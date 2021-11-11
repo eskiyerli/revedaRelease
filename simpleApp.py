@@ -15,6 +15,7 @@ from PySide6.QtGui import (
     QTransform,
     QCursor,
     QPainter,
+    QFont
 )
 from PySide6.QtWidgets import (
     QApplication,
@@ -37,13 +38,16 @@ from PySide6.QtWidgets import (
     QWidget,
     QGraphicsLineItem,
     QGraphicsItem,
+    QDialogButtonBox,
 )
 from PySide6.QtCore import Qt, QPoint, QPoint, QLine
 
 import resources
 import numpy as np
 import math
-
+import circuitElements as cel
+import pythonConsole as pcon
+from contextlib import redirect_stdout, redirect_stderr
 
 class designLibrariesView(QTreeView):
     def __init__(self, parent=None, libraryDict={}):
@@ -86,6 +90,7 @@ class designLibrariesView(QTreeView):
 class container(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
+        self.parent = parent
         self.init_UI()
 
     def init_UI(self):
@@ -100,6 +105,9 @@ class container(QWidget):
             )
         }
         treeView = designLibrariesView(self, libraryDict)
+        self.console = pcon.pythonConsole(globals())
+        self.console.writeoutput("Welcome to RevEDA")
+        self.console.setfont(QFont('Lucida Sans Typewriter', 12))
         # layout statements, using a grid layout
         gLayout = QGridLayout()
         gLayout.setSpacing(10)
@@ -107,13 +115,22 @@ class container(QWidget):
         gLayout.addWidget(self.view, 0, 1)
         # ratio of first column to second column is 5
         gLayout.setColumnStretch(1, 5)
+        gLayout.setRowStretch(0, 6)
+        gLayout.addWidget(self.console, 1, 0, 1, 2)
+        gLayout.setRowStretch(1, 1)
         self.setLayout(gLayout)
 
 
 class displayConfigDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
         self.setWindowTitle("Display Options")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.layout = QVBoxLayout()
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
         dispOptionsTabs = QTabWidget(self)
         # Grid Display Options tab
         displayTab = QWidget()
@@ -141,32 +158,50 @@ class displayConfigDialog(QDialog):
         # create a form layout
         gridFormWidget = QWidget()
         fLayout = QFormLayout(self)
-        majorGridEntry = QLineEdit()
-        minorGridEntry = QLineEdit()
-        fLayout.addRow("Major Grid:", majorGridEntry)
-        fLayout.addRow("Minor Grid Spacing", minorGridEntry)
+        self.majorGridEntry = QLineEdit()
+        if self.parent.centralWidget.scene.gridMajor:
+            self.majorGridEntry.setText(str(self.parent.centralWidget.scene.gridMajor))
+        else:
+            self.majorGridEntry.setText("10")
+        self.minorGridEntry = QLineEdit()
+        self.minorGridEntry.setText("5")
+        fLayout.addRow("Major Grid:", self.majorGridEntry)
+        fLayout.addRow("Minor Grid Spacing", self.minorGridEntry)
         gridFormWidget.setLayout(fLayout)
         vBox.addWidget(gridFormWidget)
         displayTab.setLayout(vBox)
 
         dispOptionsTabs.insertTab(0, displayTab, "Display Options")
+        self.layout.addWidget(dispOptionsTabs)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
         # need to change this later
         self.setGeometry(300, 300, 300, 200)
         self.show()
+    def accept(self):
+        self.parent.centralWidget.scene.gridMajor = int(self.majorGridEntry.text())
+        self.parent.centralWidget.view.gridMajor = int(self.majorGridEntry.text())
+        self.parent.centralWidget.scene.gridMinor = int(self.minorGridEntry.text())
+        self.parent.centralWidget.scene.update()
+        self.close()
+        
+    def reject(self):
+        self.close()
 
 
 class schematic_scene(QGraphicsScene):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.xgrid = 10
-        self.ygrid = 10
-        self.drawWireSelect = False
+        self.gridMajor = 10
+        self.drawWire = False
         self.drawItem = False
         self.selectItem = True
-        self.my_line_color = Qt.green
-        self.wirePen = QPen(QColor("green"), 2)
-        self.selectedWirePen = QPen(QColor("red"), 2)
+        self.wireLayer= cel.layer(name="wireLayer", color=QColor("green"), z=1, visible=True)
+        self.guideLineLayer = cel.layer(name="guideLineLayer", color=QColor("white"), z=2, visible=True)   
+        self.selectedWireLayer = cel.layer(name="selectedWireLayer", color=QColor("red"), z=3, visible=True)     
+        self.wirePen = QPen(self.wireLayer.color, 2)
+        self.selectedWirePen = QPen(self.selectedWireLayer.color, 2)
         self.init_UI()
 
     def init_UI(self):
@@ -174,14 +209,12 @@ class schematic_scene(QGraphicsScene):
 
     def mousePressEvent(self, mouse_event):
         self.startPosition = mouse_event.scenePos()
-        self.start = QPoint(
-            self.snapGrid(self.startPosition.x(), self.xgrid),
-            self.snapGrid(self.startPosition.y(), self.ygrid),
-        )
-        if self.drawWireSelect == True:
-            self.selectItem = False
-
-        elif self.selectItem == True:
+        if hasattr(self,'start')==False:
+            self.start = QPoint(
+                self.snapGrid(self.startPosition.x(), self.gridMajor),
+                self.snapGrid(self.startPosition.y(), self.gridMajor),
+            )
+        if self.selectItem == True:
             self.selectedItem = self.itemAt(
                 self.startPosition.x(), self.startPosition.y(), QTransform()
             )
@@ -196,14 +229,13 @@ class schematic_scene(QGraphicsScene):
     def mouseMoveEvent(self, mouse_event):
         self.currentPosition = mouse_event.scenePos()
         self.current = QPoint(
-            self.snapGrid(self.currentPosition.x(), self.xgrid),
-            self.snapGrid(self.currentPosition.y(), self.ygrid),
+            self.snapGrid(self.currentPosition.x(), self.gridMajor),
+            self.snapGrid(self.currentPosition.y(), self.gridMajor),
         )
-        if self.drawWireSelect == True:
+        if self.drawWire == True and hasattr(self, 'start') == True:
             if hasattr(self, "linkLine"):
-                self.removeItem(self.linkLine)
-
-            pen = QPen(QColor("white"), 1)
+                self.removeItem(self.linkLine) # remove old guide line
+            pen = QPen(self.guideLineLayer.color, 1)
             pen.setStyle(Qt.DashLine)
 
             self.linkLine = QGraphicsLineItem(QLine(self.start, self.current))
@@ -212,10 +244,9 @@ class schematic_scene(QGraphicsScene):
         super().mouseMoveEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
-        if self.drawWireSelect == True:
-            if hasattr(self, "linkLine"):
-                self.removeItem(self.linkLine)
-
+        if hasattr(self, "linkLine"):
+            self.removeItem(self.linkLine)
+        if self.drawWire == True:
             midPoint = QPoint(self.current.x(), self.start.y())
             horizLine = QGraphicsLineItem(QLine(self.start, midPoint))
             horizLine.setPen(self.wirePen)
@@ -223,12 +254,13 @@ class schematic_scene(QGraphicsScene):
             vertLine = QGraphicsLineItem(QLine(midPoint, self.current))
             vertLine.setPen(self.wirePen)
             self.addItem(vertLine)
-            self.selectItem = True
+            self.start =self.current # reset start position
+
         super().mouseReleaseEvent(mouse_event)
 
     def keyPressEvent(self, key_event):
         if key_event.key() == Qt.Key_Escape:
-            self.drawWireSelect = False  # turn off wire select mode
+            self.drawWire = False  # turn off wire select mode
             self.drawItem = False  # turn off drawing mode when escape is pressed
             if hasattr(self, "linkLine"):
                 self.removeItem(self.linkLine)
@@ -246,13 +278,15 @@ class schematic_scene(QGraphicsScene):
 class schematic_view(QGraphicsView):
     def __init__(self, scene, parent):
         super().__init__(scene, parent)
+        self.parent = parent
         self.scene = scene
-        self.xgrid = 10
-        self.ygrid = 10
+        self.gridMajor = self.scene.gridMajor
+
         self.init_UI()
 
     def init_UI(self):
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
+        self.CacheBackground = True
         self.standardCursor = QCursor(Qt.CrossCursor)
         self.setCursor(self.standardCursor)  # set cursor to standard arrow
         self.setRenderHint(QPainter.Antialiasing)
@@ -264,18 +298,20 @@ class schematic_view(QGraphicsView):
         rectCoord = rect.getRect()
         painter.fillRect(rect, QColor("black"))
         painter.setPen(QColor("white"))
-        grid_x_start = math.ceil(rectCoord[0] / self.xgrid) * self.xgrid
-        grid_y_start = math.ceil(rectCoord[1] / self.ygrid) * self.ygrid
-        num_x_points = math.floor(rectCoord[2] / self.xgrid)
-        num_y_points = math.floor(rectCoord[3] / self.ygrid)
+        grid_x_start = math.ceil(rectCoord[0] / self.gridMajor) * self.gridMajor
+        grid_y_start = math.ceil(rectCoord[1] / self.gridMajor) * self.gridMajor
+        num_x_points = math.floor(rectCoord[2] / self.gridMajor)
+        num_y_points = math.floor(rectCoord[3] / self.gridMajor)
         for i in range(int(num_x_points)):  # rect width
             for j in range(int(num_y_points)):  # rect length
                 painter.drawPoint(
-                    grid_x_start + i * self.xgrid, grid_y_start + j * self.ygrid
+                    grid_x_start + i * self.gridMajor, grid_y_start + j * self.gridMajor
                 )
+        super().drawBackground(painter, rect)
 
-    def mouseMoveEvent(self, mouse_event):
-        super().mouseMoveEvent(mouse_event)
+    # def mouseMoveEvent(self, mouse_event):
+
+    #     super().mouseMoveEvent(mouse_event)
 
     def wheelEvent(self, mouse_event):
         factor = 1.1
@@ -285,6 +321,8 @@ class schematic_view(QGraphicsView):
         scene_pos = self.mapToScene(view_pos)
         self.centerOn(scene_pos)
         self.scale(factor, factor)
+        delta = self.mapToScene(view_pos) - self.mapToScene(self.viewport().rect().center())
+        self.centerOn(scene_pos - delta)
         super().wheelEvent(mouse_event)    
 
     def snapGrid(self, number, base):
@@ -605,11 +643,8 @@ class mainWindow(QMainWindow):
         dcd = displayConfigDialog(self)
 
     def createWireClick(self, s):
-        self.centralWidget.scene.drawWireSelect = True
-        # pen= QPen(QColor('green'),3)
-        # pen.setCapStyle(Qt.PenCapStyle(1))
-        # # pen.setColor(QColor('green'))
-        # self.centralWidget.scene.addLine(0,0,100,100,pen)
+        self.centralWidget.scene.drawWire = True
+        self.centralWidget.scene.selectItem = False
 
     def deleteItemMethod(self, s):
         self.centralWidget.scene.deleteItem = True
@@ -619,5 +654,10 @@ app = QApplication(sys.argv)
 # app.setStyle('Fusion')
 # empty argument as there is no parent window.
 mainW = mainWindow()
+redirect = pcon.Redirect(mainW.centralWidget.console.errorwrite)
+with redirect_stdout(mainW.centralWidget.console), redirect_stderr(redirect):
+
+    mainW.show()
+    sys.exit(app.exec())
 mainW.show()
 app.exec()
