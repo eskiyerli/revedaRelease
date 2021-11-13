@@ -15,7 +15,7 @@ from PySide6.QtGui import (
     QTransform,
     QCursor,
     QPainter,
-    QFont
+    QFont,
 )
 from PySide6.QtWidgets import (
     QApplication,
@@ -40,51 +40,61 @@ from PySide6.QtWidgets import (
     QGraphicsItem,
     QDialogButtonBox,
 )
-from PySide6.QtCore import Qt, QPoint, QPoint, QLine
+from PySide6.QtCore import Qt, QPoint, QLine
 
 import resources
 import numpy as np
 import math
 import circuitElements as cel
+from Point import *
+from Vector import *
+
 import pythonConsole as pcon
 from contextlib import redirect_stdout, redirect_stderr
 
 class designLibrariesView(QTreeView):
-    def __init__(self, parent=None, libraryDict={}):
-        super().__init__(parent=parent)
-        self.libraryDict = libraryDict
-        self.init_UI()
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setHeaderHidden(True)
+        self.setSelectionMode(QTreeView.ExtendedSelection)
+        self.setDragEnabled(True)
 
-    def init_UI(self):
-        model = QStandardItemModel()
-        model.setHorizontalHeaderLabels(["Libraries"])
-        # iterate design library directories
-        for designPath in self.libraryDict.values():
-            parentItem = model.invisibleRootItem()
-            libraryName = designPath.name
-            # create a standard Item
-            libraryNameItem = QStandardItem(libraryName)
-            libraryNameItem.setEditable(False)
-            parentItem.appendRow(libraryNameItem)
-            cellList = [
-                str(cell.name) for cell in designPath.iterdir() if cell.is_dir()
-            ]
-            for cell in cellList:
-                cellItem = QStandardItem(cell)
-                cellItem.setEditable(False)
-                libraryNameItem.appendRow(cellItem)
-                viewList = [
-                    str(view.name)
-                    for view in designPath.joinpath(cell).iterdir()
-                    if view.is_dir()
-                ]
-                #                viewList = os.listdir(os.path.join(designPath, cell))
-                for view in viewList:
-                    viewItem = QStandardItem(view)
-                    viewItem.setEditable(False)
-                    cellItem.appendRow(viewItem)
+# class designLibrariesView(QTreeView):
+#     def __init__(self, parent=None, libraryDict={}):
+#         super().__init__(parent=parent)
+#         self.libraryDict = libraryDict
+#         self.init_UI()
 
-        self.setModel(model)
+#     def init_UI(self):
+#         model = QStandardItemModel()
+#         model.setHorizontalHeaderLabels(["Libraries"])
+#         # iterate design library directories
+#         for designPath in self.libraryDict.values():
+#             parentItem = model.invisibleRootItem()
+#             libraryName = designPath.name
+#             # create a standard Item
+#             libraryNameItem = QStandardItem(libraryName)
+#             libraryNameItem.setEditable(False)
+#             parentItem.appendRow(libraryNameItem)
+#             cellList = [
+#                 str(cell.name) for cell in designPath.iterdir() if cell.is_dir()
+#             ]
+#             for cell in cellList:
+#                 cellItem = QStandardItem(cell)
+#                 cellItem.setEditable(False)
+#                 libraryNameItem.appendRow(cellItem)
+#                 viewList = [
+#                     str(view.name)
+#                     for view in designPath.joinpath(cell).iterdir()
+#                     if view.is_dir()
+#                 ]
+#                 #                viewList = os.listdir(os.path.join(designPath, cell))
+#                 for view in viewList:
+#                     viewItem = QStandardItem(view)
+#                     viewItem.setEditable(False)
+#                     cellItem.appendRow(viewItem)
+
+#         self.setModel(model)
 
 
 class container(QWidget):
@@ -104,10 +114,11 @@ class container(QWidget):
                 "OneDrive", "Documents", "Projects", "RevEDA", "revedaWork"
             )
         }
-        treeView = designLibrariesView(self, libraryDict)
+        # treeView = designLibrariesView(self, libraryDict)
+        treeView = designLibrariesView(self)
         self.console = pcon.pythonConsole(globals())
         self.console.writeoutput("Welcome to RevEDA")
-        self.console.setfont(QFont('Lucida Sans Typewriter', 12))
+        self.console.setfont(QFont("Fira Mono Regular", 10))
         # layout statements, using a grid layout
         gLayout = QGridLayout()
         gLayout.setSpacing(10)
@@ -176,15 +187,16 @@ class displayConfigDialog(QDialog):
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
         # need to change this later
-        self.setGeometry(300, 300, 300, 200)
+        # self.setGeometry(300, 300, 300, 200)
         self.show()
+
     def accept(self):
         self.parent.centralWidget.scene.gridMajor = int(self.majorGridEntry.text())
         self.parent.centralWidget.view.gridMajor = int(self.majorGridEntry.text())
         self.parent.centralWidget.scene.gridMinor = int(self.minorGridEntry.text())
         self.parent.centralWidget.scene.update()
         self.close()
-        
+
     def reject(self):
         self.close()
 
@@ -197,9 +209,15 @@ class schematic_scene(QGraphicsScene):
         self.drawWire = False
         self.drawItem = False
         self.selectItem = True
-        self.wireLayer= cel.layer(name="wireLayer", color=QColor("green"), z=1, visible=True)
-        self.guideLineLayer = cel.layer(name="guideLineLayer", color=QColor("white"), z=2, visible=True)   
-        self.selectedWireLayer = cel.layer(name="selectedWireLayer", color=QColor("red"), z=3, visible=True)     
+        self.wireLayer = cel.layer(
+            name="wireLayer", color=QColor("green"), z=1, visible=True
+        )
+        self.guideLineLayer = cel.layer(
+            name="guideLineLayer", color=QColor("white"), z=2, visible=True
+        )
+        self.selectedWireLayer = cel.layer(
+            name="selectedWireLayer", color=QColor("red"), z=3, visible=True
+        )
         self.wirePen = QPen(self.wireLayer.color, 2)
         self.selectedWirePen = QPen(self.selectedWireLayer.color, 2)
         self.init_UI()
@@ -209,11 +227,14 @@ class schematic_scene(QGraphicsScene):
 
     def mousePressEvent(self, mouse_event):
         self.startPosition = mouse_event.scenePos()
-        if hasattr(self,'start')==False:
+        if hasattr(self, "start") == False:
             self.start = QPoint(
                 self.snapGrid(self.startPosition.x(), self.gridMajor),
                 self.snapGrid(self.startPosition.y(), self.gridMajor),
             )
+        # vectorObj = Vector(0,0,self.start.x(), self.start.y())
+        # print(vectorObj)
+
         if self.selectItem == True:
             self.selectedItem = self.itemAt(
                 self.startPosition.x(), self.startPosition.y(), QTransform()
@@ -232,13 +253,14 @@ class schematic_scene(QGraphicsScene):
             self.snapGrid(self.currentPosition.x(), self.gridMajor),
             self.snapGrid(self.currentPosition.y(), self.gridMajor),
         )
-        if self.drawWire == True and hasattr(self, 'start') == True:
+        if self.drawWire == True and hasattr(self, "start") == True:
             if hasattr(self, "linkLine"):
-                self.removeItem(self.linkLine) # remove old guide line
+                self.removeItem(self.linkLine)  # remove old guide line
             pen = QPen(self.guideLineLayer.color, 1)
             pen.setStyle(Qt.DashLine)
 
             self.linkLine = QGraphicsLineItem(QLine(self.start, self.current))
+
             self.linkLine.setPen(pen)
             self.addItem(self.linkLine)
         super().mouseMoveEvent(mouse_event)
@@ -254,7 +276,7 @@ class schematic_scene(QGraphicsScene):
             vertLine = QGraphicsLineItem(QLine(midPoint, self.current))
             vertLine.setPen(self.wirePen)
             self.addItem(vertLine)
-            self.start =self.current # reset start position
+            self.start = self.current  # reset start position
 
         super().mouseReleaseEvent(mouse_event)
 
@@ -317,13 +339,17 @@ class schematic_view(QGraphicsView):
         factor = 1.1
         if mouse_event.angleDelta().y() < 0:
             factor = 0.9
-        view_pos = QPoint(int(mouse_event.globalPosition().x()), int(mouse_event.globalPosition().y()))
+        view_pos = QPoint(
+            int(mouse_event.globalPosition().x()), int(mouse_event.globalPosition().y())
+        )
         scene_pos = self.mapToScene(view_pos)
         self.centerOn(scene_pos)
         self.scale(factor, factor)
-        delta = self.mapToScene(view_pos) - self.mapToScene(self.viewport().rect().center())
+        delta = self.mapToScene(view_pos) - self.mapToScene(
+            self.viewport().rect().center()
+        )
         self.centerOn(scene_pos - delta)
-        super().wheelEvent(mouse_event)    
+        super().wheelEvent(mouse_event)
 
     def snapGrid(self, number, base):
         return base * int(math.floor(number / base))
@@ -645,6 +671,8 @@ class mainWindow(QMainWindow):
     def createWireClick(self, s):
         self.centralWidget.scene.drawWire = True
         self.centralWidget.scene.selectItem = False
+        if hasattr(self.centralWidget.scene, "start"):
+            del self.centralWidget.scene.start
 
     def deleteItemMethod(self, s):
         self.centralWidget.scene.deleteItem = True
