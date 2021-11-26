@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from threading import Thread
+import shutil
 
 from PySide6.QtGui import (
     QAction,
@@ -15,13 +16,14 @@ from PySide6.QtGui import (
     QTransform,
     QCursor,
     QPainter,
-    QFont
+    QFont,
 )
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
     QDialog,
     QFileDialog,
+    QComboBox,
     QFormLayout,
     QGraphicsScene,
     QGraphicsView,
@@ -39,52 +41,136 @@ from PySide6.QtWidgets import (
     QGraphicsLineItem,
     QGraphicsItem,
     QDialogButtonBox,
+    QLabel,
+    QMenu,
 )
-from PySide6.QtCore import Qt, QPoint, QPoint, QLine
+from PySide6.QtCore import (
+    QModelIndex,
+    Qt,
+    QPoint,
+    QLine,
+    QDir,
+)
+from numpy.lib.function_base import copy
 
 import resources
 import numpy as np
 import math
 import circuitElements as cel
+from Point import *
+from Vector import *
+from ruamel.yaml import YAML
 import pythonConsole as pcon
 from contextlib import redirect_stdout, redirect_stderr
 
+
 class designLibrariesView(QTreeView):
     def __init__(self, parent=None, libraryDict={}):
-        super().__init__(parent=parent)
-        self.libraryDict = libraryDict
+        super().__init__(parent=parent)  # QTreeView
+        self.parent = parent  # type: QMainWindow
+        self.libraryDict = libraryDict  # type: dict
         self.init_UI()
 
     def init_UI(self):
-        model = QStandardItemModel()
-        model.setHorizontalHeaderLabels(["Libraries"])
+        self.libraryModel = QStandardItemModel()
+        self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
         # iterate design library directories
-        for designPath in self.libraryDict.values():
-            parentItem = model.invisibleRootItem()
-            libraryName = designPath.name
+        for designPath in self.libraryDict.values():  # type: Path
+            parentItem = self.libraryModel.invisibleRootItem()
+            libraryName = designPath.name  # type: str
             # create a standard Item
             libraryNameItem = QStandardItem(libraryName)
             libraryNameItem.setEditable(False)
+            libraryNameItem.setData("library", Qt.UserRole + 1)
+            libraryNameItem.setData(designPath, Qt.UserRole + 2)
             parentItem.appendRow(libraryNameItem)
             cellList = [
                 str(cell.name) for cell in designPath.iterdir() if cell.is_dir()
             ]
-            for cell in cellList:
+            for cell in cellList:  # type: str
                 cellItem = QStandardItem(cell)
                 cellItem.setEditable(False)
+                cellItem.setData("cell", Qt.UserRole + 1)
+                cellItem.setData(designPath / cell, Qt.UserRole + 2)
+
                 libraryNameItem.appendRow(cellItem)
                 viewList = [
-                    str(view.name)
+                    str(view.stem)
                     for view in designPath.joinpath(cell).iterdir()
-                    if view.is_dir()
+                    if view.suffix == ".yaml"
                 ]
-                #                viewList = os.listdir(os.path.join(designPath, cell))
                 for view in viewList:
                     viewItem = QStandardItem(view)
+                    viewItem.setData("view", Qt.UserRole + 1)
+                    # set the data to the item to be the path to the view.
+                    viewItem.setData(
+                        designPath.joinpath(cell, view).with_suffix(".yaml"),
+                        Qt.UserRole + 2,
+                    )
                     viewItem.setEditable(False)
                     cellItem.appendRow(viewItem)
 
-        self.setModel(model)
+        self.setModel(self.libraryModel)
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+
+        index = self.selectedIndexes()[0]
+        self.selectedItem = self.libraryModel.itemFromIndex(index)
+        if self.selectedItem.data(Qt.UserRole + 1) == "cell":
+            menu.addAction(
+                QAction("Create CellView...", self, triggered=self.createCellView)
+            )
+            menu.addAction(QAction("Copy Cell...", self, triggered=self.copyCell))
+            menu.addAction(QAction("Rename Cell...", self, triggered=self.renameCell))
+            menu.addAction(QAction("Delete Cell...", self, triggered=self.deleteCell))
+        elif self.selectedItem.data(Qt.UserRole + 1) == "view":
+            menu.addAction(QAction("Open View", self, triggered=self.openView))
+            menu.addAction(QAction("Copy View...", self, triggered=self.copyView))
+            menu.addAction(QAction("Rename View...", self, triggered=self.renameView))
+            menu.addAction(QAction("Delete View...", self, triggered=self.deleteView))
+        menu.exec(event.globalPos())
+
+    def createCellView(self):
+        print("If I could..")
+
+    def copyCell(self):
+        if self.selectedItem.data(Qt.UserRole + 1) == "cell":
+            dlg = copyCellDialog(
+                self, self.libraryModel, self.selectedItem.data(Qt.UserRole + 2)
+            )
+            dlg.exec()
+            # dlg.show()
+            # msgBox = QDialog(self)
+            # msgBox.setWindowTitle("Copy Cell")
+            # msgBox.exec()
+
+    def renameCell(self):
+        pass
+
+    def deleteCell(self):
+        try:
+            shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
+            self.selectedItem.parent().removeRow(self.selectedItem.row())
+        except OSError as e:
+            print(f"Error:{ e.strerror}")
+
+    def openView(self):
+        if self.selectedItem.text() == "schematic":
+            print(self.selectedItem.data(Qt.UserRole + 2).read_text())
+
+    def copyView(self):
+        pass
+
+    def renameView(self):
+        pass
+
+    def deleteView(self):
+        try:
+            self.selectedItem.data(Qt.UserRole + 2).unlink()
+            self.selectedItem.parent().removeRow(self.selectedItem.row())
+        except OSError as e:
+            print(f"Error:{ e.strerror}")
 
 
 class container(QWidget):
@@ -101,13 +187,27 @@ class container(QWidget):
 
         libraryDict = {
             "design": Path.home().joinpath(
-                "OneDrive", "Documents", "Projects", "RevEDA", "revedaWork"
-            )
+                "OneDrive",
+                "Documents",
+                "Projects",
+                "RevEDA",
+                "schematicEditor",
+                "design",
+            ),
+            "anotherDesign": Path.home().joinpath(
+                "OneDrive",
+                "Documents",
+                "Projects",
+                "RevEDA",
+                "schematicEditor",
+                "anotherDesign",
+            ),
         }
         treeView = designLibrariesView(self, libraryDict)
+        # treeView = designLibrariesView(self)
         self.console = pcon.pythonConsole(globals())
         self.console.writeoutput("Welcome to RevEDA")
-        self.console.setfont(QFont('Lucida Sans Typewriter', 12))
+        self.console.setfont(QFont("Fira Mono Regular", 10))
         # layout statements, using a grid layout
         gLayout = QGridLayout()
         gLayout.setSpacing(10)
@@ -119,6 +219,92 @@ class container(QWidget):
         gLayout.addWidget(self.console, 1, 0, 1, 2)
         gLayout.setRowStretch(1, 1)
         self.setLayout(gLayout)
+
+
+class copyCellDialog(QDialog):
+    def __init__(self, parent, model, path):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.model = model
+        self.path = path
+        self.index = 0
+        self.init_UI()
+
+    def init_UI(self):
+
+        self.setWindowTitle("Copy Cell")
+        # self.setFixedSize(300, 300)
+        # self.setStyleSheet("background-color: #f2f2f2")
+        layout = QVBoxLayout()
+        layout.setSpacing(10)
+        self.libraryComboBox = QComboBox()
+        self.libraryComboBox.setModel(self.model)
+        self.libraryComboBox.setModelColumn(0)
+        # self.libraryComboBox.addItems(list(self.libraryDict.keys()))
+        self.libraryComboBox.setCurrentIndex(0)
+        self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
+        print(self.selectedLibPath)
+        self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
+        libraryNameLayout = QHBoxLayout()
+        libraryLabel = QLabel("Library:")
+        libraryNameLayout.addWidget(libraryLabel)
+        libraryNameLayout.addWidget(self.libraryComboBox)
+        layout.addLayout(libraryNameLayout)
+        cellNameLayout = QHBoxLayout()
+        cellNameText = QLabel("Cell Name:")
+        cellNameLayout.addWidget(cellNameText)
+        self.cellName = QLineEdit()
+        self.cellName.setPlaceholderText("Enter Cell Name")
+        self.cellName.setFixedWidth(130)
+        cellNameLayout.addWidget(self.cellName)
+        layout.addLayout(cellNameLayout)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addWidget(self.buttonBox)
+        self.setLayout(layout)
+
+    def accept(self):
+        self.copyName = self.cellName.text()
+        if self.copyName == "":
+            self.copyName = "newCell"
+        self.copyPath = self.selectedLibPath.joinpath(self.copyName)
+        if self.copyPath.exists():
+            print("Cell already exists")
+        else:
+            assert self.path.exists()
+            shutil.copytree(self.path, self.copyPath)
+            libraryItem=self.model.findItems(self.selectedLibPath.name)[0]
+            cellItem=QStandardItem(self.copyPath.name)
+            cellItem.setEditable(False)
+            cellItem.setData("cell", Qt.UserRole + 1)
+            cellItem.setData(self.copyPath, Qt.UserRole + 2)   
+            viewList = [
+                str(view.stem)
+                for view in self.copyPath.iterdir()
+                if view.suffix == ".yaml"
+            ]
+            for view in viewList:
+                viewItem = QStandardItem(view)
+                viewItem.setData("view", Qt.UserRole + 1)
+                # set the data to the item to be the path to the view.
+                viewItem.setData(
+                    self.copyPath.joinpath(view).with_suffix(".yaml"),
+                    Qt.UserRole + 2,
+                )
+                viewItem.setEditable(False)
+                cellItem.appendRow(viewItem)    
+            libraryItem.appendRow(cellItem)                 
+        self.close()
+
+    def reject(self):
+        self.close()
+
+    def selectLibrary(self):
+        self.selectedLibPath = self.libraryComboBox.itemData(
+            self.libraryComboBox.currentIndex(), Qt.UserRole + 2
+        )
 
 
 class displayConfigDialog(QDialog):
@@ -176,17 +362,53 @@ class displayConfigDialog(QDialog):
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
         # need to change this later
-        self.setGeometry(300, 300, 300, 200)
+        # self.setGeometry(300, 300, 300, 200)
         self.show()
+
     def accept(self):
         self.parent.centralWidget.scene.gridMajor = int(self.majorGridEntry.text())
         self.parent.centralWidget.view.gridMajor = int(self.majorGridEntry.text())
         self.parent.centralWidget.scene.gridMinor = int(self.minorGridEntry.text())
         self.parent.centralWidget.scene.update()
         self.close()
-        
+
     def reject(self):
         self.close()
+
+
+# class copyCellDialog(QDialog):
+#     def __init__(self,parent,cellName):
+#         super().__init__(parent=parent)
+#         self.parent = parent
+#         self.cellName = cellName
+
+#         self.init_UI()
+
+#     def init_UI(self):
+#         self.setWindowTitle("Copy Cell")
+#         self.setWindowIcon(QIcon("./icons/copy.png"))
+#         self.setWindowFlags(Qt.WindowStaysOnTopHint)
+#         self.setFixedSize(300, 100)
+#         self.setStyleSheet("background-color: #f2f2f2")
+#         self.setModal(True)
+#         self.setFocus()
+
+#         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+#         self.layout = QVBoxLayout()
+#         self.buttonBox = QDialogButtonBox(QBtn)
+#         self.buttonBox.accepted.connect(self.accept)
+#         self.buttonBox.rejected.connect(self.reject)
+#         self.layout.addWidget(self.buttonBox)
+#         self.setLayout(self.layout)
+#         self.show()
+
+
+#     def accept(self):
+#         # self.parent.centralWidget.scene.copyCell(self.cellName)
+#         self.close()
+
+#     def reject(self):
+#         self.close()
 
 
 class schematic_scene(QGraphicsScene):
@@ -194,12 +416,23 @@ class schematic_scene(QGraphicsScene):
         super().__init__(parent)
         self.parent = parent
         self.gridMajor = 10
-        self.drawWire = False
-        self.drawItem = False
-        self.selectItem = True
-        self.wireLayer= cel.layer(name="wireLayer", color=QColor("green"), z=1, visible=True)
-        self.guideLineLayer = cel.layer(name="guideLineLayer", color=QColor("white"), z=2, visible=True)   
-        self.selectedWireLayer = cel.layer(name="selectedWireLayer", color=QColor("red"), z=3, visible=True)     
+        self.drawWire = False  # flag to indicate if a wire is being drawn
+        self.drawItem = False  # flag to indicate if an item is being drawn
+        self.selectItem = True  # flag to indicate if an item is being selected
+
+        self.wireLayer = cel.layer(
+            name="wireLayer", color=QColor("aqua"), z=1, visible=True
+        )
+        # yaml=YAML()
+        # yaml.register_class(cel.layer)
+        # yaml.dump([self.wireLayer], sys.stdout)
+
+        self.guideLineLayer = cel.layer(
+            name="guideLineLayer", color=QColor("white"), z=2, visible=True
+        )
+        self.selectedWireLayer = cel.layer(
+            name="selectedWireLayer", color=QColor("red"), z=3, visible=True
+        )
         self.wirePen = QPen(self.wireLayer.color, 2)
         self.selectedWirePen = QPen(self.selectedWireLayer.color, 2)
         self.init_UI()
@@ -209,11 +442,14 @@ class schematic_scene(QGraphicsScene):
 
     def mousePressEvent(self, mouse_event):
         self.startPosition = mouse_event.scenePos()
-        if hasattr(self,'start')==False:
+        if hasattr(self, "start") == False:
             self.start = QPoint(
                 self.snapGrid(self.startPosition.x(), self.gridMajor),
                 self.snapGrid(self.startPosition.y(), self.gridMajor),
             )
+        # vectorObj = Vector(0,0,self.start.x(), self.start.y())
+        # print(vectorObj)
+
         if self.selectItem == True:
             self.selectedItem = self.itemAt(
                 self.startPosition.x(), self.startPosition.y(), QTransform()
@@ -232,13 +468,14 @@ class schematic_scene(QGraphicsScene):
             self.snapGrid(self.currentPosition.x(), self.gridMajor),
             self.snapGrid(self.currentPosition.y(), self.gridMajor),
         )
-        if self.drawWire == True and hasattr(self, 'start') == True:
+        if self.drawWire == True and hasattr(self, "start") == True:
             if hasattr(self, "linkLine"):
-                self.removeItem(self.linkLine) # remove old guide line
+                self.removeItem(self.linkLine)  # remove old guide line
             pen = QPen(self.guideLineLayer.color, 1)
             pen.setStyle(Qt.DashLine)
 
             self.linkLine = QGraphicsLineItem(QLine(self.start, self.current))
+
             self.linkLine.setPen(pen)
             self.addItem(self.linkLine)
         super().mouseMoveEvent(mouse_event)
@@ -254,7 +491,7 @@ class schematic_scene(QGraphicsScene):
             vertLine = QGraphicsLineItem(QLine(midPoint, self.current))
             vertLine.setPen(self.wirePen)
             self.addItem(vertLine)
-            self.start =self.current # reset start position
+            self.start = self.current  # reset start position
 
         super().mouseReleaseEvent(mouse_event)
 
@@ -317,13 +554,17 @@ class schematic_view(QGraphicsView):
         factor = 1.1
         if mouse_event.angleDelta().y() < 0:
             factor = 0.9
-        view_pos = QPoint(int(mouse_event.globalPosition().x()), int(mouse_event.globalPosition().y()))
+        view_pos = QPoint(
+            int(mouse_event.globalPosition().x()), int(mouse_event.globalPosition().y())
+        )
         scene_pos = self.mapToScene(view_pos)
         self.centerOn(scene_pos)
         self.scale(factor, factor)
-        delta = self.mapToScene(view_pos) - self.mapToScene(self.viewport().rect().center())
+        delta = self.mapToScene(view_pos) - self.mapToScene(
+            self.viewport().rect().center()
+        )
         self.centerOn(scene_pos - delta)
-        super().wheelEvent(mouse_event)    
+        super().wheelEvent(mouse_event)
 
     def snapGrid(self, number, base):
         return base * int(math.floor(number / base))
@@ -397,6 +638,9 @@ class mainWindow(QMainWindow):
         closeCellIcon = QIcon(":/icons/document--minus.png")
         closeCellAction = QAction(closeCellIcon, "Close Cell", self)
         self.menuFile.addAction(closeCellAction)
+
+        deleteIcon = QIcon(":/icons/node-delete.png")
+        self.deleteCellAction = QAction(deleteIcon, "Delete", self)
 
         checkCellIcon = QIcon(":/icons/document-task.png")
         checkCellAction = QAction(checkCellIcon, "Check-Save", self)
@@ -485,7 +729,7 @@ class mainWindow(QMainWindow):
         self.menuEdit.addAction(self.pasteAction)
 
         self.menuEdit.addSeparator()
-        deleteIcon = QIcon(":/icons/node-delete.png")
+
         self.deleteAction = QAction(deleteIcon, "Delete", self)
         self.menuEdit.addAction(self.deleteAction)
         self.deleteAction.triggered.connect(self.deleteItemMethod)
@@ -645,6 +889,8 @@ class mainWindow(QMainWindow):
     def createWireClick(self, s):
         self.centralWidget.scene.drawWire = True
         self.centralWidget.scene.selectItem = False
+        if hasattr(self.centralWidget.scene, "start"):
+            del self.centralWidget.scene.start
 
     def deleteItemMethod(self, s):
         self.centralWidget.scene.deleteItem = True

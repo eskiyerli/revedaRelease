@@ -4,15 +4,15 @@
 class layer:
     def __init__(self, name, color, z, visible):
         self.name = name
-        self.color = color
+        self.color = color # QColor type
         self.z = z
         self.visible = visible
 
     def __str__(self):
-        return self.name + " " + self.color + " " + str(self.z) + " " + str(self.visible)
+        return f'{self.name}  {str(self.color.toTuple())} {str(self.z)} {str(self.visible)}'
     
     def __repr__(self):
-        return self.name + " " + self.color + " " + str(self.z) + " " + str(self.visible)
+        return f'{self.name}  {str(self.color.toTuple())} {str(self.z)} {str(self.visible)}'
 
     def __eq__(self, other):
         return self.name == other.name and self.color == other.color and self.z == other.z and self.visible == other.visible
