@@ -43,6 +43,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QLabel,
     QMenu,
+    QMessageBox,
 )
 from PySide6.QtCore import (
     QModelIndex,
@@ -62,6 +63,7 @@ from Vector import *
 from ruamel.yaml import YAML
 import pythonConsole as pcon
 from contextlib import redirect_stdout, redirect_stderr
+import schBackEnd as scb  # import the backend
 
 
 class designLibrariesView(QTreeView):
@@ -72,6 +74,7 @@ class designLibrariesView(QTreeView):
         self.init_UI()
 
     def init_UI(self):
+        self.setSortingEnabled(True)
         self.libraryModel = QStandardItemModel()
         self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
         # iterate design library directories
@@ -117,7 +120,11 @@ class designLibrariesView(QTreeView):
 
         index = self.selectedIndexes()[0]
         self.selectedItem = self.libraryModel.itemFromIndex(index)
-        if self.selectedItem.data(Qt.UserRole + 1) == "cell":
+        if self.selectedItem.data(Qt.UserRole + 1) == "library":
+            menu.addAction("Save Library As...", self.saveLibAs)
+            menu.addAction("Rename Library", self.renameLib)
+            menu.addAction("Create Cell", self.createCell)
+        elif self.selectedItem.data(Qt.UserRole + 1) == "cell":
             menu.addAction(
                 QAction("Create CellView...", self, triggered=self.createCellView)
             )
@@ -131,22 +138,29 @@ class designLibrariesView(QTreeView):
             menu.addAction(QAction("Delete View...", self, triggered=self.deleteView))
         menu.exec(event.globalPos())
 
+    def saveLibAs(self):
+        pass
+
+    def renameLib(self):
+        pass
+
+    def createCell(self):
+       dlg = createCellDialog(self, self.libraryModel, self.selectedItem)
+       dlg.exec()
+
     def createCellView(self):
-        print("If I could..")
+        dlg = createCellViewDialog(
+            self, self.libraryModel, self.selectedItem
+        )  # type: createCellViewDialog
+        dlg.exec()
 
     def copyCell(self):
-        if self.selectedItem.data(Qt.UserRole + 1) == "cell":
-            dlg = copyCellDialog(
-                self, self.libraryModel, self.selectedItem.data(Qt.UserRole + 2)
-            )
-            dlg.exec()
-            # dlg.show()
-            # msgBox = QDialog(self)
-            # msgBox.setWindowTitle("Copy Cell")
-            # msgBox.exec()
+        dlg = copyCellDialog(self, self.libraryModel, self.selectedItem)
+        dlg.exec()
 
     def renameCell(self):
-        pass
+        dlg = renameCellDialog(self, self.selectedItem)
+        dlg.exec()
 
     def deleteCell(self):
         try:
@@ -220,82 +234,139 @@ class container(QWidget):
         gLayout.setRowStretch(1, 1)
         self.setLayout(gLayout)
 
+class createCellDialog(QDialog):
+    def __init__(self, parent, libraryModel, selectedItem):
+        super().__init__(parent)
+        self.parent = parent
+        self.libraryModel = libraryModel
+        self.selectedItem = selectedItem
+        self.init_UI()
 
-class copyCellDialog(QDialog):
-    def __init__(self, parent, model, path):
+    def init_UI(self):
+        self.setWindowTitle("Create Cell")
+        layout=QFormLayout()
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText("Enter Cell Name")
+        layout.addRow("Cell Name:", self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+        
+    def accept(self):
+        cellName = self.nameEdit.text()
+        scb.createCell(cellName, self.libraryModel)
+        self.close()
+
+    def reject(self):
+        self.close()
+
+class createCellViewDialog(QDialog):
+    def __init__(self, parent, model, cellItem):
         super().__init__(parent=parent)
         self.parent = parent
         self.model = model
-        self.path = path
-        self.index = 0
+        self.cellItem = cellItem
+        self.cellPath = self.cellItem.data(Qt.UserRole + 2)
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Create CellView")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.viewComboBox = QComboBox()
+        self.viewComboBox.addItems(self.parent.parent.parent.cellViews)
+        layout.addRow("Select View:", self.viewComboBox)
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText("CellView Name")
+        self.nameEdit.setFixedWidth(200)
+        layout.addRow(QLabel("View Name:"), self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+    def accept(self):
+        viewName = self.nameEdit.text()
+        scb.createView(self, viewName, self.cellItem)
+        self.close()
+
+    def reject(self):
+        self.close()
+
+class renameCellDialog(QDialog):
+    def __init__(self, parent,cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.cellItem = cellItem
+
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Rename Cell")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText("Cell Name")
+        self.nameEdit.setFixedWidth(200)
+        layout.addRow(QLabel("Cell Name:"), self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+    def accept(self):
+        cellName = self.nameEdit.text()
+        scb.renameCell(self,self.cellItem, cellName)
+        self.close()
+
+    def reject(self):   
+        self.close()
+
+class copyCellDialog(QDialog):
+    def __init__(self, parent, model, cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.model = model
+        self.cellItem = cellItem
+
+        # self.index = 0
         self.init_UI()
 
     def init_UI(self):
 
         self.setWindowTitle("Copy Cell")
-        # self.setFixedSize(300, 300)
-        # self.setStyleSheet("background-color: #f2f2f2")
-        layout = QVBoxLayout()
+        layout = QFormLayout()
         layout.setSpacing(10)
         self.libraryComboBox = QComboBox()
         self.libraryComboBox.setModel(self.model)
         self.libraryComboBox.setModelColumn(0)
-        # self.libraryComboBox.addItems(list(self.libraryDict.keys()))
         self.libraryComboBox.setCurrentIndex(0)
         self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
-        print(self.selectedLibPath)
         self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
-        libraryNameLayout = QHBoxLayout()
-        libraryLabel = QLabel("Library:")
-        libraryNameLayout.addWidget(libraryLabel)
-        libraryNameLayout.addWidget(self.libraryComboBox)
-        layout.addLayout(libraryNameLayout)
-        cellNameLayout = QHBoxLayout()
-        cellNameText = QLabel("Cell Name:")
-        cellNameLayout.addWidget(cellNameText)
-        self.cellName = QLineEdit()
-        self.cellName.setPlaceholderText("Enter Cell Name")
-        self.cellName.setFixedWidth(130)
-        cellNameLayout.addWidget(self.cellName)
-        layout.addLayout(cellNameLayout)
+        layout.addRow(QLabel("Library:"), self.libraryComboBox)
+        self.copyName = QLineEdit()
+        self.copyName.setPlaceholderText("Enter Cell Name")
+        self.copyName.setFixedWidth(130)
+        layout.addRow(QLabel("Cell Name:"), self.copyName)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-        layout.addWidget(self.buttonBox)
+        layout.addRow(self.buttonBox)
         self.setLayout(layout)
 
     def accept(self):
-        self.copyName = self.cellName.text()
-        if self.copyName == "":
-            self.copyName = "newCell"
-        self.copyPath = self.selectedLibPath.joinpath(self.copyName)
-        if self.copyPath.exists():
-            print("Cell already exists")
-        else:
-            assert self.path.exists()
-            shutil.copytree(self.path, self.copyPath)
-            libraryItem=self.model.findItems(self.selectedLibPath.name)[0]
-            cellItem=QStandardItem(self.copyPath.name)
-            cellItem.setEditable(False)
-            cellItem.setData("cell", Qt.UserRole + 1)
-            cellItem.setData(self.copyPath, Qt.UserRole + 2)   
-            viewList = [
-                str(view.stem)
-                for view in self.copyPath.iterdir()
-                if view.suffix == ".yaml"
-            ]
-            for view in viewList:
-                viewItem = QStandardItem(view)
-                viewItem.setData("view", Qt.UserRole + 1)
-                # set the data to the item to be the path to the view.
-                viewItem.setData(
-                    self.copyPath.joinpath(view).with_suffix(".yaml"),
-                    Qt.UserRole + 2,
-                )
-                viewItem.setEditable(False)
-                cellItem.appendRow(viewItem)    
-            libraryItem.appendRow(cellItem)                 
+        self.copyName = self.copyName.text()
+        scb.copyCell(
+            self, self.model, self.cellItem, self.copyName, self.selectedLibPath
+        )
         self.close()
 
     def reject(self):
@@ -374,41 +445,6 @@ class displayConfigDialog(QDialog):
 
     def reject(self):
         self.close()
-
-
-# class copyCellDialog(QDialog):
-#     def __init__(self,parent,cellName):
-#         super().__init__(parent=parent)
-#         self.parent = parent
-#         self.cellName = cellName
-
-#         self.init_UI()
-
-#     def init_UI(self):
-#         self.setWindowTitle("Copy Cell")
-#         self.setWindowIcon(QIcon("./icons/copy.png"))
-#         self.setWindowFlags(Qt.WindowStaysOnTopHint)
-#         self.setFixedSize(300, 100)
-#         self.setStyleSheet("background-color: #f2f2f2")
-#         self.setModal(True)
-#         self.setFocus()
-
-#         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-#         self.layout = QVBoxLayout()
-#         self.buttonBox = QDialogButtonBox(QBtn)
-#         self.buttonBox.accepted.connect(self.accept)
-#         self.buttonBox.rejected.connect(self.reject)
-#         self.layout.addWidget(self.buttonBox)
-#         self.setLayout(self.layout)
-#         self.show()
-
-
-#     def accept(self):
-#         # self.parent.centralWidget.scene.copyCell(self.cellName)
-#         self.close()
-
-#     def reject(self):
-#         self.close()
 
 
 class schematic_scene(QGraphicsScene):
@@ -575,6 +611,7 @@ class mainWindow(QMainWindow):
         super().__init__()
         revEDAPathObj = Path(__file__)
         revEDADirObj = revEDAPathObj.parent
+        self.cellViews = ["schematic", "symbol"]
         self.init_UI()
 
     def init_UI(self):
@@ -900,6 +937,7 @@ app = QApplication(sys.argv)
 # app.setStyle('Fusion')
 # empty argument as there is no parent window.
 mainW = mainWindow()
+mainW.setWindowTitle("Revolution EDA Schematic Editor")
 redirect = pcon.Redirect(mainW.centralWidget.console.errorwrite)
 with redirect_stdout(mainW.centralWidget.console), redirect_stderr(redirect):
 
