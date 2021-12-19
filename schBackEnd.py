@@ -1,64 +1,26 @@
 # schematic editor backend
 from PySide6.QtGui import (
-    QAction,
-    QColor,
-    QIcon,
-    QPalette,
-    QPixmap,
     QStandardItem,
-    QStandardItemModel,
-    QPen,
-    QTransform,
-    QCursor,
-    QPainter,
-    QFont,
+
 )
 from PySide6.QtWidgets import (
-    QApplication,
-    QButtonGroup,
-    QDialog,
-    QFileDialog,
-    QComboBox,
-    QFormLayout,
-    QGraphicsScene,
-    QGraphicsView,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLineEdit,
-    QMainWindow,
-    QRadioButton,
-    QTabWidget,
-    QToolBar,
-    QTreeView,
-    QVBoxLayout,
-    QWidget,
-    QGraphicsLineItem,
-    QGraphicsItem,
-    QDialogButtonBox,
-    QLabel,
-    QMenu,
     QMessageBox,
 )
 import shutil
+from ruamel.yaml import YAML
+from pathlib import Path
 
 from PySide6.QtCore import (
-    QModelIndex,
     Qt,
-    QPoint,
-    QLine,
-    QDir,
+
 )
 
 
-def createView(parent,viewName, cellItem):
+def createCellView(parent,viewName, cellItem):
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
-    # libraryItem = self.model.findItems(
-    #     cellPath.parent.name, flags=Qt.MatchExactly
-    # )[0]
     cellPath = cellItem.data(Qt.UserRole+2)
-    viewPath = cellPath.joinpath(viewName)
+    viewPath = cellPath.joinpath(viewName+'.py')
     viewPath.touch()  # create the view file
     viewItem = QStandardItem(viewName)
     viewItem.setData(viewPath, Qt.UserRole + 2)
@@ -66,10 +28,18 @@ def createView(parent,viewName, cellItem):
     cellItem.appendRow(viewItem)
     # needs to decide on how to handle the view type
     print(f"Created {viewName} at {str(viewPath)}")
+    return viewItem
 
 # function for copying a cell
 def copyCell(parent,model,cellItem,copyName, selectedLibPath):
-    cellPath = cellItem.data(Qt.UserRole + 2)    
+    '''
+    parent: the parent widget
+    model: the model
+    cellItem: the cell item in the model
+    copyName: the name of the new cell
+    selectedLibPath: the path of the selected library
+    '''
+    cellPath = cellItem.data(Qt.UserRole + 2)    # get the cell path from item user data
     if copyName == "":
         copyName = "newCell"
     copyPath = selectedLibPath.joinpath(copyName)
@@ -92,7 +62,7 @@ def copyCell(parent,model,cellItem,copyName, selectedLibPath):
         viewList = [
             str(view.stem)
             for view in copyPath.iterdir()
-            if view.suffix == ".yaml"
+            if view.suffix == ".py"
         ]
 
         for view in viewList:
@@ -100,7 +70,7 @@ def copyCell(parent,model,cellItem,copyName, selectedLibPath):
             viewItem.setData("view", Qt.UserRole + 1)
             # set the data to the item to be the path to the view.
             viewItem.setData(
-                copyPath.joinpath(view).with_suffix(".yaml"),
+                copyPath.joinpath(view).with_suffix(".py"),
                 Qt.UserRole + 2,
             )
             viewItem.setEditable(False)
@@ -114,4 +84,47 @@ def renameCell(parent,cellItem,newName):
     else:
         cellPath.rename(cellPath.parent/newName)
         cellItem.setText(newName)
+
+def createCell(parent,model,selectedItem,cellName):
+    if cellName.strip() == "":
+        QMessageBox.warning(parent, "Error", "Please enter a cell name")
+    else:
+        if selectedItem.data(Qt.UserRole + 1) == "library":
+            selectedLibPath = selectedItem.data(Qt.UserRole + 2)
+
+            cellPath = selectedLibPath.joinpath(cellName)
+            if cellPath.exists():
+                QMessageBox.warning(parent, "Error", "Cell already exits.")
+            else:
+                cellPath.mkdir()
+                libraryItem = model.findItems(
+                    selectedLibPath.name, flags=Qt.MatchExactly
+                )[
+                    0
+                ]
+        cellItem = QStandardItem(cellName)
+        cellItem.setData(cellPath, Qt.UserRole + 2)
+        cellItem.setData("cell", Qt.UserRole + 1)
+        libraryItem.appendRow(cellItem)
+        print(f"Created {cellName} at {str(cellPath)}")
+
+def writeLibDefFile(libPathDict, libPath):
+        yaml = YAML()
+        yaml.explicit_start = True
+        yaml.default_flow_style = False
+        libDefDict ={}
+        for key,value in libPathDict.items():
+            libDefDict[key]=str(value)
+        yaml.dump(libDefDict,libPath)
+
+def readLibDefFile(libPath):
+    yaml = YAML()
+    yaml.explicit_start = True
+    yaml.default_flow_style = False
+    data = list(yaml.load_all(libPath)) 
+    libraryDict={} # empty dictionary
+    for key,value in data[0].items():
+        libraryDict[key]= Path(value)
+    return libraryDict
+
 
