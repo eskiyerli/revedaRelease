@@ -15,6 +15,20 @@ from PySide6.QtCore import (
 
 )
 
+def createLibrary(parent,model,libraryDir,libraryName):
+    if libraryName.strip() == "":
+        QMessageBox.warning(parent, "Error", "Please enter a library name")
+    else:
+        libraryPath = Path(libraryDir).joinpath(libraryName)
+        if libraryPath.exists():
+            QMessageBox.warning(parent, "Error", "Library already exits.")
+        else:
+            libraryPath.mkdir()
+            libraryItem = QStandardItem(libraryPath.name)
+            libraryItem.setData(libraryPath, Qt.UserRole + 2)
+            libraryItem.setData("library", Qt.UserRole + 1)
+            model.appendRow(libraryItem)
+            print(f"Created {libraryPath}")
 
 def createCellView(parent,viewName, cellItem):
     if viewName.strip() == "":
