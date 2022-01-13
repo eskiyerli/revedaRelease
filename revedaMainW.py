@@ -40,6 +40,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QGraphicsLineItem,
+    QGraphicsRectItem,
     QGraphicsItem,
     QDialogButtonBox,
     QLabel,
@@ -54,6 +55,7 @@ from PySide6.QtCore import (
     QPoint,
     QLine,
     QDir,
+    QRectF,
 )
 from numpy.lib.function_base import copy
 
@@ -209,8 +211,12 @@ class designLibrariesView(QTreeView):
     def openView(self):
         if self.selectedItem.text() == "schematic":
             print(self.selectedItem.data(Qt.UserRole + 2).read_text())
-            schematicWindow = editorWindow()
+            schematicWindow = schematicEditor()
             schematicWindow.show()
+        elif self.selectedItem.text() == "symbol":
+            print(self.selectedItem.data(Qt.UserRole + 2).read_text())
+            symbolWindow = symbolEditor()
+            symbolWindow.show()
 
     def copyView(self):
         dlg = copyViewDialog(self, self.libraryModel, self.selectedItem)
@@ -756,7 +762,6 @@ class editorWindow(QMainWindow):
         createWireIcon = QIcon(":/icons/node-insert.png")
         self.createWireAction = QAction(createWireIcon, "Create Wire...", self)
         self.menuCreate.addAction(self.createWireAction)
-        self.createWireAction.triggered.connect(self.createWireClick)
 
         createBusIcon = QIcon(":/icons/node-select-all.png")
         self.createBusAction = QAction(createBusIcon, "Create Bus...", self)
@@ -814,45 +819,59 @@ class editorWindow(QMainWindow):
 
     def _createToolBars(self):
         # Create tools bar called "main toolbar"
-        toolbar = QToolBar("Main Toolbar", self)
+        self.toolbar = QToolBar("Main Toolbar", self)
         # place toolbar at top
-        self.addToolBar(toolbar)
-        toolbar.addAction(self.printAction)
-        toolbar.addSeparator()
-        toolbar.addAction(self.undoAction)
-        toolbar.addAction(self.redoAction)
-        toolbar.addSeparator()
-        toolbar.addAction(self.deleteAction)
-        toolbar.addAction(self.moveAction)
-        toolbar.addAction(self.copyAction)
-        toolbar.addAction(self.stretchAction)
+        self.addToolBar(self.toolbar)
+        self.toolbar.addAction(self.printAction)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.undoAction)
+        self.toolbar.addAction(self.redoAction)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.deleteAction)
+        self.toolbar.addAction(self.moveAction)
+        self.toolbar.addAction(self.copyAction)
+        self.toolbar.addAction(self.stretchAction)
         # toolbar.addAction(self.rulerAction)
         # toolbar.addAction(self.delRulerAction)
-        toolbar.addAction(self.objPropAction)
-        toolbar.addAction(self.viewPropAction)
-        toolbar.addSeparator()
-        toolbar.addAction(self.createInstAction)
-        toolbar.addAction(self.createWireAction)
-        toolbar.addAction(self.createBusAction)
-        toolbar.addAction(self.createPinAction)
-        toolbar.addAction(self.createLabelAction)
-        toolbar.addAction(self.createSymbolAction)
-        toolbar.addSeparator()
-        toolbar.addAction(self.viewCheckAction)
+        self.toolbar.addAction(self.objPropAction)
+        self.toolbar.addAction(self.viewPropAction)
+        self.toolbar.addSeparator()
+        self.schematicToolbar = QToolBar("Schematic Toolbar", self)
+        self.addToolBar(self.schematicToolbar)
+        self.schematicToolbar.addAction(self.createInstAction)
+        self.schematicToolbar.addAction(self.createWireAction)
+        self.schematicToolbar.addAction(self.createBusAction)
+        self.schematicToolbar.addAction(self.createPinAction)
+        self.schematicToolbar.addAction(self.createLabelAction)
+        self.schematicToolbar.addAction(self.createSymbolAction)
+        self.schematicToolbar.addSeparator()
+        self.schematicToolbar.addAction(self.viewCheckAction)
 
-        symbolToolbar = QToolBar("Symbol Toolbar", self)
-        self.addToolBar(symbolToolbar)
-        symbolToolbar.addAction(self.createLineAction)
-        symbolToolbar.addAction(self.createRectAction)
-        symbolToolbar.addAction(self.createPolyAction)
-        symbolToolbar.addAction(self.createCircleAction)
-        symbolToolbar.addAction(self.createArcAction)
-        symbolToolbar.addAction(self.createLabelAction)
-        symbolToolbar.addAction(self.createPinAction)
+        self.symbolToolbar = QToolBar("Symbol Toolbar", self)
+        self.addToolBar(self.symbolToolbar)
+        self.symbolToolbar.addAction(self.createLineAction)
+        self.symbolToolbar.addAction(self.createRectAction)
+        self.symbolToolbar.addAction(self.createPolyAction)
+        self.symbolToolbar.addAction(self.createCircleAction)
+        self.symbolToolbar.addAction(self.createArcAction)
+        self.symbolToolbar.addAction(self.createLabelAction)
+        self.symbolToolbar.addAction(self.createPinAction)
 
     # self is the parent window, ie. the application
     def dispConfDialog(self):
         dcd = displayConfigDialog(self)
+
+    def deleteItemMethod(self, s):
+        self.centralWidget.scene.deleteItem = True
+
+
+class schematicEditor(editorWindow):
+    def __init__(self) -> None:
+        super().__init__()
+        self.setWindowTitle("Schematic Editor")
+        self.symbolToolbar.setVisible(False)
+        self.schematicToolbar.setVisible(True)
+        self.createWireAction.triggered.connect(self.createWireClick)
 
     def createWireClick(self, s):
         self.centralWidget.scene.drawWire = True
@@ -860,9 +879,53 @@ class editorWindow(QMainWindow):
         if hasattr(self.centralWidget.scene, "start"):
             del self.centralWidget.scene.start
 
-    def deleteItemMethod(self, s):
-        self.centralWidget.scene.deleteItem = True
 
+class symbolEditor(editorWindow):
+    def __init__(self) -> None:
+        super().__init__()
+        self.setWindowTitle("Symbol Editor")
+        self.schematicToolbar.setVisible(False)
+        self.symbolToolbar.setVisible(True)
+        self.createLineAction.triggered.connect(self.createLineClick)
+        self.createRectAction.triggered.connect(self.createRectClick)
+        self.createPolyAction.triggered.connect(self.createPolyClick)
+        self.createArcAction.triggered.connect(self.createArcClick)
+        self.createCircleAction.triggered.connect(self.createCircleClick)
+        self.createLabelAction.triggered.connect(self.createLabelClick)
+        self.createPinAction.triggered.connect(self.createPinClick)
+
+    def createRectClick(self, s):
+        self.centralWidget.scene.drawRect = True
+        self.centralWidget.scene.selectItem = False
+        if hasattr(self.centralWidget.scene, "start"):
+            del self.centralWidget.scene.start
+
+    def createLineClick(self, s):
+        self.centralWidget.scene.drawLine = True
+        self.centralWidget.scene.selectItem = False
+        if hasattr(self.centralWidget.scene, "start"):
+            del self.centralWidget.scene.start
+
+    def createPolyClick(self, s):
+        pass
+
+    def createArcClick(self, s):
+        pass
+
+    def createCircleClick(self, s):
+        pass
+
+    def createLabelClick(self, s):
+        pass
+
+    def createPinClick(self, s):
+        pass
+
+class createPinDialog(QDialog):
+    def __init__(self,parent) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Create Pin")
+        
 
 class displayConfigDialog(QDialog):
     def __init__(self, parent):
@@ -962,14 +1025,16 @@ class schematic_scene(QGraphicsScene):
         self.drawWire = False  # flag to indicate if a wire is being drawn
         self.drawItem = False  # flag to indicate if an item is being drawn
         self.selectItem = True  # flag to indicate if an item is being selected
+        self.drawLine = False
+        self.drawRect = False  # flag to indicate if a rectangle is being drawn
+        self.objectStack = []  # stack of objects to be deleted
 
         self.wireLayer = cel.layer(
             name="wireLayer", color=QColor("aqua"), z=1, visible=True
         )
-        # yaml=YAML()
-        # yaml.register_class(cel.layer)
-        # yaml.dump([self.wireLayer], sys.stdout)
-
+        self.symbolLayer = cel.layer(
+            name="symbolLayer", color=QColor("green"), z=2, visible=True
+        )
         self.guideLineLayer = cel.layer(
             name="guideLineLayer", color=QColor("white"), z=2, visible=True
         )
@@ -977,6 +1042,7 @@ class schematic_scene(QGraphicsScene):
             name="selectedWireLayer", color=QColor("red"), z=3, visible=True
         )
         self.wirePen = QPen(self.wireLayer.color, 2)
+        self.symbolPen = QPen(self.symbolLayer.color, 2)
         self.selectedWirePen = QPen(self.selectedWireLayer.color, 2)
         self.init_UI()
 
@@ -1011,48 +1077,86 @@ class schematic_scene(QGraphicsScene):
             self.snapGrid(self.currentPosition.x(), self.gridMajor),
             self.snapGrid(self.currentPosition.y(), self.gridMajor),
         )
+        pen = QPen(self.guideLineLayer.color, 1)
+        pen.setStyle(Qt.DashLine)
+        if hasattr(self, "draftItem"):
+            self.removeItem(self.draftItem)  # remove old guide line
         if self.drawWire == True and hasattr(self, "start") == True:
-            if hasattr(self, "linkLine"):
-                self.removeItem(self.linkLine)  # remove old guide line
-            pen = QPen(self.guideLineLayer.color, 1)
-            pen.setStyle(Qt.DashLine)
-
-            self.linkLine = QGraphicsLineItem(QLine(self.start, self.current))
-
-            self.linkLine.setPen(pen)
-            self.addItem(self.linkLine)
+            self.draftItem = QGraphicsLineItem(QLine(self.start, self.current))
+            self.draftItem.setPen(pen)
+            self.addItem(self.draftItem)
+        elif self.drawLine == True and hasattr(self, "start") == True:
+            self.draftItem = QGraphicsLineItem(QLine(self.start, self.current))
+            self.draftItem.setPen(pen)
+            self.addItem(self.draftItem)
+        elif self.drawRect == True and hasattr(self, "start") == True:
+            self.draftItem = QGraphicsRectItem(QRectF(self.start, self.current))
+            self.draftItem.setPen(pen)
+            self.addItem(self.draftItem)
         super().mouseMoveEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
-        if hasattr(self, "linkLine"):
-            self.removeItem(self.linkLine)
+        if hasattr(self, "draftItem"):
+            self.removeItem(self.draftItem)
         if self.drawWire == True:
-            midPoint = QPoint(self.current.x(), self.start.y())
-            horizLine = QGraphicsLineItem(QLine(self.start, midPoint))
-            horizLine.setPen(self.wirePen)
-            self.addItem(horizLine)
-            vertLine = QGraphicsLineItem(QLine(midPoint, self.current))
-            vertLine.setPen(self.wirePen)
-            self.addItem(vertLine)
-            self.start = self.current  # reset start position
+            self.lineDraw(self.wirePen)
+            self.drawWire = False
+        elif self.drawLine == True:
+            self.lineDraw(self.symbolPen)
+            self.drawLine = False
+
+        elif self.drawRect == True:
+            self.rectDraw()
+
+        self.start = self.current  # reset start position
 
         super().mouseReleaseEvent(mouse_event)
+
+    def rectDraw(self):
+        rect = QGraphicsRectItem(QRectF(self.start, self.current))
+        rect.setPen(self.symbolPen)
+        self.addItem(rect)
+        self.drawRect = False
+        self.objectStack.append(rect)
+
+    def lineDraw(self, pen):
+        midPoint = QPoint(self.current.x(), self.start.y())
+        horizLine = QGraphicsLineItem(QLine(self.start, midPoint))
+        horizLine.setPen(pen)
+        self.addItem(horizLine)
+        vertLine = QGraphicsLineItem(QLine(midPoint, self.current))
+        vertLine.setPen(pen)
+        self.addItem(vertLine)
+        self.objectStack.append([horizLine, vertLine])
 
     def keyPressEvent(self, key_event):
         if key_event.key() == Qt.Key_Escape:
             self.drawWire = False  # turn off wire select mode
             self.drawItem = False  # turn off drawing mode when escape is pressed
-            if hasattr(self, "linkLine"):
-                self.removeItem(self.linkLine)
+            self.drawRect = False
+            if hasattr(self, "draftItem"):
+                self.removeItem(self.draftItem)
             self.selectItem = True
         elif key_event.key() == Qt.Key_Delete:
             if hasattr(self, "selectedItem"):
                 self.removeItem(self.selectedItem)
                 del self.selectedItem
                 self.selectItem = True
+        elif key_event.key() == Qt.Key_U:
+            print("undo")
+
+            if type(self.objectStack[-1]) == list:
+                for item in self.objectStack[-1]:
+                    self.removeItem(item)
+                self.objectStack.pop()
+            else:
+                self.removeItem(self.objectStack[-1])
+                self.objectStack.pop()
+            print("len(self.objectStack)", len(self.objectStack))
+        super().keyPressEvent(key_event)
 
     def snapGrid(self, number, base):
-        return base * int(math.floor(number / base))
+        return base * int(round(number / base))
 
 
 class schematic_view(QGraphicsView):
