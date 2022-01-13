@@ -4,6 +4,7 @@ from pathlib import Path
 from threading import Thread
 import shutil
 
+
 from PySide6.QtGui import (
     QAction,
     QColor,
@@ -43,6 +44,9 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QLabel,
     QMenu,
+    QMessageBox,
+    QPushButton,
+    QTabWidget,
 )
 from PySide6.QtCore import (
     QModelIndex,
@@ -62,6 +66,7 @@ from Vector import *
 from ruamel.yaml import YAML
 import pythonConsole as pcon
 from contextlib import redirect_stdout, redirect_stderr
+import schBackEnd as scb  # import the backend
 
 
 class designLibrariesView(QTreeView):
@@ -72,52 +77,76 @@ class designLibrariesView(QTreeView):
         self.init_UI()
 
     def init_UI(self):
-        self.libraryModel = QStandardItemModel()
-        self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
+        self.setSortingEnabled(True)
+        self.initModel()
         # iterate design library directories
         for designPath in self.libraryDict.values():  # type: Path
-            parentItem = self.libraryModel.invisibleRootItem()
-            libraryName = designPath.name  # type: str
-            # create a standard Item
-            libraryNameItem = QStandardItem(libraryName)
-            libraryNameItem.setEditable(False)
-            libraryNameItem.setData("library", Qt.UserRole + 1)
-            libraryNameItem.setData(designPath, Qt.UserRole + 2)
-            parentItem.appendRow(libraryNameItem)
-            cellList = [
-                str(cell.name) for cell in designPath.iterdir() if cell.is_dir()
-            ]
-            for cell in cellList:  # type: str
-                cellItem = QStandardItem(cell)
-                cellItem.setEditable(False)
-                cellItem.setData("cell", Qt.UserRole + 1)
-                cellItem.setData(designPath / cell, Qt.UserRole + 2)
-
-                libraryNameItem.appendRow(cellItem)
-                viewList = [
-                    str(view.stem)
-                    for view in designPath.joinpath(cell).iterdir()
-                    if view.suffix == ".yaml"
-                ]
-                for view in viewList:
-                    viewItem = QStandardItem(view)
-                    viewItem.setData("view", Qt.UserRole + 1)
-                    # set the data to the item to be the path to the view.
-                    viewItem.setData(
-                        designPath.joinpath(cell, view).with_suffix(".yaml"),
-                        Qt.UserRole + 2,
-                    )
-                    viewItem.setEditable(False)
-                    cellItem.appendRow(viewItem)
+            self.addLibrary(designPath, self.parentItem)
 
         self.setModel(self.libraryModel)
 
+    def initModel(self):
+        self.libraryModel = QStandardItemModel()
+        self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
+        self.parentItem = self.libraryModel.invisibleRootItem()
+
+    def addLibrary(self, designPath, parentItem):  # type: Path, QStandardItem
+        if designPath.is_dir():
+            libraryNameItem = QStandardItem(designPath.name)
+            libraryNameItem.setData("library", Qt.UserRole + 1)
+            libraryNameItem.setData(designPath, Qt.UserRole + 2)
+            libraryNameItem.setEditable(False)
+            parentItem.appendRow(libraryNameItem)
+
+            cellList = [str(cell.name) for cell in designPath.iterdir() if cell.is_dir()]
+            for cell in cellList:  # type: str
+                viewList = [
+                    str(view.stem)
+                    for view in designPath.joinpath(cell).iterdir()
+                    if view.suffix == ".py"
+                    and str(view.stem) in self.parent.parent.cellViews
+                ]
+                if len(viewList) >= 0:
+                    cellItem = self.addCell(designPath, libraryNameItem, cell)
+                    for view in viewList:
+                        self.addCellView(designPath, cell, cellItem, view)
+
+
+    def addCell(self, designPath, libraryNameItem, cell):
+        cellItem = QStandardItem(cell)
+        cellItem.setEditable(False)
+        cellItem.setData("cell", Qt.UserRole + 1)
+        cellItem.setData(designPath / cell, Qt.UserRole + 2)
+
+        libraryNameItem.appendRow(cellItem)
+        return cellItem
+
+    def addCellView(self, designPath, cell, cellItem, view):
+        viewItem = QStandardItem(view)
+        viewItem.setData("view", Qt.UserRole + 1)
+        # set the data to the item to be the path to the view.
+        viewItem.setData(
+            designPath.joinpath(cell, view).with_suffix(".py"),
+            Qt.UserRole + 2,
+        )
+        viewItem.setEditable(False)
+        cellItem.appendRow(viewItem)
+
+    def removeLibrary(self):
+        pass
+
     def contextMenuEvent(self, event):
         menu = QMenu(self)
-
-        index = self.selectedIndexes()[0]
+        try:
+            index = self.selectedIndexes()[0]
+        except IndexError:
+            pass
         self.selectedItem = self.libraryModel.itemFromIndex(index)
-        if self.selectedItem.data(Qt.UserRole + 1) == "cell":
+        if self.selectedItem.data(Qt.UserRole + 1) == "library":
+            menu.addAction("Save Library As...", self.saveLibAs)
+            menu.addAction("Rename Library", self.renameLib)
+            menu.addAction("Create Cell", self.createCell)
+        elif self.selectedItem.data(Qt.UserRole + 1) == "cell":
             menu.addAction(
                 QAction("Create CellView...", self, triggered=self.createCellView)
             )
@@ -131,22 +160,40 @@ class designLibrariesView(QTreeView):
             menu.addAction(QAction("Delete View...", self, triggered=self.deleteView))
         menu.exec(event.globalPos())
 
+    def saveLibAs(self):
+        pass
+
+    def renameLib(self):
+        pass
+
+    def createCell(self):
+        dlg = createCellDialog(self, self.libraryModel, self.selectedItem)
+        if dlg.exec() == QDialog.Accepted:
+            scb.createCell(
+                self, self.libraryModel, self.selectedItem, dlg.nameEdit.text()
+            )
+            self.reworkDesignLibrariesView()
+
     def createCellView(self):
-        print("If I could..")
+        dlg = createCellViewDialog(
+            self, self.libraryModel, self.selectedItem
+        )  # type: createCellViewDialog
+        if dlg.exec() == QDialog.Accepted:
+            viewItem = scb.createCellView(self, dlg.nameEdit.text(), dlg.cellItem)
+            self.reworkDesignLibrariesView()
 
     def copyCell(self):
-        if self.selectedItem.data(Qt.UserRole + 1) == "cell":
-            dlg = copyCellDialog(
-                self, self.libraryModel, self.selectedItem.data(Qt.UserRole + 2)
+        dlg = copyCellDialog(self, self.libraryModel, self.selectedItem)
+
+        if dlg.exec() == QDialog.Accepted:
+            scb.copyCell(
+                self, dlg.model, dlg.cellItem, dlg.copyName.text(), dlg.selectedLibPath
             )
-            dlg.exec()
-            # dlg.show()
-            # msgBox = QDialog(self)
-            # msgBox.setWindowTitle("Copy Cell")
-            # msgBox.exec()
 
     def renameCell(self):
-        pass
+        dlg = renameCellDialog(self, self.selectedItem)
+        if dlg.exec() == QDialog.Accepted:
+            scb.renameCell(self, dlg.model, dlg.cellItem, dlg.nameEdit.text())
 
     def deleteCell(self):
         try:
@@ -160,7 +207,22 @@ class designLibrariesView(QTreeView):
             print(self.selectedItem.data(Qt.UserRole + 2).read_text())
 
     def copyView(self):
-        pass
+        dlg = copyViewDialog(self, self.libraryModel, self.selectedItem)
+        if dlg.exec() == QDialog.Accepted:
+            if self.selectedItem.data(Qt.UserRole + 1) == "view":
+                viewPath = self.selectedItem.data(Qt.UserRole + 2)
+                newViewPath = dlg.selectedLibPath.joinpath(
+                    dlg.selectedCell, dlg.selectedView + ".py"
+                )
+                if not newViewPath.exists():
+                    try:
+                        newViewPath.parent.mkdir(parents=True)
+                    except FileExistsError:
+                        pass
+                    shutil.copy(viewPath, newViewPath)
+                else:
+                    QMessageBox.warning(self, "Error", "View already exits.")
+                    self.copyView()  # try again
 
     def renameView(self):
         pass
@@ -172,139 +234,199 @@ class designLibrariesView(QTreeView):
         except OSError as e:
             print(f"Error:{ e.strerror}")
 
+    def reworkDesignLibrariesView(self):
+        self.libraryModel.clear()
+        self.initModel()
+        self.setModel(self.libraryModel)
+        for designPath in self.libraryDict.values():  # type: Path
+            print(designPath)
+            self.addLibrary(designPath, self.parentItem)
 
-class container(QWidget):
-    def __init__(self, parent):
-        super().__init__(parent=parent)
+
+class createCellDialog(QDialog):
+    def __init__(self, parent, libraryModel, selectedItem):
+        super().__init__(parent)
         self.parent = parent
+        self.libraryModel = libraryModel
+        self.selectedItem = selectedItem
         self.init_UI()
 
     def init_UI(self):
-
-        self.scene = schematic_scene(self)
-
-        self.view = schematic_view(self.scene, self)
-
-        libraryDict = {
-            "design": Path.home().joinpath(
-                "OneDrive",
-                "Documents",
-                "Projects",
-                "RevEDA",
-                "schematicEditor",
-                "design",
-            ),
-            "anotherDesign": Path.home().joinpath(
-                "OneDrive",
-                "Documents",
-                "Projects",
-                "RevEDA",
-                "schematicEditor",
-                "anotherDesign",
-            ),
-        }
-        treeView = designLibrariesView(self, libraryDict)
-        # treeView = designLibrariesView(self)
-        self.console = pcon.pythonConsole(globals())
-        self.console.writeoutput("Welcome to RevEDA")
-        self.console.setfont(QFont("Fira Mono Regular", 10))
-        # layout statements, using a grid layout
-        gLayout = QGridLayout()
-        gLayout.setSpacing(10)
-        gLayout.addWidget(treeView, 0, 0)
-        gLayout.addWidget(self.view, 0, 1)
-        # ratio of first column to second column is 5
-        gLayout.setColumnStretch(1, 5)
-        gLayout.setRowStretch(0, 6)
-        gLayout.addWidget(self.console, 1, 0, 1, 2)
-        gLayout.setRowStretch(1, 1)
-        self.setLayout(gLayout)
+        self.setWindowTitle("Create Cell")
+        layout = QFormLayout()
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText("Enter Cell Name")
+        layout.addRow("Cell Name:", self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
 
 
-class copyCellDialog(QDialog):
-    def __init__(self, parent, model, path):
+class createCellViewDialog(QDialog):
+    def __init__(self, parent, model, cellItem):
         super().__init__(parent=parent)
         self.parent = parent
         self.model = model
-        self.path = path
-        self.index = 0
+        self.cellItem = cellItem
+        self.cellPath = self.cellItem.data(Qt.UserRole + 2)
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Create CellView")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.viewComboBox = QComboBox()
+        self.viewComboBox.addItems(self.parent.parent.parent.cellViews)
+        layout.addRow("Select View:", self.viewComboBox)
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText("CellView Name")
+        self.nameEdit.setFixedWidth(200)
+        layout.addRow(QLabel("View Name:"), self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+
+class renameCellDialog(QDialog):
+    def __init__(self, parent, cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.cellItem = cellItem
+
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Rename Cell")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText("Cell Name")
+        self.nameEdit.setFixedWidth(200)
+        layout.addRow(QLabel("Cell Name:"), self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+
+class copyCellDialog(QDialog):
+    def __init__(self, parent, model, cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.model = model
+        self.cellItem = cellItem
+
+        # self.index = 0
         self.init_UI()
 
     def init_UI(self):
 
         self.setWindowTitle("Copy Cell")
-        # self.setFixedSize(300, 300)
-        # self.setStyleSheet("background-color: #f2f2f2")
-        layout = QVBoxLayout()
+        layout = QFormLayout()
         layout.setSpacing(10)
         self.libraryComboBox = QComboBox()
         self.libraryComboBox.setModel(self.model)
         self.libraryComboBox.setModelColumn(0)
-        # self.libraryComboBox.addItems(list(self.libraryDict.keys()))
         self.libraryComboBox.setCurrentIndex(0)
         self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
-        print(self.selectedLibPath)
         self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
-        libraryNameLayout = QHBoxLayout()
-        libraryLabel = QLabel("Library:")
-        libraryNameLayout.addWidget(libraryLabel)
-        libraryNameLayout.addWidget(self.libraryComboBox)
-        layout.addLayout(libraryNameLayout)
-        cellNameLayout = QHBoxLayout()
-        cellNameText = QLabel("Cell Name:")
-        cellNameLayout.addWidget(cellNameText)
-        self.cellName = QLineEdit()
-        self.cellName.setPlaceholderText("Enter Cell Name")
-        self.cellName.setFixedWidth(130)
-        cellNameLayout.addWidget(self.cellName)
-        layout.addLayout(cellNameLayout)
+        layout.addRow(QLabel("Library:"), self.libraryComboBox)
+        self.copyName = QLineEdit()
+        self.copyName.setPlaceholderText("Enter Cell Name")
+        self.copyName.setFixedWidth(130)
+        layout.addRow(QLabel("Cell Name:"), self.copyName)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-        layout.addWidget(self.buttonBox)
+        layout.addRow(self.buttonBox)
         self.setLayout(layout)
-
-    def accept(self):
-        self.copyName = self.cellName.text()
-        if self.copyName == "":
-            self.copyName = "newCell"
-        self.copyPath = self.selectedLibPath.joinpath(self.copyName)
-        if self.copyPath.exists():
-            print("Cell already exists")
-        else:
-            assert self.path.exists()
-            shutil.copytree(self.path, self.copyPath)
-            libraryItem=self.model.findItems(self.selectedLibPath.name)[0]
-            cellItem=QStandardItem(self.copyPath.name)
-            cellItem.setEditable(False)
-            cellItem.setData("cell", Qt.UserRole + 1)
-            cellItem.setData(self.copyPath, Qt.UserRole + 2)   
-            viewList = [
-                str(view.stem)
-                for view in self.copyPath.iterdir()
-                if view.suffix == ".yaml"
-            ]
-            for view in viewList:
-                viewItem = QStandardItem(view)
-                viewItem.setData("view", Qt.UserRole + 1)
-                # set the data to the item to be the path to the view.
-                viewItem.setData(
-                    self.copyPath.joinpath(view).with_suffix(".yaml"),
-                    Qt.UserRole + 2,
-                )
-                viewItem.setEditable(False)
-                cellItem.appendRow(viewItem)    
-            libraryItem.appendRow(cellItem)                 
-        self.close()
-
-    def reject(self):
-        self.close()
 
     def selectLibrary(self):
         self.selectedLibPath = self.libraryComboBox.itemData(
             self.libraryComboBox.currentIndex(), Qt.UserRole + 2
         )
+
+
+class copyViewDialog(QDialog):
+    def __init__(self, parent, model, cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.model = model
+        self.cellItem = cellItem
+
+        # self.index = 0
+        self.init_UI()
+
+    def init_UI(self):
+
+        self.setWindowTitle("Copy CellView")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.libraryComboBox = QComboBox()
+        self.libraryComboBox.setModel(self.model)
+        self.libraryComboBox.setModelColumn(0)
+        self.libraryComboBox.setCurrentIndex(0)
+        self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
+        self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
+        layout.addRow(QLabel("Library:"), self.libraryComboBox)
+        self.cellComboBox = QComboBox()
+        cellList = [
+            str(cell.name) for cell in self.selectedLibPath.iterdir() if cell.is_dir()
+        ]
+        self.cellComboBox.addItems(cellList)
+        self.cellComboBox.setEditable(True)
+        self.cellComboBox.InsertPolicy = QComboBox.InsertAfterCurrent
+        layout.addRow(QLabel("Cell Name:"), self.cellComboBox)
+        self.selectedCell = self.cellComboBox.currentText()
+        self.cellComboBox.currentTextChanged.connect(self.selectCell)
+        self.viewComboBox = QComboBox()
+        self.viewComboBox.setEditable(True)
+        self.viewComboBox.InsertPolicy = QComboBox.InsertAfterCurrent
+        self.viewComboBox.addItems(self.viewList())
+        self.selectedView = self.viewComboBox.currentText()
+        self.viewComboBox.currentTextChanged.connect(self.selectView)
+        layout.addRow(QLabel("View Name:"), self.viewComboBox)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+    def viewList(self):
+        viewList = [
+            str(view.stem)
+            for view in self.selectedLibPath.joinpath(self.selectedCell).iterdir()
+            if view.suffix == ".py"
+        ]
+        return viewList
+
+    def selectLibrary(self):
+        self.selectedLibPath = self.libraryComboBox.itemData(
+            self.libraryComboBox.currentIndex(), Qt.UserRole + 2
+        )
+        cellList = [
+            str(cell.name) for cell in self.selectedLibPath.iterdir() if cell.is_dir()
+        ]
+        self.cellComboBox.clear()
+        self.cellComboBox.addItems(cellList)
+
+    def selectCell(self):
+        self.selectedCell = self.cellComboBox.currentText()
+        self.viewComboBox.clear()
+        self.viewComboBox.addItems(self.viewList())
+
+    def selectView(self):
+        self.selectedView = self.viewComboBox.currentText()
 
 
 class displayConfigDialog(QDialog):
@@ -372,43 +494,39 @@ class displayConfigDialog(QDialog):
         self.parent.centralWidget.scene.update()
         self.close()
 
-    def reject(self):
-        self.close()
 
+class container(QWidget):
+    def __init__(self, parent):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.libraryDict = self.parent.libraryDict
+        self.sceneDict = {}
+        self.viewDict = {}
+        self.init_UI()
 
-# class copyCellDialog(QDialog):
-#     def __init__(self,parent,cellName):
-#         super().__init__(parent=parent)
-#         self.parent = parent
-#         self.cellName = cellName
+    def init_UI(self):
 
-#         self.init_UI()
+        self.scene = schematic_scene(self)
 
-#     def init_UI(self):
-#         self.setWindowTitle("Copy Cell")
-#         self.setWindowIcon(QIcon("./icons/copy.png"))
-#         self.setWindowFlags(Qt.WindowStaysOnTopHint)
-#         self.setFixedSize(300, 100)
-#         self.setStyleSheet("background-color: #f2f2f2")
-#         self.setModal(True)
-#         self.setFocus()
+        self.view = schematic_view(self.scene, self)
 
-#         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-#         self.layout = QVBoxLayout()
-#         self.buttonBox = QDialogButtonBox(QBtn)
-#         self.buttonBox.accepted.connect(self.accept)
-#         self.buttonBox.rejected.connect(self.reject)
-#         self.layout.addWidget(self.buttonBox)
-#         self.setLayout(self.layout)
-#         self.show()
+        self.treeView = designLibrariesView(self, self.libraryDict)
 
-
-#     def accept(self):
-#         # self.parent.centralWidget.scene.copyCell(self.cellName)
-#         self.close()
-
-#     def reject(self):
-#         self.close()
+        # treeView = designLibrariesView(self)
+        self.console = pcon.pythonConsole(globals())
+        self.console.writeoutput("Welcome to RevEDA")
+        self.console.setfont(QFont("Fira Mono Regular", 10))
+        # layout statements, using a grid layout
+        gLayout = QGridLayout()
+        gLayout.setSpacing(10)
+        gLayout.addWidget(self.treeView, 0, 0)
+        gLayout.addWidget(self.view, 0, 1)
+        # ratio of first column to second column is 5
+        gLayout.setColumnStretch(1, 5)
+        gLayout.setRowStretch(0, 6)
+        gLayout.addWidget(self.console, 1, 0, 1, 2)
+        gLayout.setRowStretch(1, 1)
+        self.setLayout(gLayout)
 
 
 class schematic_scene(QGraphicsScene):
@@ -546,10 +664,6 @@ class schematic_view(QGraphicsView):
                 )
         super().drawBackground(painter, rect)
 
-    # def mouseMoveEvent(self, mouse_event):
-
-    #     super().mouseMoveEvent(mouse_event)
-
     def wheelEvent(self, mouse_event):
         factor = 1.1
         if mouse_event.angleDelta().y() < 0:
@@ -570,11 +684,166 @@ class schematic_view(QGraphicsView):
         return base * int(math.floor(number / base))
 
 
+class libraryPathEditorDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.libraryEditRowList = []
+        self.libraryDict = self.parent.libraryDict
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Library Path Editor")
+        mainLayout = QVBoxLayout()
+        mainLayout.setSpacing(10)
+        self.entriesLayout = QVBoxLayout()  # layout for all the entries
+        labelLayout = QHBoxLayout()
+        labelLayout.addWidget(QLabel("Library Name"))
+        labelLayout.addWidget(QLabel("Library Path"))
+        mainLayout.addLayout(labelLayout)  # add label layout to main layout
+        for key in self.libraryDict.keys():
+            self.libraryEditRowList.append(libraryEditRow(self))
+            self.entriesLayout.addWidget(self.libraryEditRowList[-1])
+            self.libraryEditRowList[-1].libraryNameEdit.setText(key)
+            self.libraryEditRowList[-1].libraryPathEdit.setText(
+                str(self.libraryDict[key])
+            )
+            self.libraryEditRowList[-1].libraryPathEdit.textChanged.connect(self.addRow)
+        mainLayout.addLayout(self.entriesLayout)
+        self.libraryEditRowList.append(libraryEditRow(self))
+        self.entriesLayout.addWidget(self.libraryEditRowList[-1])
+        self.libraryEditRowList[-1].libraryPathEdit.textChanged.connect(self.addRow)
+        mainLayout.addLayout(self.entriesLayout)
+        applyButton = QPushButton("Apply")
+        applyButton.clicked.connect(self.apply)
+        applyButton.setDefault(False)
+        cancelButton = QPushButton("Cancel")
+        cancelButton.clicked.connect(self.cancel)
+        buttonBox = QDialogButtonBox(Qt.Horizontal)
+        buttonBox.addButton(applyButton, QDialogButtonBox.ActionRole)
+        buttonBox.addButton(cancelButton, QDialogButtonBox.ActionRole)
+        mainLayout.addWidget(buttonBox)
+        self.setLayout(mainLayout)
+
+    def apply(self):
+        self.reworkLibraryModel()
+
+        self.close()
+
+    def reworkLibraryModel(self):
+        libPath = Path.cwd().joinpath("library.yaml")
+        tempLibDict = {}
+        for item in self.libraryEditRowList:
+            if item.libraryNameEdit.text() != "":  # check if the key is empty
+                tempLibDict[item.libraryNameEdit.text()] = item.libraryPathEdit.text()
+        try:
+            with libPath.open(mode="w") as f:
+                scb.writeLibDefFile(tempLibDict, libPath)
+        except IOError:
+            print(f"Cannot save library definitions in {libPath}")
+        # self.parent.centralWidget.treeView.addLibrary()
+        self.libraryDict = {}  # now empty the library dict
+        for key, value in tempLibDict.items():
+            self.libraryDict[key] = Path(
+                value
+            )  # redefine  libraryDict with pathlib paths.
+        self.parent.libraryDict = self.libraryDict  # propogate changes up to mainWindow
+        self.parent.centralWidget.treeView.libraryModel.clear()
+        self.parent.centralWidget.treeView.initModel()
+        self.parent.centralWidget.treeView.setModel(
+            self.parent.centralWidget.treeView.libraryModel
+        )
+        for designPath in self.libraryDict.values():  # type: Path
+            self.parent.centralWidget.treeView.addLibrary(
+                designPath, self.parent.centralWidget.treeView.parentItem
+            )
+
+    def cancel(self):
+        self.close()
+
+    def addRow(self):
+        if self.libraryEditRowList[-1].libraryPathEdit.text() != "":
+            self.libraryEditRowList.append(libraryEditRow(self))
+            self.entriesLayout.addWidget(self.libraryEditRowList[-1])
+            self.libraryEditRowList[-1].libraryPathEdit.textChanged.connect(self.addRow)
+
+
+class libraryEditRow(QWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.init_UI()
+
+    def init_UI(self):
+        self.layout = QHBoxLayout()
+        self.layout.setSpacing(10)
+        self.libraryNameEdit = libraryNameEditC(self)
+        self.libraryPathEdit = libraryPathEditC(self)
+        self.layout.addWidget(self.libraryNameEdit)
+        self.layout.addWidget(self.libraryPathEdit)
+        self.setLayout(self.layout)
+
+
+class libraryNameEditC(QLineEdit):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.fileDialog = QFileDialog()
+        self.fileDialog.setFileMode(QFileDialog.Directory)
+        self.init_UI()
+
+    def init_UI(self):
+        self.setPlaceholderText("Library Name")
+        self.setMaximumWidth(250)
+        self.setFixedWidth(200)
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        menu.addAction("Remove", self.removeRow)
+        menu.addAction("Add Library...", self.addLibrary)
+        menu.addAction("Library Info...", self.libInfo)
+        menu.exec(event.globalPos())
+
+    def addLibrary(self):
+        self.fileDialog.exec()
+        if self.fileDialog.selectedFiles():
+            self.selectedDirectory = QDir(self.fileDialog.selectedFiles()[0])
+            self.setText(self.selectedDirectory.dirName())
+            self.parent.libraryPathEdit.setText(self.selectedDirectory.absolutePath())
+
+    def removeRow(self):
+        self.parent.deleteLater()
+        self.parent.parent.libraryEditRowList.remove(self.parent)
+
+    def libInfo(self):
+        pass
+
+
+class libraryPathEditC(QLineEdit):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.init_UI()
+
+    def init_UI(self):
+        self.setPlaceholderText("Library Path                ")
+        self.setMaximumWidth(600)
+        self.setFixedWidth(500)
+
+
 class mainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         revEDAPathObj = Path(__file__)
         revEDADirObj = revEDAPathObj.parent
+        self.cellViews = ["schematic", "symbol"]
+        libraryPathObj = Path.cwd().joinpath("library.yaml")
+        try:
+            with libraryPathObj.open(mode="r") as f:
+                self.libraryDict = scb.readLibDefFile(f)
+        except IOError:
+            print(f"Cannot find {str(libraryPathObj)} file.")
+            self.libraryDict = {}
         self.init_UI()
 
     def init_UI(self):
@@ -840,7 +1109,28 @@ class mainWindow(QMainWindow):
         simulateIcon = QIcon(":/icons/application-wave.png")
         self.simulateAction = QAction(simulateIcon, "Run RevEDA Sim GUI", self)
         self.menuSimulation.addAction(self.simulateAction)
-        # Main toolbar
+
+        self.libraryEditorAction = QAction(openLibIcon, "Library Editor", self)
+        self.menuUtilities.addAction(self.libraryEditorAction)
+        self.libraryEditorAction.triggered.connect(self.libraryEditorClick)
+
+        createLineIcon = QIcon(":/icons/layer-shape-line.png")
+        self.createLineAction = QAction(createLineIcon, "Create Line...", self)
+
+        createRectIcon = QIcon(":/icons/layer-shape.png")
+        self.createRectAction = QAction(createRectIcon, "Create Rectangle...", self)
+
+        createPolyIcon = QIcon(":/icons/layer-shape-polygon.png")
+        self.createPolyAction = QAction(createPolyIcon, "Create Polygon...", self)
+
+        createCircleIcon = QIcon(":/icons/layer-shape-ellipse.png")
+        self.createCircleAction = QAction(createCircleIcon, "Create Circle...", self)
+
+        createArcIcon = QIcon(":/icons/layer-shape-polyline.png")
+        self.createArcAction = QAction(createArcIcon, "Create Arc...", self)
+
+        createTextIcon = QIcon(":/icons/layer-shape-text.png")
+        createLabelAction = QAction(createTextIcon, "Create Label...", self)
 
     def _createToolBars(self):
         # Create tools bar called "main toolbar"
@@ -878,6 +1168,16 @@ class mainWindow(QMainWindow):
         toolbar.addSeparator()
         toolbar.addAction(self.viewCheckAction)
 
+        symbolToolbar = QToolBar("Symbol Toolbar", self)
+        self.addToolBar(symbolToolbar)
+        symbolToolbar.addAction(self.createLineAction)
+        symbolToolbar.addAction(self.createRectAction)
+        symbolToolbar.addAction(self.createPolyAction)
+        symbolToolbar.addAction(self.createCircleAction)
+        symbolToolbar.addAction(self.createArcAction)
+        symbolToolbar.addAction(self.createLabelAction)
+        symbolToolbar.addAction(self.createPinAction)
+
     def openLibDialog(self):
         home_dir = str(Path.home())
         fname = QFileDialog.getOpenFileName(self, "Open file", home_dir)
@@ -895,11 +1195,16 @@ class mainWindow(QMainWindow):
     def deleteItemMethod(self, s):
         self.centralWidget.scene.deleteItem = True
 
+    def libraryEditorClick(self, s):
+        dlg = libraryPathEditorDialog(self)
+        dlg.exec()
+
 
 app = QApplication(sys.argv)
 # app.setStyle('Fusion')
 # empty argument as there is no parent window.
 mainW = mainWindow()
+mainW.setWindowTitle("Revolution EDA Schematic/Symbol Editor")
 redirect = pcon.Redirect(mainW.centralWidget.console.errorwrite)
 with redirect_stdout(mainW.centralWidget.console), redirect_stderr(redirect):
 

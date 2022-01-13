@@ -47,6 +47,12 @@
     <file>icons/report--exclamation.png</file>   
     <file>icons/report--minus.png</file>  
     <file>icons/script-text.png</file>       
-    <file>icons/application-wave.png</file>                                  
+    <file>icons/application-wave.png</file>          
+    <file>icons/layer-shape-line.png</file>
+    <file>icons/layer-shape.png</file>
+    <file>icons/layer-shape-polygon.png</file>
+    <file>icons/layer-shape-ellipse.png</file>
+    <file>icons/layer-shape-polyline.png</file>
+    <file>icons/layer-shape-text.png</file>                            
 </qresource>
 </RCC>
