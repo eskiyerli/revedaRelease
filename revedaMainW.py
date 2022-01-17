@@ -56,6 +56,7 @@ from PySide6.QtCore import (
     QLine,
     QDir,
     QRectF,
+    QRect,
 )
 from numpy.lib.function_base import copy
 
@@ -895,16 +896,10 @@ class symbolEditor(editorWindow):
         self.createPinAction.triggered.connect(self.createPinClick)
 
     def createRectClick(self, s):
-        self.centralWidget.scene.drawRect = True
-        self.centralWidget.scene.selectItem = False
-        if hasattr(self.centralWidget.scene, "start"):
-            del self.centralWidget.scene.start
+        self.setDrawMode(False, False, False, True, False)
 
     def createLineClick(self, s):
-        self.centralWidget.scene.drawLine = True
-        self.centralWidget.scene.selectItem = False
-        if hasattr(self.centralWidget.scene, "start"):
-            del self.centralWidget.scene.start
+        self.setDrawMode(False, False, False, False, True)
 
     def createPolyClick(self, s):
         pass
@@ -919,13 +914,51 @@ class symbolEditor(editorWindow):
         pass
 
     def createPinClick(self, s):
-        pass
+        print("Voila")
+        createPinDlg = createPinDialog(self)
+        if createPinDlg.exec() == QDialog.Accepted:
+            self.centralWidget.scene.pinName = createPinDlg.pinName.text()
+            self.setDrawMode(True, False, False, False, False)
+
+    def setDrawMode(self, drawPin, selectItem, drawArc, drawRect, drawLine):
+        self.centralWidget.scene.drawPin = drawPin
+        self.centralWidget.scene.selectItem = selectItem
+        self.centralWidget.scene.drawArc = drawArc  # draw arc
+        self.centralWidget.scene.drawRect = drawRect
+        self.centralWidget.scene.drawLine = drawLine
+        if hasattr(self.centralWidget.scene, "start"):
+            del self.centralWidget.scene.start
+
 
 class createPinDialog(QDialog):
-    def __init__(self,parent) -> None:
+    def __init__(self, parent) -> None:
         super().__init__(parent)
         self.setWindowTitle("Create Pin")
-        
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.layout = QFormLayout()
+
+        self.pinName = QLineEdit()
+        self.pinName.setPlaceholderText("Pin Name")
+        self.pinName.setToolTip("Enter pin name")
+        self.layout.addRow(QLabel("Pin Name"), self.pinName)
+        self.pinDir = QComboBox()
+        self.pinDir.addItems(["Input", "Output", "Inout"])
+        self.pinDir.setToolTip("Select pin direction")
+        self.layout.addRow(QLabel("Pin Direction"), self.pinDir)
+        self.pinType = QComboBox()
+        self.pinType.addItems(
+            ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
+        )
+        self.pinType.setToolTip("Select pin type")
+        self.layout.addRow(QLabel("Pin Type"), self.pinType)
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
+        self.show()
+
 
 class displayConfigDialog(QDialog):
     def __init__(self, parent):
@@ -986,6 +1019,7 @@ class displayConfigDialog(QDialog):
         self.show()
 
     def accept(self):
+        super().accept()
         self.parent.centralWidget.scene.gridMajor = int(self.majorGridEntry.text())
         self.parent.centralWidget.view.gridMajor = int(self.majorGridEntry.text())
         self.parent.centralWidget.scene.gridMinor = int(self.minorGridEntry.text())
@@ -1004,7 +1038,6 @@ class editorContainer(QWidget):
     def init_UI(self):
 
         self.scene = schematic_scene(self)
-
         self.view = schematic_view(self.scene, self)
 
         # layout statements, using a grid layout
@@ -1026,6 +1059,8 @@ class schematic_scene(QGraphicsScene):
         self.drawItem = False  # flag to indicate if an item is being drawn
         self.selectItem = True  # flag to indicate if an item is being selected
         self.drawLine = False
+        self.drawArc = False  # flag to indicate if an arc is being drawn
+        self.drawPin = False
         self.drawRect = False  # flag to indicate if a rectangle is being drawn
         self.objectStack = []  # stack of objects to be deleted
 
@@ -1033,59 +1068,55 @@ class schematic_scene(QGraphicsScene):
             name="wireLayer", color=QColor("aqua"), z=1, visible=True
         )
         self.symbolLayer = cel.layer(
-            name="symbolLayer", color=QColor("green"), z=2, visible=True
+            name="symbolLayer", color=QColor("green"), z=1, visible=True
         )
         self.guideLineLayer = cel.layer(
-            name="guideLineLayer", color=QColor("white"), z=2, visible=True
+            name="guideLineLayer", color=QColor("white"), z=1, visible=True
         )
         self.selectedWireLayer = cel.layer(
-            name="selectedWireLayer", color=QColor("red"), z=3, visible=True
+            name="selectedWireLayer", color=QColor("red"), z=1, visible=True
+        )
+        self.pinLayer = cel.layer(
+            name="pinLayer", color=QColor("darkRed"), z=1, visible=True
         )
         self.wirePen = QPen(self.wireLayer.color, 2)
-        self.symbolPen = QPen(self.symbolLayer.color, 2)
+        self.symbolPen = QPen(self.symbolLayer.color, 3)
         self.selectedWirePen = QPen(self.selectedWireLayer.color, 2)
+        self.pinPen = QPen(self.pinLayer.color, 2)
+
         self.init_UI()
 
     def init_UI(self):
         pass
 
     def mousePressEvent(self, mouse_event):
-        self.startPosition = mouse_event.scenePos()
-        if hasattr(self, "start") == False:
-            self.start = QPoint(
-                self.snapGrid(self.startPosition.x(), self.gridMajor),
-                self.snapGrid(self.startPosition.y(), self.gridMajor),
-            )
-        # vectorObj = Vector(0,0,self.start.x(), self.start.y())
-        # print(vectorObj)
-
-        if self.selectItem == True:
-            self.selectedItem = self.itemAt(
-                self.startPosition.x(), self.startPosition.y(), QTransform()
-            )
-            if self.selectedItem != None:
-                self.selectedItem.setSelected(True)
-                self.selectedItem.setZValue(1)
-                self.selectedItem.setPen(self.selectedWirePen)  # set pen to red
-                self.selectedItem.show()
-                self.selectedItem.setFlag(QGraphicsItem.ItemIsMovable, True)
         super().mousePressEvent(mouse_event)
+        if self.selectItem == True:
+            self.selectedItem = self.itemAt(mouse_event.scenePos(), QTransform())
+            if self.selectedItem != None:
+                print("I found something")
+        else:
+            self.startPosition = mouse_event.scenePos().toPoint()
+            if hasattr(self, "start") == False:
+                self.start = QPoint(
+                    self.snapGrid(self.startPosition.x(), self.gridMajor),
+                    self.snapGrid(self.startPosition.y(), self.gridMajor),
+                )
 
     def mouseMoveEvent(self, mouse_event):
-        self.currentPosition = mouse_event.scenePos()
-        self.current = QPoint(
-            self.snapGrid(self.currentPosition.x(), self.gridMajor),
-            self.snapGrid(self.currentPosition.y(), self.gridMajor),
-        )
+        self.snap2Grid(mouse_event)
+
         pen = QPen(self.guideLineLayer.color, 1)
         pen.setStyle(Qt.DashLine)
         if hasattr(self, "draftItem"):
             self.removeItem(self.draftItem)  # remove old guide line
+            del self.draftItem
         if self.drawWire == True and hasattr(self, "start") == True:
             self.draftItem = QGraphicsLineItem(QLine(self.start, self.current))
             self.draftItem.setPen(pen)
             self.addItem(self.draftItem)
         elif self.drawLine == True and hasattr(self, "start") == True:
+            print(f'{self.start} {self.current}')
             self.draftItem = QGraphicsLineItem(QLine(self.start, self.current))
             self.draftItem.setPen(pen)
             self.addItem(self.draftItem)
@@ -1093,41 +1124,54 @@ class schematic_scene(QGraphicsScene):
             self.draftItem = QGraphicsRectItem(QRectF(self.start, self.current))
             self.draftItem.setPen(pen)
             self.addItem(self.draftItem)
+        elif self.drawPin == True and hasattr(self, "start") == True:
+            self.draftItem = QGraphicsRectItem(
+                QRectF(self.current.x() - 5, self.current.y() - 5, 10, 10)
+            )
+            self.draftItem.setPen(pen)
+            self.addItem(self.draftItem)
         super().mouseMoveEvent(mouse_event)
 
+    def snap2Grid(self, mouse_event):
+        self.current = mouse_event.scenePos().toPoint()
+        self.current /= self.gridMajor
+        self.current *= self.gridMajor
+
     def mouseReleaseEvent(self, mouse_event):
+        super().mouseReleaseEvent(mouse_event)
         if hasattr(self, "draftItem"):
             self.removeItem(self.draftItem)
+            del self.draftItem
         if self.drawWire == True:
             self.lineDraw(self.wirePen)
             self.drawWire = False
         elif self.drawLine == True:
             self.lineDraw(self.symbolPen)
             self.drawLine = False
-
         elif self.drawRect == True:
             self.rectDraw()
+        elif self.drawPin == True:
+            self.pinDraw(self.pinPen)
+            self.drawPin = False  # reset flag
 
         self.start = self.current  # reset start position
 
-        super().mouseReleaseEvent(mouse_event)
-
     def rectDraw(self):
-        rect = QGraphicsRectItem(QRectF(self.start, self.current))
-        rect.setPen(self.symbolPen)
+        rect = rectItem(QRect(self.start, self.current), self.symbolPen)
         self.addItem(rect)
         self.drawRect = False
         self.objectStack.append(rect)
 
     def lineDraw(self, pen):
-        midPoint = QPoint(self.current.x(), self.start.y())
-        horizLine = QGraphicsLineItem(QLine(self.start, midPoint))
-        horizLine.setPen(pen)
-        self.addItem(horizLine)
-        vertLine = QGraphicsLineItem(QLine(midPoint, self.current))
-        vertLine.setPen(pen)
-        self.addItem(vertLine)
-        self.objectStack.append([horizLine, vertLine])
+        line = lineItem(self.start, self.current, pen)
+        self.addItem(line)
+        self.objectStack.append(line)
+
+    def pinDraw(self, pen):
+        pin = pinItem(self.current, self.pinName, pen)
+        self.addItem(pin)
+        self.objectStack.append(pin)
+        del self.pinName
 
     def keyPressEvent(self, key_event):
         if key_event.key() == Qt.Key_Escape:
@@ -1148,15 +1192,76 @@ class schematic_scene(QGraphicsScene):
             if type(self.objectStack[-1]) == list:
                 for item in self.objectStack[-1]:
                     self.removeItem(item)
-                self.objectStack.pop()
+                    del item
             else:
                 self.removeItem(self.objectStack[-1])
-                self.objectStack.pop()
-            print("len(self.objectStack)", len(self.objectStack))
+                del self.objectStack[-1]
+            self.objectStack.pop()
+        elif key_event.key() == Qt.Key_Delete:
+            if hasattr(self, "selectedItem"):
+                self.removeItem(self.selectedItem)
+                del self.selectedItem
+                self.selectItem = True
         super().keyPressEvent(key_event)
 
     def snapGrid(self, number, base):
         return base * int(round(number / base))
+
+
+class rectItem(QGraphicsItem):
+    def __init__(self, rect, pen):
+        super().__init__()
+        self.rect = rect
+        self.pen = pen
+        self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
+
+    def boundingRect(self):
+        return QRectF(self.rect)
+
+    def paint(self, painter, option, widget):
+        painter.setPen(self.pen)
+        painter.drawRect(self.rect)
+
+
+class lineItem(QGraphicsItem):
+    def __init__(self, start, current, pen):
+        super().__init__()
+        self.current = current
+        self.start = start
+        self.pen = pen
+        self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
+
+    def boundingRect(self):
+        return QRectF(
+            self.start.x(), self.start.y(), self.current.x(), self.current.y()
+        )
+
+    def paint(self, painter, option, widget):
+        painter.setPen(self.pen)
+        midPoint = QPoint(self.current.x(), self.start.y())
+        painter.drawLine(self.start, midPoint)
+        painter.drawLine(midPoint, self.current)
+
+
+class pinItem(QGraphicsItem):
+    def __init__(self, pos, name, pen):
+        super().__init__()
+        self.pos = pos
+        self.pen = pen
+        self.name = name
+        self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
+        self.rect = QRectF(self.pos.x() - 5, self.pos.y() - 5, 10, 10)
+
+    def boundingRect(self):
+        return self.rect
+
+    def paint(self, painter, option, widget):
+        painter.setPen(self.pen)
+        painter.setBrush(self.pen.color())
+        painter.drawRect(self.rect)
+        painter.setFont(QFont("Arial", 10))
+        textLoc = QPoint(self.pos.x() - 2.5, self.pos.y() - 10)
+        painter.drawText(textLoc, self.name)
 
 
 class schematic_view(QGraphicsView):
