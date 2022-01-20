@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from threading import Thread
 import shutil
+import pickle
 
 
 from PySide6.QtGui import (
@@ -53,6 +54,7 @@ from PySide6.QtCore import (
     QModelIndex,
     Qt,
     QPoint,
+    QPointF,
     QLine,
     QDir,
     QRectF,
@@ -602,8 +604,8 @@ class editorWindow(QMainWindow):
     def _createActions(self):
 
         checkCellIcon = QIcon(":/icons/document-task.png")
-        checkCellAction = QAction(checkCellIcon, "Check-Save", self)
-        self.menuFile.addAction(checkCellAction)
+        self.checkCellAction = QAction(checkCellIcon, "Check-Save", self)
+        self.menuFile.addAction(self.checkCellAction)
 
         self.menuFile.addSeparator()
 
@@ -887,6 +889,7 @@ class symbolEditor(editorWindow):
         self.setWindowTitle("Symbol Editor")
         self.schematicToolbar.setVisible(False)
         self.symbolToolbar.setVisible(True)
+        self.checkCellAction.triggered.connect(self.checkSaveCell)
         self.createLineAction.triggered.connect(self.createLineClick)
         self.createRectAction.triggered.connect(self.createRectClick)
         self.createPolyAction.triggered.connect(self.createPolyClick)
@@ -894,6 +897,10 @@ class symbolEditor(editorWindow):
         self.createCircleAction.triggered.connect(self.createCircleClick)
         self.createLabelAction.triggered.connect(self.createLabelClick)
         self.createPinAction.triggered.connect(self.createPinClick)
+
+    def checkSaveCell(self):
+        # print('I am saving')
+        self.centralWidget.scene.saveSymbolCell()
 
     def createRectClick(self, s):
         self.setDrawMode(False, False, False, True, False)
@@ -1031,8 +1038,6 @@ class editorContainer(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.parent = parent
-        self.sceneDict = {}
-        self.viewDict = {}
         self.init_UI()
 
     def init_UI(self):
@@ -1077,7 +1082,7 @@ class schematic_scene(QGraphicsScene):
             name="selectedWireLayer", color=QColor("red"), z=1, visible=True
         )
         self.pinLayer = cel.layer(
-            name="pinLayer", color=QColor("darkRed"), z=1, visible=True
+            name="pinLayer", color=QColor("darkRed"), z=2, visible=True
         )
         self.wirePen = QPen(self.wireLayer.color, 2)
         self.symbolPen = QPen(self.symbolLayer.color, 3)
@@ -1116,7 +1121,6 @@ class schematic_scene(QGraphicsScene):
             self.draftItem.setPen(pen)
             self.addItem(self.draftItem)
         elif self.drawLine == True and hasattr(self, "start") == True:
-            print(f'{self.start} {self.current}')
             self.draftItem = QGraphicsLineItem(QLine(self.start, self.current))
             self.draftItem.setPen(pen)
             self.addItem(self.draftItem)
@@ -1187,7 +1191,6 @@ class schematic_scene(QGraphicsScene):
                 del self.selectedItem
                 self.selectItem = True
         elif key_event.key() == Qt.Key_U:
-            print("undo")
 
             if type(self.objectStack[-1]) == list:
                 for item in self.objectStack[-1]:
@@ -1207,12 +1210,30 @@ class schematic_scene(QGraphicsScene):
     def snapGrid(self, number, base):
         return base * int(round(number / base))
 
+    def saveSymbolCell(self):
+        self.sceneR = self.sceneRect()
+
+        items = self.items(self.sceneR)
+        for item in items:
+            print(f'item dict: {item.__dict__}')
+            print(type(item))
+            pickled_content = pickle.dumps(item)
+            reconstructed_content = pickle.loads(
+                pickled_content
+            )  # loading back the content
+            print(
+                f"type: {type(reconstructed_content)}"
+            )  
+            # self.addItem(reconstructed_content)
+        #     print(item.scenePos())
+
 
 class rectItem(QGraphicsItem):
     def __init__(self, rect, pen):
         super().__init__()
         self.rect = rect
         self.pen = pen
+        self.loc = self.scenePos()
         self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
 
     def boundingRect(self):
@@ -1221,6 +1242,27 @@ class rectItem(QGraphicsItem):
     def paint(self, painter, option, widget):
         painter.setPen(self.pen)
         painter.drawRect(self.rect)
+
+    def mouseMoveEvent(self, event) -> None:
+        self.loc = self.scenePos()
+        print(self.loc)
+        super().mouseMoveEvent(event)
+
+    def __getstate__(self):
+        stateDict = {
+            "rect": self.__dict__["rect"].getRect(),
+            "pen": self.__dict__["pen"].color(),
+            "penWidth": self.__dict__["pen"].width(),
+            "loc": self.__dict__["loc"].toTuple(),
+        }
+        return stateDict
+
+    def __setstate__(self, state):
+        self.__dict__["rect"] = QRect(
+            state["rect"][0], state["rect"][1], state["rect"][2], state["rect"][3]
+        )
+        self.__dict__["pen"] = QPen(QColor(state["pen"]), state["penWidth"]+5)
+        self.__dict__["loc"] = QPointF(state["loc"][0], state["loc"][1])
 
 
 class lineItem(QGraphicsItem):
@@ -1238,9 +1280,21 @@ class lineItem(QGraphicsItem):
 
     def paint(self, painter, option, widget):
         painter.setPen(self.pen)
-        midPoint = QPoint(self.current.x(), self.start.y())
-        painter.drawLine(self.start, midPoint)
-        painter.drawLine(midPoint, self.current)
+        if self.start.x() != self.current.x():
+            if self.start.y() != self.current.y():
+                midPoint = QPoint(self.current.x(), self.start.y())
+                painter.drawLine(self.start, midPoint)
+                painter.drawLine(midPoint, self.current)
+            else:
+                painter.drawLine(self.start, self.current)
+        else:
+            if self.start.y() != self.current.y():
+                painter.drawLine(self.start, self.current)
+            else:
+                painter.drawPoint(self.start)
+
+    def pos(self):
+        return self.start
 
 
 class pinItem(QGraphicsItem):
@@ -1263,6 +1317,9 @@ class pinItem(QGraphicsItem):
         textLoc = QPoint(self.pos.x() - 2.5, self.pos.y() - 10)
         painter.drawText(textLoc, self.name)
 
+    def pos(self):
+        return self.pos
+
 
 class schematic_view(QGraphicsView):
     def __init__(self, scene, parent):
@@ -1283,21 +1340,6 @@ class schematic_view(QGraphicsView):
         self.setMouseTracking(True)
         # self.setDragMode(QGraphicsView.RubberBandDrag)
 
-    def drawBackground(self, painter, rect):
-        rectCoord = rect.getRect()
-        painter.fillRect(rect, QColor("black"))
-        painter.setPen(QColor("white"))
-        grid_x_start = math.ceil(rectCoord[0] / self.gridMajor) * self.gridMajor
-        grid_y_start = math.ceil(rectCoord[1] / self.gridMajor) * self.gridMajor
-        num_x_points = math.floor(rectCoord[2] / self.gridMajor)
-        num_y_points = math.floor(rectCoord[3] / self.gridMajor)
-        for i in range(int(num_x_points)):  # rect width
-            for j in range(int(num_y_points)):  # rect length
-                painter.drawPoint(
-                    grid_x_start + i * self.gridMajor, grid_y_start + j * self.gridMajor
-                )
-        super().drawBackground(painter, rect)
-
     def wheelEvent(self, mouse_event):
         factor = 1.1
         if mouse_event.angleDelta().y() < 0:
@@ -1316,6 +1358,21 @@ class schematic_view(QGraphicsView):
 
     def snapGrid(self, number, base):
         return base * int(math.floor(number / base))
+
+    def drawBackground(self, painter, rect):
+        rectCoord = rect.getRect()
+        painter.fillRect(rect, QColor("black"))
+        painter.setPen(QColor("white"))
+        grid_x_start = math.ceil(rectCoord[0] / self.gridMajor) * self.gridMajor
+        grid_y_start = math.ceil(rectCoord[1] / self.gridMajor) * self.gridMajor
+        num_x_points = math.floor(rectCoord[2] / self.gridMajor)
+        num_y_points = math.floor(rectCoord[3] / self.gridMajor)
+        for i in range(int(num_x_points)):  # rect width
+            for j in range(int(num_y_points)):  # rect length
+                painter.drawPoint(
+                    grid_x_start + i * self.gridMajor, grid_y_start + j * self.gridMajor
+                )
+        super().drawBackground(painter, rect)
 
 
 class libraryPathEditorDialog(QDialog):
