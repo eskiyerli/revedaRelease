@@ -1,77 +1,37 @@
+import json
+import math
 import os
+import shutil
 import sys
+from contextlib import redirect_stderr, redirect_stdout
+from hashlib import new
 from pathlib import Path
 from threading import Thread
-import shutil
-import pickle
 
-
-from PySide6.QtGui import (
-    QAction,
-    QColor,
-    QIcon,
-    QPalette,
-    QPixmap,
-    QStandardItem,
-    QStandardItemModel,
-    QPen,
-    QTransform,
-    QCursor,
-    QPainter,
-    QFont,
-)
-from PySide6.QtWidgets import (
-    QApplication,
-    QButtonGroup,
-    QDialog,
-    QFileDialog,
-    QComboBox,
-    QFormLayout,
-    QGraphicsScene,
-    QGraphicsView,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLineEdit,
-    QMainWindow,
-    QRadioButton,
-    QTabWidget,
-    QToolBar,
-    QTreeView,
-    QVBoxLayout,
-    QWidget,
-    QGraphicsLineItem,
-    QGraphicsRectItem,
-    QGraphicsItem,
-    QDialogButtonBox,
-    QLabel,
-    QMenu,
-    QMessageBox,
-    QPushButton,
-    QTabWidget,
-)
-from PySide6.QtCore import (
-    QModelIndex,
-    Qt,
-    QPoint,
-    QPointF,
-    QLine,
-    QDir,
-    QRectF,
-    QRect,
-)
-from numpy.lib.function_base import copy
-
-import resources
 import numpy as np
-import math
+from numpy.lib.function_base import copy
+from PySide6.QtCore import (QDir, QLine, QModelIndex, QPoint, QPointF, QRect,
+                            QRectF, Qt)
+from PySide6.QtGui import (QAction, QColor, QCursor,  # QPalette,; QPixmap,
+                           QFont, QIcon, QPainter, QPen, QStandardItem,
+                           QStandardItemModel, QTransform)
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDialog,
+                               QDialogButtonBox, QFileDialog, QFormLayout,
+                               QGraphicsItem, QGraphicsLineItem,
+                               QGraphicsRectItem, QGraphicsScene,
+                               QGraphicsView, QGridLayout, QGroupBox,
+                               QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+                               QMenu, QMessageBox, QPushButton, QRadioButton,
+                               QTabWidget, QToolBar, QTreeView, QVBoxLayout,
+                               QWidget)
+from ruamel.yaml import YAML
+
 import circuitElements as cel
+import pythonConsole as pcon
+import resources
+import schBackEnd as scb  # import the backend
 from Point import *
 from Vector import *
-from ruamel.yaml import YAML
-import pythonConsole as pcon
-from contextlib import redirect_stdout, redirect_stderr
-import schBackEnd as scb  # import the backend
 
 
 class designLibrariesView(QTreeView):
@@ -96,13 +56,10 @@ class designLibrariesView(QTreeView):
         self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
         self.parentItem = self.libraryModel.invisibleRootItem()
 
-    def addLibrary(self, designPath, parentItem):  # type: Path, QStandardItem
+    def addLibrary(self, designPath, parentItem): # designPath: Path
         if designPath.is_dir():
-            libraryNameItem = QStandardItem(designPath.name)
-            libraryNameItem.setData("library", Qt.UserRole + 1)
-            libraryNameItem.setData(designPath, Qt.UserRole + 2)
-            libraryNameItem.setEditable(False)
-            parentItem.appendRow(libraryNameItem)
+            libraryEntry = scb.libraryItem(designPath,designPath.name)
+            parentItem.appendRow(libraryEntry)
 
             cellList = [
                 str(cell.name) for cell in designPath.iterdir() if cell.is_dir()
@@ -111,33 +68,23 @@ class designLibrariesView(QTreeView):
                 viewList = [
                     str(view.stem)
                     for view in designPath.joinpath(cell).iterdir()
-                    if view.suffix == ".py" and str(view.stem) in self.cellViews
+                    if view.suffix == ".json" and str(view.stem) in self.cellViews
                 ]
                 if len(viewList) >= 0:
-                    cellItem = self.addCell(designPath, libraryNameItem, cell)
+                    cellEntry = self.addCell(designPath, libraryEntry, cell)
                     for view in viewList:
-                        self.addCellView(designPath, cell, cellItem, view)
+                        self.addCellView(designPath, cell, cellEntry, view)
 
     def addCell(self, designPath, libraryNameItem, cell):
-        cellItem = QStandardItem(cell)
-        cellItem.setEditable(False)
-        cellItem.setData("cell", Qt.UserRole + 1)
-        cellItem.setData(designPath / cell, Qt.UserRole + 2)
-        libraryNameItem.appendRow(cellItem)
+        cellEntry = scb.cellItem(designPath, cell)
+        libraryNameItem.appendRow(cellEntry)
         # libraryNameItem.appendRow(cellItem)
-        return cellItem
+        return cellEntry
 
     def addCellView(self, designPath, cell, cellItem, view):
-        viewItem = QStandardItem(view)
-        viewItem.setData("view", Qt.UserRole + 1)
-        # set the data to the item to be the path to the view.
-        viewItem.setData(
-            designPath.joinpath(cell, view).with_suffix(".py"),
-            Qt.UserRole + 2,
-        )
-        viewItem.setEditable(False)
-        cellItem.appendRow(viewItem)
-        return viewItem
+        viewEntry = scb.viewItem(designPath, cell, view)
+        cellItem.appendRow(viewEntry)
+        return viewEntry
 
     def contextMenuEvent(self, event):
         menu = QMenu(self)
@@ -188,7 +135,7 @@ class designLibrariesView(QTreeView):
             self, self.libraryModel, self.selectedItem
         )  # type: createCellViewDialog
         if dlg.exec() == QDialog.Accepted:
-            viewItem = scb.createCellView(self, dlg.nameEdit.text(), dlg.cellItem)
+            scb.createCellView(self, dlg.nameEdit.text(), dlg.cellItem)
             self.reworkDesignLibrariesView()
 
     def copyCell(self):
@@ -209,15 +156,15 @@ class designLibrariesView(QTreeView):
             shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
             self.selectedItem.parent().removeRow(self.selectedItem.row())
         except OSError as e:
-            print(f"Error:{ e.strerror}")
+            print(f"Error:{e.strerror}")
 
     def openView(self):
         if self.selectedItem.text() == "schematic":
-            print(self.selectedItem.data(Qt.UserRole + 2).read_text())
+            print(self.selectedItem.type())
             schematicWindow = schematicEditor()
             schematicWindow.show()
         elif self.selectedItem.text() == "symbol":
-            print(self.selectedItem.data(Qt.UserRole + 2).read_text())
+            print(self.selectedItem.type())
             symbolWindow = symbolEditor()
             symbolWindow.show()
 
@@ -247,7 +194,7 @@ class designLibrariesView(QTreeView):
             self.selectedItem.data(Qt.UserRole + 2).unlink()
             self.selectedItem.parent().removeRow(self.selectedItem.row())
         except OSError as e:
-            print(f"Error:{ e.strerror}")
+            print(f"Error:{e.strerror}")
 
     def reworkDesignLibrariesView(self):
         self.libraryModel.clear()
@@ -367,10 +314,10 @@ class container(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.parent = parent
+
         self.init_UI()
 
     def init_UI(self):
-
         # treeView = designLibrariesView(self)
         self.console = pcon.pythonConsole(globals())
         self.console.writeoutput("Welcome to RevEDA")
@@ -468,7 +415,6 @@ class copyCellDialog(QDialog):
         self.init_UI()
 
     def init_UI(self):
-
         self.setWindowTitle("Copy Cell")
         layout = QFormLayout()
         layout.setSpacing(10)
@@ -507,7 +453,6 @@ class copyViewDialog(QDialog):
         self.init_UI()
 
     def init_UI(self):
-
         self.setWindowTitle("Copy CellView")
         layout = QFormLayout()
         layout.setSpacing(10)
@@ -602,7 +547,6 @@ class editorWindow(QMainWindow):
         self.statusBar()
 
     def _createActions(self):
-
         checkCellIcon = QIcon(":/icons/document-task.png")
         self.checkCellAction = QAction(checkCellIcon, "Check-Save", self)
         self.menuFile.addAction(self.checkCellAction)
@@ -1041,7 +985,6 @@ class editorContainer(QWidget):
         self.init_UI()
 
     def init_UI(self):
-
         self.scene = schematic_scene(self)
         self.view = schematic_view(self.scene, self)
 
@@ -1215,17 +1158,20 @@ class schematic_scene(QGraphicsScene):
 
         items = self.items(self.sceneR)
         for item in items:
-            print(f'item dict: {item.__dict__}')
-            print(type(item))
-            pickled_content = pickle.dumps(item)
-            reconstructed_content = pickle.loads(
-                pickled_content
-            )  # loading back the content
-            print(
-                f"type: {type(reconstructed_content)}"
-            )  
-            # self.addItem(reconstructed_content)
-        #     print(item.scenePos())
+            itemJson = json.dumps(item.stateDict)
+            newDict = json.loads(itemJson)
+            if newDict["class"] == "rectItem":
+                print(newDict)
+                rect = QRect(*newDict["rect"])
+                color = QColor()
+                color.setRgb(
+                    newDict["color"][0], newDict["color"][1], 255, newDict["color"][3]
+                )
+                pen = QPen(color, newDict["width"])
+                newItem = rectItem(rect, pen)
+                newItem.setPos(*newDict["loc"])
+                newItem.show()
+                self.addItem(newItem)
 
 
 class rectItem(QGraphicsItem):
@@ -1235,6 +1181,13 @@ class rectItem(QGraphicsItem):
         self.pen = pen
         self.loc = self.scenePos()
         self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
+        self.stateDict = {
+            "class": "rectItem",
+            "rect": self.__dict__["rect"].getRect(),
+            "color": self.__dict__["pen"].color().toTuple(),
+            "width": self.__dict__["pen"].width(),
+            "loc": self.__dict__["loc"].toTuple(),
+        }
 
     def boundingRect(self):
         return QRectF(self.rect)
@@ -1244,25 +1197,9 @@ class rectItem(QGraphicsItem):
         painter.drawRect(self.rect)
 
     def mouseMoveEvent(self, event) -> None:
-        self.loc = self.scenePos()
-        print(self.loc)
+        self.stateDict["loc"] = self.scenePos().toTuple()
+
         super().mouseMoveEvent(event)
-
-    def __getstate__(self):
-        stateDict = {
-            "rect": self.__dict__["rect"].getRect(),
-            "pen": self.__dict__["pen"].color(),
-            "penWidth": self.__dict__["pen"].width(),
-            "loc": self.__dict__["loc"].toTuple(),
-        }
-        return stateDict
-
-    def __setstate__(self, state):
-        self.__dict__["rect"] = QRect(
-            state["rect"][0], state["rect"][1], state["rect"][2], state["rect"][3]
-        )
-        self.__dict__["pen"] = QPen(QColor(state["pen"]), state["penWidth"]+5)
-        self.__dict__["loc"] = QPointF(state["loc"][0], state["loc"][1])
 
 
 class lineItem(QGraphicsItem):

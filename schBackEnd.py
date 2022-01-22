@@ -1,21 +1,54 @@
 # schematic editor backend
 from PySide6.QtGui import (
     QStandardItem,
-
 )
 from PySide6.QtWidgets import (
     QMessageBox,
 )
 import shutil
 from ruamel.yaml import YAML
+import json
 from pathlib import Path
 
 from PySide6.QtCore import (
     Qt,
-
 )
 
-def createLibrary(parent,model,libraryDir,libraryName):
+
+class libraryItem(QStandardItem):
+    def __init__(self, path, name):  # path is a pathlib.Path object
+        super().__init__(name)
+        self.setData(path, Qt.UserRole + 2)
+        self.setData("library", Qt.UserRole + 1)
+
+
+class cellItem(QStandardItem):
+    def __init__(self, libraryPath, name) -> None:
+        super().__init__(name)
+        self.setEditable(False)
+        self.setData("cell", Qt.UserRole + 1)
+        self.setData(libraryPath / name, Qt.UserRole + 2)
+
+    def type(self):
+        return QStandardItem.UserType + 1
+
+
+class viewItem(QStandardItem):
+    def __init__(self, libraryPath, cell, name) -> None:
+        super().__init__(name)
+        self.setEditable(False)
+        self.setData("view", Qt.UserRole + 1)
+        # set the data to the item to be the path to the view.
+        self.setData(
+            libraryPath.joinpath(cell, name).with_suffix(".json"),
+            Qt.UserRole + 2,
+        )
+
+    def type(self):
+        return QStandardItem.UserType + 2
+
+
+def createLibrary(parent, model, libraryDir, libraryName):
     if libraryName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a library name")
     else:
@@ -30,11 +63,12 @@ def createLibrary(parent,model,libraryDir,libraryName):
             model.appendRow(libraryItem)
             print(f"Created {libraryPath}")
 
-def createCellView(parent,viewName, cellItem):
+
+def createCellView(parent, viewName, cellItem):
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
-    cellPath = cellItem.data(Qt.UserRole+2)
-    viewPath = cellPath.joinpath(viewName+'.py')
+    cellPath = cellItem.data(Qt.UserRole + 2)
+    viewPath = cellPath.joinpath(viewName + ".py")
     viewPath.touch()  # create the view file
     viewItem = QStandardItem(viewName)
     viewItem.setData(viewPath, Qt.UserRole + 2)
@@ -44,16 +78,17 @@ def createCellView(parent,viewName, cellItem):
     print(f"Created {viewName} at {str(viewPath)}")
     return viewItem
 
+
 # function for copying a cell
-def copyCell(parent,model,cellItem,copyName, selectedLibPath):
-    '''
+def copyCell(parent, model, cellItem, copyName, selectedLibPath):
+    """
     parent: the parent widget
     model: the model
     cellItem: the cell item in the model
     copyName: the name of the new cell
     selectedLibPath: the path of the selected library
-    '''
-    cellPath = cellItem.data(Qt.UserRole + 2)    # get the cell path from item user data
+    """
+    cellPath = cellItem.data(Qt.UserRole + 2)  # get the cell path from item user data
     if copyName == "":
         copyName = "newCell"
     copyPath = selectedLibPath.joinpath(copyName)
@@ -62,9 +97,7 @@ def copyCell(parent,model,cellItem,copyName, selectedLibPath):
     else:
         assert cellPath.exists()
         shutil.copytree(cellPath, copyPath)  # copied the cell
-        libraryItem = model.findItems(
-            selectedLibPath.name, flags=Qt.MatchExactly
-        )[
+        libraryItem = model.findItems(selectedLibPath.name, flags=Qt.MatchExactly)[
             0
         ]  # find the library item
         # create new cell item
@@ -74,9 +107,7 @@ def copyCell(parent,model,cellItem,copyName, selectedLibPath):
         cellItem.setData(copyPath, Qt.UserRole + 2)
         # go through view list and add to cell item
         viewList = [
-            str(view.stem)
-            for view in copyPath.iterdir()
-            if view.suffix == ".py"
+            str(view.stem) for view in copyPath.iterdir() if view.suffix == ".py"
         ]
 
         for view in viewList:
@@ -91,15 +122,17 @@ def copyCell(parent,model,cellItem,copyName, selectedLibPath):
             cellItem.appendRow(viewItem)
         libraryItem.appendRow(cellItem)
 
-def renameCell(parent,cellItem,newName):
+
+def renameCell(parent, cellItem, newName):
     cellPath = cellItem.data(Qt.UserRole + 2)
     if newName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a cell name")
     else:
-        cellPath.rename(cellPath.parent/newName)
+        cellPath.rename(cellPath.parent / newName)
         cellItem.setText(newName)
 
-def createCell(parent,model,selectedItem,cellName):
+
+def createCell(parent, model, selectedItem, cellName):
     if cellName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a cell name")
     else:
@@ -113,32 +146,30 @@ def createCell(parent,model,selectedItem,cellName):
                 cellPath.mkdir()
                 libraryItem = model.findItems(
                     selectedLibPath.name, flags=Qt.MatchExactly
-                )[
-                    0
-                ]
+                )[0]
         cellItem = QStandardItem(cellName)
         cellItem.setData(cellPath, Qt.UserRole + 2)
         cellItem.setData("cell", Qt.UserRole + 1)
         libraryItem.appendRow(cellItem)
         print(f"Created {cellName} at {str(cellPath)}")
 
+
 def writeLibDefFile(libPathDict, libPath):
-        yaml = YAML()
-        yaml.explicit_start = True
-        yaml.default_flow_style = False
-        libDefDict ={}
-        for key,value in libPathDict.items():
-            libDefDict[key]=str(value)
-        yaml.dump(libDefDict,libPath)
+    yaml = YAML()
+    yaml.explicit_start = True
+    yaml.default_flow_style = False
+    libDefDict = {}
+    for key, value in libPathDict.items():
+        libDefDict[key] = str(value)
+    yaml.dump(libDefDict, libPath)
+
 
 def readLibDefFile(libPath):
     yaml = YAML()
     yaml.explicit_start = True
     yaml.default_flow_style = False
-    data = list(yaml.load_all(libPath)) 
-    libraryDict={} # empty dictionary
-    for key,value in data[0].items():
-        libraryDict[key]= Path(value)
+    data = list(yaml.load_all(libPath))
+    libraryDict = {}  # empty dictionary
+    for key, value in data[0].items():
+        libraryDict[key] = Path(value)
     return libraryDict
-
-
