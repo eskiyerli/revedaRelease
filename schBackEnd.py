@@ -173,3 +173,6 @@ def readLibDefFile(libPath):
     for key, value in data[0].items():
         libraryDict[key] = Path(value)
     return libraryDict
+
+def decodeSymbol(item):
+    print(type(item))

@@ -4,26 +4,59 @@ import os
 import shutil
 import sys
 from contextlib import redirect_stderr, redirect_stdout
-from hashlib import new
+
+# from hashlib import new
 from pathlib import Path
-from threading import Thread
+
+# from threading import Thread
+
+import json
+
 
 import numpy as np
 from numpy.lib.function_base import copy
-from PySide6.QtCore import (QDir, QLine, QModelIndex, QPoint, QPointF, QRect,
-                            QRectF, Qt)
-from PySide6.QtGui import (QAction, QColor, QCursor,  # QPalette,; QPixmap,
-                           QFont, QIcon, QPainter, QPen, QStandardItem,
-                           QStandardItemModel, QTransform)
-from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDialog,
-                               QDialogButtonBox, QFileDialog, QFormLayout,
-                               QGraphicsItem, QGraphicsLineItem,
-                               QGraphicsRectItem, QGraphicsScene,
-                               QGraphicsView, QGridLayout, QGroupBox,
-                               QHBoxLayout, QLabel, QLineEdit, QMainWindow,
-                               QMenu, QMessageBox, QPushButton, QRadioButton,
-                               QTabWidget, QToolBar, QTreeView, QVBoxLayout,
-                               QWidget)
+from PySide6.QtCore import QDir, QLine, QModelIndex, QPoint, QPointF, QRect, QRectF, Qt
+from PySide6.QtGui import (
+    QAction,
+    QColor,
+    QCursor,  # QPalette,; QPixmap,
+    QFont,
+    QIcon,
+    QPainter,
+    QPen,
+    QStandardItem,
+    QStandardItemModel,
+    QTransform,
+)
+from PySide6.QtWidgets import (
+    QApplication,
+    QButtonGroup,
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
+    QFormLayout,
+    QGraphicsItem,
+    QGraphicsLineItem,
+    QGraphicsRectItem,
+    QGraphicsScene,
+    QGraphicsView,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QRadioButton,
+    QTabWidget,
+    QToolBar,
+    QTreeView,
+    QVBoxLayout,
+    QWidget,
+)
 from ruamel.yaml import YAML
 
 import circuitElements as cel
@@ -56,9 +89,9 @@ class designLibrariesView(QTreeView):
         self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
         self.parentItem = self.libraryModel.invisibleRootItem()
 
-    def addLibrary(self, designPath, parentItem): # designPath: Path
+    def addLibrary(self, designPath, parentItem):  # designPath: Path
         if designPath.is_dir():
-            libraryEntry = scb.libraryItem(designPath,designPath.name)
+            libraryEntry = scb.libraryItem(designPath, designPath.name)
             parentItem.appendRow(libraryEntry)
 
             cellList = [
@@ -164,9 +197,9 @@ class designLibrariesView(QTreeView):
             schematicWindow = schematicEditor()
             schematicWindow.show()
         elif self.selectedItem.text() == "symbol":
-            print(self.selectedItem.type())
-            symbolWindow = symbolEditor()
+            symbolWindow = symbolEditor(file=self.selectedItem.data(Qt.UserRole + 2))
             symbolWindow.show()
+            symbolWindow.loadSymbol()
 
     def copyView(self):
         dlg = copyViewDialog(self, self.libraryModel, self.selectedItem)
@@ -515,9 +548,9 @@ class copyViewDialog(QDialog):
 
 
 class editorWindow(QMainWindow):
-    def __init__(self) -> None:
+    def __init__(self, file) -> None:  # file is a pathlib.Path object
         super().__init__()
-
+        self.file = file
         self.init_UI()
 
     def init_UI(self):
@@ -813,8 +846,8 @@ class editorWindow(QMainWindow):
 
 
 class schematicEditor(editorWindow):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, file) -> None:
+        super().__init__(file=file)
         self.setWindowTitle("Schematic Editor")
         self.symbolToolbar.setVisible(False)
         self.schematicToolbar.setVisible(True)
@@ -828,8 +861,8 @@ class schematicEditor(editorWindow):
 
 
 class symbolEditor(editorWindow):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, file) -> None:
+        super().__init__(file=file)
         self.setWindowTitle("Symbol Editor")
         self.schematicToolbar.setVisible(False)
         self.symbolToolbar.setVisible(True)
@@ -843,8 +876,7 @@ class symbolEditor(editorWindow):
         self.createPinAction.triggered.connect(self.createPinClick)
 
     def checkSaveCell(self):
-        # print('I am saving')
-        self.centralWidget.scene.saveSymbolCell()
+        self.centralWidget.scene.saveSymbolCell(self.file)
 
     def createRectClick(self, s):
         self.setDrawMode(False, False, False, True, False)
@@ -879,6 +911,9 @@ class symbolEditor(editorWindow):
         self.centralWidget.scene.drawLine = drawLine
         if hasattr(self.centralWidget.scene, "start"):
             del self.centralWidget.scene.start
+
+    def loadSymbol(self):
+        self.centralWidget.scene.loadSymbol(self.file)
 
 
 class createPinDialog(QDialog):
@@ -1032,11 +1067,6 @@ class schematic_scene(QGraphicsScene):
         self.selectedWirePen = QPen(self.selectedWireLayer.color, 2)
         self.pinPen = QPen(self.pinLayer.color, 2)
 
-        self.init_UI()
-
-    def init_UI(self):
-        pass
-
     def mousePressEvent(self, mouse_event):
         super().mousePressEvent(mouse_event)
         if self.selectItem == True:
@@ -1153,25 +1183,73 @@ class schematic_scene(QGraphicsScene):
     def snapGrid(self, number, base):
         return base * int(round(number / base))
 
-    def saveSymbolCell(self):
+    def loadSymbol(self, file):
+        pass
+        with open(file, "r") as f:
+            fsonLoad = f.read()
+            items = json.loads(fsonLoad)
+        for item in items:
+            if item["type"] == "rect":
+                rectPaint = QRect(
+                        item["rect"][0],
+                        item["rect"][1],
+                        item["rect"][2],
+                        item["rect"][3],
+                    )
+                rectPaint.setTopLeft(QPoint(item["loc"][0], item["loc"][1]))
+                rect = rectItem(
+                    rectPaint,
+                    QPen(
+                        QColor(
+                            item["color"][0],
+                            item["color"][1],
+                            item["color"][2],
+                            item["color"][3],
+                        ),
+                        item["width"],
+                    ),
+                )
+                self.addItem(rect)
+                self.objectStack.append(rect)
+        # if item['type'] == 'line':
+        #     line = lineItem(QPoint(item['start'][0],item['start'][1]),QPoint(item['end'][0],item['end'][1]),QPen(QColor(item['color']),item['width']))
+        #     self.addItem(line)
+        #     self.objectStack.append(line)
+        # elif item['type'] == 'rect':
+        #     rect = rectItem(QRect(item['start'][0],item['start'][1],item['end'][0],item['end'][1]),QPen(QColor(item['color']),item['width']))
+        #     self.addItem(rect)
+        #     self.objectStack.append(rect)
+        # elif item['type'] == 'pin':
+        #     pin = pinItem(QPoint(item['x'],item['y']),item['name'],QPen(QColor(item['color']),item['width']))
+        #     self.addItem(pin)
+        #     self.objectStack.append(pin)
+        # elif item['type'] == 'wire':
+        #     wire = wireItem(QPoint(item['start'][0],item['start'][1]),QPoint(item['end'][0],item['end'][1]),QPen(QColor(item['color']),item['width']))
+        #     self.addItem(wire)
+        #     self.objectStack.append(wire)
+
+    def saveSymbolCell(self, fileName):
+
         self.sceneR = self.sceneRect()
 
         items = self.items(self.sceneR)
-        for item in items:
-            itemJson = json.dumps(item.stateDict)
-            newDict = json.loads(itemJson)
-            if newDict["class"] == "rectItem":
-                print(newDict)
-                rect = QRect(*newDict["rect"])
-                color = QColor()
-                color.setRgb(
-                    newDict["color"][0], newDict["color"][1], 255, newDict["color"][3]
-                )
-                pen = QPen(color, newDict["width"])
-                newItem = rectItem(rect, pen)
-                newItem.setPos(*newDict["loc"])
-                newItem.show()
-                self.addItem(newItem)
+        with open(fileName, "w") as f:
+            json.dump(items, f, cls=complexEncoder, indent=4)
+
+
+class complexEncoder(json.JSONEncoder):
+    def default(self, item):
+        if isinstance(item, rectItem):
+            itemDict = {
+                "type": "rect",
+                "rect": item.__dict__["rect"].getRect(),
+                "color": item.__dict__["pen"].color().toTuple(),
+                "width": item.__dict__["pen"].width(),
+                "loc": item.__dict__["loc"].toTuple(),
+            }
+            return itemDict
+        else:
+            return super().default(item)
 
 
 class rectItem(QGraphicsItem):
@@ -1179,15 +1257,8 @@ class rectItem(QGraphicsItem):
         super().__init__()
         self.rect = rect
         self.pen = pen
-        self.loc = self.scenePos()
+        self.loc = self.rect.topLeft()
         self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-        self.stateDict = {
-            "class": "rectItem",
-            "rect": self.__dict__["rect"].getRect(),
-            "color": self.__dict__["pen"].color().toTuple(),
-            "width": self.__dict__["pen"].width(),
-            "loc": self.__dict__["loc"].toTuple(),
-        }
 
     def boundingRect(self):
         return QRectF(self.rect)
@@ -1197,8 +1268,7 @@ class rectItem(QGraphicsItem):
         painter.drawRect(self.rect)
 
     def mouseMoveEvent(self, event) -> None:
-        self.stateDict["loc"] = self.scenePos().toTuple()
-
+        self.loc = self.rect.topLeft()
         super().mouseMoveEvent(event)
 
 
