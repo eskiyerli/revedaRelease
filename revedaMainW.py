@@ -13,7 +13,7 @@ from pathlib import Path
 import json
 
 
-import numpy as np
+# import numpy as np
 from numpy.lib.function_base import copy
 from PySide6.QtCore import QDir, QLine, QModelIndex, QPoint, QPointF, QRect, QRectF, Qt
 from PySide6.QtGui import (
@@ -63,6 +63,7 @@ import circuitElements as cel
 import pythonConsole as pcon
 import resources
 import schBackEnd as scb  # import the backend
+import shape as shp # import the shapes
 from Point import *
 from Vector import *
 
@@ -1126,15 +1127,15 @@ class schematic_scene(QGraphicsScene):
             self.lineDraw(self.symbolPen)
             self.drawLine = False
         elif self.drawRect == True:
-            self.rectDraw()
+            self.rectDraw(self.start,self.current)
         elif self.drawPin == True:
             self.pinDraw(self.pinPen)
             self.drawPin = False  # reset flag
 
         self.start = self.current  # reset start position
 
-    def rectDraw(self):
-        rect = rectItem(QRect(self.start, self.current), self.symbolPen)
+    def rectDraw(self,start: QPoint = None, end: QPoint = None):
+        rect = shp.rectangle(QRect(start,end),self.symbolLayer,2)
         self.addItem(rect)
         self.drawRect = False
         self.objectStack.append(rect)
@@ -1191,13 +1192,13 @@ class schematic_scene(QGraphicsScene):
         for item in items:
             if item["type"] == "rect":
                 rectPaint = QRect(
-                        item["rect"][0],
-                        item["rect"][1],
-                        item["rect"][2],
-                        item["rect"][3],
-                    )
+                    item["rect"][0],
+                    item["rect"][1],
+                    item["rect"][2],
+                    item["rect"][3],
+                )
                 rectPaint.setTopLeft(QPoint(item["loc"][0], item["loc"][1]))
-                rect = rectItem(
+                rect = shp.rectangle(
                     rectPaint,
                     QPen(
                         QColor(
@@ -1229,7 +1230,7 @@ class schematic_scene(QGraphicsScene):
         #     self.objectStack.append(wire)
 
     def saveSymbolCell(self, fileName):
-
+        print(f"file name: {fileName}")
         self.sceneR = self.sceneRect()
 
         items = self.items(self.sceneR)
@@ -1250,26 +1251,6 @@ class complexEncoder(json.JSONEncoder):
             return itemDict
         else:
             return super().default(item)
-
-
-class rectItem(QGraphicsItem):
-    def __init__(self, rect, pen):
-        super().__init__()
-        self.rect = rect
-        self.pen = pen
-        self.loc = self.rect.topLeft()
-        self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-
-    def boundingRect(self):
-        return QRectF(self.rect)
-
-    def paint(self, painter, option, widget):
-        painter.setPen(self.pen)
-        painter.drawRect(self.rect)
-
-    def mouseMoveEvent(self, event) -> None:
-        self.loc = self.rect.topLeft()
-        super().mouseMoveEvent(event)
 
 
 class lineItem(QGraphicsItem):
@@ -1559,9 +1540,7 @@ class mainWindow(QMainWindow):
         self.menuFile = self.menuBar.addMenu("&File")
         self.menuTools = self.menuBar.addMenu("&Tools")
         self.menuOptions = self.menuBar.addMenu("&Options")
-
         self.menuHelp = self.menuBar.addMenu("&Help")
-
         self.statusBar()
 
         # create actions
