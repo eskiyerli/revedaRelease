@@ -68,7 +68,7 @@ def createCellView(parent, viewName, cellItem):
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
     cellPath = cellItem.data(Qt.UserRole + 2)
-    viewPath = cellPath.joinpath(viewName + ".py")
+    viewPath = cellPath.joinpath(viewName + ".json")
     viewPath.touch()  # create the view file
     viewItem = QStandardItem(viewName)
     viewItem.setData(viewPath, Qt.UserRole + 2)
@@ -107,7 +107,7 @@ def copyCell(parent, model, cellItem, copyName, selectedLibPath):
         cellItem.setData(copyPath, Qt.UserRole + 2)
         # go through view list and add to cell item
         viewList = [
-            str(view.stem) for view in copyPath.iterdir() if view.suffix == ".py"
+            str(view.stem) for view in copyPath.iterdir() if view.suffix == ".json"
         ]
 
         for view in viewList:
@@ -115,7 +115,7 @@ def copyCell(parent, model, cellItem, copyName, selectedLibPath):
             viewItem.setData("view", Qt.UserRole + 1)
             # set the data to the item to be the path to the view.
             viewItem.setData(
-                copyPath.joinpath(view).with_suffix(".py"),
+                copyPath.joinpath(view).with_suffix(".json"),
                 Qt.UserRole + 2,
             )
             viewItem.setEditable(False)
