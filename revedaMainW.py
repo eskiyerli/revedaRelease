@@ -4,67 +4,40 @@ import os
 import shutil
 import sys
 from contextlib import redirect_stderr, redirect_stdout
-
 # from hashlib import new
 from pathlib import Path
 
-# from threading import Thread
-
-import json
-
-
-import numpy as np
+# import numpy as np
 from numpy.lib.function_base import copy
-from PySide6.QtCore import QDir, QLine, QModelIndex, QPoint, QPointF, QRect, QRectF, Qt
-from PySide6.QtGui import (
-    QAction,
-    QColor,
-    QCursor,  # QPalette,; QPixmap,
-    QFont,
-    QIcon,
-    QPainter,
-    QPen,
-    QStandardItem,
-    QStandardItemModel,
-    QTransform,
-)
-from PySide6.QtWidgets import (
-    QApplication,
-    QButtonGroup,
-    QComboBox,
-    QDialog,
-    QDialogButtonBox,
-    QFileDialog,
-    QFormLayout,
-    QGraphicsItem,
-    QGraphicsLineItem,
-    QGraphicsRectItem,
-    QGraphicsScene,
-    QGraphicsView,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QMenu,
-    QMessageBox,
-    QPushButton,
-    QRadioButton,
-    QTabWidget,
-    QToolBar,
-    QTreeView,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtCore import (QDir, QLine, QModelIndex, QPoint, QPointF, QRect,
+                            QRectF, Qt)
+from PySide6.QtGui import QCursor  # QPalette,; QPixmap,
+from PySide6.QtGui import (QAction, QColor, QFont, QIcon, QPainter, QPen,
+                           QStandardItem, QStandardItemModel, QTransform)
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDialog,
+                               QDialogButtonBox, QFileDialog, QFormLayout,
+                               QGraphicsItem, QGraphicsLineItem,
+                               QGraphicsRectItem, QGraphicsScene,
+                               QGraphicsView, QGridLayout, QGroupBox,
+                               QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+                               QMenu, QMessageBox, QPushButton, QRadioButton,
+                               QTabWidget, QToolBar, QTreeView, QVBoxLayout,
+                               QWidget)
 from ruamel.yaml import YAML
 
 import circuitElements as cel
 import pythonConsole as pcon
 import resources
 import schBackEnd as scb  # import the backend
+import shape as shp  # import the shapes
 from Point import *
 from Vector import *
+
+# from threading import Thread
+
+
+
+
 
 
 class designLibrariesView(QTreeView):
@@ -207,7 +180,7 @@ class designLibrariesView(QTreeView):
             if self.selectedItem.data(Qt.UserRole + 1) == "view":
                 viewPath = self.selectedItem.data(Qt.UserRole + 2)
                 newViewPath = dlg.selectedLibPath.joinpath(
-                    dlg.selectedCell, dlg.selectedView + ".py"
+                    dlg.selectedCell, dlg.selectedView + ".json"
                 )
                 if not newViewPath.exists():
                     try:
@@ -524,7 +497,7 @@ class copyViewDialog(QDialog):
         viewList = [
             str(view.stem)
             for view in self.selectedLibPath.joinpath(self.selectedCell).iterdir()
-            if view.suffix == ".py"
+            if view.suffix == ".json"
         ]
         return viewList
 
@@ -1126,26 +1099,29 @@ class schematic_scene(QGraphicsScene):
             self.lineDraw(self.symbolPen)
             self.drawLine = False
         elif self.drawRect == True:
-            self.rectDraw()
+            self.rectDraw(self.start, self.current)
         elif self.drawPin == True:
             self.pinDraw(self.pinPen)
             self.drawPin = False  # reset flag
 
         self.start = self.current  # reset start position
 
-    def rectDraw(self):
-        rect = rectItem(QRect(self.start, self.current), self.symbolPen)
+    def rectDraw(self, start: QPoint, end: QPoint):
+        """
+        Draws a rectangle on the scene
+        """
+        rect = shp.rectangle(start, end, self.symbolPen)
         self.addItem(rect)
         self.drawRect = False
         self.objectStack.append(rect)
 
     def lineDraw(self, pen):
-        line = lineItem(self.start, self.current, pen)
+        line = shp.line(self.start, self.current, self.symbolPen)
         self.addItem(line)
         self.objectStack.append(line)
 
     def pinDraw(self, pen):
-        pin = pinItem(self.current, self.pinName, pen)
+        pin = shp.pin(self.current, self.pinPen,self.pinName)
         self.addItem(pin)
         self.objectStack.append(pin)
         del self.pinName
@@ -1184,149 +1160,47 @@ class schematic_scene(QGraphicsScene):
         return base * int(round(number / base))
 
     def loadSymbol(self, file):
-        pass
         with open(file, "r") as f:
             fsonLoad = f.read()
             items = json.loads(fsonLoad)
         for item in items:
             if item["type"] == "rect":
-                rectPaint = QRect(
-                        item["rect"][0],
-                        item["rect"][1],
-                        item["rect"][2],
-                        item["rect"][3],
-                    )
-                rectPaint.setTopLeft(QPoint(item["loc"][0], item["loc"][1]))
-                rect = rectItem(
-                    rectPaint,
-                    QPen(
-                        QColor(
-                            item["color"][0],
-                            item["color"][1],
-                            item["color"][2],
-                            item["color"][3],
-                        ),
-                        item["width"],
-                    ),
+                start = QPoint(item["rect"][0], item["rect"][1])
+                end = QPoint(item["rect"][2], item["rect"][3])
+                penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]] # convert string to enum
+                penWidth = item["width"]
+
+                penColor = QColor(*item["color"])
+                pen = QPen(penColor, penWidth, penStyle)
+                rect = shp.rectangle(
+                    start,end,
+                    pen,
                 )
+                rect.setPos(QPoint(item["location"][0], item["location"][1]))
                 self.addItem(rect)
                 self.objectStack.append(rect)
-        # if item['type'] == 'line':
-        #     line = lineItem(QPoint(item['start'][0],item['start'][1]),QPoint(item['end'][0],item['end'][1]),QPen(QColor(item['color']),item['width']))
-        #     self.addItem(line)
-        #     self.objectStack.append(line)
-        # elif item['type'] == 'rect':
-        #     rect = rectItem(QRect(item['start'][0],item['start'][1],item['end'][0],item['end'][1]),QPen(QColor(item['color']),item['width']))
-        #     self.addItem(rect)
-        #     self.objectStack.append(rect)
-        # elif item['type'] == 'pin':
-        #     pin = pinItem(QPoint(item['x'],item['y']),item['name'],QPen(QColor(item['color']),item['width']))
-        #     self.addItem(pin)
-        #     self.objectStack.append(pin)
-        # elif item['type'] == 'wire':
-        #     wire = wireItem(QPoint(item['start'][0],item['start'][1]),QPoint(item['end'][0],item['end'][1]),QPen(QColor(item['color']),item['width']))
-        #     self.addItem(wire)
-        #     self.objectStack.append(wire)
 
     def saveSymbolCell(self, fileName):
-
         self.sceneR = self.sceneRect()
-
         items = self.items(self.sceneR)
         with open(fileName, "w") as f:
             json.dump(items, f, cls=complexEncoder, indent=4)
 
-
 class complexEncoder(json.JSONEncoder):
     def default(self, item):
-        if isinstance(item, rectItem):
+        if isinstance(item, shp.rectangle):
             itemDict = {
                 "type": "rect",
-                "rect": item.__dict__["rect"].getRect(),
+                "rect": item.__dict__["rect"].getCoords(),
                 "color": item.__dict__["pen"].color().toTuple(),
                 "width": item.__dict__["pen"].width(),
-                "loc": item.__dict__["loc"].toTuple(),
+                "lineStyle": str(item.__dict__["pen"].style()),
+                "location": item.scenePos().toTuple()
             }
-            return itemDict
+            print(itemDict['color'])
+            return itemDict            
         else:
             return super().default(item)
-
-
-class rectItem(QGraphicsItem):
-    def __init__(self, rect, pen):
-        super().__init__()
-        self.rect = rect
-        self.pen = pen
-        self.loc = self.rect.topLeft()
-        self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-
-    def boundingRect(self):
-        return QRectF(self.rect)
-
-    def paint(self, painter, option, widget):
-        painter.setPen(self.pen)
-        painter.drawRect(self.rect)
-
-    def mouseMoveEvent(self, event) -> None:
-        self.loc = self.rect.topLeft()
-        super().mouseMoveEvent(event)
-
-
-class lineItem(QGraphicsItem):
-    def __init__(self, start, current, pen):
-        super().__init__()
-        self.current = current
-        self.start = start
-        self.pen = pen
-        self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-
-    def boundingRect(self):
-        return QRectF(
-            self.start.x(), self.start.y(), self.current.x(), self.current.y()
-        )
-
-    def paint(self, painter, option, widget):
-        painter.setPen(self.pen)
-        if self.start.x() != self.current.x():
-            if self.start.y() != self.current.y():
-                midPoint = QPoint(self.current.x(), self.start.y())
-                painter.drawLine(self.start, midPoint)
-                painter.drawLine(midPoint, self.current)
-            else:
-                painter.drawLine(self.start, self.current)
-        else:
-            if self.start.y() != self.current.y():
-                painter.drawLine(self.start, self.current)
-            else:
-                painter.drawPoint(self.start)
-
-    def pos(self):
-        return self.start
-
-
-class pinItem(QGraphicsItem):
-    def __init__(self, pos, name, pen):
-        super().__init__()
-        self.pos = pos
-        self.pen = pen
-        self.name = name
-        self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-        self.rect = QRectF(self.pos.x() - 5, self.pos.y() - 5, 10, 10)
-
-    def boundingRect(self):
-        return self.rect
-
-    def paint(self, painter, option, widget):
-        painter.setPen(self.pen)
-        painter.setBrush(self.pen.color())
-        painter.drawRect(self.rect)
-        painter.setFont(QFont("Arial", 10))
-        textLoc = QPoint(self.pos.x() - 2.5, self.pos.y() - 10)
-        painter.drawText(textLoc, self.name)
-
-    def pos(self):
-        return self.pos
-
 
 class schematic_view(QGraphicsView):
     def __init__(self, scene, parent):
@@ -1339,7 +1213,7 @@ class schematic_view(QGraphicsView):
 
     def init_UI(self):
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
-        self.CacheBackground = True
+        self.setCacheMode(QGraphicsView.CacheBackground)
         self.standardCursor = QCursor(Qt.CrossCursor)
         self.setCursor(self.standardCursor)  # set cursor to standard arrow
         self.setRenderHint(QPainter.Antialiasing)
@@ -1559,9 +1433,7 @@ class mainWindow(QMainWindow):
         self.menuFile = self.menuBar.addMenu("&File")
         self.menuTools = self.menuBar.addMenu("&Tools")
         self.menuOptions = self.menuBar.addMenu("&Options")
-
         self.menuHelp = self.menuBar.addMenu("&Help")
-
         self.statusBar()
 
         # create actions
