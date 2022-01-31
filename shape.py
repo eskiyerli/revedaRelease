@@ -1,7 +1,11 @@
 # shape class definition for symbol editor.
 # base class for all shapes: rectangle, circle, line
 from PySide6.QtCore import QPoint, QPointF, QRect, Qt
-from PySide6.QtGui import (QPen, QFont,)
+from PySide6.QtGui import (
+    QPen,
+    QFont,
+    QFontMetrics,
+)
 from PySide6.QtWidgets import (
     QGraphicsItem,
     QGraphicsSceneMouseEvent,
@@ -11,22 +15,24 @@ import circuitElements as cel
 
 
 class shape(QGraphicsItem):
-    def __init__(self, pen:QPen) -> None:
+    def __init__(self, pen: QPen, grid: tuple) -> None:
         super().__init__()
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
+        self.setAcceptHoverEvents(True)
         # self.setZValue(self.layer.z)
-        self.gridSize = 10
-        
+        self.gridX = grid[0]
+        self.gridY = grid[1]
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange and self.scene():
             newPos = value.toPoint()
             sceneRect = self.scene().sceneRect()
             viewRect = self.scene().views()[0].viewport().rect()
-            newPos.setX(round(newPos.x() / self.gridSize) * self.gridSize)
-            newPos.setY(round(newPos.y() / self.gridSize) * self.gridSize)
+            newPos.setX(round(newPos.x() / self.gridX) * self.gridX)
+            newPos.setY(round(newPos.y() / self.gridY) * self.gridY)
             if not sceneRect.contains(newPos):
                 # Keep the item inside the scene rect.
                 if newPos.x() > sceneRect.right():
@@ -51,10 +57,16 @@ class shape(QGraphicsItem):
     def snapGrid(self):
         return self.gridSize
 
+    def hoverEnterEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        self.setCursor(Qt.ArrowCursor)
+        super().hoverEnterEvent(event)
+
+    def hoverLeaveEvent(self, event: QGraphicsSceneMouseEvent) -> None: 
+        self.setCursor(Qt.CrossCursor)
+        super().hoverLeaveEvent(event)    
 
 class rectangle(shape):
     """
-
     rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
     """
 
@@ -63,8 +75,11 @@ class rectangle(shape):
         start: QPoint,
         end: QPoint,
         pen: QPen,
+        grid: tuple,
     ):
-        super().__init__(pen)
+        super().__init__(pen, grid)
+        self.start = start # top left corner
+        self.end = end   # bottom right corner
         self.rect = QRect(start, end)
         self.pen = pen
 
@@ -132,36 +147,41 @@ class line(shape):
     def __init__(
         self,
         start: QPoint,
-        current: QPoint,
+        end: QPoint,
         pen: QPen,
+        grid: tuple,
     ):
-        super().__init__(pen=pen)
-        self.current = current
+        super().__init__(pen, grid)
+        self.end = end
         self.start = start
         self.pen = pen
         self.points = 2
 
     def boundingRect(self):
-        return QRect(self.start.x(), self.start.y(), self.current.x(), self.current.y())
+        minX = min(self.start.x(), self.end.x())
+        maxX = max(self.start.x(), self.end.x())
+        minY = min(self.start.y(), self.end.y())
+        maxY = max(self.start.y(), self.end.y())
+        return QRect(
+            QPoint(minX - 0.5 * self.gridX, minY - 0.5 * self.gridY),
+            QPoint(maxX + self.gridX * 0.5, maxY + self.gridY * 0.5),
+        )
 
     def paint(self, painter, option, widget):
         painter.setPen(self.pen)
-        if self.start.x() != self.current.x():
-            if self.start.y() != self.current.y():
-                midPoint = QPoint(self.current.x(), self.start.y())
+        if self.start.x() != self.end.x():
+            if self.start.y() != self.end.y():
+                midPoint = QPoint(self.end.x(), self.start.y())
                 painter.drawLine(self.start, midPoint)
-                painter.drawLine(midPoint, self.current)
+                painter.drawLine(midPoint, self.end)
                 self.points = 3
             else:
-                painter.drawLine(self.start, self.current)
+                painter.drawLine(self.start, self.end)
         else:
-            if self.start.y() != self.current.y():
-                painter.drawLine(self.start, self.current)
+            if self.start.y() != self.end.y():
+                painter.drawLine(self.start, self.end)
             else:
                 painter.drawPoint(self.start)
-
-    def pos(self):
-        return self.start
 
     def objName(self):
         return "LINE"
@@ -178,52 +198,90 @@ class line(shape):
     def bBox(self) -> QRect:
         return self.boundingRect()
 
-
 class pin(shape):
     """
-    pin class definition for symbol drawing.
+
+    rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
     """
 
     def __init__(
         self,
-        centre: QPoint,
+        start: QPoint,
         pen: QPen,
-        pinName: str = "",
+        pinName:str,
+        pinDir:str,
+        pinType:str,
+        grid: tuple,
     ):
-        super().__init__(pen)
-        self.centre = centre
-        self.pinName = pinName
-        self.rect = QRect(self.centre.x() - 5, self.centre.y() - 5, 10, 10)
+        super().__init__(pen, grid)
+        self.start = start # top left corner
         self.pen = pen
-        self.pinDirections = ['INPUT', 'OUTPUT', 'INOUT']
-        self.pinDir = self.pinDirections[2] # default to INOUT
-        self.pinUses = ['SIGNAL', 'POWER', 'GROUND', 'CLOCK', 'TRISTATE']
+        self.pinName = pinName
+        self.pinDir = pinDir
+        self.pinType = pinType
+        self.rect = QRect(start.x()-5,start.y()-5, 10, 10)
 
     def boundingRect(self):
-        return self.rect
+        return self.rect  #
 
     def paint(self, painter, option, widget):
         painter.setPen(self.pen)
         painter.setBrush(self.pen.color())
         painter.drawRect(self.rect)
-        painter.setFont(QFont("Arial", 10))
-        textLoc = QPoint(self.pos.x() - 2.5, self.pos.y() - 10)
-        painter.drawText(textLoc, self.pinName)
+        painter.setFont(QFont("Arial", 12))
+        painter.drawText(QPoint(self.start.x()-5,self.start.y()-10),self.pinName )
 
     def name(self):
         return self.pinName
 
-    def setName(self,name):
+    def setName(self, name):
         self.pinName = name
 
-    def setDir(self,direction: str):
+    def setDir(self, direction: str):
         if direction in self.pinDirections:
             self.pinDir = direction
 
     def getDir(self):
         return self.pinDir
 
-    def setUse(self,use: str):
+    def setUse(self, use: str):
         if use in self.pinUses:
             self.pinUse = use
 
+class label(shape):
+    """
+
+    rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
+    """
+
+    def __init__(
+        self,
+        start: QPoint,
+        pen: QPen,
+        labelName:str,
+        labelType:str,
+        grid: tuple,
+    ):
+        super().__init__(pen, grid)
+        self.start = start # top left corner
+        self.pen = pen
+        self.labelName = labelName
+        self.labelType = labelType
+        self.font = QFont("Arial", 12)
+        self.fm = QFontMetrics(self.font)
+        self.rect=self.fm.boundingRect(self.labelName)
+        self.rect.setWidth(self.rect.width()+10)
+        self.rect.setHeight(self.rect.height()+10)
+
+    def boundingRect(self):
+        return self.rect
+
+    def paint(self, painter, option, widget):
+        painter.setFont(self.font)
+        painter.drawText(self.start,self.labelName )
+
+    def name(self):
+        return self.labelName
+
+    def setName(self, name):
+        self.labelName = name
