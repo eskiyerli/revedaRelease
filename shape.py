@@ -259,29 +259,31 @@ class label(shape):
         start: QPoint,
         pen: QPen,
         labelName:str,
-        labelType:str,
         grid: tuple,
+        labelType:str="Normal",
+        labelHeight:str="12",
+        labelAlignment:str="Left",
+        labelOrient:str="R0",
+        labelUse:str="Normal",        
     ):
         super().__init__(pen, grid)
         self.start = start # top left corner
         self.pen = pen
         self.labelName = labelName
+        self.labelHeight = labelHeight
+        self.labelAlignment = labelAlignment
+        self.labelOrient = labelOrient
+        self.labelUse = labelUse
         self.labelType = labelType
-        self.font = QFont("Arial", 12)
-        self.fm = QFontMetrics(self.font)
+        self.labelFont = QFont("Arial", int(self.labelHeight))
+        self.fm = QFontMetrics(self.labelFont)
         self.rect=self.fm.boundingRect(self.labelName)
-        self.rect.setWidth(self.rect.width()+10)
-        self.rect.setHeight(self.rect.height()+10)
 
     def boundingRect(self):
-        return self.rect
+        return QRect(self.start.x(),self.start.y(),self.rect.width(),self.rect.height())  #
 
     def paint(self, painter, option, widget):
-        painter.setFont(self.font)
-        painter.drawText(self.start,self.labelName )
-
-    def name(self):
-        return self.labelName
-
-    def setName(self, name):
-        self.labelName = name
+        self.rect=self.fm.boundingRect(self.labelName)
+        painter.setFont(self.labelFont)
+        painter.setPen(self.pen)
+        painter.drawText(self.rect,Qt.AlignCenter,self.labelName)

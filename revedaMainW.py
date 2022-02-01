@@ -21,6 +21,7 @@ from PySide6.QtGui import (
     QPen,
     QBrush,
     QStandardItem,
+    QFontMetrics,
     QStandardItemModel,
     QTransform,
 )
@@ -753,7 +754,6 @@ class editorWindow(QMainWindow):
         self.createLabelAction = QAction(createLabelIcon, "Create Label...", self)
         self.menuCreate.addAction(self.createLabelAction)
 
-
         createPinIcon = QIcon(":/icons/pin--plus.png")
         self.createPinAction = QAction(createPinIcon, "Create Pin...", self)
         self.menuCreate.addAction(self.createPinAction)
@@ -865,6 +865,7 @@ class editorWindow(QMainWindow):
     def closeWindow(self):
         self.close()
 
+
 class schematicEditor(editorWindow):
     def __init__(self, file) -> None:
         super().__init__(file=file)
@@ -892,7 +893,7 @@ class symbolEditor(editorWindow):
         self.createPolyAction.triggered.connect(self.createPolyClick)
         self.createArcAction.triggered.connect(self.createArcClick)
         self.createCircleAction.triggered.connect(self.createCircleClick)
-        self.createLabelAction.triggered.connect(self.createLabelDialogue)
+        self.createLabelAction.triggered.connect(self.createSymbolLabelDialogue)
         self.createPinAction.triggered.connect(self.createPinClick)
 
     def checkSaveCell(self):
@@ -902,7 +903,7 @@ class symbolEditor(editorWindow):
         self.setDrawMode(False, False, False, True, False, False)
 
     def createLineClick(self, s):
-        self.setDrawMode(False, False, False, False, True,False)
+        self.setDrawMode(False, False, False, False, True, False)
 
     def createPolyClick(self, s):
         pass
@@ -913,16 +914,23 @@ class symbolEditor(editorWindow):
     def createCircleClick(self, s):
         pass
 
-
     def createPinClick(self, s):
         createPinDlg = createPinDialog(self)
         if createPinDlg.exec() == QDialog.Accepted:
             self.centralW.scene.pinName = createPinDlg.pinName.text()
             self.centralW.scene.pinType = createPinDlg.pinType.currentText()
             self.centralW.scene.pinDir = createPinDlg.pinDir.currentText()
-            self.setDrawMode(True, False, False, False, False,False)
+            self.setDrawMode(True, False, False, False, False, False)
 
-    def setDrawMode(self, drawPin:bool, selectItem:bool, drawArc:bool, drawRect:bool, drawLine:bool,addLabel:bool):
+    def setDrawMode(
+        self,
+        drawPin: bool,
+        selectItem: bool,
+        drawArc: bool,
+        drawRect: bool,
+        drawLine: bool,
+        addLabel: bool,
+    ):
         self.centralW.scene.drawPin = drawPin
         self.centralW.scene.selectItem = selectItem
         self.centralW.scene.drawArc = drawArc  # draw arc
@@ -938,10 +946,29 @@ class symbolEditor(editorWindow):
         """
         self.centralW.scene.loadSymbol(self.file)
 
-    def createLabelDialogue(self):
+    def createSymbolLabelDialogue(self):
         createLabelDlg = createSymbolLabelDialog(self)
         if createLabelDlg.exec() == QDialog.Accepted:
-            self.setDrawMode(False, False, False, False, False,True)
+            self.setDrawMode(False, False, False, False, False, True)
+            self.centralW.scene.labelName = createLabelDlg.labelName.text()
+            self.centralW.scene.labelHeight = createLabelDlg.labelHeight.text().strip()
+            self.centralW.scene.labelAlignment = (
+                createLabelDlg.labelAlignment.currentText()
+            )
+            self.centralW.scene.labelOrient = (
+                createLabelDlg.labelOrientation.currentText()
+            )
+            self.centralW.scene.labelUse = createLabelDlg.labelUse.currentText()
+            self.centralW.scene.labelType = "Normal"  # default button
+
+            if createLabelDlg.normalType.isChecked():
+                self.centralW.scene.labelType = "Normal"
+            elif createLabelDlg.NLPType.isChecked():
+                self.centralW.scene.labelType = "NLPLabel"
+            elif createLabelDlg.pyLType.isChecked():
+                self.centralW.scene.labelType = "PyLabel"
+            print(self.centralW.scene.labelType)
+
 
 class createPinDialog(QDialog):
     def __init__(self, parent) -> None:
@@ -972,12 +999,13 @@ class createPinDialog(QDialog):
         self.setLayout(self.fLayout)
         self.show()
 
+
 class createSymbolLabelDialog(QDialog):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.setWindowTitle("Create Label")
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.mainLayout =QVBoxLayout()
+        self.mainLayout = QVBoxLayout()
         self.fLayout = QFormLayout()
         self.labelName = QLineEdit()
         self.labelName.setPlaceholderText("Label Name")
@@ -991,10 +1019,12 @@ class createSymbolLabelDialog(QDialog):
         self.labelAlignment.addItems(["Left", "Center", "Right"])
         self.fLayout.addRow(QLabel("Label Alignment"), self.labelAlignment)
         self.labelOrientation = QComboBox()
-        self.labelOrientation.addItems(["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"])
+        self.labelOrientation.addItems(
+            ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
+        )
         self.fLayout.addRow(QLabel("Label Orientation"), self.labelOrientation)
         self.labelUse = QComboBox()
-        self.labelUse.addItems(["Normal", "Instance", "Pin","Device", "Annotation"])
+        self.labelUse.addItems(["Normal", "Instance", "Pin", "Device", "Annotation"])
         self.fLayout.addRow(QLabel("Label Use"), self.labelUse)
         self.mainLayout.addLayout(self.fLayout)
         self.labelTypeGroup = QGroupBox("Label Type")
@@ -1014,8 +1044,6 @@ class createSymbolLabelDialog(QDialog):
         self.mainLayout.addWidget(self.buttonBox)
         self.setLayout(self.mainLayout)
         self.show()
-
-
 
 
 class displayConfigDialog(QDialog):
@@ -1112,6 +1140,7 @@ class editor_scene(QGraphicsScene):
         self.parent = parent
         self.gridMajor = 10
         self.gridTuple = (self.gridMajor, self.gridMajor)
+        # drawing switches
         self.drawWire = False  # flag to indicate if a wire is being drawn
         self.drawItem = False  # flag to indicate if an item is being drawn
         self.selectItem = True  # flag to indicate if an item is being selected
@@ -1120,8 +1149,9 @@ class editor_scene(QGraphicsScene):
         self.drawPin = False
         self.drawRect = False  # flag to indicate if a rectangle is being drawn
         self.addLabel = False  # flag to indicate if a label is being drawn
+
         self.objectStack = []  # stack of objects to be deleted
-# layer infrastructure is ad-hoc. Needs rethink at some point.
+        # layer infrastructure is ad-hoc. Needs rethink at some point.
         self.wireLayer = cel.layer(
             name="wireLayer", color=QColor("aqua"), z=1, visible=True
         )
@@ -1137,8 +1167,10 @@ class editor_scene(QGraphicsScene):
         self.pinLayer = cel.layer(
             name="pinLayer", color=QColor("darkRed"), z=2, visible=True
         )
-        self.labelLayer = cel.layer(name="labelLayer", color=QColor("yellow"), z=3, visible=True)
-
+        self.labelLayer = cel.layer(
+            name="labelLayer", color=QColor("yellow"), z=3, visible=True
+        )
+        # pen definitions
         self.wirePen = QPen(self.wireLayer.color, 2)
         self.wirePen.setCosmetic(True)
         self.symbolPen = QPen(self.symbolLayer.color, 3)
@@ -1192,7 +1224,18 @@ class editor_scene(QGraphicsScene):
             self.draftItem.setBrush(QBrush(QColor("white")))
             self.addItem(self.draftItem)
         elif self.addLabel == True:
-            print('I need a label')
+            self.labelFont = QFont("Arial", 12)
+            fm = QFontMetrics(self.labelFont)
+            self.draftItem = QGraphicsRectItem(
+                QRect(
+                    self.current.x(),
+                    self.current.y(),
+                    fm.boundingRect(self.labelName).width(),
+                    fm.boundingRect(self.labelName).height(),
+                )
+            )
+            self.draftItem.setPen(pen)
+            self.addItem(self.draftItem)
         self.parent.parent.statusLine.showMessage(
             "Cursor Position: " + str(self.current.toTuple())
         )
@@ -1204,7 +1247,7 @@ class editor_scene(QGraphicsScene):
         self.current *= self.gridMajor
 
     def mouseReleaseEvent(self, mouse_event):
-        super().mouseReleaseEvent(mouse_event)
+
         if hasattr(self, "draftItem"):
             self.removeItem(self.draftItem)
             del self.draftItem
@@ -1219,8 +1262,12 @@ class editor_scene(QGraphicsScene):
         elif self.drawPin == True:
             self.pinDraw(self.pinPen)
             self.drawPin = False  # reset flag
+        elif self.addLabel == True:
+            self.labelDraw(self.labelPen)
+            self.addLabel = False
         if hasattr(self, "start"):
             del self.start
+        super().mouseReleaseEvent(mouse_event)
 
     def rectDraw(self, start: QPoint, end: QPoint, pen: QPen):
         """
@@ -1243,13 +1290,30 @@ class editor_scene(QGraphicsScene):
         )
         self.addItem(pin)
         self.objectStack.append(pin)
-        del self.pinName
+
+    def labelDraw(self, pen: QPen):
+        print(self.labelType)
+        label = shp.label(
+            self.current,
+            pen,
+            self.labelName,
+            self.gridTuple,
+            self.labelType,
+            self.labelHeight,
+            self.labelAlignment,
+            self.labelOrient,
+            self.labelUse,
+        )
+        self.addItem(label)
+        self.objectStack.append(label)
 
     def keyPressEvent(self, key_event):
         if key_event.key() == Qt.Key_Escape:
             self.drawWire = False  # turn off wire select mode
             self.drawItem = False  # turn off drawing mode when escape is pressed
             self.drawRect = False
+            self.drawLabel = False
+            self.drawLine = False
             if hasattr(self, "draftItem"):
                 self.removeItem(self.draftItem)
             self.selectItem = True
@@ -1333,7 +1397,27 @@ class editor_scene(QGraphicsScene):
                 pin.setPos(QPoint(item["location"][0], item["location"][1]))
                 self.addItem(pin)
                 self.objectStack.append(pin)
-
+            elif item["type"] == "label":
+                start = QPoint(item["start"][0], item["start"][1])
+                penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
+                penWidth = item["width"]
+                penColor = QColor(*item["color"])
+                pen = QPen(penColor, penWidth, penStyle)
+                pen.setCosmetic(item["cosmetic"])
+                label = shp.label(
+                    start,
+                    pen,
+                    item["labelName"],
+                    self.gridTuple,
+                    item["labelType"],
+                    item["labelHeight"],
+                    item["labelAlignment"],
+                    item["labelOrient"],
+                    item["labelUse"],
+                )
+                label.setPos(QPoint(item["location"][0], item["location"][1]))
+                self.addItem(label)
+                self.objectStack.append(label)
     def saveSymbolCell(self, fileName):
         self.sceneR = self.sceneRect()
         items = self.items(self.sceneR)
@@ -1380,7 +1464,24 @@ class symbolEncoder(json.JSONEncoder):
                 "location": item.scenePos().toTuple(),
             }
             return itemDict
-
+        elif isinstance(item, shp.label):
+            itemDict = {
+                "type": "label",
+                "start": item.__dict__["start"].toTuple(),
+                "color": item.__dict__["pen"].color().toTuple(),
+                "width": item.__dict__["pen"].width(),
+                "lineStyle": str(item.__dict__["pen"].style()),
+                "cosmetic": item.__dict__["pen"].isCosmetic(),
+                "labelName": item.__dict__["labelName"],
+                "labelType": item.__dict__["labelType"],
+                "labelHeight": item.__dict__["labelHeight"],
+                "labelAlignment": item.__dict__["labelAlignment"],
+                "labelOrient": item.__dict__["labelOrient"],
+                "labelUse": item.__dict__["labelUse"],
+                "location": item.scenePos().toTuple(),
+            }
+            return itemDict
+        
         else:
             return super().default(item)
 
