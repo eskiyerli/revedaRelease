@@ -10,8 +10,16 @@ from pathlib import Path
 
 # import numpy as np
 from numpy.lib.function_base import copy
-from PySide6.QtCore import QDir, QLine, QModelIndex, QPoint, QPointF, QRect, QRectF, Qt
-from PySide6.QtGui import QCursor  # QPalette,; QPixmap,
+from PySide6.QtCore import (
+    QDir,
+    QLine,
+    QModelIndex,
+    QPoint,
+    QPointF,
+    QRect,
+    QRectF,
+    Qt,
+)
 from PySide6.QtGui import (
     QAction,
     QColor,
@@ -24,6 +32,7 @@ from PySide6.QtGui import (
     QFontMetrics,
     QStandardItemModel,
     QTransform,
+    QCursor,
 )
 from PySide6.QtWidgets import (
     QApplication,
@@ -61,8 +70,10 @@ import pythonConsole as pcon
 import resources
 import schBackEnd as scb  # import the backend
 import shape as shp  # import the shapes
+import propertyDialogues as pdlg
 from Point import *
 from Vector import *
+
 
 # from threading import Thread
 
@@ -848,7 +859,7 @@ class editorWindow(QMainWindow):
         dcd = displayConfigDialog(self)
 
     def deleteItemMethod(self, s):
-        self.centralW.scene.deleteItem = True
+        self.centralW.scene.itemDelete = True
 
     def createLabelDialogue(self):
         pass
@@ -887,6 +898,7 @@ class symbolEditor(editorWindow):
         self.setWindowTitle("Symbol Editor")
         self.schematicToolbar.setVisible(False)
         self.symbolToolbar.setVisible(True)
+        self.centralW.scene._symbolActions()
         self.checkCellAction.triggered.connect(self.checkSaveCell)
         self.createLineAction.triggered.connect(self.createLineClick)
         self.createRectAction.triggered.connect(self.createRectClick)
@@ -1179,12 +1191,35 @@ class editor_scene(QGraphicsScene):
         self.pinPen = QPen(self.pinLayer.color, 2)
         self.labelPen = QPen(self.labelLayer.color, 1)
 
+        self.symbolContextMenu = QMenu()
+
+    def _symbolActions(self):
+        copyIcon = QIcon(":/icons/document-copy.png")
+        self.copyAction = QAction(copyIcon, "Copy", self)
+        self.symbolContextMenu.addAction(self.copyAction)
+
+        moveIcon = QIcon(":/icons/arrow-move.png")
+        self.moveAction = QAction(moveIcon, "Move", self)
+        self.symbolContextMenu.addAction(self.moveAction)
+
+        stretchIcon = QIcon(":/icons/fill.png")
+        self.stretchAction = QAction(stretchIcon, "Stretch", self)
+        self.symbolContextMenu.addAction(self.stretchAction)
+
+        deleteIcon = QIcon(":/icons/node-delete.png")
+        self.deleteAction = QAction(deleteIcon, "Delete", self)
+        self.symbolContextMenu.addAction(self.deleteAction)
+        self.deleteAction.triggered.connect(self.itemDelete)
+
+        objPropIcon = QIcon(":/icons/property-blue.png")
+        self.objPropAction = QAction(objPropIcon, "Object Properties...", self)
+        self.symbolContextMenu.addAction(self.objPropAction)
+        self.objPropAction.triggered.connect(self.itemProperties)
+
     def mousePressEvent(self, mouse_event):
         super().mousePressEvent(mouse_event)
-        if self.selectItem == True:
-            self.selectedItem = self.itemAt(mouse_event.scenePos(), QTransform())
-            if self.selectedItem != None:
-                print("I found something")
+        if self.selectItem == True and self.itemAt(mouse_event.scenePos(),QTransform()):
+            self.selectedItem = self.itemAt(mouse_event.scenePos(),QTransform())
         elif (
             hasattr(self, "start") == False
             and (self.drawWire or self.drawLine or self.drawPin or self.drawRect)
@@ -1198,7 +1233,6 @@ class editor_scene(QGraphicsScene):
 
     def mouseMoveEvent(self, mouse_event):
         self.snap2Grid(mouse_event)
-
         pen = QPen(self.guideLineLayer.color, 1)
         pen.setStyle(Qt.DashLine)
         if hasattr(self, "draftItem"):
@@ -1332,14 +1366,46 @@ class editor_scene(QGraphicsScene):
                 self.removeItem(self.objectStack[-1])
                 del self.objectStack[-1]
             self.objectStack.pop()
+
         elif key_event.key() == Qt.Key_Delete:
-            if hasattr(self, "selectedItem"):
-                print("i am removing")
+            self.itemDelete()
+        elif key_event.key() == Qt.Key_Q:
+            self.itemProperties()
+        elif key_event.key() == Qt.Key_C:
+            self.copyItem()
+        super().keyPressEvent(key_event)
+
+    def copyItem(self):
+        pass
+
+    def itemProperties(self):
+        if isinstance(self.selectedItem, shp.rectangle):
+            queryDlg = pdlg.rectPropertyDialog(self.parent.parent, self.selectedItem)
+            if queryDlg.exec() == QDialog.Accepted:
                 self.removeItem(self.selectedItem)
                 self.objectStack.remove(self.selectedItem)
+                start = QPoint()
+                newItem = shp.rectangle(
+                    QPoint(queryDlg.coords[0], queryDlg.coords[1]),
+                    QPoint(
+                        queryDlg.coords[0] + int(queryDlg.rectWidthLine.text()),
+                        queryDlg.coords[1] + int(queryDlg.rectHeightLine.text()),
+                    ),
+                    self.selectedItem.pen,
+                    self.gridTuple,
+                )
                 del self.selectedItem
-                self.selectItem = True
-        super().keyPressEvent(key_event)
+                # newItem.setPos(QPoint(int(queryDlg.rectLeftLine.text()), int(queryDlg.rectTopLine.text())))
+                self.addItem(newItem)
+                self.objectStack.append(newItem)
+
+    def itemDelete(self):
+        if hasattr(self, "selectedItem"):
+            print(self.selectedItem)
+            self.removeItem(self.selectedItem)
+            self.objectStack.remove(self.selectedItem)
+            del self.selectedItem
+            self.selectItem = True
 
     def snapGrid(self, number, base):
         return base * int(round(number / base))
@@ -1418,6 +1484,7 @@ class editor_scene(QGraphicsScene):
                 label.setPos(QPoint(item["location"][0], item["location"][1]))
                 self.addItem(label)
                 self.objectStack.append(label)
+
     def saveSymbolCell(self, fileName):
         self.sceneR = self.sceneRect()
         items = self.items(self.sceneR)
@@ -1481,7 +1548,7 @@ class symbolEncoder(json.JSONEncoder):
                 "location": item.scenePos().toTuple(),
             }
             return itemDict
-        
+
         else:
             return super().default(item)
 
