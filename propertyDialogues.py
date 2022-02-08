@@ -18,7 +18,7 @@ class rectPropertyDialog(QDialog):
         self.rectItem = rectItem
         self.location = self.rectItem.scenePos().toTuple()
         self.coords = self.rectItem.rect.getRect()
-        print(self.coords)
+
         self.init_UI()
 
     def init_UI(self):        

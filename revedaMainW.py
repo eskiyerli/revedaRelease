@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import pathlib
 import shutil
 import sys
 from contextlib import redirect_stderr, redirect_stdout
@@ -22,6 +23,8 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import (
     QAction,
+    QShortcut,
+    QKeySequence,
     QColor,
     QFont,
     QIcon,
@@ -92,7 +95,6 @@ class designLibrariesView(QTreeView):
         # iterate design library directories
         for designPath in self.libraryDict.values():  # type: Path
             self.addLibrary(designPath, self.parentItem)
-
         self.setModel(self.libraryModel)
 
     def initModel(self):
@@ -204,13 +206,16 @@ class designLibrariesView(QTreeView):
 
     def openView(self):
         if self.selectedItem.text() == "schematic":
-            print(self.selectedItem.type())
-            schematicWindow = schematicEditor()
-            schematicWindow.show()
+            self.schematicWindow = schematicEditor(
+                file=self.selectedItem.data(Qt.UserRole + 2)
+            )
+            self.schematicWindow.show()
         elif self.selectedItem.text() == "symbol":
-            symbolWindow = symbolEditor(file=self.selectedItem.data(Qt.UserRole + 2))
-            symbolWindow.show()
-            symbolWindow.loadSymbol()
+            self.symbolWindow = symbolEditor(
+                file=self.selectedItem.data(Qt.UserRole + 2)
+            )
+            self.symbolWindow.loadSymbol()
+            self.symbolWindow.show()
 
     def copyView(self):
         dlg = copyViewDialog(self, self.libraryModel, self.selectedItem)
@@ -255,9 +260,7 @@ class libraryBrowser(QMainWindow):
         self.setWindowTitle("Library Browser")
         self._createMenuBar()
         self._createActions()
-
         self._createToolBars()
-
         self.initUI()
 
     def initUI(self):
@@ -265,8 +268,8 @@ class libraryBrowser(QMainWindow):
         self.setCentralWidget(self.libBrowserCont)
 
     def _createMenuBar(self):
-        self.menuBar = self.menuBar()
-        self.libraryMenu = self.menuBar.addMenu("&Library")
+        self.browserMenubar = self.menuBar()
+        self.libraryMenu = self.browserMenubar.addMenu("&Library")
 
     def _createActions(self):
         openLibIcon = QIcon(":/icons/database--plus.png")
@@ -352,26 +355,6 @@ class libraryBrowserContainer(QWidget):
         self.designView = designLibrariesView(self, self.libraryDict)
         self.layout.addWidget(self.designView)
         self.setLayout(self.layout)
-
-
-class container(QWidget):
-    def __init__(self, parent):
-        super().__init__(parent=parent)
-        self.parent = parent
-
-        self.init_UI()
-
-    def init_UI(self):
-        # treeView = designLibrariesView(self)
-        self.console = pcon.pythonConsole(globals())
-        self.console.writeoutput("Welcome to RevEDA")
-        self.console.writeoutput("Revolution Semiconductor (C) 2021.")
-        self.console.setfont(QFont("Fira Mono Regular", 12))
-        # layout statements, using a grid layout
-        gLayout = QVBoxLayout()
-        gLayout.setSpacing(10)
-        gLayout.addWidget(self.console)
-        self.setLayout(gLayout)
 
 
 class createCellDialog(QDialog):
@@ -559,7 +542,7 @@ class copyViewDialog(QDialog):
 
 
 class editorWindow(QMainWindow):
-    def __init__(self, file) -> None:  # file is a pathlib.Path object
+    def __init__(self, file: pathlib.Path) -> None:  # file is a pathlib.Path object
         super().__init__()
         self.file = file
         self.init_UI()
@@ -667,10 +650,12 @@ class editorWindow(QMainWindow):
         undoIcon = QIcon(":/icons/arrow-circle-315-left.png")
         self.undoAction = QAction(undoIcon, "Undo", self)
         self.menuEdit.addAction(self.undoAction)
+        self.undoAction.setShortcut("U")
 
         redoIcon = QIcon(":/icons/arrow-circle-225.png")
         self.redoAction = QAction(redoIcon, "Redo", self)
         self.menuEdit.addAction(self.redoAction)
+        self.redoAction.setShortcut("Shift+U")
 
         yankIcon = QIcon(":/icons/node-insert.png")
         self.yankAction = QAction(yankIcon, "Yank", self)
@@ -684,11 +669,12 @@ class editorWindow(QMainWindow):
 
         deleteIcon = QIcon(":/icons/node-delete.png")
         self.deleteAction = QAction(deleteIcon, "Delete", self)
+        self.deleteAction.setShortcut(QKeySequence.Delete)
         self.menuEdit.addAction(self.deleteAction)
-        self.deleteAction.triggered.connect(self.deleteItemMethod)
 
         copyIcon = QIcon(":/icons/document-copy.png")
         self.copyAction = QAction(copyIcon, "Copy", self)
+        self.copyAction.setShortcut("C")
         self.menuEdit.addAction(self.copyAction)
 
         moveIcon = QIcon(":/icons/arrow-move.png")
@@ -720,6 +706,8 @@ class editorWindow(QMainWindow):
         self.netNameAction = QAction(netNameIcon, "Net Name...", self)
         self.menuEdit.addAction(self.netNameAction)
 
+        self._createMenu()
+
         hierMenu = self.menuEdit.addMenu("Hierarchy")
 
         goUpIcon = QIcon(":/icons/arrow-step-out.png")
@@ -739,39 +727,16 @@ class editorWindow(QMainWindow):
         self.deselectAllAction = QAction(deselectAllIcon, "Unselect All", self)
         selectMenu.addAction(self.deselectAllAction)
 
-        propertyMenu = self.menuEdit.addMenu("Properties")
+        self.propertyMenu = self.menuEdit.addMenu("Properties")
 
         objPropIcon = QIcon(":/icons/property-blue.png")
         self.objPropAction = QAction(objPropIcon, "Object Properties...", self)
-        propertyMenu.addAction(self.objPropAction)
+        self.propertyMenu.addAction(self.objPropAction)
+        self.objPropAction.setShortcut("Q")
 
         viewPropIcon = QIcon(":/icons/property.png")
         self.viewPropAction = QAction(viewPropIcon, "Cellview Properties...", self)
-        propertyMenu.addAction(self.viewPropAction)
-
-        createInstIcon = QIcon(":/icons/block--plus.png")
-        self.createInstAction = QAction(createInstIcon, "Create Instance...", self)
-        self.menuCreate.addAction(self.createInstAction)
-
-        createWireIcon = QIcon(":/icons/node-insert.png")
-        self.createWireAction = QAction(createWireIcon, "Create Wire...", self)
-        self.menuCreate.addAction(self.createWireAction)
-
-        createBusIcon = QIcon(":/icons/node-select-all.png")
-        self.createBusAction = QAction(createBusIcon, "Create Bus...", self)
-        self.menuCreate.addAction(self.createBusAction)
-
-        createLabelIcon = QIcon(":/icons/tag-label-yellow.png")
-        self.createLabelAction = QAction(createLabelIcon, "Create Label...", self)
-        self.menuCreate.addAction(self.createLabelAction)
-
-        createPinIcon = QIcon(":/icons/pin--plus.png")
-        self.createPinAction = QAction(createPinIcon, "Create Pin...", self)
-        self.menuCreate.addAction(self.createPinAction)
-
-        createSymbolIcon = QIcon(":/icons/application-block.png")
-        self.createSymbolAction = QAction(createSymbolIcon, "Create Symbol...", self)
-        self.menuCreate.addAction(self.createSymbolAction)
+        self.propertyMenu.addAction(self.viewPropAction)
 
         viewCheckIcon = QIcon(":/icons/ui-check-box.png")
         self.viewCheckAction = QAction(viewCheckIcon, "Check CellView", self)
@@ -786,8 +751,8 @@ class editorWindow(QMainWindow):
         self.menuCheck.addAction(self.deleteErrorsAction)
 
         netlistIcon = QIcon(":/icons/script-text.png")
-        netlistAction = QAction(netlistIcon, "Create Netlist...", self)
-        self.menuSimulation.addAction(netlistAction)
+        self.netlistAction = QAction(netlistIcon, "Create Netlist...", self)
+        self.menuSimulation.addAction(self.netlistAction)
 
         simulateIcon = QIcon(":/icons/application-wave.png")
         self.simulateAction = QAction(simulateIcon, "Run RevEDA Sim GUI", self)
@@ -809,7 +774,40 @@ class editorWindow(QMainWindow):
         self.createArcAction = QAction(createArcIcon, "Create Arc...", self)
 
         createTextIcon = QIcon(":/icons/layer-shape-text.png")
-        createLabelAction = QAction(createTextIcon, "Create Label...", self)
+        self.createLabelAction = QAction(createTextIcon, "Create Label...", self)
+
+    # self is the parent window, ie. the application
+    def dispConfDialog(self):
+        dcd = displayConfigDialog(self)
+
+    # def deleteItemMethod(self, s):
+    #     self.centralW.scene.itemDelete = True
+
+    def createLabelDialogue(self):
+        pass
+
+    def fitToWindow(self):
+        self.centralW.view.fitToView()
+
+    def zoomIn(self):
+        self.centralW.view.scale(1.25, 1.25)
+
+    def zoomOut(self):
+        self.centralW.view.scale(0.8, 0.8)
+
+    def closeWindow(self):
+        self.close()
+
+    def _createMenu(self):
+        pass
+
+
+class schematicEditor(editorWindow):
+    def __init__(self, file) -> None:
+        super().__init__(file=file)
+        self.setWindowTitle("Schematic Editor")
+        self.setWindowIcon(QIcon(":/icons/layer-shape.png"))
+        self.createWireAction.triggered.connect(self.createWireClick)
 
     def _createToolBars(self):
         # Create tools bar called "main toolbar"
@@ -835,6 +833,7 @@ class editorWindow(QMainWindow):
         self.toolbar.addAction(self.zoomOutAction)
         self.schematicToolbar = QToolBar("Schematic Toolbar", self)
         self.addToolBar(self.schematicToolbar)
+
         self.schematicToolbar.addAction(self.createInstAction)
         self.schematicToolbar.addAction(self.createWireAction)
         self.schematicToolbar.addAction(self.createBusAction)
@@ -844,6 +843,77 @@ class editorWindow(QMainWindow):
         self.schematicToolbar.addSeparator()
         self.schematicToolbar.addAction(self.viewCheckAction)
 
+    def _createMenu(self):
+        createInstIcon = QIcon(":/icons/block--plus.png")
+        self.createInstAction = QAction(createInstIcon, "Create Instance...", self)
+        self.menuCreate.addAction(self.createInstAction)
+
+        createWireIcon = QIcon(":/icons/node-insert.png")
+        self.createWireAction = QAction(createWireIcon, "Create Wire...", self)
+        self.menuCreate.addAction(self.createWireAction)
+
+        createBusIcon = QIcon(":/icons/node-select-all.png")
+        self.createBusAction = QAction(createBusIcon, "Create Bus...", self)
+        self.menuCreate.addAction(self.createBusAction)
+
+        createLabelIcon = QIcon(":/icons/tag-label-yellow.png")
+        self.createLabelAction = QAction(createLabelIcon, "Create Label...", self)
+        self.menuCreate.addAction(self.createLabelAction)
+
+        createPinIcon = QIcon(":/icons/pin--plus.png")
+        self.createPinAction = QAction(createPinIcon, "Create Pin...", self)
+        self.menuCreate.addAction(self.createPinAction)
+
+        createSymbolIcon = QIcon(":/icons/application-block.png")
+        self.createSymbolAction = QAction(createSymbolIcon, "Create Symbol...", self)
+        self.menuCreate.addAction(self.createSymbolAction)
+
+    def createWireClick(self, s):
+        pass
+
+
+class symbolEditor(editorWindow):
+    def __init__(self, file) -> None:
+        super().__init__(file=file)
+        self.setWindowTitle("Symbol Editor")
+
+        self._symbolActions()
+        self.checkCellAction.triggered.connect(self.checkSaveCell)
+        self.createLineAction.triggered.connect(self.createLineClick)
+        self.createRectAction.triggered.connect(self.createRectClick)
+        self.createPolyAction.triggered.connect(self.createPolyClick)
+        self.createArcAction.triggered.connect(self.createArcClick)
+        self.createCircleAction.triggered.connect(self.createCircleClick)
+        self.createLabelAction.triggered.connect(self.createSymbolLabelDialogue)
+        self.createPinAction.triggered.connect(self.createPinClick)
+        self.objPropAction.triggered.connect(self.objPropClick)
+        self.copyAction.triggered.connect(self.copyClick)
+        self.redoAction.triggered.connect(self.redoClick)
+        self.undoAction.triggered.connect(self.undoClick)
+        self.deleteAction.triggered.connect(self.deleteClick)
+
+    def _createToolBars(self):  # redefine the toolbar in the editorWindow class
+        # Create tools bar called "main toolbar"
+        self.toolbar = QToolBar("Main Toolbar", self)
+        # place toolbar at top
+        self.addToolBar(self.toolbar)
+        self.toolbar.addAction(self.printAction)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.undoAction)
+        self.toolbar.addAction(self.redoAction)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.deleteAction)
+        self.toolbar.addAction(self.moveAction)
+        self.toolbar.addAction(self.copyAction)
+        self.toolbar.addAction(self.stretchAction)
+        # toolbar.addAction(self.rulerAction)
+        # toolbar.addAction(self.delRulerAction)
+        self.toolbar.addAction(self.objPropAction)
+        self.toolbar.addAction(self.viewPropAction)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.fitAction)
+        self.toolbar.addAction(self.zoomInAction)
+        self.toolbar.addAction(self.zoomOutAction)
         self.symbolToolbar = QToolBar("Symbol Toolbar", self)
         self.addToolBar(self.symbolToolbar)
         self.symbolToolbar.addAction(self.createLineAction)
@@ -854,59 +924,26 @@ class editorWindow(QMainWindow):
         self.symbolToolbar.addAction(self.createLabelAction)
         self.symbolToolbar.addAction(self.createPinAction)
 
-    # self is the parent window, ie. the application
-    def dispConfDialog(self):
-        dcd = displayConfigDialog(self)
+    def _createMenu(self):
 
-    def deleteItemMethod(self, s):
-        self.centralW.scene.itemDelete = True
+        createLabelIcon = QIcon(":/icons/tag-label-yellow.png")
+        self.createLabelAction = QAction(createLabelIcon, "Create Label...", self)
+        self.menuCreate.addAction(self.createLabelAction)
 
-    def createLabelDialogue(self):
-        pass
+        createPinIcon = QIcon(":/icons/pin--plus.png")
+        self.createPinAction = QAction(createPinIcon, "Create Pin...", self)
+        self.menuCreate.addAction(self.createPinAction)
 
-    def fitToWindow(self):
-        self.centralW.view.fitToView()
+    def _symbolActions(self):
 
-    def zoomIn(self):
-        self.centralW.view.scale(1.25, 1.25)
+        self.centralW.scene.symbolContextMenu.addAction(self.copyAction)
+        self.centralW.scene.symbolContextMenu.addAction(self.moveAction)
+        self.centralW.scene.symbolContextMenu.addAction(self.stretchAction)
+        self.centralW.scene.symbolContextMenu.addAction(self.deleteAction)
+        self.centralW.scene.symbolContextMenu.addAction(self.objPropAction)
 
-    def zoomOut(self):
-        self.centralW.view.scale(0.8, 0.8)
-
-    def closeWindow(self):
-        self.close()
-
-
-class schematicEditor(editorWindow):
-    def __init__(self, file) -> None:
-        super().__init__(file=file)
-        self.setWindowTitle("Schematic Editor")
-        self.symbolToolbar.setVisible(False)
-        self.schematicToolbar.setVisible(True)
-        self.createWireAction.triggered.connect(self.createWireClick)
-
-    def createWireClick(self, s):
-        self.centralW.scene.drawWire = True
-        self.centralW.scene.selectItem = False
-        if hasattr(self.centralW.scene, "start"):
-            del self.centralW.scene.start
-
-
-class symbolEditor(editorWindow):
-    def __init__(self, file) -> None:
-        super().__init__(file=file)
-        self.setWindowTitle("Symbol Editor")
-        self.schematicToolbar.setVisible(False)
-        self.symbolToolbar.setVisible(True)
-        self.centralW.scene._symbolActions()
-        self.checkCellAction.triggered.connect(self.checkSaveCell)
-        self.createLineAction.triggered.connect(self.createLineClick)
-        self.createRectAction.triggered.connect(self.createRectClick)
-        self.createPolyAction.triggered.connect(self.createPolyClick)
-        self.createArcAction.triggered.connect(self.createArcClick)
-        self.createCircleAction.triggered.connect(self.createCircleClick)
-        self.createLabelAction.triggered.connect(self.createSymbolLabelDialogue)
-        self.createPinAction.triggered.connect(self.createPinClick)
+    def objPropClick(self):
+        self.centralW.scene.itemProperties()
 
     def checkSaveCell(self):
         self.centralW.scene.saveSymbolCell(self.file)
@@ -934,6 +971,18 @@ class symbolEditor(editorWindow):
             self.centralW.scene.pinDir = createPinDlg.pinDir.currentText()
             self.setDrawMode(True, False, False, False, False, False)
 
+    def undoClick(self, s):
+        self.centralW.scene.undoLastItem()
+
+    def redoClick(self, s):
+        self.centralW.scene.redoLastItem()
+
+    def deleteClick(self, s):
+        self.centralW.scene.deleteSelectedItem()
+
+    def copyClick(self,s):
+        self.centralW.scene.copySelectedItem()
+
     def setDrawMode(
         self,
         drawPin: bool,
@@ -943,6 +992,9 @@ class symbolEditor(editorWindow):
         drawLine: bool,
         addLabel: bool,
     ):
+        """
+        Sets the drawing mode in the symbol editor.
+        """
         self.centralW.scene.drawPin = drawPin
         self.centralW.scene.selectItem = selectItem
         self.centralW.scene.drawArc = drawArc  # draw arc
@@ -1162,7 +1214,9 @@ class editor_scene(QGraphicsScene):
         self.drawRect = False  # flag to indicate if a rectangle is being drawn
         self.addLabel = False  # flag to indicate if a label is being drawn
 
-        self.objectStack = []  # stack of objects to be deleted
+        self.objectStack = []  # stack of objects
+        self.undoStack = []  # stack of objects to be redone
+        self.selectedItem = None  # selected item
         # layer infrastructure is ad-hoc. Needs rethink at some point.
         self.wireLayer = cel.layer(
             name="wireLayer", color=QColor("aqua"), z=1, visible=True
@@ -1193,33 +1247,12 @@ class editor_scene(QGraphicsScene):
 
         self.symbolContextMenu = QMenu()
 
-    def _symbolActions(self):
-        copyIcon = QIcon(":/icons/document-copy.png")
-        self.copyAction = QAction(copyIcon, "Copy", self)
-        self.symbolContextMenu.addAction(self.copyAction)
-
-        moveIcon = QIcon(":/icons/arrow-move.png")
-        self.moveAction = QAction(moveIcon, "Move", self)
-        self.symbolContextMenu.addAction(self.moveAction)
-
-        stretchIcon = QIcon(":/icons/fill.png")
-        self.stretchAction = QAction(stretchIcon, "Stretch", self)
-        self.symbolContextMenu.addAction(self.stretchAction)
-
-        deleteIcon = QIcon(":/icons/node-delete.png")
-        self.deleteAction = QAction(deleteIcon, "Delete", self)
-        self.symbolContextMenu.addAction(self.deleteAction)
-        self.deleteAction.triggered.connect(self.itemDelete)
-
-        objPropIcon = QIcon(":/icons/property-blue.png")
-        self.objPropAction = QAction(objPropIcon, "Object Properties...", self)
-        self.symbolContextMenu.addAction(self.objPropAction)
-        self.objPropAction.triggered.connect(self.itemProperties)
-
     def mousePressEvent(self, mouse_event):
         super().mousePressEvent(mouse_event)
-        if self.selectItem == True and self.itemAt(mouse_event.scenePos(),QTransform()):
-            self.selectedItem = self.itemAt(mouse_event.scenePos(),QTransform())
+        if self.selectItem == True and self.itemAt(
+            mouse_event.scenePos(), QTransform()
+        ):
+            self.selectedItem = self.itemAt(mouse_event.scenePos(), QTransform())
         elif (
             hasattr(self, "start") == False
             and (self.drawWire or self.drawLine or self.drawPin or self.drawRect)
@@ -1232,7 +1265,7 @@ class editor_scene(QGraphicsScene):
             )
 
     def mouseMoveEvent(self, mouse_event):
-        self.snap2Grid(mouse_event)
+        self.snapMouse2Grid(mouse_event)
         pen = QPen(self.guideLineLayer.color, 1)
         pen.setStyle(Qt.DashLine)
         if hasattr(self, "draftItem"):
@@ -1275,7 +1308,7 @@ class editor_scene(QGraphicsScene):
         )
         super().mouseMoveEvent(mouse_event)
 
-    def snap2Grid(self, mouse_event):
+    def snapMouse2Grid(self, mouse_event):
         self.current = mouse_event.scenePos().toPoint()
         self.current /= self.gridMajor
         self.current *= self.gridMajor
@@ -1309,7 +1342,6 @@ class editor_scene(QGraphicsScene):
         """
         rect = shp.rectangle(start, end, pen, self.gridTuple)
         self.addItem(rect)
-        print(rect.__dict__)
         self.drawRect = False
         self.objectStack.append(rect)
 
@@ -1326,7 +1358,6 @@ class editor_scene(QGraphicsScene):
         self.objectStack.append(pin)
 
     def labelDraw(self, pen: QPen):
-        print(self.labelType)
         label = shp.label(
             self.current,
             pen,
@@ -1351,61 +1382,73 @@ class editor_scene(QGraphicsScene):
             if hasattr(self, "draftItem"):
                 self.removeItem(self.draftItem)
             self.selectItem = True
-        elif key_event.key() == Qt.Key_Delete:
-            if hasattr(self, "selectedItem"):
-                self.removeItem(self.selectedItem)
-                del self.selectedItem
-                self.selectItem = True
-        elif key_event.key() == Qt.Key_U:
-
-            if type(self.objectStack[-1]) == list:
-                for item in self.objectStack[-1]:
-                    self.removeItem(item)
-                    del item
-            else:
-                self.removeItem(self.objectStack[-1])
-                del self.objectStack[-1]
-            self.objectStack.pop()
-
-        elif key_event.key() == Qt.Key_Delete:
-            self.itemDelete()
-        elif key_event.key() == Qt.Key_Q:
-            self.itemProperties()
         elif key_event.key() == Qt.Key_C:
             self.copyItem()
         super().keyPressEvent(key_event)
 
-    def copyItem(self):
+    def deleteSelectedItem(self):
+        if hasattr(self, "selectedItem"):
+            self.removeItem(self.selectedItem)
+            self.objectStack.remove(self.selectedItem)
+            self.undoStack.append(self.selectedItem)
+            del self.selectedItem
+            self.update()
+            self.selectItem = True
+
+    def undoLastItem(self):
+        if len(self.objectStack) > 0:
+            lastItem = self.objectStack.pop()
+            self.removeItem(lastItem)
+            self.undoStack.append(lastItem)
+            self.update()
+        else:
+            print("Nothing to undo")
+
+    def redoLastItem(self):
+        if len(self.undoStack) > 0:
+            lastItem = self.undoStack.pop()
+            self.addItem(lastItem)
+            self.objectStack.append(lastItem)
+            self.update()
+        else:
+            print("No item to redo")
+
+    def copySelectedItem(self):
         pass
 
     def itemProperties(self):
-        if isinstance(self.selectedItem, shp.rectangle):
-            queryDlg = pdlg.rectPropertyDialog(self.parent.parent, self.selectedItem)
-            if queryDlg.exec() == QDialog.Accepted:
-                self.removeItem(self.selectedItem)
-                self.objectStack.remove(self.selectedItem)
-                start = QPoint()
-                newItem = shp.rectangle(
-                    QPoint(queryDlg.coords[0], queryDlg.coords[1]),
-                    QPoint(
-                        queryDlg.coords[0] + int(queryDlg.rectWidthLine.text()),
-                        queryDlg.coords[1] + int(queryDlg.rectHeightLine.text()),
-                    ),
-                    self.selectedItem.pen,
-                    self.gridTuple,
+        # print(self.selectedItem.__dict__)
+        if self.selectedItem is not None:
+            if not hasattr(self, "queryDlg") and isinstance(
+                self.selectedItem, shp.rectangle
+            ):
+                self.queryDlg = pdlg.rectPropertyDialog(
+                    self.parent.parent, self.selectedItem
                 )
-                del self.selectedItem
-                # newItem.setPos(QPoint(int(queryDlg.rectLeftLine.text()), int(queryDlg.rectTopLine.text())))
-                self.addItem(newItem)
-                self.objectStack.append(newItem)
+                self.queryDlg.show()
+            else:
+                self.queryDlg.show()
 
-    def itemDelete(self):
-        if hasattr(self, "selectedItem"):
-            print(self.selectedItem)
-            self.removeItem(self.selectedItem)
-            self.objectStack.remove(self.selectedItem)
-            del self.selectedItem
-            self.selectItem = True
+            if self.queryDlg.exec() == QDialog.Accepted:
+                self.recreateRect()
+                del self.queryDlg
+        else:
+            print("No item selected")
+
+    def recreateRect(self):
+        location = self.selectedItem.scenePos().toTuple()
+        newLeft = self.snapGrid(float(self.queryDlg.rectLeftLine.text())-float(location[0]),self.gridTuple[0])
+        newTop = self.snapGrid(float(self.queryDlg.rectTopLine.text())-float(location[1]),self.gridTuple[1])
+        newWidth = self.snapGrid(float(self.queryDlg.rectWidthLine.text()), self.gridTuple[0])
+        newHeight = self.snapGrid(float(self.queryDlg.rectHeightLine.text()), self.gridTuple[1])
+        self.selectedItem.start = QPoint(newLeft, newTop)
+        self.selectedItem.end = QPoint(newLeft + newWidth, newTop + newHeight)
+        self.selectedItem.setLeft(newLeft)
+        self.selectedItem.setTop(newTop)
+        self.selectedItem.setWidth(newWidth)
+        self.selectedItem.setHeight(newHeight)
+        self.selectedItem.update()
+
 
     def snapGrid(self, number, base):
         return base * int(round(number / base))
@@ -1769,10 +1812,35 @@ class libraryPathEditC(QLineEdit):
         self.setFixedWidth(500)
 
 
+class mainwContainer(QWidget):
+    """
+    Definition for the main app window layout.
+    """
+
+    def __init__(self, parent):
+        super().__init__(parent=parent)
+        self.parent = parent
+
+        self.init_UI()
+
+    def init_UI(self):
+        # treeView = designLibrariesView(self)
+        self.console = pcon.pythonConsole(globals())
+        self.console.writeoutput("Welcome to RevEDA")
+        self.console.writeoutput("Revolution Semiconductor (C) 2021.")
+        self.console.setfont(QFont("Fira Mono Regular", 12))
+        # layout statements, using a grid layout
+        gLayout = QVBoxLayout()
+        gLayout.setSpacing(10)
+        gLayout.addWidget(self.console)
+        self.setLayout(gLayout)
+
+
 # main application window definition
 class mainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
+        self.app = app
         revEDAPathObj = Path(__file__)
         revEDADirObj = revEDAPathObj.parent
         self.cellViews = ["schematic", "symbol"]
@@ -1791,7 +1859,7 @@ class mainWindow(QMainWindow):
         self._createMenuBar()
         self._createActions()
         # create container to position all widgets
-        self.centralW = container(self)
+        self.centralW = mainwContainer(self)
         self.setCentralWidget(self.centralW)
         self.libraryBrowser = None
 
@@ -1808,6 +1876,12 @@ class mainWindow(QMainWindow):
         # create actions
 
     def _createActions(self):
+        exitIcon = QIcon(":/icons/external.png")
+        self.exitAction = QAction(exitIcon, "Exit", self)
+        self.exitAction.setShortcut("Ctrl+Q")
+        self.exitAction.triggered.connect(self.exitApp)
+        self.menuFile.addAction(self.exitAction)
+
         openLibIcon = QIcon(":/icons/database--pencil.png")
         self.libraryBrowserAction = QAction(openLibIcon, "Library Browser", self)
         self.menuTools.addAction(self.libraryBrowserAction)
@@ -1823,12 +1897,15 @@ class mainWindow(QMainWindow):
         else:
             self.libraryBrowser.show()
 
+    def exitApp(self):
+        self.app.closeAllWindows()
+
 
 # Start Main application window
 app = QApplication(sys.argv)
 # app.setStyle('Fusion')
 # empty argument as there is no parent window.
-mainW = mainWindow()
+mainW = mainWindow(app)
 mainW.setWindowTitle("Revolution EDA Main Window")
 redirect = pcon.Redirect(mainW.centralW.console.errorwrite)
 with redirect_stdout(mainW.centralW.console), redirect_stderr(redirect):
