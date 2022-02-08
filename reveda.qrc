@@ -53,6 +53,8 @@
     <file>icons/layer-shape-polygon.png</file>
     <file>icons/layer-shape-ellipse.png</file>
     <file>icons/layer-shape-polyline.png</file>
-    <file>icons/layer-shape-text.png</file>                            
+    <file>icons/layer-shape-text.png</file>          
+    <file>icons/home.png</file>    
+    <file>icons/question.png</file>                            
 </qresource>
 </RCC>

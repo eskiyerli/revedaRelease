@@ -1,4 +1,6 @@
 # schematic editor backend
+import pathlib
+
 from PySide6.QtGui import (
     QStandardItem,
 )
@@ -16,15 +18,20 @@ from PySide6.QtCore import (
 
 
 class libraryItem(QStandardItem):
-    def __init__(self, path, name):  # path is a pathlib.Path object
-        super().__init__(name)
-        self.setData(path, Qt.UserRole + 2)
+    def __init__(self, libraryPath:pathlib.Path, libraryName:str):  # path is a pathlib.Path object
+        super().__init__(libraryName)
+        self.libraryPath = libraryPath
+        self.libraryName = libraryName
+        self.setEditable(False)
+        self.setData(libraryPath, Qt.UserRole + 2)
         self.setData("library", Qt.UserRole + 1)
 
 
 class cellItem(QStandardItem):
-    def __init__(self, libraryPath, name) -> None:
+    def __init__(self, libraryPath:pathlib.Path, name:str) -> None:
         super().__init__(name)
+        self.name = name
+        self.libraryPath = libraryPath
         self.setEditable(False)
         self.setData("cell", Qt.UserRole + 1)
         self.setData(libraryPath / name, Qt.UserRole + 2)
@@ -34,13 +41,16 @@ class cellItem(QStandardItem):
 
 
 class viewItem(QStandardItem):
-    def __init__(self, libraryPath, cell, name) -> None:
-        super().__init__(name)
+    def __init__(self, libraryPath:pathlib.Path, cellName:str, viewName) -> None:
+        super().__init__(viewName)
+        self.name = viewName
+        self.libraryPath = libraryPath
+        self.cellName = cellName
         self.setEditable(False)
         self.setData("view", Qt.UserRole + 1)
         # set the data to the item to be the path to the view.
         self.setData(
-            libraryPath.joinpath(cell, name).with_suffix(".json"),
+            libraryPath.joinpath(cellName, viewName).with_suffix(".json"),
             Qt.UserRole + 2,
         )
 
@@ -68,7 +78,7 @@ def createCellView(parent, viewName, cellItem):
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
     cellPath = cellItem.data(Qt.UserRole + 2)
-    viewPath = cellPath.joinpath(viewName + ".py")
+    viewPath = cellPath.joinpath(viewName + ".json")
     viewPath.touch()  # create the view file
     viewItem = QStandardItem(viewName)
     viewItem.setData(viewPath, Qt.UserRole + 2)
@@ -107,7 +117,7 @@ def copyCell(parent, model, cellItem, copyName, selectedLibPath):
         cellItem.setData(copyPath, Qt.UserRole + 2)
         # go through view list and add to cell item
         viewList = [
-            str(view.stem) for view in copyPath.iterdir() if view.suffix == ".py"
+            str(view.stem) for view in copyPath.iterdir() if view.suffix == ".json"
         ]
 
         for view in viewList:
@@ -115,7 +125,7 @@ def copyCell(parent, model, cellItem, copyName, selectedLibPath):
             viewItem.setData("view", Qt.UserRole + 1)
             # set the data to the item to be the path to the view.
             viewItem.setData(
-                copyPath.joinpath(view).with_suffix(".py"),
+                copyPath.joinpath(view).with_suffix(".json"),
                 Qt.UserRole + 2,
             )
             viewItem.setEditable(False)
