@@ -26,7 +26,6 @@ class shape(QGraphicsItem):
         self.gridX = grid[0]
         self.gridY = grid[1]
 
-
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange and self.scene():
             newPos = value.toPoint()
@@ -49,21 +48,6 @@ class shape(QGraphicsItem):
                     sceneRect.setTop(newPos.y())
                     viewRect.setTop(newPos.y())
             return newPos
-        elif change == QGraphicsItem.ItemSelectedChange and self.scene():
-            if value:
-                self.setZValue(self.zValue() + 1)
-                selectionRect = self.boundingRect()
-                pen = QPen(Qt.yellow, 1)
-                pen.setStyle(Qt.DashLine)
-                self.selectionItem = self.scene().addRect(selectionRect, pen)
-                self.selectionItem.setPos(self.pos())
-            else:
-                if self.selectionItem is not None:
-                    self.scene().removeItem(self.selectionItem)
-                    del self.selectionItem
-                    self.selectionItem = None
-
-        # # return QGraphicsItem.itemChange(self, change, value)
         return super().itemChange(change, value)
 
     def setSnapGrid(self, gridSize: int) -> None:
@@ -75,16 +59,14 @@ class shape(QGraphicsItem):
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
         self.setCursor(Qt.OpenHandCursor)
-        if self.selectionItem is None:
-            self.setSelected(True)
+        self.setSelected(True)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(event)
-        if self.selectionItem is not None:
-            self.setSelected(False)
+        # self.setSelected(False)
 
     def hoverEnterEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().hoverEnterEvent(event)
@@ -108,11 +90,11 @@ class rectangle(shape):
     """
 
     def __init__(
-        self,
-        start: QPoint,
-        end: QPoint,
-        pen: QPen,
-        grid: tuple,
+            self,
+            start: QPoint,
+            end: QPoint,
+            pen: QPen,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
@@ -124,8 +106,12 @@ class rectangle(shape):
         return self.rect  #
 
     def paint(self, painter, option, widget):
-        painter.setPen(self.pen)
-        painter.drawRect(self.rect)
+        if self.isSelected():
+            painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
+            painter.drawRect(self.rect)
+        else:
+            painter.setPen(self.pen)
+            painter.drawRect(self.rect)
 
     def centre(self):
         return QPoint(
@@ -140,9 +126,6 @@ class rectangle(shape):
         return self.rect.width()
 
     def objName(self):
-        return "RECTANGLE"
-
-    def objType(self):
         return "RECTANGLE"
 
     def left(self):
@@ -169,11 +152,23 @@ class rectangle(shape):
     def setBottom(self, bottom: int):
         self.rect.setBottom(bottom)
 
+    def setHeight(self, height: int):
+        self.rect.setHeight(height)
+
+    def setWidth(self, width: int):
+        self.rect.setWidth(width)
+
     def origin(self):
         return self.rect.bottomLeft()
 
     def bBox(self):
         return self.rect
+
+    def Move(self, offset: QPoint):  # starts with capital letter
+        self.moveBy(offset.x(), offset.y())
+
+    def setScale(self, scale: float):
+        self.setScale(scale, scale)
 
 
 class line(shape):
@@ -182,11 +177,11 @@ class line(shape):
     """
 
     def __init__(
-        self,
-        start: QPoint,
-        end: QPoint,
-        pen: QPen,
-        grid: tuple,
+            self,
+            start: QPoint,
+            end: QPoint,
+            pen: QPen,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         self.end = end
@@ -219,11 +214,11 @@ class line(shape):
                 painter.drawLine(self.start, self.end)
             else:
                 painter.drawPoint(self.start)
+        if self.isSelected():
+            painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
+            painter.drawLine(self.start, self.end)
 
     def objName(self):
-        return "LINE"
-
-    def objType(self):
         return "LINE"
 
     def nPoints(self):
@@ -235,6 +230,13 @@ class line(shape):
     def bBox(self) -> QRect:
         return self.boundingRect()
 
+    def width(self):
+        return self.pen.width()
+
+    def Move(self, offset: QPoint):
+        self.start += offset
+        self.end += offset
+
 
 class pin(shape):
     """
@@ -243,13 +245,13 @@ class pin(shape):
     """
 
     def __init__(
-        self,
-        start: QPoint,
-        pen: QPen,
-        pinName: str,
-        pinDir: str,
-        pinType: str,
-        grid: tuple,
+            self,
+            start: QPoint,
+            pen: QPen,
+            pinName: str,
+            pinDir: str,
+            pinType: str,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
@@ -268,6 +270,10 @@ class pin(shape):
         painter.drawRect(self.rect)
         painter.setFont(QFont("Arial", 12))
         painter.drawText(QPoint(self.start.x() - 5, self.start.y() - 10), self.pinName)
+        if self.isSelected():
+            painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
+            painter.setBrush(Qt.yellow)
+            painter.drawRect(self.rect)
 
     def name(self):
         return self.pinName
@@ -289,21 +295,20 @@ class pin(shape):
 
 class label(shape):
     """
-
     rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
     """
 
     def __init__(
-        self,
-        start: QPoint,
-        pen: QPen,
-        labelName: str,
-        grid: tuple,
-        labelType: str = "Normal",
-        labelHeight: str = "12",
-        labelAlignment: str = "Left",
-        labelOrient: str = "R0",
-        labelUse: str = "Normal",
+            self,
+            start: QPoint,
+            pen: QPen,
+            labelName: str,
+            grid: tuple,
+            labelType: str = "Normal",
+            labelHeight: str = "12",
+            labelAlignment: str = "Left",
+            labelOrient: str = "R0",
+            labelUse: str = "Normal",
     ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
@@ -317,7 +322,7 @@ class label(shape):
         self.labelFont = QFont("Arial", int(self.labelHeight))
         self.fm = QFontMetrics(self.labelFont)
         self.rect = self.fm.boundingRect(self.labelName)
-        self.setZValue(10)
+        # self.setZValue(10)
 
     def boundingRect(self):
         return QRect(
@@ -325,7 +330,11 @@ class label(shape):
         )  #
 
     def paint(self, painter, option, widget):
-        self.rect = self.fm.boundingRect(self.labelName)
+        # self.rect = self.fm.boundingRect(self.labelName)
         painter.setFont(self.labelFont)
-        painter.setPen(self.pen)
-        painter.drawText(self.rect, Qt.AlignCenter, self.labelName)
+        if self.isSelected():
+            painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
+            painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
+        else:
+            painter.setPen(self.pen)
+            painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
