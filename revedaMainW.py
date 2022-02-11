@@ -66,6 +66,7 @@ from Point import *
 from Vector import *
 import resources
 
+
 # from threading import Thread
 
 
@@ -967,7 +968,7 @@ class symbolEditor(editorWindow):
         pass
 
     def createPinClick(self, s):
-        createPinDlg = createPinDialog(self)
+        createPinDlg = pdlg.createPinDialog(self)
         if createPinDlg.exec() == QDialog.Accepted:
             self.centralW.scene.pinName = createPinDlg.pinName.text()
             self.centralW.scene.pinType = createPinDlg.pinType.currentText()
@@ -987,13 +988,13 @@ class symbolEditor(editorWindow):
         self.centralW.scene.copySelectedItem()
 
     def setDrawMode(
-        self,
-        drawPin: bool,
-        selectItem: bool,
-        drawArc: bool,
-        drawRect: bool,
-        drawLine: bool,
-        addLabel: bool,
+            self,
+            drawPin: bool,
+            selectItem: bool,
+            drawArc: bool,
+            drawRect: bool,
+            drawLine: bool,
+            addLabel: bool,
     ):
         """
         Sets the drawing mode in the symbol editor.
@@ -1014,7 +1015,7 @@ class symbolEditor(editorWindow):
         self.centralW.scene.loadSymbol(self.file)
 
     def createSymbolLabelDialogue(self):
-        createLabelDlg = createSymbolLabelDialog(self)
+        createLabelDlg = pdlg.createSymbolLabelDialog(self)
         if createLabelDlg.exec() == QDialog.Accepted:
             self.setDrawMode(False, False, False, False, False, True)
             self.centralW.scene.labelName = createLabelDlg.labelName.text()
@@ -1034,84 +1035,6 @@ class symbolEditor(editorWindow):
                 self.centralW.scene.labelType = "NLPLabel"
             elif createLabelDlg.pyLType.isChecked():
                 self.centralW.scene.labelType = "PyLabel"
-            print(self.centralW.scene.labelType)
-
-
-class createPinDialog(QDialog):
-    def __init__(self, parent) -> None:
-        super().__init__(parent)
-        self.setWindowTitle("Create Pin")
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.fLayout = QFormLayout()
-
-        self.pinName = QLineEdit()
-        self.pinName.setPlaceholderText("Pin Name")
-        self.pinName.setToolTip("Enter pin name")
-        self.fLayout.addRow(QLabel("Pin Name"), self.pinName)
-        self.pinDir = QComboBox()
-        self.pinDir.addItems(["Input", "Output", "Inout"])
-        self.pinDir.setToolTip("Select pin direction")
-        self.fLayout.addRow(QLabel("Pin Direction"), self.pinDir)
-        self.pinType = QComboBox()
-        self.pinType.addItems(
-            ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
-        )
-        self.pinType.setToolTip("Select pin type")
-        self.fLayout.addRow(QLabel("Pin Type"), self.pinType)
-
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        self.fLayout.addWidget(self.buttonBox)
-        self.setLayout(self.fLayout)
-        self.show()
-
-
-class createSymbolLabelDialog(QDialog):
-    def __init__(self, parent) -> None:
-        super().__init__(parent)
-        self.setWindowTitle("Create Label")
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.mainLayout = QVBoxLayout()
-        self.fLayout = QFormLayout()
-        self.labelName = QLineEdit()
-        self.labelName.setPlaceholderText("Label Name")
-        self.labelName.setToolTip("Enter label name")
-        self.fLayout.addRow(QLabel("Label Name"), self.labelName)
-        self.labelHeight = QLineEdit()
-        self.labelHeight.setPlaceholderText("Label Height")
-        self.labelHeight.setToolTip("Enter label Height")
-        self.fLayout.addRow(QLabel("Label Height"), self.labelHeight)
-        self.labelAlignment = QComboBox()
-        self.labelAlignment.addItems(["Left", "Center", "Right"])
-        self.fLayout.addRow(QLabel("Label Alignment"), self.labelAlignment)
-        self.labelOrientation = QComboBox()
-        self.labelOrientation.addItems(
-            ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
-        )
-        self.fLayout.addRow(QLabel("Label Orientation"), self.labelOrientation)
-        self.labelUse = QComboBox()
-        self.labelUse.addItems(["Normal", "Instance", "Pin", "Device", "Annotation"])
-        self.fLayout.addRow(QLabel("Label Use"), self.labelUse)
-        self.mainLayout.addLayout(self.fLayout)
-        self.labelTypeGroup = QGroupBox("Label Type")
-        self.labelTypeLayout = QHBoxLayout()
-        self.normalType = QRadioButton("Normal")
-        self.normalType.setChecked(True)
-        self.NLPType = QRadioButton("NLPLabel")
-        self.pyLType = QRadioButton("PyLabel")
-        self.labelTypeLayout.addWidget(self.normalType)
-        self.labelTypeLayout.addWidget(self.NLPType)
-        self.labelTypeLayout.addWidget(self.pyLType)
-        self.labelTypeGroup.setLayout(self.labelTypeLayout)
-        self.mainLayout.addWidget(self.labelTypeGroup)
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        self.mainLayout.addWidget(self.buttonBox)
-        self.setLayout(self.mainLayout)
-        self.show()
-
 
 class displayConfigDialog(QDialog):
     def __init__(self, parent):
@@ -1252,15 +1175,15 @@ class editor_scene(QGraphicsScene):
 
     def mousePressEvent(self, mouse_event):
 
-        if self.selectItem == True and self.itemAt(
-            mouse_event.scenePos(), QTransform()
+        if self.selectItem and self.itemAt(
+                mouse_event.scenePos(), QTransform()
         ):
             self.selectedItem = self.itemAt(mouse_event.scenePos(), QTransform())
             print(f'{self.selectedItem.objName()} at {self.selectedItem.pos().toTuple()} is selected.')
         elif (
-            hasattr(self, "start") == False
-            and (self.drawWire or self.drawLine or self.drawPin or self.drawRect)
-            == True
+                hasattr(self, "start") == False
+                and (self.drawWire or self.drawLine or self.drawPin or self.drawRect)
+                == True
         ):
             self.startPosition = mouse_event.scenePos().toPoint()
             self.start = QPoint(
@@ -1323,18 +1246,18 @@ class editor_scene(QGraphicsScene):
         if hasattr(self, "draftItem"):
             self.removeItem(self.draftItem)
             del self.draftItem
-        if self.drawWire == True:
+        if self.drawWire:
             self.lineDraw(self.wirePen)
             self.drawWire = False
-        elif self.drawLine == True:
+        elif self.drawLine:
             self.lineDraw(self.symbolPen)
             self.drawLine = False
-        elif self.drawRect == True:
+        elif self.drawRect:
             self.rectDraw(self.start, self.current, self.symbolPen)
-        elif self.drawPin == True:
+        elif self.drawPin:
             self.pinDraw(self.pinPen)
             self.drawPin = False  # reset flag
-        elif self.addLabel == True:
+        elif self.addLabel:
             self.labelDraw(self.labelPen)
             self.addLabel = False
         if hasattr(self, "start"):
@@ -1423,21 +1346,37 @@ class editor_scene(QGraphicsScene):
         pass
 
     def itemProperties(self):
-
         if self.selectedItem is not None:
             if isinstance(self.selectedItem, shp.rectangle):
-
                 self.queryDlg = pdlg.rectPropertyDialog(
                     self.parent.parent, self.selectedItem
                 )
-
                 if self.queryDlg.exec() == QDialog.Accepted:
-                    self.recreateRect()
-                del self.queryDlg
+                    self.updateRectangleShape()
+            elif isinstance(self.selectedItem, shp.line):
+                self.queryDlg = pdlg.linePropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
+                if self.queryDlg.exec() == QDialog.Accepted:
+                    self.updateLineShape()
+
+            elif isinstance(self.selectedItem, shp.pin):
+                self.queryDlg = pdlg.pinPropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
+                if self.queryDlg.exec() == QDialog.Accepted:
+                    self.updatePinShape()
+            elif isinstance(self.selectedItem, shp.label):
+                self.queryDlg = pdlg.labelPropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
+                if self.queryDlg.exec() == QDialog.Accepted:
+                    pass
+            del self.queryDlg
         else:
             print("No item selected")
 
-    def recreateRect(self):
+    def updateRectangleShape(self):
         location = self.selectedItem.scenePos().toTuple()
         newLeft = self.snapGrid(
             float(self.queryDlg.rectLeftLine.text()) - float(location[0]),
@@ -1460,6 +1399,36 @@ class editor_scene(QGraphicsScene):
         self.selectedItem.setWidth(newWidth)
         self.selectedItem.setHeight(newHeight)
         self.selectedItem.update()
+
+    def updateLineShape(self):
+        location = self.selectedItem.scenePos().toTuple()
+        newStartX = self.snapGrid(float(self.queryDlg.startXLine.text()) - float(location[0]),
+                                  self.gridTuple[0],
+                                  )
+        newStartY = self.snapGrid(float(self.queryDlg.startYLine.text()) - float(location[1]),
+                                  self.gridTuple[1],
+                                  )
+        newEndX = self.snapGrid(float(self.queryDlg.endXLine.text()) - float(location[0]),
+                                self.gridTuple[0],
+                                )
+        newEndY = self.snapGrid(float(self.queryDlg.endYLine.text()) - float(location[1]),
+                                self.gridTuple[1],
+                                )
+        self.selectedItem.start = QPoint(newStartX, newStartY)
+        self.selectedItem.end = QPoint(newEndX, newEndY)
+        self.selectedItem.update()
+
+    def updatePinShape(self):
+        location = self.selectedItem.scenePos().toTuple()
+        newX = self.snapGrid(float(self.queryDlg.pinXLine.text()) - float(location[0]), self.gridTuple[0])
+        newY = self.snapGrid(float(self.queryDlg.pinYLine.text()) - float(location[1]), self.gridTuple[1])
+        self.selectedItem.start = QPoint(newX, newY)
+        self.selectedItem.rect = QRect(newX-5, newY-5, 10, 10)
+        self.selectedItem.pinName = self.queryDlg.pinNameLine.text()
+        self.selectedItem.pinType = self.queryDlg.pinTypeCombo.currentText()
+        self.selectedItem.pinDir = self.queryDlg.pinDirCombo.currentText()
+        self.selectedItem.update()
+
 
     def snapGrid(self, number, base):
         return base * int(round(number / base))
@@ -1546,8 +1515,8 @@ class editor_scene(QGraphicsScene):
             self.objectStack.append(label)
 
     def saveSymbolCell(self, fileName):
-        self.sceneR = self.sceneRect()
-        items = self.items(self.sceneR)
+        self.sceneR = self.sceneRect()  # get scene rect
+        items = self.items(self.sceneR)  # get items in scene rect
         with open(fileName, "w") as f:
             json.dump(items, f, cls=symbolEncoder, indent=4)
 

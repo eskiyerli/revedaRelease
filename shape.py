@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QGraphicsItem,
     QGraphicsSceneMouseEvent,
 )
-
+import math
 import circuitElements as cel
 
 
@@ -216,7 +216,12 @@ class line(shape):
                 painter.drawPoint(self.start)
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
-            painter.drawLine(self.start, self.end)
+            if self.points == 2:
+                painter.drawLine(self.start, self.end)
+            else:
+                midPoint = QPoint(self.end.x(), self.start.y())
+                painter.drawLine(self.start, midPoint)
+                painter.drawLine(midPoint, self.end)
 
     def objName(self):
         return "LINE"
@@ -237,10 +242,12 @@ class line(shape):
         self.start += offset
         self.end += offset
 
+    def length(self):
+        return math.sqrt((self.start.x() - self.end.x()) ** 2 + (self.start.y() - self.end.y()) ** 2)
+
 
 class pin(shape):
     """
-
     rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
     """
 
@@ -259,7 +266,9 @@ class pin(shape):
         self.pinName = pinName
         self.pinDir = pinDir
         self.pinType = pinType
-        self.rect = QRect(start.x() - 5, start.y() - 5, 10, 10)
+        self.rect = QRect(self.start.x() - 5, self.start.y() - 5, 10, 10)
+        self.pinDirs = ["Input", "Output", "Inout"]
+        self.pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
 
     def boundingRect(self):
         return self.rect  #
@@ -275,11 +284,9 @@ class pin(shape):
             painter.setBrush(Qt.yellow)
             painter.drawRect(self.rect)
 
-    def name(self):
-        return self.pinName
 
-    def setName(self, name):
-        self.pinName = name
+    def objName(self):
+        return "PIN"
 
     def setDir(self, direction: str):
         if direction in self.pinDirections:
@@ -322,7 +329,10 @@ class label(shape):
         self.labelFont = QFont("Arial", int(self.labelHeight))
         self.fm = QFontMetrics(self.labelFont)
         self.rect = self.fm.boundingRect(self.labelName)
-        # self.setZValue(10)
+        self.labelAlignments = ["Left", "Center", "Right"]
+        self.labelOrients =["Normal", "Instance", "Pin", "Device", "Annotation"]
+        self.labelUses = ["Normal", "Instance", "Pin", "Device", "Annotation"]
+        self.labelTypes = ["Normal" "NLPLabel", "PyLabel"]
 
     def boundingRect(self):
         return QRect(
@@ -338,3 +348,64 @@ class label(shape):
         else:
             painter.setPen(self.pen)
             painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
+
+    def left(self):
+        return self.start.x()
+
+    def right(self):
+        return self.start.x() + self.boundingRect().width()
+
+    def top(self):
+        return self.start.y()
+
+    def bottom(self):
+        return self.start.y() + self.boundingRect().height()
+
+    def width(self):
+        return self.boundingRect().width()
+
+    def height(self):
+        return self.rect.boundingRect().height()
+
+    def setLabel(self, label):
+        self.labelName = label
+        self.rect = self.fm.boundingRect(self.labelName)
+
+    def objName(self):
+        return "LABEL"
+
+    def setType(self, labelType):
+        if labelType in self.labelTypes:
+            self.labelType = labelType
+        else:
+            print("Invalid label type")
+
+    def setAlign(self, labelAlignment):
+        if labelAlignment in self.labelAlignments:
+            self.labelAlignment = labelAlignment
+        else:
+            print("Invalid label alignment")
+
+    def setOrient(self, labelOrient):
+        if labelOrient in self.labelOrients:
+            self.labelOrient = labelOrient
+        else:
+            print("Invalid label orientation")
+
+    def setUse(self, labelUse):
+        if labelUse in self.labelUses:
+            self.labelUse = labelUse
+        else:
+            print("Invalid label use")
+
+    def moveBy(self, delta: QPoint):
+        self.start += delta
+
+
+
+
+
+
+
+
+
