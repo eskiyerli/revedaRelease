@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QGraphicsItem,
     QGraphicsSceneMouseEvent,
 )
-
+import math
 import circuitElements as cel
 
 
@@ -216,7 +216,12 @@ class line(shape):
                 painter.drawPoint(self.start)
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
-            painter.drawLine(self.start, self.end)
+            if self.points == 2:
+                painter.drawLine(self.start, self.end)
+            else:
+                midPoint = QPoint(self.end.x(), self.start.y())
+                painter.drawLine(self.start, midPoint)
+                painter.drawLine(midPoint, self.end)
 
     def objName(self):
         return "LINE"
@@ -236,6 +241,9 @@ class line(shape):
     def Move(self, offset: QPoint):
         self.start += offset
         self.end += offset
+
+    def length(self):
+        return math.sqrt((self.start.x() - self.end.x()) ** 2 + (self.start.y() - self.end.y()) ** 2)
 
 
 class pin(shape):
@@ -259,7 +267,7 @@ class pin(shape):
         self.pinName = pinName
         self.pinDir = pinDir
         self.pinType = pinType
-        self.rect = QRect(start.x() - 5, start.y() - 5, 10, 10)
+        self.rect = QRect(self.start.x() - 5, self.start.y() - 5, 10, 10)
 
     def boundingRect(self):
         return self.rect  #
@@ -280,6 +288,9 @@ class pin(shape):
 
     def setName(self, name):
         self.pinName = name
+
+    def objName(self):
+        return "PIN"
 
     def setDir(self, direction: str):
         if direction in self.pinDirections:

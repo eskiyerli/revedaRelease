@@ -66,6 +66,7 @@ from Point import *
 from Vector import *
 import resources
 
+
 # from threading import Thread
 
 
@@ -987,13 +988,13 @@ class symbolEditor(editorWindow):
         self.centralW.scene.copySelectedItem()
 
     def setDrawMode(
-        self,
-        drawPin: bool,
-        selectItem: bool,
-        drawArc: bool,
-        drawRect: bool,
-        drawLine: bool,
-        addLabel: bool,
+            self,
+            drawPin: bool,
+            selectItem: bool,
+            drawArc: bool,
+            drawRect: bool,
+            drawLine: bool,
+            addLabel: bool,
     ):
         """
         Sets the drawing mode in the symbol editor.
@@ -1252,15 +1253,15 @@ class editor_scene(QGraphicsScene):
 
     def mousePressEvent(self, mouse_event):
 
-        if self.selectItem == True and self.itemAt(
-            mouse_event.scenePos(), QTransform()
+        if self.selectItem and self.itemAt(
+                mouse_event.scenePos(), QTransform()
         ):
             self.selectedItem = self.itemAt(mouse_event.scenePos(), QTransform())
             print(f'{self.selectedItem.objName()} at {self.selectedItem.pos().toTuple()} is selected.')
         elif (
-            hasattr(self, "start") == False
-            and (self.drawWire or self.drawLine or self.drawPin or self.drawRect)
-            == True
+                hasattr(self, "start") == False
+                and (self.drawWire or self.drawLine or self.drawPin or self.drawRect)
+                == True
         ):
             self.startPosition = mouse_event.scenePos().toPoint()
             self.start = QPoint(
@@ -1323,18 +1324,18 @@ class editor_scene(QGraphicsScene):
         if hasattr(self, "draftItem"):
             self.removeItem(self.draftItem)
             del self.draftItem
-        if self.drawWire == True:
+        if self.drawWire:
             self.lineDraw(self.wirePen)
             self.drawWire = False
-        elif self.drawLine == True:
+        elif self.drawLine:
             self.lineDraw(self.symbolPen)
             self.drawLine = False
-        elif self.drawRect == True:
+        elif self.drawRect:
             self.rectDraw(self.start, self.current, self.symbolPen)
-        elif self.drawPin == True:
+        elif self.drawPin:
             self.pinDraw(self.pinPen)
             self.drawPin = False  # reset flag
-        elif self.addLabel == True:
+        elif self.addLabel:
             self.labelDraw(self.labelPen)
             self.addLabel = False
         if hasattr(self, "start"):
@@ -1423,21 +1424,31 @@ class editor_scene(QGraphicsScene):
         pass
 
     def itemProperties(self):
-
         if self.selectedItem is not None:
             if isinstance(self.selectedItem, shp.rectangle):
-
                 self.queryDlg = pdlg.rectPropertyDialog(
                     self.parent.parent, self.selectedItem
                 )
-
                 if self.queryDlg.exec() == QDialog.Accepted:
-                    self.recreateRect()
-                del self.queryDlg
+                    self.updateRectangleShape()
+            elif isinstance(self.selectedItem, shp.line):
+                self.queryDlg = pdlg.linePropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
+                if self.queryDlg.exec() == QDialog.Accepted:
+                    self.updateLineShape()
+
+            elif isinstance(self.selectedItem, shp.pin):
+                self.queryDlg = pdlg.pinPropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
+                if self.queryDlg.exec() == QDialog.Accepted:
+                    self.updatePinShape()
+            del self.queryDlg
         else:
             print("No item selected")
 
-    def recreateRect(self):
+    def updateRectangleShape(self):
         location = self.selectedItem.scenePos().toTuple()
         newLeft = self.snapGrid(
             float(self.queryDlg.rectLeftLine.text()) - float(location[0]),
@@ -1459,6 +1470,35 @@ class editor_scene(QGraphicsScene):
         self.selectedItem.setTop(newTop)
         self.selectedItem.setWidth(newWidth)
         self.selectedItem.setHeight(newHeight)
+        self.selectedItem.update()
+
+    def updateLineShape(self):
+        location = self.selectedItem.scenePos().toTuple()
+        newStartX = self.snapGrid(float(self.queryDlg.startXLine.text()) - float(location[0]),
+                                  self.gridTuple[0],
+                                  )
+        newStartY = self.snapGrid(float(self.queryDlg.startYLine.text()) - float(location[1]),
+                                  self.gridTuple[1],
+                                  )
+        newEndX = self.snapGrid(float(self.queryDlg.endXLine.text()) - float(location[0]),
+                                self.gridTuple[0],
+                                )
+        newEndY = self.snapGrid(float(self.queryDlg.endYLine.text()) - float(location[1]),
+                                self.gridTuple[1],
+                                )
+        self.selectedItem.start = QPoint(newStartX, newStartY)
+        self.selectedItem.end = QPoint(newEndX, newEndY)
+        self.selectedItem.update()
+
+    def updatePinShape(self):
+        location = self.selectedItem.scenePos().toTuple()
+        newX = self.snapGrid(float(self.queryDlg.pinXLine.text()) - float(location[0]), self.gridTuple[0])
+        newY = self.snapGrid(float(self.queryDlg.pinYLine.text()) - float(location[1]), self.gridTuple[1])
+        self.selectedItem.start = QPoint(newX, newY)
+        self.selectedItem.rect = QRect(newX-5, newY-5, 10, 10)
+        self.selectedItem.pinName = self.queryDlg.pinNameLine.text()
+        self.selectedItem.pinType = self.queryDlg.pinTypeCombo.currentText()
+        self.selectedItem.pinDir = self.queryDlg.pinDirCombo.currentText()
         self.selectedItem.update()
 
     def snapGrid(self, number, base):
@@ -1546,8 +1586,8 @@ class editor_scene(QGraphicsScene):
             self.objectStack.append(label)
 
     def saveSymbolCell(self, fileName):
-        self.sceneR = self.sceneRect()
-        items = self.items(self.sceneR)
+        self.sceneR = self.sceneRect()  # get scene rect
+        items = self.items(self.sceneR)  # get items in scene rect
         with open(fileName, "w") as f:
             json.dump(items, f, cls=symbolEncoder, indent=4)
 

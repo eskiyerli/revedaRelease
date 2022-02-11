@@ -1,0 +1,119 @@
+[
+    {
+        "type": "rect",
+        "rect": [
+            -330,
+            -370,
+            -50,
+            -140
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -340,
+            -300
+        ],
+        "end": [
+            550,
+            -200
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            320.0,
+            -60.0
+        ]
+    },
+    {
+        "type": "label",
+        "start": [
+            -860,
+            -1190
+        ],
+        "color": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "width": 1,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "labelName": "label",
+        "labelType": "Normal",
+        "labelHeight": "20",
+        "labelAlignment": "Left",
+        "labelOrient": "R0",
+        "labelUse": "Normal",
+        "location": [
+            810.0,
+            1040.0
+        ]
+    },
+    {
+        "type": "rect",
+        "rect": [
+            30,
+            -210,
+            829,
+            139
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            -210.0,
+            -30.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            300,
+            -200
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "ZIN",
+        "pinDir": "Output",
+        "pinType": "Power",
+        "location": [
+            0.0,
+            0.0
+        ]
+    }
+]
