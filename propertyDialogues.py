@@ -93,12 +93,12 @@ class createPinDialog(QDialog):
         self.pinName.setToolTip("Enter pin name")
         self.fLayout.addRow(QLabel("Pin Name"), self.pinName)
         self.pinDir = QComboBox()
-        self.pinDir.addItems(shp.pin().pinDirs)
+        self.pinDir.addItems(shp.pin.pinDirs)
         self.pinDir.setToolTip("Select pin direction")
         self.fLayout.addRow(QLabel("Pin Direction"), self.pinDir)
         self.pinType = QComboBox()
         self.pinType.addItems(
-            shp.pin().pinTypes
+            shp.pin.pinTypes
         )
         self.pinType.setToolTip("Select pin type")
         self.fLayout.addRow(QLabel("Pin Type"), self.pinType)
@@ -148,23 +148,23 @@ class createSymbolLabelDialog(QDialog):
         self.labelHeight.setToolTip("Enter label Height")
         self.fLayout.addRow(QLabel("Label Height"), self.labelHeight)
         self.labelAlignment = QComboBox()
-        self.labelAlignment.addItems(shp.label().labelAlignments)
+        self.labelAlignment.addItems(shp.label.labelAlignments)
         self.fLayout.addRow(QLabel("Label Alignment"), self.labelAlignment)
         self.labelOrientation = QComboBox()
         self.labelOrientation.addItems(
-            shp.label().labelOrientations
+            shp.label.labelOrients
         )
         self.fLayout.addRow(QLabel("Label Orientation"), self.labelOrientation)
         self.labelUse = QComboBox()
-        self.labelUse.addItems(shp.label().labelUses)
+        self.labelUse.addItems(shp.label.labelUses)
         self.fLayout.addRow(QLabel("Label Use"), self.labelUse)
         self.mainLayout.addLayout(self.fLayout)
         self.labelTypeGroup = QGroupBox("Label Type")
         self.labelTypeLayout = QHBoxLayout()
-        self.normalType = QRadioButton(shp.label().labelTypes[0])
-        self.normalType.setChecked(True)
-        self.NLPType = QRadioButton(shp.label().labelTypes[1])
-        self.pyLType = QRadioButton(shp.label().labelTypes[2])
+        self.normalType = QRadioButton(shp.label.labelTypes[0])
+        # self.normalType.setChecked(True)
+        self.NLPType = QRadioButton(shp.label.labelTypes[1])
+        self.pyLType = QRadioButton(shp.label.labelTypes[2])
         self.labelTypeLayout.addWidget(self.normalType)
         self.labelTypeLayout.addWidget(self.NLPType)
         self.labelTypeLayout.addWidget(self.pyLType)
@@ -191,9 +191,17 @@ class labelPropertyDialog(createSymbolLabelDialog):
         self.labelAlignment.setCurrentText(labelItem.labelAlignment)
         self.labelOrientation.setCurrentText(labelItem.labelOrient)
         self.labelUse.setCurrentText(labelItem.labelUse)
-        if labelItem.labelType == "Normal":
+        if self.labelItem.labelType == "Normal":
             self.normalType.setChecked(True)
-        elif labelItem.labelType == "NLPLabel":
+        elif self.labelItem.labelType == "NLPLabel":
             self.NLPType.setChecked(True)
-        elif labelItem.labelType == "PyLabel":
+        elif self.labelItem.labelType == "PyLabel":
             self.pyLType.setChecked(True)
+        self.labelXLine = QLineEdit()
+        self.labelXLine.setText(str(self.labelItem.start.x() + self.location[0]))
+        self.labelXLine.setToolTip("X Coordinate")
+        self.fLayout.addRow(QLabel("X:"), self.labelXLine)
+        self.labelYLine = QLineEdit()
+        self.labelYLine.setText(str(self.labelItem.start.y() + self.location[1]))
+        self.labelYLine.setToolTip("Y Coordinate")
+        self.fLayout.addRow(QLabel("Y:"), self.labelYLine)
