@@ -14,6 +14,7 @@ import math
 import circuitElements as cel
 import copy
 
+
 class shape(QGraphicsItem):
     def __init__(self, pen: QPen, grid: tuple) -> None:
         super().__init__()
@@ -137,7 +138,6 @@ class rectangle(shape):
             self.stretchSide = None
             self.update()
 
-
     def centre(self):
         return QPoint(
             int(self.rect.x() + self.rect.width() / 2),
@@ -224,19 +224,19 @@ class rectangle(shape):
             if self.stretchSide == "left":
                 self.setCursor(Qt.SizeHorCursor)
                 self.rect.setLeft(eventPos.x())
-                self.rect= QRect(self.rect.topLeft(), self.rect.bottomRight())
+                self.rect = QRect(self.rect.topLeft(), self.rect.bottomRight())
             elif self.stretchSide == "right":
                 self.setCursor(Qt.SizeHorCursor)
                 self.rect.setRight(eventPos.x())
-                self.rect= QRect(self.rect.topLeft(), self.rect.bottomRight())
+                self.rect = QRect(self.rect.topLeft(), self.rect.bottomRight())
             elif self.stretchSide == "top":
                 self.setCursor(Qt.SizeVerCursor)
                 self.rect.setTop(eventPos.y())
-                self.rect= QRect(self.rect.topLeft(), self.rect.bottomRight())
+                self.rect = QRect(self.rect.topLeft(), self.rect.bottomRight())
             elif self.stretchSide == "bottom":
                 self.setCursor(Qt.SizeVerCursor)
                 self.rect.setBottom(eventPos.y())
-                self.rect= QRect(self.rect.topLeft(), self.rect.bottomRight())
+                self.rect = QRect(self.rect.topLeft(), self.rect.bottomRight())
             self.update()
 
         else:
@@ -246,6 +246,7 @@ class rectangle(shape):
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         self.stretch = False
         super().mouseReleaseEvent(event)
+
 
 class line(shape):
     """
@@ -392,7 +393,7 @@ class label(shape):
             grid: tuple,
             labelType: str,
             labelHeight: str = "12",
-            labelAlignment: str = "Left",
+            labelAlign: str = "Left",
             labelOrient: str = "R0",
             labelUse: str = "Normal",
     ):
@@ -401,7 +402,7 @@ class label(shape):
         self.pen = pen
         self.labelName = labelName
         self.labelHeight = labelHeight
-        self.labelAlignment = labelAlignment
+        self.labelAlign = labelAlign
         self.labelOrient = labelOrient
         self.labelUse = labelUse
         self.labelType = labelType
@@ -460,7 +461,7 @@ class label(shape):
 
     def setAlign(self, labelAlignment):
         if labelAlignment in self.labelAlignments:
-            self.labelAlignment = labelAlignment
+            self.labelAlign = labelAlignment
         else:
             print("Invalid label alignment")
 

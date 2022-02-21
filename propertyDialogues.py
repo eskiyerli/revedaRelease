@@ -9,7 +9,9 @@ from PySide6.QtWidgets import (
     QLabel,
     QComboBox,
     QGroupBox,
-    QRadioButton
+    QRadioButton,
+    QGridLayout,
+    QCheckBox,
 )
 
 import shape as shp
@@ -139,30 +141,30 @@ class createSymbolLabelDialog(QDialog):
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.mainLayout = QVBoxLayout()
         self.fLayout = QFormLayout()
-        self.labelName = QLineEdit()
-        self.labelName.setPlaceholderText("Label Name")
-        self.labelName.setToolTip("Enter label name")
-        self.fLayout.addRow(QLabel("Label Name"), self.labelName)
-        self.labelHeight = QLineEdit()
-        self.labelHeight.setPlaceholderText("Label Height")
-        self.labelHeight.setToolTip("Enter label Height")
-        self.fLayout.addRow(QLabel("Label Height"), self.labelHeight)
-        self.labelAlignment = QComboBox()
-        self.labelAlignment.addItems(shp.label.labelAlignments)
-        self.fLayout.addRow(QLabel("Label Alignment"), self.labelAlignment)
-        self.labelOrientation = QComboBox()
-        self.labelOrientation.addItems(
+        self.labelNameEdit = QLineEdit()
+        self.labelNameEdit.setPlaceholderText("Label Definition")
+        self.labelNameEdit.setToolTip("Enter label Definition")
+        self.fLayout.addRow(QLabel("Label Definition"), self.labelNameEdit)
+        self.labelHeightEdit = QLineEdit()
+        self.labelHeightEdit.setPlaceholderText("Label Height")
+        self.labelHeightEdit.setToolTip("Enter label Height")
+        self.fLayout.addRow(QLabel("Label Height"), self.labelHeightEdit)
+        self.labelAlignCombo = QComboBox()
+        self.labelAlignCombo.addItems(shp.label.labelAlignments)
+        self.fLayout.addRow(QLabel("Label Alignment"), self.labelAlignCombo)
+        self.labelOrientCombo = QComboBox()
+        self.labelOrientCombo.addItems(
             shp.label.labelOrients
         )
-        self.fLayout.addRow(QLabel("Label Orientation"), self.labelOrientation)
-        self.labelUse = QComboBox()
-        self.labelUse.addItems(shp.label.labelUses)
-        self.fLayout.addRow(QLabel("Label Use"), self.labelUse)
+        self.fLayout.addRow(QLabel("Label Orientation"), self.labelOrientCombo)
+        self.labelUseCombo = QComboBox()
+        self.labelUseCombo.addItems(shp.label.labelUses)
+        self.fLayout.addRow(QLabel("Label Use"), self.labelUseCombo)
         self.mainLayout.addLayout(self.fLayout)
         self.labelTypeGroup = QGroupBox("Label Type")
         self.labelTypeLayout = QHBoxLayout()
         self.normalType = QRadioButton(shp.label.labelTypes[0])
-        # self.normalType.setChecked(True)
+        self.normalType.setChecked(True)
         self.NLPType = QRadioButton(shp.label.labelTypes[1])
         self.pyLType = QRadioButton(shp.label.labelTypes[2])
         self.labelTypeLayout.addWidget(self.normalType)
@@ -186,11 +188,11 @@ class labelPropertyDialog(createSymbolLabelDialog):
         self.location = self.labelItem.scenePos().toTuple()
 
         self.setWindowTitle("Label Properties")
-        self.labelName.setText(str(labelItem.labelName))
-        self.labelHeight.setText(str(labelItem.labelHeight))
-        self.labelAlignment.setCurrentText(labelItem.labelAlignment)
-        self.labelOrientation.setCurrentText(labelItem.labelOrient)
-        self.labelUse.setCurrentText(labelItem.labelUse)
+        self.labelNameEdit.setText(str(labelItem.labelName))
+        self.labelHeightEdit.setText(str(labelItem.labelHeight))
+        self.labelAlignCombo.setCurrentText(labelItem.labelAlign)
+        self.labelOrientCombo.setCurrentText(labelItem.labelOrient)
+        self.labelUseCombo.setCurrentText(labelItem.labelUse)
         if self.labelItem.labelType == "Normal":
             self.normalType.setChecked(True)
         elif self.labelItem.labelType == "NLPLabel":
@@ -205,3 +207,104 @@ class labelPropertyDialog(createSymbolLabelDialog):
         self.labelYLine.setText(str(self.labelItem.start.y() + self.location[1]))
         self.labelYLine.setToolTip("Y Coordinate")
         self.fLayout.addRow(QLabel("Y:"), self.labelYLine)
+
+
+class symbolLabelsDialogue(QDialog):
+    '''
+    Dialog for changing symbol labels and attributes. Symbol properties... menu item.
+    '''
+    def __init__(self,parent,items:list):
+        super().__init__(parent)
+        self.parent = parent
+        self.items = items
+        self.setWindowTitle("Symbol Labels")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.mainLayout = QVBoxLayout()
+        self.symbolPropsLayout = QGridLayout()
+        self.symbolLabelsLayout = QGridLayout()
+        self.labelItemList = []
+        self.labelNameList = []
+        self.labelHeightList = []
+        self.labelAlignmentList = []
+        self.labelOrientationList = []
+        self.labelUseList = []
+        self.labelTypeList = []
+        self.labelItemList = []
+        self.attributeNameList = []
+        self.attributeTypeList = []
+        self.attributeDefList = []
+
+        # Symbol Properties
+        self.symbolPropsLayout.addWidget(QLabel("Attribute Name"), 0, 0)
+        self.symbolPropsLayout.addWidget(QLabel("Type"), 0, 1)
+        self.symbolPropsLayout.addWidget(QLabel("Definition"), 0, 2)
+        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 0)
+        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 1)
+        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 2)
+        i =0
+        self.attributeNameList.append(QLineEdit())
+        attrTypeCombo = QComboBox()
+        attrTypeCombo.addItems(shp.label.labelTypes)
+        self.attributeTypeList.append(attrTypeCombo)
+        self.attributeDefList.append(QLineEdit())
+        self.symbolPropsLayout.addWidget(self.attributeNameList[i], i+1, 0)
+        self.symbolPropsLayout.addWidget(self.attributeTypeList[i], i+1, 1)
+        self.symbolPropsLayout.addWidget(self.attributeDefList[i], i+1, 2)
+        self.attributeNameList[-1].setPlaceholderText("Enter Attribute Name")
+        self.attributeTypeList[-1].setToolTip("Enter Attribute Type")
+        self.attributeDefList[-1].setToolTip("Enter Attribute Definition")
+        self.attributeDefList[-1].returnPressed.connect(self.updateAttributeDef)
+        # Symbol Labels
+        self.symbolLabelsMethod()
+        self.mainLayout.addLayout(self.symbolLabelsLayout)
+        self.mainLayout.addLayout(self.symbolPropsLayout)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        # self.buttonBox.accepted.connect(self.accept)
+        # self.buttonBox.rejected.connect(self.reject)
+
+    def updateAttributeDef(self):
+        print('updateAttributeDef')
+
+    def symbolLabelsMethod(self):
+        i = 0
+        self.symbolLabelsLayout.addWidget(QLabel("Definition"), 0, 0)
+        self.symbolLabelsLayout.addWidget(QLabel("Height"), 0, 1)
+        self.symbolLabelsLayout.addWidget(QLabel("Alignment"), 0, 2)
+        self.symbolLabelsLayout.addWidget(QLabel("Orientation"), 0, 3)
+        self.symbolLabelsLayout.addWidget(QLabel("Use"), 0, 4)
+        self.symbolLabelsLayout.addWidget(QLabel("Type"), 0, 5)
+        for item in self.items:
+            if type(item) == shp.label:
+                i += 1
+                self.labelItemList.append(item)
+                self.labelNameList.append(QLabel(item.labelName))
+                self.symbolLabelsLayout.addWidget(self.labelNameList[-1], i, 0)
+                self.labelHeightList.append(shortLineEdit())
+                self.labelHeightList[-1].setText(str(item.labelHeight))
+                self.symbolLabelsLayout.addWidget(self.labelHeightList[-1], i, 1)
+                self.labelAlignmentList.append(QComboBox())
+                self.labelAlignmentList[-1].addItems(shp.label.labelAlignments)
+                self.labelAlignmentList[-1].setCurrentText(item.labelAlign)
+                self.symbolLabelsLayout.addWidget(self.labelAlignmentList[-1], i, 2)
+                self.labelOrientationList.append(QComboBox())
+                self.labelOrientationList[-1].addItems(shp.label.labelOrients)
+                self.labelOrientationList[-1].setCurrentText(item.labelOrient)
+                self.symbolLabelsLayout.addWidget(self.labelOrientationList[-1], i, 3)
+                self.labelUseList.append(QComboBox())
+                self.labelUseList[-1].addItems(shp.label.labelUses)
+                self.labelUseList[-1].setCurrentText(item.labelUse)
+                self.symbolLabelsLayout.addWidget(self.labelUseList[-1], i, 4)
+                self.labelTypeList.append(QComboBox())
+                self.labelTypeList[-1].addItems(shp.label.labelTypes)
+                self.labelTypeList[-1].setCurrentText(item.labelType)
+                self.symbolLabelsLayout.addWidget(self.labelTypeList[-1], i, 5)
+        if i == 0:  # no labels to edit
+            self.symbolLabelsLayout.addWidget(QLabel("No symbol labels found."), 1, 0)
+
+
+class shortLineEdit(QLineEdit):
+    def __init__(self):
+        super().__init__(None)
+        self.setMaximumWidth(50)

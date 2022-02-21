@@ -58,7 +58,7 @@ class designLibrariesView(QTreeView):
             cellList = [str(cell.name) for cell in designPath.iterdir() if cell.is_dir()]
             for cell in cellList:  # type: str
                 viewList = [str(view.stem) for view in designPath.joinpath(cell).iterdir() if
-                    view.suffix == ".json" and str(view.stem) in self.cellViews]
+                            view.suffix == ".json" and str(view.stem) in self.cellViews]
                 if len(viewList) >= 0:
                     cellEntry = self.addCell(designPath, libraryEntry, cell)
                     for view in viewList:
@@ -439,7 +439,7 @@ class copyViewDialog(QDialog):
 
     def viewList(self):
         viewList = [str(view.stem) for view in self.selectedLibPath.joinpath(self.selectedCell).iterdir() if
-            view.suffix == ".json"]
+                    view.suffix == ".json"]
         return viewList
 
     def selectLibrary(self):
@@ -845,6 +845,8 @@ class symbolEditor(editorWindow):
 
     def _addActions(self):
         super()._addActions()
+        self.menuEdit.addAction(self.stretchAction)
+        self.menuEdit.addAction(self.viewPropAction)
         self.menuCreate.addAction(self.createLineAction)
         self.menuCreate.addAction(self.createRectAction)
         self.menuCreate.addAction(self.createPolyAction)
@@ -869,6 +871,7 @@ class symbolEditor(editorWindow):
         self.undoAction.triggered.connect(self.undoClick)
         self.deleteAction.triggered.connect(self.deleteClick)
         self.stretchAction.triggered.connect(self.stretchClick)
+        self.viewPropAction.triggered.connect(self.viewPropClick)
         super()._createTriggers()
 
     def _symbolActions(self):
@@ -923,8 +926,11 @@ class symbolEditor(editorWindow):
     def stretchClick(self, s):
         self.centralW.scene.stretchSelectedItem()
 
+    def viewPropClick(self, s):
+        self.centralW.scene.viewSymbolProperties()
+
     def setDrawMode(self, drawPin: bool, selectItem: bool, drawArc: bool, drawRect: bool, drawLine: bool,
-            addLabel: bool, ):
+                    addLabel: bool, ):
         """
         Sets the drawing mode in the symbol editor.
         """
@@ -948,11 +954,11 @@ class symbolEditor(editorWindow):
         if createLabelDlg.exec() == QDialog.Accepted:
             self.setDrawMode(False, False, False, False, False, True)
             # directly setting scene class attributes here to pass the information.
-            self.centralW.scene.labelName = createLabelDlg.labelName.text()
-            self.centralW.scene.labelHeight = createLabelDlg.labelHeight.text().strip()
-            self.centralW.scene.labelAlignment = (createLabelDlg.labelAlignment.currentText())
-            self.centralW.scene.labelOrient = (createLabelDlg.labelOrientation.currentText())
-            self.centralW.scene.labelUse = createLabelDlg.labelUse.currentText()
+            self.centralW.scene.labelName = createLabelDlg.labelNameEdit.text()
+            self.centralW.scene.labelHeight = createLabelDlg.labelHeightEdit.text().strip()
+            self.centralW.scene.labelAlignment = (createLabelDlg.labelAlignCombo.currentText())
+            self.centralW.scene.labelOrient = (createLabelDlg.labelOrientCombo.currentText())
+            self.centralW.scene.labelUse = createLabelDlg.labelUseCombo.currentText()
             self.centralW.scene.labelType = "Normal"  # default button
             if createLabelDlg.normalType.isChecked():
                 self.centralW.scene.labelType = "Normal"
@@ -1095,7 +1101,7 @@ class editor_scene(QGraphicsScene):
                 self.drawWire or self.drawLine or self.drawPin or self.drawRect or self.addLabel) == True):
             self.startPosition = mouse_event.scenePos().toPoint()
             self.start = QPoint(self.snapGrid(self.startPosition.x(), self.gridMajor),
-                self.snapGrid(self.startPosition.y(), self.gridMajor), )
+                                self.snapGrid(self.startPosition.y(), self.gridMajor), )
             self.selectedItem = None
         super().mousePressEvent(mouse_event)
 
@@ -1128,7 +1134,7 @@ class editor_scene(QGraphicsScene):
             fm = QFontMetrics(self.labelFont)
             self.draftItem = QGraphicsRectItem(
                 QRect(self.current.x(), self.current.y(), fm.boundingRect(self.labelName).width(),
-                    fm.boundingRect(self.labelName).height(), ))
+                      fm.boundingRect(self.labelName).height(), ))
             self.draftItem.setPen(pen)
             self.addItem(self.draftItem)
         self.parent.parent.statusLine.showMessage("Cursor Position: " + str(self.current.toTuple()))
@@ -1183,7 +1189,7 @@ class editor_scene(QGraphicsScene):
 
     def labelDraw(self, pen: QPen):
         label = shp.label(self.current, pen, self.labelName, self.gridTuple, self.labelType, self.labelHeight,
-            self.labelAlignment, self.labelOrient, self.labelUse, )
+                          self.labelAlignment, self.labelOrient, self.labelUse, )
         self.addItem(label)
         self.objectStack.append(label)
 
@@ -1233,12 +1239,11 @@ class editor_scene(QGraphicsScene):
         if hasattr(self, "selectedItem"):
             selectedItemJson = json.dumps(self.selectedItem, cls=symbolEncoder)
             itemCopyDict = json.loads(selectedItemJson)
-            print(itemCopyDict)
-
             shape = self.createSymbolItems(itemCopyDict)
             self.addItem(shape)
-            shape.setPos(self.current)
-
+            shape.setPos(QPoint(self.selectedItem.pos().x() + self.gridTuple[0],
+                                self.selectedItem.pos().y() + self.gridTuple[1]))
+            self.objectStack.append(shape)
 
     def itemProperties(self):
         if self.selectedItem is not None:
@@ -1294,19 +1299,22 @@ class editor_scene(QGraphicsScene):
         newY = self.snapGrid(float(self.queryDlg.pinYLine.text()) - float(location[1]), self.gridTuple[1])
         self.selectedItem.start = QPoint(newX, newY)
         self.selectedItem.rect = QRect(newX - 5, newY - 5, 10, 10)
-        self.selectedItem.pinName = self.queryDlg.pinNameLine.text()
-        self.selectedItem.pinType = self.queryDlg.pinTypeCombo.currentText()
-        self.selectedItem.pinDir = self.queryDlg.pinDirCombo.currentText()
+        self.selectedItem.pinName = self.queryDlg.pinName.text()
+        self.selectedItem.pinType = self.queryDlg.pinType.currentText()
+        self.selectedItem.pinDir = self.queryDlg.pinDir.currentText()
         self.selectedItem.update()
 
     def updateLabelShape(self):
+        '''
+        update pin shape with new values.
+        '''
         location = self.selectedItem.scenePos().toTuple()
         newX = self.snapGrid(float(self.queryDlg.labelXLine.text()) - float(location[0]), self.gridTuple[0])
         newY = self.snapGrid(float(self.queryDlg.labelYLine.text()) - float(location[1]), self.gridTuple[1])
         self.selectedItem.start = QPoint(newX, newY)
-        self.selectedItem.labelName = self.queryDlg.labelName.text()
-        self.selectedItem.labelHeight = self.queryDlg.labelHeight.text()
-        self.selectedItem.labelAlignment = self.queryDlg.labelAlignment.currentText()
+        self.selectedItem.labelName = self.queryDlg.labelNameEdit.text()
+        self.selectedItem.labelHeight = self.queryDlg.labelHeightEdit.text()
+        self.selectedItem.labelAlign = self.queryDlg.labelAlignCombo.currentText()
         self.selectedItem.labelOrient = self.queryDlg.labelOrientation.currentText()
         self.selectedItem.labelUse = self.queryDlg.labelUse.currentText()
         if self.queryDlg.normalType.isChecked():
@@ -1373,7 +1381,7 @@ class editor_scene(QGraphicsScene):
             pen = QPen(penColor, penWidth, penStyle)
             pen.setCosmetic(item["cosmetic"])
             label = shp.label(start, pen, item["labelName"], self.gridTuple, item["labelType"], item["labelHeight"],
-                item["labelAlignment"], item["labelOrient"], item["labelUse"], )
+                              item["labelAlign"], item["labelOrient"], item["labelUse"], )
             label.setPos(QPoint(item["location"][0], item["location"][1]))
             return label
 
@@ -1387,36 +1395,47 @@ class editor_scene(QGraphicsScene):
         if self.selectedItem is not None:
             self.selectedItem.stretch = True
 
+    def viewSymbolProperties(self):
+        symbolPropDialogue = pdlg.symbolLabelsDialogue(self.parent.parent, self.items())
+        if symbolPropDialogue.exec() == QDialog.Accepted:
+            for i, item in enumerate(symbolPropDialogue.labelItemList):
+                # label name is not changed.
+                item.labelHeight = symbolPropDialogue.labelHeightList[i]
+                item.labelAlign = symbolPropDialogue.labelAlignmentList[i]
+                item.labelOrient = symbolPropDialogue.labelOrientationList[i]
+                item.labelUse = symbolPropDialogue.labelUseList[i]
+                item.labelType = symbolPropDialogue.labelTypeList[i]
+                item.update()
 
 class symbolEncoder(json.JSONEncoder):
     def default(self, item):
         if isinstance(item, shp.rectangle):
             itemDict = {"type": "rect", "rect": item.__dict__["rect"].getCoords(),
-                "color": item.__dict__["pen"].color().toTuple(), "width": item.__dict__["pen"].width(),
-                "lineStyle": str(item.__dict__["pen"].style()), "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": item.scenePos().toTuple(), }
+                        "color": item.__dict__["pen"].color().toTuple(), "width": item.__dict__["pen"].width(),
+                        "lineStyle": str(item.__dict__["pen"].style()), "cosmetic": item.__dict__["pen"].isCosmetic(),
+                        "location": item.scenePos().toTuple(), }
             return itemDict
         elif isinstance(item, shp.line):
             itemDict = {"type": "line", "start": item.__dict__["start"].toTuple(),
-                "end": item.__dict__["end"].toTuple(), "color": item.__dict__["pen"].color().toTuple(),
-                "width": item.__dict__["pen"].width(), "lineStyle": str(item.__dict__["pen"].style()),
-                "cosmetic": item.__dict__["pen"].isCosmetic(), "location": item.scenePos().toTuple(), }
+                        "end": item.__dict__["end"].toTuple(), "color": item.__dict__["pen"].color().toTuple(),
+                        "width": item.__dict__["pen"].width(), "lineStyle": str(item.__dict__["pen"].style()),
+                        "cosmetic": item.__dict__["pen"].isCosmetic(), "location": item.scenePos().toTuple(), }
             return itemDict
         elif isinstance(item, shp.pin):
             itemDict = {"type": "pin", "start": item.__dict__["start"].toTuple(),
-                "color": item.__dict__["pen"].color().toTuple(), "width": item.__dict__["pen"].width(),
-                "lineStyle": str(item.__dict__["pen"].style()), "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "pinName": item.__dict__["pinName"], "pinDir": item.__dict__["pinDir"],
-                "pinType": item.__dict__["pinType"], "location": item.scenePos().toTuple(), }
+                        "color": item.__dict__["pen"].color().toTuple(), "width": item.__dict__["pen"].width(),
+                        "lineStyle": str(item.__dict__["pen"].style()), "cosmetic": item.__dict__["pen"].isCosmetic(),
+                        "pinName": item.__dict__["pinName"], "pinDir": item.__dict__["pinDir"],
+                        "pinType": item.__dict__["pinType"], "location": item.scenePos().toTuple(), }
             return itemDict
         elif isinstance(item, shp.label):
             itemDict = {"type": "label", "start": item.__dict__["start"].toTuple(),
-                "color": item.__dict__["pen"].color().toTuple(), "width": item.__dict__["pen"].width(),
-                "lineStyle": str(item.__dict__["pen"].style()), "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "labelName": item.__dict__["labelName"], "labelType": item.__dict__["labelType"],
-                "labelHeight": item.__dict__["labelHeight"], "labelAlignment": item.__dict__["labelAlignment"],
-                "labelOrient": item.__dict__["labelOrient"], "labelUse": item.__dict__["labelUse"],
-                "location": item.scenePos().toTuple(), }
+                        "color": item.__dict__["pen"].color().toTuple(), "width": item.__dict__["pen"].width(),
+                        "lineStyle": str(item.__dict__["pen"].style()), "cosmetic": item.__dict__["pen"].isCosmetic(),
+                        "labelName": item.__dict__["labelName"], "labelType": item.__dict__["labelType"],
+                        "labelHeight": item.__dict__["labelHeight"], "labelAlign": item.__dict__["labelAlign"],
+                        "labelOrient": item.__dict__["labelOrient"], "labelUse": item.__dict__["labelUse"],
+                        "location": item.scenePos().toTuple(), }
             return itemDict
 
         else:
@@ -1550,7 +1569,7 @@ class libraryPathEditorDialog(QDialog):
         self.parent.libBrowserCont.designView.setModel(self.parent.libBrowserCont.designView.libraryModel)
         for designPath in self.libraryDict.values():  # type: Path
             self.parent.libBrowserCont.designView.addLibrary(designPath,
-                self.parent.libBrowserCont.designView.parentItem)
+                                                             self.parent.libBrowserCont.designView.parentItem)
 
     def cancel(self):
         self.close()
