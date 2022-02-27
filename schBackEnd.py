@@ -18,7 +18,9 @@ from PySide6.QtCore import (
 
 
 class libraryItem(QStandardItem):
-    def __init__(self, libraryPath:pathlib.Path, libraryName:str):  # path is a pathlib.Path object
+    def __init__(
+        self, libraryPath: pathlib.Path, libraryName: str
+    ):  # path is a pathlib.Path object
         super().__init__(libraryName)
         self.libraryPath = libraryPath
         self.libraryName = libraryName
@@ -28,7 +30,7 @@ class libraryItem(QStandardItem):
 
 
 class cellItem(QStandardItem):
-    def __init__(self, libraryPath:pathlib.Path, name:str) -> None:
+    def __init__(self, libraryPath: pathlib.Path, name: str) -> None:
         super().__init__(name)
         self.name = name
         self.libraryPath = libraryPath
@@ -41,7 +43,7 @@ class cellItem(QStandardItem):
 
 
 class viewItem(QStandardItem):
-    def __init__(self, libraryPath:pathlib.Path, cellName:str, viewName) -> None:
+    def __init__(self, libraryPath: pathlib.Path, cellName: str, viewName) -> None:
         super().__init__(viewName)
         self.name = viewName
         self.libraryPath = libraryPath
@@ -183,6 +185,7 @@ def readLibDefFile(libPath):
     for key, value in data[0].items():
         libraryDict[key] = Path(value)
     return libraryDict
+
 
 def decodeSymbol(item):
     print(type(item))

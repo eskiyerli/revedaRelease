@@ -5,6 +5,7 @@ from PySide6.QtGui import (
     QPen,
     QFont,
     QFontMetrics,
+    QColor,
 )
 from PySide6.QtWidgets import (
     QGraphicsItem,
@@ -34,6 +35,7 @@ class shape(QGraphicsItem):
             viewRect = self.scene().views()[0].viewport().rect()
             newPos.setX(round(newPos.x() / self.gridX) * self.gridX)
             newPos.setY(round(newPos.y() / self.gridY) * self.gridY)
+
             if not sceneRect.contains(newPos):
                 # Keep the item inside the scene rect.
                 if newPos.x() > sceneRect.right():
@@ -85,11 +87,8 @@ class shape(QGraphicsItem):
         self.scene().symbolContextMenu.exec_(event.screenPos())
 
     def snap2grid(self, pos: QPoint) -> QPoint:
-        return QPoint(
-            round(pos.x() / self.gridX) * self.gridX,
-            round(pos.y() / self.gridY) * self.gridY,
-        )
-
+        return QPoint(round(pos.x() / self.gridX) * self.gridX,
+                      round(pos.y() / self.gridY) * self.gridY)
 
 class rectangle(shape):
     """
@@ -97,11 +96,11 @@ class rectangle(shape):
     """
 
     def __init__(
-        self,
-        start: QPoint,
-        end: QPoint,
-        pen: QPen,
-        grid: tuple,
+            self,
+            start: QPoint,
+            end: QPoint,
+            pen: QPen,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
@@ -113,13 +112,13 @@ class rectangle(shape):
         self.stretchSide = None
 
     def boundingRect(self):
-        minX = min(self.start.x(), self.end.x())
-        maxX = max(self.start.x(), self.end.x())
-        minY = min(self.start.y(), self.end.y())
-        maxY = max(self.start.y(), self.end.y())
+        self.minX = min(self.start.x(), self.end.x())
+        self.maxX = max(self.start.x(), self.end.x())
+        self.minY = min(self.start.y(), self.end.y())
+        self.maxY = max(self.start.y(), self.end.y())
         return QRect(
-            QPoint(minX - 0.5 * self.gridX, minY - 0.5 * self.gridY),
-            QPoint(maxX + self.gridX * 0.5, maxY + self.gridY * 0.5),
+            QPoint(self.minX - 0.5 * self.gridX, self.minY - 0.5 * self.gridY),
+            QPoint(self.maxX + self.gridX * 0.5, self.maxY + self.gridY * 0.5),
         )
 
     def paint(self, painter, option, widget):
@@ -208,33 +207,21 @@ class rectangle(shape):
         super().mousePressEvent(event)
         eventPos = self.snap2grid(event.pos())
         if eventPos.x() == self.rect.left():
-            if (
-                self.start.y() <= eventPos.y() <= self.end.y()
-                or self.start.y() >= eventPos.y() >= self.end.y()
-            ):
+            if self.start.y() <= eventPos.y() <= self.end.y() or self.start.y() >= eventPos.y() >= self.end.y():
                 self.setCursor(Qt.SizeHorCursor)
                 self.stretchSide = "left"
         elif eventPos.x() == self.rect.right():
-            if (
-                self.start.y() <= eventPos.y() <= self.end.y()
-                or self.start.y() >= eventPos.y() >= self.end.y()
-            ):
+            if self.start.y() <= eventPos.y() <= self.end.y() or self.start.y() >= eventPos.y() >= self.end.y():
                 self.setCursor(Qt.SizeHorCursor)
                 self.stretchSide = "right"
 
         elif eventPos.y() == self.rect.top():
-            if (
-                self.start.x() <= eventPos.x() <= self.end.x()
-                or self.start.x() >= eventPos.x() >= self.end.x()
-            ):
+            if self.start.x() <= eventPos.x() <= self.end.x() or self.start.x() >= eventPos.x() >= self.end.x():
                 self.setCursor(Qt.SizeVerCursor)
                 self.stretchSide = "top"
 
         elif eventPos.y() == self.rect.bottom():
-            if (
-                self.start.x() <= eventPos.x() <= self.end.x()
-                or self.start.x() >= eventPos.x() >= self.end.x()
-            ):
+            if self.start.x() <= eventPos.x() <= self.end.x() or self.start.x() >= eventPos.x() >= self.end.x():
                 self.setCursor(Qt.SizeVerCursor)
                 self.stretchSide = "bottom"
 
@@ -265,6 +252,8 @@ class rectangle(shape):
             super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        self.start = self.rect.topLeft()
+        self.end = self.rect.bottomRight()
         self.stretch = False
         super().mouseReleaseEvent(event)
 
@@ -275,11 +264,11 @@ class line(shape):
     """
 
     def __init__(
-        self,
-        start: QPoint,
-        end: QPoint,
-        pen: QPen,
-        grid: tuple,
+            self,
+            start: QPoint,
+            end: QPoint,
+            pen: QPen,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         self.end = end
@@ -341,27 +330,23 @@ class line(shape):
         self.end += offset
 
     def length(self):
-        return math.sqrt(
-            (self.start.x() - self.end.x()) ** 2 + (self.start.y() - self.end.y()) ** 2
-        )
-
+        return math.sqrt((self.start.x() - self.end.x()) ** 2 + (self.start.y() - self.end.y()) ** 2)
 
 class pin(shape):
     """
     rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
     """
-
     pinDirs = ["Input", "Output", "Inout"]
     pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
 
     def __init__(
-        self,
-        start: QPoint,
-        pen: QPen,
-        pinName: str,
-        pinDir: str,
-        pinType: str,
-        grid: tuple,
+            self,
+            start: QPoint,
+            pen: QPen,
+            pinName: str,
+            pinDir: str,
+            pinType: str,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
@@ -372,14 +357,7 @@ class pin(shape):
         self.rect = QRect(self.start.x() - 5, self.start.y() - 5, 10, 10)
 
     def boundingRect(self):
-        minX = self.start.x() - 5
-        maxX = self.start.x() + 5
-        minY = self.start.y() - 5
-        maxY = self.start.y() + 5
-        return QRect(
-            QPoint(minX - 0.5 * self.gridX, minY - 0.5 * self.gridY),
-            QPoint(maxX + self.gridX * 0.5, maxY + self.gridY * 0.5),
-        )
+        return self.rect  #
 
     def paint(self, painter, option, widget):
         painter.setPen(self.pen)
@@ -411,23 +389,22 @@ class label(shape):
     """
     rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
     """
-
     labelAlignments = ["Left", "Center", "Right"]
     labelOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
     labelUses = ["Normal", "Instance", "Pin", "Device", "Annotation"]
     labelTypes = ["Normal", "NLPLabel", "PyLabel"]
 
     def __init__(
-        self,
-        start: QPoint,
-        pen: QPen,
-        labelName: str,
-        grid: tuple,
-        labelType: str,
-        labelHeight: str = "12",
-        labelAlign: str = "Left",
-        labelOrient: str = "R0",
-        labelUse: str = "Normal",
+            self,
+            start: QPoint,
+            pen: QPen,
+            labelName: str,
+            grid: tuple,
+            labelType: str,
+            labelHeight: str = "12",
+            labelAlign: str = "Left",
+            labelOrient: str = "R0",
+            labelUse: str = "Normal",
     ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
@@ -444,10 +421,7 @@ class label(shape):
 
     def boundingRect(self):
         return QRect(
-            self.start.x(),
-            self.start.y(),
-            self.rect.width() + self.gridX * 0.5,
-            self.rect.height() + self.gridY * 0.5,
+            self.start.x(), self.start.y(), self.rect.width(), self.rect.height()
         )  #
 
     def paint(self, painter, option, widget):
@@ -455,17 +429,11 @@ class label(shape):
         painter.setFont(self.labelFont)
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
-            painter.drawText(
-                QPoint(self.start.x(), self.start.y() + self.rect.height()),
-                self.labelName,
-            )
+            painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
             painter.drawRect(self.boundingRect())
         else:
             painter.setPen(self.pen)
-            painter.drawText(
-                QPoint(self.start.x(), self.start.y() + self.rect.height()),
-                self.labelName,
-            )
+            painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
         self.fm = QFontMetrics(self.labelFont)
         self.rect = self.fm.boundingRect(self.labelName)
 
