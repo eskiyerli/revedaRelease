@@ -1220,36 +1220,38 @@ class editor_scene(QGraphicsScene):
         pen = QPen(self.guideLineLayer.color, 1)
         pen.setStyle(Qt.DashLine)
         if hasattr(self, "draftItem"):
-            self.removeItem(self.draftItem)  # remove old guide line
+            self.removeItem(self.draftItem)  # remove ghost item
             del self.draftItem
         elif self.drawLine and hasattr(self, "start") == True:
-            print("i am drawing a line")
-            self.draftItem = QGraphicsLineItem(QLine(self.start, self.current))
-            self.draftItem.setPen(pen)
+            self.draftItem = shp.line(self.start, self.current, pen, self.gridTuple)
             self.addItem(self.draftItem)
         elif self.drawRect and hasattr(self, "start") == True:
-            self.draftItem = QGraphicsRectItem(QRectF(self.start, self.current))
-            self.draftItem.setPen(pen)
+            self.draftItem = shp.rectangle(
+                self.start, self.current, pen, self.gridTuple
+            )
             self.addItem(self.draftItem)
         elif self.drawPin:  # draw pin
-            self.draftItem = QGraphicsRectItem(
-                QRect(self.current.x() - 5, self.current.y() - 5, 10, 10)
-            )
-            self.draftItem.setPen(pen)
-            self.draftItem.setBrush(QBrush(QColor("white")))
+            self.draftItem = shp.pin(
+                self.current,
+                pen,
+                self.pinName,
+                self.pinDir,
+                self.pinType,
+                self.gridTuple,
+            )  # draw pin
             self.addItem(self.draftItem)
         elif self.addLabel:  # draw label
-            self.labelFont = QFont("Arial", 12)
-            fm = QFontMetrics(self.labelFont)
-            self.draftItem = QGraphicsRectItem(
-                QRect(
-                    self.current.x(),
-                    self.current.y(),
-                    fm.boundingRect(self.labelName).width(),
-                    fm.boundingRect(self.labelName).height(),
-                )
-            )
-            self.draftItem.setPen(pen)
+            self.draftItem = shp.label(
+            self.current,
+            pen,
+            self.labelName,
+            self.gridTuple,
+            self.labelType,
+            self.labelHeight,
+            self.labelAlignment,
+            self.labelOrient,
+            self.labelUse,
+        )
             self.addItem(self.draftItem)
         self.parent.parent.statusLine.showMessage(
             "Cursor Position: " + str(self.current.toTuple())
@@ -1257,8 +1259,8 @@ class editor_scene(QGraphicsScene):
         super().mouseMoveEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
-
         if hasattr(self, "draftItem"):  # remove ghost item
+            print("removing ghost item")
             self.removeItem(self.draftItem)
             del self.draftItem
             if self.drawLine:
@@ -1266,7 +1268,14 @@ class editor_scene(QGraphicsScene):
             elif self.drawRect:
                 self.rectDraw(self.start, self.current, self.symbolPen, self.gridTuple)
             elif self.drawPin:
-                self.pinDraw(self.current, self.pinPen, self.pinName, self.pinDir, self.pinType, self.gridTuple) # draw pin
+                self.pinDraw(
+                    self.current,
+                    self.pinPen,
+                    self.pinName,
+                    self.pinDir,
+                    self.pinType,
+                    self.gridTuple,
+                )  # draw pin
             elif self.addLabel:
                 self.labelDraw(self.labelPen)
         if hasattr(self, "start"):
@@ -1290,13 +1299,14 @@ class editor_scene(QGraphicsScene):
         self.undoStack.push(undoCommand)
         self.drawRect = False
 
-    def pinDraw(self, current, pen: QPen, pinName: str, pinDir, pinType, gridTuple: tuple):
-        pin = shp.pin(
-            current, pen, pinName, pinDir, pinType, gridTuple
-        )
+    def pinDraw(
+        self, current, pen: QPen, pinName: str, pinDir, pinType, gridTuple: tuple
+    ):
+        pin = shp.pin(current, pen, pinName, pinDir, pinType, gridTuple)
         self.addItem(pin)
         undoCommand = us.addShapeUndo(self, pin)
         self.undoStack.push(undoCommand)
+        self.drawPin = False
 
     def labelDraw(self, pen: QPen):
         label = shp.label(
@@ -1313,6 +1323,7 @@ class editor_scene(QGraphicsScene):
         self.addItem(label)
         undoCommand = us.addShapeUndo(self, label)
         self.undoStack.push(undoCommand)
+        self.addLabel = False
 
     def keyPressEvent(self, key_event):
         if key_event.key() == Qt.Key_Escape:

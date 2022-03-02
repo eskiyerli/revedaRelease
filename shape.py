@@ -1,6 +1,6 @@
 # shape class definition for symbol editor.
 # base class for all shapes: rectangle, circle, line
-from PySide6.QtCore import QPoint, QPointF, QRect, Qt
+from PySide6.QtCore import (QPoint, QPointF, QRect, Qt, QLine)
 from PySide6.QtGui import (
     QPen,
     QFont,
@@ -90,6 +90,7 @@ class shape(QGraphicsItem):
         return QPoint(round(pos.x() / self.gridX) * self.gridX,
                       round(pos.y() / self.gridY) * self.gridY)
 
+
 class rectangle(shape):
     """
     rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
@@ -126,6 +127,7 @@ class rectangle(shape):
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
             painter.drawRect(self.rect)
             if self.stretch:
+                self.prepareGeometryChange()
                 if self.stretchSide == "left":
                     painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
                     painter.drawLine(self.rect.topLeft(), self.rect.bottomLeft())
@@ -205,25 +207,26 @@ class rectangle(shape):
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
-        eventPos = self.snap2grid(event.pos())
-        if eventPos.x() == self.rect.left():
-            if self.start.y() <= eventPos.y() <= self.end.y() or self.start.y() >= eventPos.y() >= self.end.y():
-                self.setCursor(Qt.SizeHorCursor)
-                self.stretchSide = "left"
-        elif eventPos.x() == self.rect.right():
-            if self.start.y() <= eventPos.y() <= self.end.y() or self.start.y() >= eventPos.y() >= self.end.y():
-                self.setCursor(Qt.SizeHorCursor)
-                self.stretchSide = "right"
+        if self.stretch:
+            eventPos = self.snap2grid(event.pos())
+            if eventPos.x() == self.rect.left():
+                if self.start.y() <= eventPos.y() <= self.end.y() or self.start.y() >= eventPos.y() >= self.end.y():
+                    self.setCursor(Qt.SizeHorCursor)
+                    self.stretchSide = "left"
+            elif eventPos.x() == self.rect.right():
+                if self.start.y() <= eventPos.y() <= self.end.y() or self.start.y() >= eventPos.y() >= self.end.y():
+                    self.setCursor(Qt.SizeHorCursor)
+                    self.stretchSide = "right"
 
-        elif eventPos.y() == self.rect.top():
-            if self.start.x() <= eventPos.x() <= self.end.x() or self.start.x() >= eventPos.x() >= self.end.x():
-                self.setCursor(Qt.SizeVerCursor)
-                self.stretchSide = "top"
+            elif eventPos.y() == self.rect.top():
+                if self.start.x() <= eventPos.x() <= self.end.x() or self.start.x() >= eventPos.x() >= self.end.x():
+                    self.setCursor(Qt.SizeVerCursor)
+                    self.stretchSide = "top"
 
-        elif eventPos.y() == self.rect.bottom():
-            if self.start.x() <= eventPos.x() <= self.end.x() or self.start.x() >= eventPos.x() >= self.end.x():
-                self.setCursor(Qt.SizeVerCursor)
-                self.stretchSide = "bottom"
+            elif eventPos.y() == self.rect.bottom():
+                if self.start.x() <= eventPos.x() <= self.end.x() or self.start.x() >= eventPos.x() >= self.end.x():
+                    self.setCursor(Qt.SizeVerCursor)
+                    self.stretchSide = "bottom"
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
 
@@ -274,47 +277,46 @@ class line(shape):
         self.end = end
         self.start = start
         self.pen = pen
-        self.points = 2
+        self.stretch = False
+        self.stretchSide = ""
+        self.line = QLine(self.start, self.end)
+        self.horizontal = True # True if line is horizontal, False if vertical
 
     def boundingRect(self):
-        minX = min(self.start.x(), self.end.x())
-        maxX = max(self.start.x(), self.end.x())
-        minY = min(self.start.y(), self.end.y())
-        maxY = max(self.start.y(), self.end.y())
+        self.minX = min(self.line.x1(), self.line.x2())
+        self.maxX = max(self.line.x1(), self.line.x2())
+        self.minY = min(self.line.y1(), self.line.y2())
+        self.maxY = max(self.line.y1(), self.line.y2())
         return QRect(
-            QPoint(minX - 0.5 * self.gridX, minY - 0.5 * self.gridY),
-            QPoint(maxX + self.gridX * 0.5, maxY + self.gridY * 0.5),
+            QPoint(self.minX - 0.5 * self.gridX, self.minY - 0.5 * self.gridY),
+            QPoint(self.maxX + self.gridX * 0.5, self.maxY + self.gridY * 0.5),
         )
 
     def paint(self, painter, option, widget):
-        painter.setPen(self.pen)
-        if self.start.x() != self.end.x():
-            if self.start.y() != self.end.y():
-                midPoint = QPoint(self.end.x(), self.start.y())
-                painter.drawLine(self.start, midPoint)
-                painter.drawLine(midPoint, self.end)
-                self.points = 3
-            else:
-                painter.drawLine(self.start, self.end)
-        else:
-            if self.start.y() != self.end.y():
-                painter.drawLine(self.start, self.end)
-            else:
-                painter.drawPoint(self.start)
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
-            if self.points == 2:
-                painter.drawLine(self.start, self.end)
-            else:
-                midPoint = QPoint(self.end.x(), self.start.y())
-                painter.drawLine(self.start, midPoint)
-                painter.drawLine(midPoint, self.end)
+            painter.drawLine(self.line)
+            if self.stretch:
+                painter.setPen(QPen(Qt.red, 1, Qt.SolidLine))
+                if self.stretchSide == "x1_horizontal" or self.stretchSide == "y1_vertical":
+                    painter.drawRect(self.line.x1() - 5, self.line.y1() - 5, 10, 10)
+                elif self.stretchSide == "x2_horizontal" or self.stretchSide == "y2_vertical":
+                    painter.drawRect(self.line.x2() - 5, self.line.y2() - 5, 10, 10)
+        else:
+            painter.setPen(self.pen)
+            length = self.line.x1() - self.line.x2()
+            height = self.line.y1() - self.line.y2()
+            if abs(length) >= abs(height):  # horizontal
+                self.line = QLine(self.start, QPoint(self.end.x(), self.start.y()))
+                painter.drawLine(self.line)
+                self.horizontal = True
+            else:  # vertical
+                self.line = QLine(self.start, QPoint(self.start.x(), self.end.y()))
+                painter.drawLine(self.line)
+                self.horizontal = False
 
     def objName(self):
         return "LINE"
-
-    def nPoints(self):
-        return self.points
 
     def setWidth(self, width: int):
         self.pen.setWidth(width)
@@ -331,6 +333,44 @@ class line(shape):
 
     def length(self):
         return math.sqrt((self.start.x() - self.end.x()) ** 2 + (self.start.y() - self.end.y()) ** 2)
+
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mousePressEvent(event)
+        if self.stretch:
+            eventPos = self.snap2grid(event.pos())
+            if eventPos == self.line.p1() or eventPos == self.line.p2():
+                if self.horizontal:
+                    if eventPos.x() == self.line.x1():
+                        self.stretchSide = "x1_horizontal"
+                    elif eventPos.x() == self.line.x2():
+                        self.stretchSide = "x2_horizontal"
+                elif not self.horizontal:
+                    if eventPos.y() == self.line.y1():
+                        self.stretchSide = "y1_vertical"
+                    elif eventPos.y() == self.line.y2():
+                        self.stretchSide = "y2_vertical"
+
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        if self.stretch:
+            eventPos = self.snap2grid(event.pos())
+            if self.stretchSide == "x1_horizontal":
+                self.line.setP1(QPoint(eventPos.x(), self.line.y1()))
+            elif self.stretchSide == "x2_horizontal":
+                self.line.setP2(QPoint(eventPos.x(), self.line.y2()))
+            elif self.stretchSide == "y1_vertical":
+                self.line.setP1(QPoint(self.line.x1(), eventPos.y()))
+            elif self.stretchSide == "y2_vertical":
+                self.line.setP2(QPoint(self.line.x2(), eventPos.y()))
+        elif self.isSelected():
+            super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mouseReleaseEvent(event)
+        self.start = self.line.p1()
+        self.end = self.line.p2()
+        self.stretch = False
+        self.stretchSide = ""
+
 
 class pin(shape):
     """
