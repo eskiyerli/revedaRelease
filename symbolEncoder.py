@@ -4,6 +4,17 @@ from PySide6.QtCore import (QDir, QLine, QRect, QRectF, QPoint, QPointF, QSize, 
 from PySide6.QtGui import (QAction, QKeySequence, QColor, QFont, QIcon, QPainter, QPen, QBrush, QFontMetrics,
                            QStandardItemModel, QTransform, QCursor, QUndoCommand, QUndoStack)
 
+class symbolAttribute(object):
+    def __init__(self, name:str,  type:str, definition:str):   # type: str, str, str
+        self.name = name
+        self.type = type
+        self.definition = definition
+
+    def __str__(self):
+        return f'{self.name}: {self.type}  {self.definition}'
+
+    def __repr__(self):
+        return f'{self.name}: {self.type}  {self.definition}'
 
 class symbolEncoder(json.JSONEncoder):
     def default(self, item):
@@ -61,7 +72,14 @@ class symbolEncoder(json.JSONEncoder):
                 "location": item.scenePos().toTuple(),
             }
             return itemDict
+        elif isinstance(item, symbolAttribute):
+            itemDict = {
+                "type": "attribute",
+                "name": item.name,
+                "attributeType": item.type,
+                "definition": item.definition,
+            }
+            return itemDict
 
-        else:
-            return super().default(item)
+
 

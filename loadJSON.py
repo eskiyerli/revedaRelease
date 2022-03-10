@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDialog, Q
                                QGraphicsItem, )
 
 import shape as shp
+import symbolEncoder as se
 
 def createSymbolItems(item,gridTuple):
     '''
@@ -74,3 +75,6 @@ def createSymbolItems(item,gridTuple):
         )
         label.setPos(QPoint(item["location"][0], item["location"][1]))
         return label
+def createSymbolAttribute(item):
+   if item["type"] == "attribute":
+        return se.symbolAttribute(item["name"],item["attributeType"],item["definition"])

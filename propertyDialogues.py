@@ -219,50 +219,19 @@ class symbolLabelsDialogue(QDialog):
     Dialog for changing symbol labels and attributes. Symbol properties... menu item.
     """
 
-    def __init__(self, parent, items: list):
+    def __init__(self, parent, items: list, attributes: list):
         super().__init__(parent)
         self.parent = parent
         self.items = items
+        self.attributes = attributes
         self.setWindowTitle("Symbol Labels")
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.mainLayout = QVBoxLayout()
         self.symbolPropsLayout = QGridLayout()
         self.symbolLabelsLayout = QGridLayout()
-        self.labelNameList = []
-        self.labelHeightList = []
-        self.labelAlignmentList = []
-        self.labelOrientationList = []
-        self.labelUseList = []
-        self.labelTypeList = []
-        self.labelItemList = []
-        self.attributeNameList = []
-        self.attributeTypeList = []
-        self.attributeDefList = []
-
-        # Symbol Properties
-        self.symbolPropsLayout.addWidget(QLabel("Attribute Name"), 0, 0)
-        self.symbolPropsLayout.addWidget(QLabel("Type"), 0, 1)
-        self.symbolPropsLayout.addWidget(QLabel("Definition"), 0, 2)
-        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 0)
-        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 1)
-        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 2)
-        i = 0
-        self.attributeNameList.append(longLineEdit())
-        attrTypeCombo = QComboBox()
-        attrTypeCombo.addItems(shp.label.labelTypes)
-        self.attributeTypeList.append(attrTypeCombo)
-        self.attributeDefList.append(longLineEdit())
-        self.symbolPropsLayout.addWidget(self.attributeNameList[-1], 1, 0)
-        self.symbolPropsLayout.addWidget(self.attributeTypeList[-1], 1, 1)
-        self.symbolPropsLayout.addWidget(self.attributeDefList[-1], 1, 2)
-        self.attributeNameList[-1].setPlaceholderText("Enter Attribute Name")
-        self.attributeTypeList[-1].setToolTip("Enter Attribute Type")
-        self.attributeDefList[-1].setToolTip("Enter Attribute Definition")
-        self.attributeDefList[-1].editingFinished.connect(
-            lambda: self.updateAttributeDef(i)
-        )
-        # Symbol Labels
+        self.symbolAttrsMethod()
+        # Symbol Labels Layout
         self.symbolLabelsMethod()
         labelsGroup = QGroupBox("Symbol Labels")
         labelsGroup.setLayout(self.symbolLabelsLayout)
@@ -278,6 +247,48 @@ class symbolLabelsDialogue(QDialog):
         self.setLayout(self.mainLayout)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
+
+    def symbolAttrsMethod(self):
+        self.attributeNameList = []
+        self.attributeTypeList = []
+        self.attributeDefList = []
+        # Symbol Properties
+        self.symbolPropsLayout.addWidget(QLabel("Attribute Name"), 0, 0)
+        self.symbolPropsLayout.addWidget(QLabel("Type"), 0, 1)
+        self.symbolPropsLayout.addWidget(QLabel("Definition"), 0, 2)
+        i = 0
+        for item in self.attributes:
+            print(f'item is :{item}')
+            self.attributeNameList.append(longLineEdit())
+            self.attributeNameList[i].setText(item.name)
+            self.symbolPropsLayout.addWidget(self.attributeNameList[i], i + 1, 0)
+            attrTypeCombo = QComboBox()
+            attrTypeCombo.addItems(shp.label.labelTypes)
+            self.attributeTypeList.append(attrTypeCombo)
+            self.attributeTypeList[i].setCurrentText(item.type)
+            self.symbolPropsLayout.addWidget(self.attributeTypeList[i], i + 1, 1)
+            self.attributeDefList.append(longLineEdit())
+            self.attributeDefList[i].setText(item.definition)
+            self.symbolPropsLayout.addWidget(self.attributeDefList[i], i + 1, 2)
+            i += 1
+            print(i)
+        # self.symbolPropsLayout.addWidget(QLineEdit(), 1, 0)
+        # self.symbolPropsLayout.addWidget(QLineEdit(), 1, 1)
+        # self.symbolPropsLayout.addWidget(QLineEdit(), 1, 2)
+        self.attributeNameList.append(longLineEdit())
+        attrTypeCombo = QComboBox()
+        attrTypeCombo.addItems(shp.label.labelTypes)
+        self.attributeTypeList.append(attrTypeCombo)
+        self.attributeDefList.append(longLineEdit())
+        self.symbolPropsLayout.addWidget(self.attributeNameList[-1], i+2, 0)
+        self.symbolPropsLayout.addWidget(self.attributeTypeList[-1], i+2, 1)
+        self.symbolPropsLayout.addWidget(self.attributeDefList[-1], i+2, 2)
+        self.attributeNameList[-1].setPlaceholderText("Enter Attribute Name")
+        self.attributeTypeList[-1].setToolTip("Enter Attribute Type")
+        self.attributeDefList[-1].setToolTip("Enter Attribute Definition")
+        self.attributeDefList[-1].editingFinished.connect(
+            lambda: self.updateAttributeDef(i+1)
+        )
 
     def updateAttributeDef(self, i):
         i += 1
@@ -314,6 +325,7 @@ class symbolLabelsDialogue(QDialog):
         for item in self.items:
             if type(item) == shp.label:
                 i += 1
+                self.labelItemList.append(item)
                 self.labelNameList.append(longLineEdit())
                 self.labelNameList[-1].setText(item.labelName)
                 self.labelNameList[-1].setReadOnly(True)

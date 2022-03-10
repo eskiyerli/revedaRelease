@@ -1016,13 +1016,13 @@ class symbolEditor(editorWindow):
         self.centralW.scene.viewSymbolProperties()
 
     def setDrawMode(
-        self,
-        drawPin: bool,
-        selectItem: bool,
-        drawArc: bool,
-        drawRect: bool,
-        drawLine: bool,
-        addLabel: bool,
+            self,
+            drawPin: bool,
+            selectItem: bool,
+            drawArc: bool,
+            drawRect: bool,
+            drawLine: bool,
+            addLabel: bool,
     ):
         """
         Sets the drawing mode in the symbol editor.
@@ -1174,6 +1174,7 @@ class editor_scene(QGraphicsScene):
         self.wirePen.setCosmetic(True)
         self.symbolPen = QPen(self.symbolLayer.color, 3)
         self.symbolPen.setCosmetic(True)
+        self.symbolPen.setCosmetic(True)
         self.selectedWirePen = QPen(self.selectedWireLayer.color, 2)
         self.pinPen = QPen(self.pinLayer.color, 2)
         self.labelPen = QPen(self.labelLayer.color, 1)
@@ -1201,22 +1202,17 @@ class editor_scene(QGraphicsScene):
         self.symbolContextMenu = QMenu()
 
     def mousePressEvent(self, mouse_event):
-        if self.selectItem and self.itemAt(mouse_event.scenePos(), QTransform()):
-            self.itemsAtMousePress = self.items(mouse_event.scenePos())
+        snapped_pos = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+        if self.selectItem and self.items(snapped_pos):
+            self.itemsAtMousePress = self.items(snapped_pos)
             self.selectedItem = self.itemsAtMousePress[0]
-        elif (  # if we are not in select mode and
-            not self.selectItem and hasattr(self, "start") == False
-        ):
-            self.startPosition = mouse_event.scenePos().toPoint()
-            self.start = QPoint(
-                self.snapGrid(self.startPosition.x(), self.gridMajor),
-                self.snapGrid(self.startPosition.y(), self.gridMajor),
-            )
+        elif not (self.selectItem or hasattr(self, "start")):
+            self.start = snapped_pos
             self.selectedItem = None
         super().mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, mouse_event):
-        self.snap2Grid(mouse_event)
+        self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
         pen = QPen(self.guideLineLayer.color, 1)
         pen.setStyle(Qt.DashLine)
         if hasattr(self, "draftItem"):
@@ -1242,16 +1238,16 @@ class editor_scene(QGraphicsScene):
             self.addItem(self.draftItem)
         elif self.addLabel:  # draw label
             self.draftItem = shp.label(
-            self.current,
-            pen,
-            self.labelName,
-            self.gridTuple,
-            self.labelType,
-            self.labelHeight,
-            self.labelAlignment,
-            self.labelOrient,
-            self.labelUse,
-        )
+                self.current,
+                pen,
+                self.labelName,
+                self.gridTuple,
+                self.labelType,
+                self.labelHeight,
+                self.labelAlignment,
+                self.labelOrient,
+                self.labelUse,
+            )
             self.addItem(self.draftItem)
         self.parent.parent.statusLine.showMessage(
             "Cursor Position: " + str(self.current.toTuple())
@@ -1260,7 +1256,6 @@ class editor_scene(QGraphicsScene):
 
     def mouseReleaseEvent(self, mouse_event):
         if hasattr(self, "draftItem"):  # remove ghost item
-            print("removing ghost item")
             self.removeItem(self.draftItem)
             del self.draftItem
             if self.drawLine:
@@ -1283,7 +1278,7 @@ class editor_scene(QGraphicsScene):
         super().mouseReleaseEvent(mouse_event)
 
     def lineDraw(self, start: QPoint, current: QPoint, pen: QPen, gridTuple: tuple):
-        line = shp.line(start, current, pen, gridTuple)
+        line = shp.line(start, current - QPoint(pen.width() / 2, pen.width() / 2), pen, gridTuple)
         self.addItem(line)
         undoCommand = us.addShapeUndo(self, line)
         self.undoStack.push(undoCommand)
@@ -1293,14 +1288,14 @@ class editor_scene(QGraphicsScene):
         """
         Draws a rectangle on the scene
         """
-        rect = shp.rectangle(start, end, pen, gridTuple)
+        rect = shp.rectangle(start, end - QPoint(pen.width() / 2, pen.width() / 2), pen, gridTuple)
         self.addItem(rect)
         undoCommand = us.addShapeUndo(self, rect)
         self.undoStack.push(undoCommand)
         self.drawRect = False
 
     def pinDraw(
-        self, current, pen: QPen, pinName: str, pinDir, pinType, gridTuple: tuple
+            self, current, pen: QPen, pinName: str, pinDir, pinType, gridTuple: tuple
     ):
         pin = shp.pin(current, pen, pinName, pinDir, pinType, gridTuple)
         self.addItem(pin)
@@ -1452,36 +1447,21 @@ class editor_scene(QGraphicsScene):
 
     def updateLineShape(self):
         location = self.selectedItem.scenePos().toTuple()
-        newStartX = self.snapGrid(
-            float(self.queryDlg.startXLine.text()) - float(location[0]),
-            self.gridTuple[0],
-        )
-        newStartY = self.snapGrid(
-            float(self.queryDlg.startYLine.text()) - float(location[1]),
-            self.gridTuple[1],
-        )
-        newEndX = self.snapGrid(
-            float(self.queryDlg.endXLine.text()) - float(location[0]),
-            self.gridTuple[0],
-        )
-        newEndY = self.snapGrid(
-            float(self.queryDlg.endYLine.text()) - float(location[1]),
-            self.gridTuple[1],
-        )
-        self.selectedItem.start = QPoint(newStartX, newStartY)
-        self.selectedItem.end = QPoint(newEndX, newEndY)
+        self.selectedItem.start = self.snap2Grid(QPoint(float(self.queryDlg.startXLine.text()) - float(location[0]),
+                                                        float(self.queryDlg.startYLine.text()) - float(location[1])),
+                                                 self.gridTuple)
+        self.selectedItem.end = self.snap2Grid(QPoint(float(self.queryDlg.endXLine.text()) - float(location[0]),
+                                                      float(self.queryDlg.endYLine.text()) - float(location[1])),
+                                               self.gridTuple)
+
         self.selectedItem.update()
 
     def updatePinShape(self):
         location = self.selectedItem.scenePos().toTuple()
-        newX = self.snapGrid(
-            float(self.queryDlg.pinXLine.text()) - float(location[0]), self.gridTuple[0]
-        )
-        newY = self.snapGrid(
-            float(self.queryDlg.pinYLine.text()) - float(location[1]), self.gridTuple[1]
-        )
-        self.selectedItem.start = QPoint(newX, newY)
-        self.selectedItem.rect = QRect(newX - 5, newY - 5, 10, 10)
+        self.selectedItem.start = self.snap2Grid(QPoint(float(self.queryDlg.pinXLine.text()) - float(location[0]),
+                                                        float(self.queryDlg.pinYLine.text()) - float(location[1])),
+                                                 self.gridTuple)
+        self.selectedItem.rect = QRect(self.selectedItem.start.x() - 5, self.selectedItem.start.y() - 5, 10, 10)
         self.selectedItem.pinName = self.queryDlg.pinName.text()
         self.selectedItem.pinType = self.queryDlg.pinType.currentText()
         self.selectedItem.pinDir = self.queryDlg.pinDir.currentText()
@@ -1492,20 +1472,14 @@ class editor_scene(QGraphicsScene):
         update pin shape with new values.
         """
         location = self.selectedItem.scenePos().toTuple()
-        newX = self.snapGrid(
-            float(self.queryDlg.labelXLine.text()) - float(location[0]),
-            self.gridTuple[0],
-        )
-        newY = self.snapGrid(
-            float(self.queryDlg.labelYLine.text()) - float(location[1]),
-            self.gridTuple[1],
-        )
-        self.selectedItem.start = QPoint(newX, newY)
+        self.selectedItem.start = self.snap2Grid(QPoint(float(self.queryDlg.labelXLine.text()) - float(location[0]),
+                                                        float(self.queryDlg.labelYLine.text()) - float(location[1])),
+                                                 self.gridTuple)
         self.selectedItem.labelName = self.queryDlg.labelNameEdit.text()
         self.selectedItem.labelHeight = self.queryDlg.labelHeightEdit.text()
         self.selectedItem.labelAlign = self.queryDlg.labelAlignCombo.currentText()
-        self.selectedItem.labelOrient = self.queryDlg.labelOrientation.currentText()
-        self.selectedItem.labelUse = self.queryDlg.labelUse.currentText()
+        self.selectedItem.labelOrient = self.queryDlg.labelOrientCombo.currentText()
+        self.selectedItem.labelUse = self.queryDlg.labelUseCombo.currentText()
         if self.queryDlg.normalType.isChecked():
             self.selectedItem.labelType = shp.label.labelTypes[0]
         elif self.queryDlg.NLPType.isChecked():
@@ -1515,27 +1489,37 @@ class editor_scene(QGraphicsScene):
         self.selectedItem.update()
 
     def snapGrid(self, number, base):
-        return base * int(round(number / base))
+        return base * int(math.floor(number / base))
 
-    def snap2Grid(self, mouse_event):
-        self.current = mouse_event.scenePos().toPoint()
-        self.current /= self.gridMajor
-        self.current *= self.gridMajor
+    def snap2Grid(self, point: QPoint, gridTuple: tuple[int, int]):
+        '''
+        snap point to grid. Divides and multiplies by grid size.
+        '''
+        return QPoint(gridTuple[0] * int(round(point.x() / gridTuple[0])),
+                      gridTuple[1] * int(round(point.y() / gridTuple[1])))
 
     def loadSymbol(self, file):
+        self.attributeList = []
         with open(file, "r") as f:
             fJsonLoad = f.read()
             try:
                 items = json.loads(fJsonLoad)  # load json file
                 for item in items:
-                    shape = lj.createSymbolItems(item, self.gridTuple)
-                    self.addItem(shape)
+                    if item["type"] == "rect" or item["type"] == "line" or item["type"] == "pin" or item[
+                        "type"] == "label":
+                        shape = lj.createSymbolItems(item, self.gridTuple)
+                        self.addItem(shape)
+                    elif item["type"] == "attribute":
+                        attr = lj.createSymbolAttribute(item)
+                        self.attributeList.append(attr)
+
             except json.decoder.JSONDecodeError:
                 print("Invalid JSON file")
 
     def saveSymbolCell(self, fileName):
         self.sceneR = self.sceneRect()  # get scene rect
         items = self.items(self.sceneR)  # get items in scene rect
+        items.extend(self.attributeList)  # add attribute list to list
         with open(fileName, "w") as f:
             json.dump(items, f, cls=se.symbolEncoder, indent=4)
 
@@ -1544,16 +1528,22 @@ class editor_scene(QGraphicsScene):
             self.selectedItem.stretch = True
 
     def viewSymbolProperties(self):
-        symbolPropDialogue = pdlg.symbolLabelsDialogue(self.parent.parent, self.items())
+        symbolPropDialogue = pdlg.symbolLabelsDialogue(self.parent.parent, self.items(), self.attributeList)
+        self.attributeList = []
         if symbolPropDialogue.exec() == QDialog.Accepted:
             for i, item in enumerate(symbolPropDialogue.labelItemList):
                 # label name is not changed.
-                item.labelHeight = symbolPropDialogue.labelHeightList[i]
-                item.labelAlign = symbolPropDialogue.labelAlignmentList[i]
-                item.labelOrient = symbolPropDialogue.labelOrientationList[i]
-                item.labelUse = symbolPropDialogue.labelUseList[i]
-                item.labelType = symbolPropDialogue.labelTypeList[i]
-                item.update()
+                item.labelHeight = symbolPropDialogue.labelHeightList[i].text()
+                item.labelAlign = symbolPropDialogue.labelAlignmentList[i].currentText()
+                item.labelOrient = symbolPropDialogue.labelOrientationList[i].currentText()
+                item.labelUse = symbolPropDialogue.labelUseList[i].currentText()
+                item.labelType = symbolPropDialogue.labelTypeList[i].currentText()
+                item.update(item.boundingRect())
+            for i, item in enumerate(symbolPropDialogue.attributeNameList):
+                if item.text().strip() != "":
+                    self.attributeList.append(
+                        se.symbolAttribute(item.text(), symbolPropDialogue.attributeTypeList[i].currentText(),
+                                           symbolPropDialogue.attributeDefList[i].text()))
 
 
 class editor_view(QGraphicsView):
