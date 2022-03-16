@@ -7,12 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f443f3ba-db20-42bb-8de4-fefb1e9339d6" name="Changes" comment="Symbol attributes can be saved and recovered.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/third/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/third/symbol.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/revedaMainW.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaMainW.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
-    </list>
+    <list default="true" id="f443f3ba-db20-42bb-8de4-fefb1e9339d6" name="Changes" comment="Symbol attributes can be saved and recovered." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -43,6 +38,7 @@
     <option name="selectedIndex" value="2" />
   </component>
   <component name="ProjectId" id="24pU0n7EpoOuAv9MCeO4GuBBhg0" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -55,7 +51,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/libraryWindow-ICT0122331.py" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.DirectoryMappings" />
     <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/libraryWindow-ICT0122331.py" />
   </component>
   <component name="ReaderModeSettings">
@@ -157,7 +153,7 @@
       <breakpoints>
         <line-breakpoint suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/shape.py</url>
-          <line>435</line>
+          <line>437</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
