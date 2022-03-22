@@ -86,7 +86,7 @@ class shape(QGraphicsItem):
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
         self.setCursor(Qt.OpenHandCursor)
-        self.setSelected(True)
+        # self.setSelected(True)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(event)
@@ -585,7 +585,6 @@ class symbolInst(QGraphicsItemGroup):
             return newPos
         return super().itemChange(change, value)
 
-
     def setSnapGrid(self, gridSize: int) -> None:
         self.gridSize = gridSize
 
@@ -595,7 +594,10 @@ class symbolInst(QGraphicsItemGroup):
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
         self.setCursor(Qt.OpenHandCursor)
-        self.setSelected(True)
+        # if hasattr(self, "pins"):
+        #     print("Pins: ", self.pins)
+        #     print("Pins: ", self.pins[0].scenePos())
+
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(event)
@@ -626,3 +628,6 @@ class symbolInst(QGraphicsItemGroup):
         if type(item) is pin:
             self.pins.append(item)
         super().addToGroup(item)
+
+    def boundingRect(self):
+        return self.childrenBoundingRect()

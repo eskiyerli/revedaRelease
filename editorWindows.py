@@ -20,10 +20,11 @@
 
 # from hashlib import new
 import pathlib
+import temppathlib
 import json
 import shutil
 # import numpy as np
-from PySide6.QtCore import QDir, QLine, QPoint, QPointF, QRect, QRectF, QSize
+from PySide6.QtCore import QRect, QTemporaryFile
 from PySide6.QtGui import (QAction, QBrush, QColor, QCursor, QFont,
                            QFontMetrics, QIcon, QKeySequence, QPainter, QPen,
                            QStandardItemModel, QTransform, QUndoCommand,
@@ -35,7 +36,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDialog,
                                QGraphicsView, QGridLayout, QGroupBox,
                                QHBoxLayout, QLabel, QLineEdit, QMainWindow,
                                QMenu, QMessageBox, QPushButton, QRadioButton,
-                               QTabWidget, QToolBar, QTreeView, QVBoxLayout,
+                               QTabWidget, QToolBar, QTreeView, QVBoxLayout, QGraphicsSceneMouseEvent,
                                QWidget)
 
 import circuitElements as cel
@@ -63,13 +64,7 @@ class editorWindow(QMainWindow):
         self.init_UI()
 
     def init_UI(self):
-        self.resize(1600, 800)
-        self._createMenuBar()
-        self._createToolBars()
-        # create container to position all widgets
-        self.centralW = editorContainer(self)
-        self.setCentralWidget(self.centralW)
-        self.statusLine = self.statusBar()
+        pass
 
     def _createMenuBar(self):
         self.editorMenuBar = self.menuBar()
@@ -304,6 +299,7 @@ class editorWindow(QMainWindow):
         self.zoomInAction.triggered.connect(self.zoomIn)
         self.zoomOutAction.triggered.connect(self.zoomOut)
         self.dispConfigAction.triggered.connect(self.dispConfDialog)
+        self.moveOriginAction.triggered.connect(self.moveOrigin)
 
     def _createShortcuts(self):
         self.redoAction.setShortcut("Shift+U")
@@ -314,6 +310,11 @@ class editorWindow(QMainWindow):
 
     def dispConfDialog(self):
         dcd = displayConfigDialog(self)
+        if dcd.exec() == QDialog.Accepted:
+            self.centralW.scene.gridMajor = dcd.majorGridEntry.text()
+            self.centralW.scene.update()
+            self.centralW.view.update()
+
 
     # def deleteItemMethod(self, s):
     #     self.centralW.scene.itemDelete = True
@@ -333,14 +334,26 @@ class editorWindow(QMainWindow):
     def _createMenu(self):
         pass
 
+    def moveOrigin(self):
+        # self.centralW.scene.moveOrigin()
+        pass
 
 class schematicEditor(editorWindow):
     def __init__(self, file: pathlib.Path, libraryDict: dict) -> None:
         super().__init__(file=file, libraryDict=libraryDict)
-        self.setWindowTitle("Schematic Editor")
+        self.setWindowTitle(f"Schematic Editor - {file.parent.stem}")
         self.setWindowIcon(QIcon(":/icons/layer-shape.png"))
         self.symbolChooser = None
-        self.cellViews = ['symbol'] # only symbol can be instantiated in the schematic window.
+        self.cellViews = ['symbol']  # only symbol can be instantiated in the schematic window.
+
+    def init_UI(self):
+        self.resize(1600, 800)
+        self._createMenuBar()
+        self._createToolBars()
+        # create container to position all widgets
+        self.centralW = schematicContainer(self)
+        self.setCentralWidget(self.centralW)
+        self.statusLine = self.statusBar()
 
     def _createTriggers(self):
         super()._createTriggers()
@@ -425,19 +438,22 @@ class schematicEditor(editorWindow):
         else:
             self.symbolChooser.show()
 
-    def instSymbol(self,symbolFile):
-        # self.centralW.scene.instSymbol(symbolFile)
-        pass
 
 class symbolEditor(editorWindow):
-    def __init__(self, file,libraryDict):
-        super().__init__(file=file,libraryDict=libraryDict)
+    def __init__(self, file, libraryDict):
+        super().__init__(file=file, libraryDict=libraryDict)
         self.file = file
         self.setWindowTitle(f"Symbol Editor - {file.parent.stem}")
         self._symbolActions()
 
     def init_UI(self):
-        return super().init_UI()
+        self.resize(1600, 800)
+        self._createMenuBar()
+        self._createToolBars()
+        # create container to position all widgets
+        self.centralW = symbolContainer(self)
+        self.setCentralWidget(self.centralW)
+        self.statusLine = self.statusBar()
 
     def _createActions(self):
         super()._createActions()
@@ -608,78 +624,95 @@ class displayConfigDialog(QDialog):
         super().__init__(parent)
         self.parent = parent
         self.setWindowTitle("Display Options")
+        self.vLayout = QVBoxLayout()
+
+        # dispOptionsTabs = QTabWidget(self)
+        # # Grid Display Options tab
+        # displayTab = QWidget()
+        # # layout for displayTab
+        # vBox = QVBoxLayout()
+        # gridGrBox = QGroupBox("Display Grid")
+        # noGrid = QRadioButton("None")
+        # dotGrid = QRadioButton("Dots")
+        # dotGrid.setChecked(True)
+        # lineGrid = QRadioButton("Lines")
+        # gRLayout = QHBoxLayout()
+        # # create a logical group of grid option buttons
+        # gridButtonGroup = QButtonGroup()
+        # gridButtonGroup.addButton(noGrid)
+        # gridButtonGroup.addButton(dotGrid)
+        # gridButtonGroup.addButton(lineGrid)
+        # gRLayout.addWidget(noGrid)
+        # gRLayout.addWidget(dotGrid)
+        # gRLayout.addWidget(lineGrid)
+        # gRLayout.addStretch(1)
+        # gridGrBox.setLayout(gRLayout)
+        # #  gridGrBox.setLayout(gRLayout)
+        # # add to top row of display tab
+        # vBox.addWidget(gridGrBox)
+        # # create a form layout
+        # gridFormWidget = QWidget()
+        fLayout = QFormLayout(self)
+        self.majorGridEntry = QLineEdit()
+        if self.parent.centralW.scene.gridMajor:
+            self.majorGridEntry.setText(str(self.parent.centralW.scene.gridMajor))
+        else:
+            self.majorGridEntry.setText("10")
+        # self.minorGridEntry = QLineEdit()
+        # self.minorGridEntry.setText("5")
+        fLayout.addRow("Major Grid:", self.majorGridEntry)
+        self.vLayout.addLayout(fLayout, 1)
+        # fLayout.addRow("Minor Grid Spacing", self.minorGridEntry)
+        # gridFormWidget.setLayout(fLayout)
+        # vBox.addWidget(gridFormWidget)
+        # displayTab.setLayout(vBox)
+
+        # dispOptionsTabs.insertTab(0, displayTab, "Display Options")
+        # self.layout.addWidget(dispOptionsTabs)
+        # self.layout.addWidget(self.buttonBox)
+        # self.setLayout(self.vBoxLayout)
+        # need to change this later
+        # self.setGeometry(300, 300, 300, 200)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.vBoxLayout = QVBoxLayout()
+        # self.vBoxLayout = QVBoxLayout()
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-        dispOptionsTabs = QTabWidget(self)
-        # Grid Display Options tab
-        displayTab = QWidget()
-        # layout for displayTab
-        vBox = QVBoxLayout()
-        gridGrBox = QGroupBox("Display Grid")
-        noGrid = QRadioButton("None")
-        dotGrid = QRadioButton("Dots")
-        dotGrid.setChecked(True)
-        lineGrid = QRadioButton("Lines")
-        gRLayout = QHBoxLayout()
-        # create a logical group of grid option buttons
-        gridButtonGroup = QButtonGroup()
-        gridButtonGroup.addButton(noGrid)
-        gridButtonGroup.addButton(dotGrid)
-        gridButtonGroup.addButton(lineGrid)
-        gRLayout.addWidget(noGrid)
-        gRLayout.addWidget(dotGrid)
-        gRLayout.addWidget(lineGrid)
-        gRLayout.addStretch(1)
-        gridGrBox.setLayout(gRLayout)
-        #  gridGrBox.setLayout(gRLayout)
-        # add to top row of display tab
-        vBox.addWidget(gridGrBox)
-        # create a form layout
-        gridFormWidget = QWidget()
-        fLayout = QFormLayout(self)
-        self.majorGridEntry = QLineEdit()
-        if self.parent.centralWidget.scene.gridMajor:
-            self.majorGridEntry.setText(str(self.parent.centralWidget.scene.gridMajor))
-        else:
-            self.majorGridEntry.setText("10")
-        self.minorGridEntry = QLineEdit()
-        self.minorGridEntry.setText("5")
-        fLayout.addRow("Major Grid:", self.majorGridEntry)
-        fLayout.addRow("Minor Grid Spacing", self.minorGridEntry)
-        gridFormWidget.setLayout(fLayout)
-        vBox.addWidget(gridFormWidget)
-        displayTab.setLayout(vBox)
-
-        dispOptionsTabs.insertTab(0, displayTab, "Display Options")
-        self.layout.addWidget(dispOptionsTabs)
-        self.layout.addWidget(self.buttonBox)
-        self.setLayout(self.vBoxLayout)
-        # need to change this later
-        # self.setGeometry(300, 300, 300, 200)
+        self.vLayout.addWidget(self.buttonBox)
+        self.setLayout(self.vLayout)
         self.show()
 
-    def accept(self):
-        super().accept()
-        self.parent.centralWidget.scene.gridMajor = int(self.majorGridEntry.text())
-        self.parent.centralWidget.view.gridMajor = int(self.majorGridEntry.text())
-        self.parent.centralWidget.scene.gridMinor = int(self.minorGridEntry.text())
-        self.parent.centralWidget.view.gridMinor = int(self.minorGridEntry.text())
-        self.parent.centralWidget.scene.update()
-        self.close()
 
 
-class editorContainer(QWidget):
+class symbolContainer(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.parent = parent
         self.init_UI()
 
     def init_UI(self):
-        self.scene = editor_scene(self)
-        self.view = editor_view(self.scene, self)
+        self.scene = symbol_scene(self)
+        self.view = symbol_view(self.scene, self)
+
+        # layout statements, using a grid layout
+        gLayout = QGridLayout()
+        gLayout.setSpacing(10)
+        gLayout.addWidget(self.view, 0, 0)
+        # ratio of first column to second column is 5
+        gLayout.setColumnStretch(0, 5)
+        gLayout.setRowStretch(0, 6)
+        self.setLayout(gLayout)
+
+
+class schematicContainer(QWidget):
+    def __init__(self, parent):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.init_UI()
+
+    def init_UI(self):
+        self.scene = schematic_scene(self)
+        self.view = schematic_view(self.scene, self)
 
         # layout statements, using a grid layout
         gLayout = QGridLayout()
@@ -697,14 +730,10 @@ class editor_scene(QGraphicsScene):
         self.parent = parent
         self.gridMajor = 10
         self.gridTuple = (self.gridMajor, self.gridMajor)
-        # drawing switches
-        self.resetSceneMode()  # reset to select mode
         self.selectedItem = None  # selected item
         self.defineSceneLayers()
-        # pen definitions
         self.setPens()
-        self.symbolContextMenu = QMenu()
-        self.instCounter = 0
+        self.undoStack = QUndoStack()
 
     def setPens(self):
         self.wirePen = QPen(self.wireLayer.color, 2)
@@ -735,67 +764,85 @@ class editor_scene(QGraphicsScene):
         self.labelLayer = cel.layer(
             name="labelLayer", color=QColor("yellow"), z=3, visible=True
         )
-        self.undoStack = QUndoStack()
+
+    def snapGrid(self, number, base):
+        return base * int(math.floor(number / base))
+
+    def snap2Grid(self, point: QPoint, gridTuple: tuple[int, int]):
+        """
+        snap point to grid. Divides and multiplies by grid size.
+        """
+        return QPoint(
+            gridTuple[0] * int(round(point.x() / gridTuple[0])),
+            gridTuple[1] * int(round(point.y() / gridTuple[1])),
+        )
+
+class symbol_scene(editor_scene):
+    '''
+    Scene for Symbol editor.
+    '''
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        # drawing switches
+        self.resetSceneMode()  # reset to select mode
+        # pen definitions
+        self.setPens()
         self.symbolContextMenu = QMenu()
 
     def mousePressEvent(self, mouse_event):
-
-        if self.parent.parent is symbolEditor:
-            snapped_pos = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
-            if self.selectItem and self.items(snapped_pos):
-                self.itemsAtMousePress = self.items(snapped_pos)
-                self.selectedItem = self.itemsAtMousePress[0]
-            elif not (self.selectItem or hasattr(self, "start")):
-                self.start = snapped_pos
-                self.selectedItem = None
-        elif self.parent.parent is schematicEditor:
-            print("schematic editor")
+        snapped_pos = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+        if self.selectItem and self.items(snapped_pos):
+            self.itemsAtMousePress = self.items(snapped_pos)
+            self.selectedItem = self.itemsAtMousePress[0]
+            self.selectedItem.setSelected(True)
+        elif not (self.selectItem or hasattr(self, "start")):
+            self.start = snapped_pos
+            self.selectedItem = None
         super().mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, mouse_event):
-        if self.parent.parent is symbolEditor:
-            self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
-            pen = QPen(self.guideLineLayer.color, 1)
-            pen.setStyle(Qt.DashLine)
-            if hasattr(self, "draftItem"):
-                self.removeItem(self.draftItem)  # remove ghost item
-                del self.draftItem
-            elif self.drawLine and hasattr(self, "start") == True:
-                self.draftItem = shp.line(self.start, self.current, pen, self.gridTuple)
-                self.addItem(self.draftItem)
-            elif self.drawRect and hasattr(self, "start") == True:
-                self.draftItem = shp.rectangle(
-                    self.start, self.current, pen, self.gridTuple
-                )
-                self.addItem(self.draftItem)
-            elif self.drawPin:  # draw pin
-                self.draftItem = shp.pin(
-                    self.current,
-                    pen,
-                    self.pinName,
-                    self.pinDir,
-                    self.pinType,
-                    self.gridTuple,
-                )  # draw pin
-                self.addItem(self.draftItem)
-            elif self.addLabel:  # draw label
-                self.draftItem = shp.label(
-                    self.current,
-                    pen,
-                    self.labelName,
-                    self.gridTuple,
-                    self.labelType,
-                    self.labelHeight,
-                    self.labelAlignment,
-                    self.labelOrient,
-                    self.labelUse,
-                )
-                self.addItem(self.draftItem)
-            self.parent.parent.statusLine.showMessage(
-                "Cursor Position: " + str(self.current.toTuple())
+        self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+        pen = QPen(self.guideLineLayer.color, 1)
+        pen.setStyle(Qt.DashLine)
+        if hasattr(self, "draftItem"):
+            self.removeItem(self.draftItem)  # remove ghost item
+            del self.draftItem
+        elif self.drawLine and hasattr(self, "start") == True:
+            self.draftItem = shp.line(self.start, self.current, pen, self.gridTuple)
+            self.addItem(self.draftItem)
+        elif self.drawRect and hasattr(self, "start") == True:
+            self.draftItem = shp.rectangle(
+                self.start, self.current, pen, self.gridTuple
             )
-        elif self.parent.parent is schematicEditor:
-            print('I am a schematic editor')
+            self.addItem(self.draftItem)
+        elif self.drawPin:  # draw pin
+            self.draftItem = shp.pin(
+                self.current,
+                pen,
+                self.pinName,
+                self.pinDir,
+                self.pinType,
+                self.gridTuple,
+            )  # draw pin
+            self.addItem(self.draftItem)
+        elif self.addLabel:  # draw label
+            self.draftItem = shp.label(
+                self.current,
+                pen,
+                self.labelName,
+                self.gridTuple,
+                self.labelType,
+                self.labelHeight,
+                self.labelAlignment,
+                self.labelOrient,
+                self.labelUse,
+            )
+            self.addItem(self.draftItem)
+        self.parent.parent.statusLine.showMessage(
+            "Cursor Position: " + str(self.current.toTuple())
+        )
+
         super().mouseMoveEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
@@ -1054,24 +1101,12 @@ class editor_scene(QGraphicsScene):
             self.selectedItem.labelType = shp.label.labelTypes[2]
         self.selectedItem.update()
 
-    def snapGrid(self, number, base):
-        return base * int(math.floor(number / base))
-
-    def snap2Grid(self, point: QPoint, gridTuple: tuple[int, int]):
-        """
-        snap point to grid. Divides and multiplies by grid size.
-        """
-        return QPoint(
-            gridTuple[0] * int(round(point.x() / gridTuple[0])),
-            gridTuple[1] * int(round(point.y() / gridTuple[1])),
-        )
-
     def loadSymbol(self, file):
         self.attributeList = []
-        with open(file, "r") as f:
-            fJsonLoad = f.read()
+        with temppathlib.NamedTemporaryFile() as temp:
+            shutil.copy(file, temp.path.name)
             try:
-                items = json.loads(fJsonLoad)  # load json file
+                items = json.load(open(temp.path.name))
                 for item in items:
                     if (
                             item["type"] == "rect"
@@ -1087,30 +1122,6 @@ class editor_scene(QGraphicsScene):
 
             except json.decoder.JSONDecodeError:
                 print("Invalid JSON file")
-
-    def instSymbol(self,file:pathlib.Path):
-        symbolInstance = shp.symbolInst(self) # create symbol instance
-        self.addItem(symbolInstance) # add symbol instance to scene
-        with open(file, "r") as f:
-            fJsonLoad = f.read()
-            try:
-                items = json.loads(fJsonLoad)  # load json file
-                for item in items:
-                    if (
-                            item["type"] == "rect"
-                            or item["type"] == "line"
-                            or item["type"] == "pin"
-                            or item["type"] == "label"
-                    ):
-                        itemShape = lj.createSymbolItems(item, self.gridTuple)
-                        symbolInstance.addToGroup(itemShape)
-                symbolInstance.setData(0,self.instCounter)
-                print(symbolInstance.pins[0].start)
-                self.instCounter += 1
-
-            except json.decoder.JSONDecodeError:
-                print("Invalid JSON file")
-
 
     def saveSymbolCell(self, fileName):
         self.sceneR = self.sceneRect()  # get scene rect
@@ -1148,6 +1159,56 @@ class editor_scene(QGraphicsScene):
                             symbolPropDialogue.attributeDefList[i].text(),
                         )
                     )
+
+
+class schematic_scene(editor_scene):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.instCounter = 0
+        self.current = QPoint(0, 0)
+        self.itemsAtMousePress = []
+
+    def mousePressEvent(self, mouse_event:QGraphicsSceneMouseEvent) -> None:
+        snapped_pos = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+        if mouse_event.button() == Qt.LeftButton:
+            if self.items(snapped_pos):
+                self.itemsAtMousePress = self.items(snapped_pos)
+                self.selectedItem = self.itemsAtMousePress[0]
+                self.selectedItem.setSelected(True)
+                self.selectedItem.setFocus()
+        super().mousePressEvent(mouse_event)
+
+    def mouseMoveEvent(self, event:QGraphicsSceneMouseEvent) -> None:
+        self.current = self.snap2Grid(event.scenePos(), self.gridTuple)
+        self.parent.parent.statusLine.showMessage(
+            "Cursor Position: " + str(self.current.toTuple())
+        )
+        super().mouseMoveEvent(event)
+
+    def instSymbol(self, file: pathlib.Path):
+        symbolInstance = shp.symbolInst(self)  # create symbol instance        with temppathlib.NamedTemporaryFile() as temp:
+        with temppathlib.NamedTemporaryFile() as temp:
+            shutil.copy(file, temp.path.name)
+            try:
+                items = json.load(open(temp.path.name))
+                for item in items:
+                    if (
+                            item["type"] == "rect"
+                            or item["type"] == "line"
+                            or item["type"] == "pin"
+                            or item["type"] == "label"
+                    ):
+                        itemShape = lj.createSymbolItems(item, self.gridTuple)
+                        symbolInstance.addToGroup(itemShape)
+                symbolInstance.setData(0, self.instCounter)
+                symbolInstance.setPos(300,300)
+                self.addItem(symbolInstance)  # add symbol instance to scene
+                symbolInstance.setPos(self.current)
+                print(f'scene position: {symbolInstance.scenePos().toTuple()}')
+                self.instCounter += 1
+
+            except json.decoder.JSONDecodeError:
+                print("Invalid JSON file")
 
 
 class editor_view(QGraphicsView):
@@ -1215,3 +1276,17 @@ class editor_view(QGraphicsView):
         viewRect = self.scene.itemsBoundingRect()
         self.fitInView(viewRect, Qt.AspectRatioMode.KeepAspectRatio)
         self.show()
+
+
+class symbol_view(editor_view):
+    def __int__(self, scene, parent):
+        self.scene = scene
+        self.parent = parent
+        super().__init__(self.scene, self.parent)
+
+
+class schematic_view(editor_view):
+    def __init__(self, scene, parent):
+        self.scene = scene
+        self.parent = parent
+        super().__init__(self.scene, self.parent)

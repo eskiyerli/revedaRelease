@@ -23,7 +23,7 @@ from pathlib import Path
 
 # import numpy as np
 from PySide6.QtCore import (
-    QDir,
+    QDir, QTemporaryFile
 )
 from PySide6.QtGui import (
     QAction,
@@ -66,14 +66,8 @@ from PySide6.QtWidgets import (
     QGraphicsItem,
 )
 
-import circuitElements as cel
-import propertyDialogues as pdlg
-import pythonConsole as pcon
+
 import schBackEnd as scb  # import the backend
-import shape as shp  # import the shapes
-import loadJSON as lj
-import undoStack as us
-import symbolEncoder as se
 import editorWindows as edw
 import shutil
 from Point import *
@@ -87,6 +81,7 @@ class designLibrariesView(QTreeView):
         self.parent = parent  # type: QMainWindow
         self.libraryDict = libraryDict  # type: dict
         self.cellViews = cellViews  # type: list
+        self.viewCounter = 0
         self.init_UI()
 
     def init_UI(self):
@@ -214,19 +209,19 @@ class designLibrariesView(QTreeView):
 
     def openView(self):
         if self.selectedItem.text() == "schematic":
-            self.schematicWindow = edw.schematicEditor(
+            schematicWindow = edw.schematicEditor(
                 file=self.selectedItem.data(Qt.UserRole + 2),
                 libraryDict=self.libraryDict
             )
             # self.schematicWindow.instSymbol() # instantiate symbol
-            self.schematicWindow.show()
+            schematicWindow.show()
         elif self.selectedItem.text() == "symbol":
             # create a symbol editor window and load the symbol JSON file.
-            self.symbolWindow = edw.symbolEditor(
+            symbolWindow = edw.symbolEditor(
                 file=self.selectedItem.data(Qt.UserRole + 2)
                 , libraryDict=self.libraryDict)
-            self.symbolWindow.loadSymbol()
-            self.symbolWindow.show()
+            symbolWindow.loadSymbol()
+            symbolWindow.show()
 
     def copyView(self):
         dlg = copyViewDialog(self, self.libraryModel, self.selectedItem)
@@ -571,6 +566,7 @@ class libraryPathEditorDialog(QDialog):
         labelLayout.addWidget(QLabel("Library Name"))
         labelLayout.addWidget(QLabel("Library Path"))
         mainLayout.addLayout(labelLayout)  # add label layout to main layout
+        mainLayout.addLayout(labelLayout)  # add label layout to main layout
         for key in self.libraryDict.keys():
             self.libraryEditRowList.append(libraryEditRow(self))
             self.entriesLayout.addWidget(self.libraryEditRowList[-1])
@@ -773,7 +769,7 @@ class symLibrariesView(designLibrariesView):
         pass
 
     def addSymbol(self):
-        assert type(self.scene) is edw.editor_scene, 'not a scene'
+        assert type(self.scene) is edw.schematic_scene, 'not a schematic scene'
         if self.selectedItem.text() == "symbol":
             symbolFile = self.selectedItem.data(Qt.UserRole + 2)
             self.scene.instSymbol(symbolFile)
