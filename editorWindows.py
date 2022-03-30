@@ -20,7 +20,6 @@
 
 # from hashlib import new
 import pathlib
-import temppathlib
 import json
 import shutil
 # import numpy as np
@@ -315,7 +314,6 @@ class editorWindow(QMainWindow):
             self.centralW.scene.update()
             self.centralW.view.update()
 
-
     # def deleteItemMethod(self, s):
     #     self.centralW.scene.itemDelete = True
 
@@ -335,8 +333,8 @@ class editorWindow(QMainWindow):
         pass
 
     def moveOrigin(self):
-        # self.centralW.scene.moveOrigin()
-        pass
+        self.centralW.scene.changeOrigin = True
+
 
 class schematicEditor(editorWindow):
     def __init__(self, file: pathlib.Path, libraryDict: dict) -> None:
@@ -683,7 +681,6 @@ class displayConfigDialog(QDialog):
         self.show()
 
 
-
 class symbolContainer(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
@@ -734,6 +731,8 @@ class editor_scene(QGraphicsScene):
         self.defineSceneLayers()
         self.setPens()
         self.undoStack = QUndoStack()
+        self.changeOrigin = False
+        self.origin = QPoint(0, 0)
 
     def setPens(self):
         self.wirePen = QPen(self.wireLayer.color, 2)
@@ -766,7 +765,7 @@ class editor_scene(QGraphicsScene):
         )
 
     def snapGrid(self, number, base):
-        return base * int(math.floor(number / base))
+        return base * int(round(number / base))
 
     def snap2Grid(self, point: QPoint, gridTuple: tuple[int, int]):
         """
@@ -776,6 +775,7 @@ class editor_scene(QGraphicsScene):
             gridTuple[0] * int(round(point.x() / gridTuple[0])),
             gridTuple[1] * int(round(point.y() / gridTuple[1])),
         )
+
 
 class symbol_scene(editor_scene):
     '''
@@ -799,6 +799,9 @@ class symbol_scene(editor_scene):
         elif not (self.selectItem or hasattr(self, "start")):
             self.start = snapped_pos
             self.selectedItem = None
+        elif self.changeOrigin:
+            self.origin = snapped_pos  # set origin
+            self.changeOrigin = False
         super().mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, mouse_event):
@@ -809,16 +812,16 @@ class symbol_scene(editor_scene):
             self.removeItem(self.draftItem)  # remove ghost item
             del self.draftItem
         elif self.drawLine and hasattr(self, "start") == True:
-            self.draftItem = shp.line(self.start, self.current, pen, self.gridTuple)
+            self.draftItem = shp.line(self.start , self.current , pen, self.gridTuple)
             self.addItem(self.draftItem)
         elif self.drawRect and hasattr(self, "start") == True:
             self.draftItem = shp.rectangle(
-                self.start, self.current, pen, self.gridTuple
+                self.start , self.current , pen, self.gridTuple
             )
             self.addItem(self.draftItem)
         elif self.drawPin:  # draw pin
             self.draftItem = shp.pin(
-                self.current,
+                self.current ,
                 pen,
                 self.pinName,
                 self.pinDir,
@@ -828,7 +831,7 @@ class symbol_scene(editor_scene):
             self.addItem(self.draftItem)
         elif self.addLabel:  # draw label
             self.draftItem = shp.label(
-                self.current,
+                self.current ,
                 pen,
                 self.labelName,
                 self.gridTuple,
@@ -840,7 +843,7 @@ class symbol_scene(editor_scene):
             )
             self.addItem(self.draftItem)
         self.parent.parent.statusLine.showMessage(
-            "Cursor Position: " + str(self.current.toTuple())
+            "Cursor Position: " + str((self.current - self.origin).toTuple())
         )
 
         super().mouseMoveEvent(mouse_event)
@@ -850,12 +853,12 @@ class symbol_scene(editor_scene):
             self.removeItem(self.draftItem)
             del self.draftItem
             if self.drawLine:
-                self.lineDraw(self.start, self.current, self.symbolPen, self.gridTuple)
+                self.lineDraw(self.start, self.current - self.origin, self.symbolPen, self.gridTuple)
             elif self.drawRect:
-                self.rectDraw(self.start, self.current, self.symbolPen, self.gridTuple)
+                self.rectDraw(self.start, self.current - self.origin, self.symbolPen, self.gridTuple)
             elif self.drawPin:
                 self.pinDraw(
-                    self.current,
+                    self.current - self.origin,
                     self.pinPen,
                     self.pinName,
                     self.pinDir,
@@ -863,7 +866,8 @@ class symbol_scene(editor_scene):
                     self.gridTuple,
                 )  # draw pin
             elif self.addLabel:
-                self.labelDraw(self.labelPen)
+                self.labelDraw(self.current, self.labelPen, self.labelName, self.gridTuple, self.labelType,
+                               self.labelHeight, self.labelAlignment, self.labelOrient, self.labelUse)
         if hasattr(self, "start"):
             del self.start
         super().mouseReleaseEvent(mouse_event)
@@ -898,17 +902,19 @@ class symbol_scene(editor_scene):
         self.undoStack.push(undoCommand)
         self.drawPin = False
 
-    def labelDraw(self, pen: QPen):
+
+    def labelDraw(self, current, pen: QPen, labelName, gridTuple, labelType, labelHeight, labelAlignment, labelOrient,
+                  labelUse):
         label = shp.label(
-            self.current,
+            current,
             pen,
-            self.labelName,
-            self.gridTuple,
-            self.labelType,
-            self.labelHeight,
-            self.labelAlignment,
-            self.labelOrient,
-            self.labelUse,
+            labelName,
+            gridTuple,
+            labelType,
+            labelHeight,
+            labelAlignment,
+            labelOrient,
+            labelUse,
         )
         self.addItem(label)
         undoCommand = us.addShapeUndo(self, label)
@@ -975,8 +981,7 @@ class symbol_scene(editor_scene):
                 QPoint(
                     self.selectedItem.pos().x() + self.gridTuple[0],
                     self.selectedItem.pos().y() + self.gridTuple[1],
-                )
-            )
+                ))
 
     def itemProperties(self):
         if self.selectedItem is not None:
@@ -1103,10 +1108,9 @@ class symbol_scene(editor_scene):
 
     def loadSymbol(self, file):
         self.attributeList = []
-        with temppathlib.NamedTemporaryFile() as temp:
-            shutil.copy(file, temp.path.name)
+        with open(file, 'r') as temp:
             try:
-                items = json.load(open(temp.path.name))
+                items = json.load(temp)
                 for item in items:
                     if (
                             item["type"] == "rect"
@@ -1168,7 +1172,7 @@ class schematic_scene(editor_scene):
         self.current = QPoint(0, 0)
         self.itemsAtMousePress = []
 
-    def mousePressEvent(self, mouse_event:QGraphicsSceneMouseEvent) -> None:
+    def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         snapped_pos = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
         if mouse_event.button() == Qt.LeftButton:
             if self.items(snapped_pos):
@@ -1178,7 +1182,7 @@ class schematic_scene(editor_scene):
                 self.selectedItem.setFocus()
         super().mousePressEvent(mouse_event)
 
-    def mouseMoveEvent(self, event:QGraphicsSceneMouseEvent) -> None:
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         self.current = self.snap2Grid(event.scenePos(), self.gridTuple)
         self.parent.parent.statusLine.showMessage(
             "Cursor Position: " + str(self.current.toTuple())
@@ -1186,11 +1190,10 @@ class schematic_scene(editor_scene):
         super().mouseMoveEvent(event)
 
     def instSymbol(self, file: pathlib.Path):
-        symbolInstance = shp.symbolInst(self)  # create symbol instance        with temppathlib.NamedTemporaryFile() as temp:
-        with temppathlib.NamedTemporaryFile() as temp:
-            shutil.copy(file, temp.path.name)
+        symbolInstance = shp.symbolInst(self)  # create symbol instance
+        with open(file, 'r') as temp:
             try:
-                items = json.load(open(temp.path.name))
+                items = json.load(temp)
                 for item in items:
                     if (
                             item["type"] == "rect"
@@ -1201,7 +1204,7 @@ class schematic_scene(editor_scene):
                         itemShape = lj.createSymbolItems(item, self.gridTuple)
                         symbolInstance.addToGroup(itemShape)
                 symbolInstance.setData(0, self.instCounter)
-                symbolInstance.setPos(300,300)
+                symbolInstance.setPos(300, 300)
                 self.addItem(symbolInstance)  # add symbol instance to scene
                 symbolInstance.setPos(self.current)
                 print(f'scene position: {symbolInstance.scenePos().toTuple()}')

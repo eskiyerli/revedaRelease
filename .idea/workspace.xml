@@ -7,13 +7,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f443f3ba-db20-42bb-8de4-fefb1e9339d6" name="Changes" comment="Symbol attributes can be saved and recovered.">
+    <list default="true" id="f443f3ba-db20-42bb-8de4-fefb1e9339d6" name="Changes" comment="Origin change is implemented.">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/first/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/symbol.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/third/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/third/symbol.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libraryWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/libraryWindow.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symbolEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/symbolEncoder.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,9 +79,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Users\eskiye50\WPy64-31020\python-3.10.2.amd64\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/revedaMainW.py" />
@@ -153,14 +155,15 @@
     <MESSAGE value="Copy and property dialogues are now working." />
     <MESSAGE value="Started symbol properties dialogue work." />
     <MESSAGE value="Symbol attributes can be saved and recovered." />
-    <option name="LAST_COMMIT_MESSAGE" value="Symbol attributes can be saved and recovered." />
+    <MESSAGE value="Origin change is implemented." />
+    <option name="LAST_COMMIT_MESSAGE" value="Origin change is implemented." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/shape.py</url>
-          <line>439</line>
+          <line>440</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

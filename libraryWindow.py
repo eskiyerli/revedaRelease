@@ -213,14 +213,13 @@ class designLibrariesView(QTreeView):
                 file=self.selectedItem.data(Qt.UserRole + 2),
                 libraryDict=self.libraryDict
             )
-            # self.schematicWindow.instSymbol() # instantiate symbol
             schematicWindow.show()
         elif self.selectedItem.text() == "symbol":
             # create a symbol editor window and load the symbol JSON file.
             symbolWindow = edw.symbolEditor(
                 file=self.selectedItem.data(Qt.UserRole + 2)
                 , libraryDict=self.libraryDict)
-            symbolWindow.loadSymbol()
+            symbolWindow.loadSymbol() # load the symbol
             symbolWindow.show()
 
     def copyView(self):

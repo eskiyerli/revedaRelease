@@ -1,5 +1,74 @@
 [
     {
+        "type": "line",
+        "start": [
+            460,
+            0
+        ],
+        "end": [
+            359,
+            -1
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            -20.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            460,
+            -20
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "Zout",
+        "pinDir": "Output",
+        "pinType": "Signal",
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "rect",
+        "rect": [
+            -600,
+            -510,
+            -351,
+            -341
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            710.0,
+            450.0
+        ]
+    },
+    {
         "type": "label",
         "start": [
             -510,
@@ -21,8 +90,8 @@
         "labelOrient": "R0",
         "labelUse": "Normal",
         "location": [
-            -10.0,
-            -60.0
+            660.0,
+            330.0
         ]
     },
     {
@@ -45,8 +114,8 @@
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": true,
         "location": [
-            0.0,
-            0.0
+            710.0,
+            450.0
         ]
     },
     {
@@ -68,30 +137,8 @@
         "pinDir": "Input",
         "pinType": "Signal",
         "location": [
-            0.0,
-            0.0
-        ]
-    },
-    {
-        "type": "rect",
-        "rect": [
-            -620,
-            -520,
-            -311,
-            -261
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            20.0,
-            0.0
+            710.0,
+            450.0
         ]
     },
     {

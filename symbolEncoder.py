@@ -26,7 +26,7 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": item.scenePos().toTuple(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict
         elif isinstance(item, shp.line):
@@ -38,7 +38,7 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": item.scenePos().toTuple(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict
         elif isinstance(item, shp.pin):
@@ -52,7 +52,7 @@ class symbolEncoder(json.JSONEncoder):
                 "pinName": item.__dict__["pinName"],
                 "pinDir": item.__dict__["pinDir"],
                 "pinType": item.__dict__["pinType"],
-                "location": item.scenePos().toTuple(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict
         elif isinstance(item, shp.label):
@@ -69,7 +69,7 @@ class symbolEncoder(json.JSONEncoder):
                 "labelAlign": item.__dict__["labelAlign"],
                 "labelOrient": item.__dict__["labelOrient"],
                 "labelUse": item.__dict__["labelUse"],
-                "location": item.scenePos().toTuple(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict
         elif isinstance(item, symbolAttribute):
