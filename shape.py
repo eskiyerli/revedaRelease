@@ -630,3 +630,31 @@ class symbolInst(QGraphicsItemGroup):
 
     def boundingRect(self):
         return self.childrenBoundingRect()
+
+
+class symbolShape(shape):
+    def __init__(self, pen: QPen, gridTuple: tuple, *args, **kwargs):
+        super().__init__(pen, gridTuple)
+        self.args = args
+        self.kwargs = kwargs
+        for item in self.args:
+            item.setParentItem(self)
+
+        self.setFiltersChildEvents(True)
+        self.setHandlesChildEvents(True)
+        self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
+
+    def paint(self, painter, option, widget):
+        if self.isSelected():
+            painter.setPen(self.pen)
+            painter.drawRect(self.boundingRect())
+
+    def boundingRect(self):
+        return self.childrenBoundingRect()
+
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        self.setSelected(True)
+        for item in self.childItems():
+            item.setSelected(True)
+        print("Selected")
+        super().mousePressEvent(event)
