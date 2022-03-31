@@ -23,6 +23,8 @@ import pathlib
 import json
 import shutil
 # import numpy as np
+import copy
+
 from PySide6.QtCore import QRect, QTemporaryFile
 from PySide6.QtGui import (QAction, QBrush, QColor, QCursor, QFont,
                            QFontMetrics, QIcon, QKeySequence, QPainter, QPen,
@@ -323,7 +325,10 @@ class editorWindow(QMainWindow):
     def dispConfDialog(self):
         dcd = displayConfigDialog(self)
         if dcd.exec() == QDialog.Accepted:
-            self.centralW.scene.gridMajor = dcd.majorGridEntry.text()
+            gridValue = int(float(dcd.majorGridEntry.text()))
+            self.centralW.scene.gridMajor = gridValue
+            self.centralW.view.gridMajor = gridValue
+            self.centralW.scene.gridTuple = (gridValue, gridValue)
             self.centralW.scene.update()
             self.centralW.view.update()
 
@@ -627,65 +632,24 @@ class displayConfigDialog(QDialog):
         super().__init__(parent)
         self.parent = parent
         self.setWindowTitle("Display Options")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
         self.vLayout = QVBoxLayout()
-
-        # dispOptionsTabs = QTabWidget(self)
-        # # Grid Display Options tab
-        # displayTab = QWidget()
-        # # layout for displayTab
-        # vBox = QVBoxLayout()
-        # gridGrBox = QGroupBox("Display Grid")
-        # noGrid = QRadioButton("None")
-        # dotGrid = QRadioButton("Dots")
-        # dotGrid.setChecked(True)
-        # lineGrid = QRadioButton("Lines")
-        # gRLayout = QHBoxLayout()
-        # # create a logical group of grid option buttons
-        # gridButtonGroup = QButtonGroup()
-        # gridButtonGroup.addButton(noGrid)
-        # gridButtonGroup.addButton(dotGrid)
-        # gridButtonGroup.addButton(lineGrid)
-        # gRLayout.addWidget(noGrid)
-        # gRLayout.addWidget(dotGrid)
-        # gRLayout.addWidget(lineGrid)
-        # gRLayout.addStretch(1)
-        # gridGrBox.setLayout(gRLayout)
-        # #  gridGrBox.setLayout(gRLayout)
-        # # add to top row of display tab
-        # vBox.addWidget(gridGrBox)
-        # # create a form layout
-        # gridFormWidget = QWidget()
-        fLayout = QFormLayout(self)
+        fLayout = QFormLayout()
         self.majorGridEntry = QLineEdit()
+        fLayout.addRow("Major Grid:", self.majorGridEntry)
         if self.parent.centralW.scene.gridMajor:
             self.majorGridEntry.setText(
                 str(self.parent.centralW.scene.gridMajor))
         else:
             self.majorGridEntry.setText("10")
-        # self.minorGridEntry = QLineEdit()
-        # self.minorGridEntry.setText("5")
-        fLayout.addRow("Major Grid:", self.majorGridEntry)
-        self.vLayout.addLayout(fLayout, 1)
-        # fLayout.addRow("Minor Grid Spacing", self.minorGridEntry)
-        # gridFormWidget.setLayout(fLayout)
-        # vBox.addWidget(gridFormWidget)
-        # displayTab.setLayout(vBox)
-
-        # dispOptionsTabs.insertTab(0, displayTab, "Display Options")
-        # self.layout.addWidget(dispOptionsTabs)
-        # self.layout.addWidget(self.buttonBox)
-        # self.setLayout(self.vBoxLayout)
-        # need to change this later
-        # self.setGeometry(300, 300, 300, 200)
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        # self.vBoxLayout = QVBoxLayout()
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
+        self.vLayout.addLayout(fLayout)
+        self.vLayout.addStretch(1)
         self.vLayout.addWidget(self.buttonBox)
         self.setLayout(self.vLayout)
         self.show()
-
 
 class symbolContainer(QWidget):
     def __init__(self, parent):
@@ -1096,10 +1060,14 @@ class symbol_scene(editor_scene):
             self.selectedItem.stretch = True
 
     def viewSymbolProperties(self):
+        '''
+        View symbol properties dialog.
+        '''
+        # copy symbol attribute list to another list by deepcopy to be safe
+        attributeListCopy = copy.deepcopy(self.attributeList)
         symbolPropDialogue = pdlg.symbolLabelsDialogue(self.parent.parent,
                                                        self.items(),
-                                                       self.attributeList)
-        self.attributeList = []
+                                                       attributeListCopy)
         if symbolPropDialogue.exec() == QDialog.Accepted:
             for i, item in enumerate(symbolPropDialogue.labelItemList):
                 # label name is not changed.
@@ -1112,15 +1080,18 @@ class symbol_scene(editor_scene):
                 item.labelType = symbolPropDialogue.labelTypeList[
                     i].currentText()
                 item.update(item.boundingRect())
+            # create an empty attribute list. If the dialog is OK, the local attribute list
+            # will be copied to the symbol attribute list.
+            localAttributeList = []
             for i, item in enumerate(symbolPropDialogue.attributeNameList):
                 if item.text().strip() != "":
-                    self.attributeList.append(
+                    localAttributeList.append(
                         se.symbolAttribute(item.text(),
                                            symbolPropDialogue.attributeTypeList[
                                                i].currentText(),
                                            symbolPropDialogue.attributeDefList[
                                                i].text(), ))
-
+                self.attributeList = copy.deepcopy(localAttributeList)
 
 class schematic_scene(editor_scene):
     def __init__(self, parent):
@@ -1184,12 +1155,11 @@ class editor_view(QGraphicsView):
         self.parent = parent
         self.scene = scene
         self.gridMajor = self.scene.gridMajor
-
         self.init_UI()
 
     def init_UI(self):
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
-        self.setCacheMode(QGraphicsView.CacheBackground)
+        # self.setCacheMode(QGraphicsView.CacheBackground)
         self.standardCursor = QCursor(Qt.CrossCursor)
         self.setCursor(self.standardCursor)  # set cursor to standard arrow
         self.setRenderHint(QPainter.Antialiasing)

@@ -258,7 +258,7 @@ class symbolLabelsDialogue(QDialog):
         self.symbolPropsLayout.addWidget(QLabel("Definition"), 0, 2)
         i = 0
         for item in self.attributes:
-            print(f'item is :{item}')
+            # print(f'item is :{item}')
             self.attributeNameList.append(longLineEdit())
             self.attributeNameList[i].setText(item.name)
             self.symbolPropsLayout.addWidget(self.attributeNameList[i], i + 1, 0)
@@ -271,10 +271,7 @@ class symbolLabelsDialogue(QDialog):
             self.attributeDefList[i].setText(item.definition)
             self.symbolPropsLayout.addWidget(self.attributeDefList[i], i + 1, 2)
             i += 1
-            print(i)
-        # self.symbolPropsLayout.addWidget(QLineEdit(), 1, 0)
-        # self.symbolPropsLayout.addWidget(QLineEdit(), 1, 1)
-        # self.symbolPropsLayout.addWidget(QLineEdit(), 1, 2)
+
         self.attributeNameList.append(longLineEdit())
         attrTypeCombo = QComboBox()
         attrTypeCombo.addItems(shp.label.labelTypes)
