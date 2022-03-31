@@ -4,6 +4,17 @@ from PySide6.QtCore import (QDir, QLine, QRect, QRectF, QPoint, QPointF, QSize, 
 from PySide6.QtGui import (QAction, QKeySequence, QColor, QFont, QIcon, QPainter, QPen, QBrush, QFontMetrics,
                            QStandardItemModel, QTransform, QCursor, QUndoCommand, QUndoStack)
 
+class symbolAttribute(object):
+    def __init__(self, name:str,  type:str, definition:str):   # type: str, str, str
+        self.name = name
+        self.type = type
+        self.definition = definition
+
+    def __str__(self):
+        return f'{self.name}: {self.type}  {self.definition}'
+
+    def __repr__(self):
+        return f'{self.name}: {self.type}  {self.definition}'
 
 class symbolEncoder(json.JSONEncoder):
     def default(self, item):
@@ -15,7 +26,7 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": item.scenePos().toTuple(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict
         elif isinstance(item, shp.line):
@@ -27,7 +38,7 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": item.scenePos().toTuple(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict
         elif isinstance(item, shp.pin):
@@ -41,7 +52,7 @@ class symbolEncoder(json.JSONEncoder):
                 "pinName": item.__dict__["pinName"],
                 "pinDir": item.__dict__["pinDir"],
                 "pinType": item.__dict__["pinType"],
-                "location": item.scenePos().toTuple(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict
         elif isinstance(item, shp.label):
@@ -58,10 +69,17 @@ class symbolEncoder(json.JSONEncoder):
                 "labelAlign": item.__dict__["labelAlign"],
                 "labelOrient": item.__dict__["labelOrient"],
                 "labelUse": item.__dict__["labelUse"],
-                "location": item.scenePos().toTuple(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
+            }
+            return itemDict
+        elif isinstance(item, symbolAttribute):
+            itemDict = {
+                "type": "attribute",
+                "name": item.name,
+                "attributeType": item.type,
+                "definition": item.definition,
             }
             return itemDict
 
-        else:
-            return super().default(item)
+
 

@@ -1,0 +1,24 @@
+[
+    {
+        "type": "rect",
+        "rect": [
+            -610,
+            -350,
+            -461,
+            -231
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    }
+]
