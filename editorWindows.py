@@ -756,71 +756,138 @@ class symbol_scene(editor_scene):
         self.symbolContextMenu = QMenu()
 
     def mousePressEvent(self, mouse_event):
-        snapped_pos = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
-        if self.selectItem and self.items(snapped_pos):
-            self.itemsAtMousePress = self.items(snapped_pos)
-            self.selectedItem = self.itemsAtMousePress[0]
-            self.selectedItem.setSelected(True)
-        elif not (self.selectItem or hasattr(self, "start")):
-            self.start = snapped_pos
-            self.selectedItem = None
-        elif self.changeOrigin:
-            self.origin = snapped_pos  # set origin
-            self.changeOrigin = False
+        self.draftPen = QPen(self.guideLineLayer.color, 1)
+        if mouse_event.button() == Qt.LeftButton:
+            self.start = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+            if self.changeOrigin: # change origin of the symbol
+                self.origin = self.start
+                self.changeOrigin = False
+            elif self.selectItem and self.items(self.start): # item select mode True
+                self.itemsAtMousePress = self.items(self.start)
+                self.selectedItem = self.itemsAtMousePress[0]
+                self.selectedItem.setSelected(True)
+            elif self.drawPin:
+                if hasattr(self,'draftPin'):
+                    self.removeItem(self.draftPin)
+                self.draftPin = shp.pin(self.start, self.draftPen, self.pinName,
+                                         self.pinDir, self.pinType, self.gridTuple, )
+                self.addItem(self.draftPin)
+            elif self.addLabel:
+                if hasattr(self,'draftLabel'):
+                    self.removeItem(self.draftLabel)
+                self.draftLabel = shp.label(self.start, self.draftPen, self.labelName,
+                                       self.gridTuple, self.labelType,
+                                       self.labelHeight, self.labelAlignment,
+                                       self.labelOrient, self.labelUse, )
+                self.addItem(self.draftLabel)
+        # if self.selectItem and self.items(snapped_pos):
+        #     self.itemsAtMousePress = self.items(snapped_pos)
+        #     self.selectedItem = self.itemsAtMousePress[0]
+        #     self.selectedItem.setSelected(True)
+        # elif self.changeOrigin:
+        #     self.origin = snapped_pos  # set origin
+        #     self.changeOrigin = False
+        # elif self.drawPin:  # draw pin
+        #     self.draftItem = shp.pin(snapped_pos, pen, self.pinName,
+        #                              self.pinDir, self.pinType,
+        #                              self.gridTuple, )  # draw pin
+        #     self.addItem(self.draftItem)
+        # elif self.addLabel:  # draw label
+        #     self.draftItem = shp.label(snapped_pos, pen, self.labelName,
+        #                                self.gridTuple, self.labelType,
+        #                                self.labelHeight, self.labelAlignment,
+        #                                self.labelOrient, self.labelUse, )
+        #     self.addItem(self.draftItem)
+        # elif not (self.selectItem or hasattr(self, "start")):
+        #     self.start = snapped_pos
+        #     self.selectedItem = None
         super().mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, mouse_event):
         self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
-        pen = QPen(self.guideLineLayer.color, 1)
-        pen.setStyle(Qt.DashLine)
-        if hasattr(self, "draftItem"):
-            self.removeItem(self.draftItem)  # remove ghost item
-            del self.draftItem
-        elif self.drawLine and hasattr(self, "start") == True:
-            self.draftItem = shp.line(self.start, self.current, pen,
+        if mouse_event.buttons() == Qt.LeftButton:
+            if hasattr(self, "draftItem"):
+                self.removeItem(self.draftItem)
+            if self.drawLine and hasattr(self, "start"):
+                self.draftItem = shp.line(self.start, self.current, self.draftPen,
                                       self.gridTuple)
-            self.addItem(self.draftItem)
-        elif self.drawRect and hasattr(self, "start") == True:
-            self.draftItem = shp.rectangle(self.start, self.current, pen,
-                                           self.gridTuple)
-            self.addItem(self.draftItem)
-        elif self.drawPin:  # draw pin
-            self.draftItem = shp.pin(self.current, pen, self.pinName,
-                                     self.pinDir, self.pinType,
-                                     self.gridTuple, )  # draw pin
-            self.addItem(self.draftItem)
-        elif self.addLabel:  # draw label
-            self.draftItem = shp.label(self.current, pen, self.labelName,
-                                       self.gridTuple, self.labelType,
-                                       self.labelHeight, self.labelAlignment,
-                                       self.labelOrient, self.labelUse, )
-            self.addItem(self.draftItem)
+                self.addItem(self.draftItem)
+            elif self.drawRect and hasattr(self, "start"):
+                self.draftItem = shp.rectangle(self.start, self.current, self.draftPen,
+                                      self.gridTuple)
+                self.addItem(self.draftItem)
+            elif self.drawPin and hasattr(self, "draftPin"): # there is a pin draft
+                self.draftPin.setSelected(True)
+            elif self.addLabel and hasattr(self, "draftLabel"):
+                self.draftLabel.setSelected(True)
+
+        # self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+        # pen = QPen(self.guideLineLayer.color, 1)
+        # pen.setStyle(Qt.DashLine)
+        # if hasattr(self, "draftItem"):
+        #     self.removeItem(self.draftItem)  # remove ghost item
+        #     del self.draftItem
+        # elif self.drawLine and hasattr(self, "start") == True:
+        #     self.draftItem = shp.line(self.start, self.current, pen,
+        #                               self.gridTuple)
+        #     self.addItem(self.draftItem)
+        # elif self.drawRect and hasattr(self, "start") == True:
+        #     self.draftItem = shp.rectangle(self.start, self.current, pen,
+        #                                    self.gridTuple)
+        #     self.addItem(self.draftItem)
+        #
         self.parent.parent.statusLine.showMessage(
             "Cursor Position: " + str((self.current - self.origin).toTuple()))
 
         super().mouseMoveEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
-        if hasattr(self, "draftItem"):  # remove ghost item
-            self.removeItem(self.draftItem)
-            del self.draftItem
-            if self.drawLine:
-                self.lineDraw(self.start, self.current - self.origin,
+        if mouse_event.button() == Qt.LeftButton:
+            if self.drawLine and hasattr(self, "start"):
+                self.lineDraw(self.start, self.current,
                               self.symbolPen, self.gridTuple)
-            elif self.drawRect:
-                self.rectDraw(self.start, self.current - self.origin,
+            elif self.drawRect and hasattr(self, "start"):
+                self.rectDraw(self.start, self.current,
                               self.symbolPen, self.gridTuple)
-            elif self.drawPin:
-                self.pinDraw(self.current - self.origin, self.pinPen,
+            elif self.drawPin and hasattr(self, "draftPin"):
+                self.pinDraw(self.current, self.pinPen,
                              self.pinName, self.pinDir, self.pinType,
                              self.gridTuple, )  # draw pin
-            elif self.addLabel:
-                self.labelDraw(self.current, self.labelPen, self.labelName,
-                               self.gridTuple, self.labelType,
-                               self.labelHeight, self.labelAlignment,
-                               self.labelOrient, self.labelUse)
-        if hasattr(self, "start"):
-            del self.start
+            elif self.addLabel and hasattr(self, "draftLabel"):
+                self.labelDraw(self.current, self.labelPen,
+                               self.labelName, self.gridTuple,
+                               self.labelType, self.labelHeight,
+                               self.labelAlignment, self.labelOrient,
+                               self.labelUse, )  # draw label
+            if hasattr(self, "draftItem"):
+                self.removeItem(self.draftItem)
+                del self.draftItem
+            elif hasattr(self, "draftPin"):
+                self.removeItem(self.draftPin)
+                del self.draftPin
+            elif hasattr(self, "draftLabel"):
+                self.removeItem(self.draftLabel)
+                del self.draftLabel
+        # if hasattr(self, "draftItem"):  # remove ghost item
+        #     self.removeItem(self.draftItem)
+        #     del self.draftItem
+        #     if self.drawLine:
+        #         self.lineDraw(self.start, self.current - self.origin,
+        #                       self.symbolPen, self.gridTuple)
+        #     elif self.drawRect:
+        #         self.rectDraw(self.start, self.current - self.origin,
+        #                       self.symbolPen, self.gridTuple)
+        #     elif self.drawPin:
+        #         self.pinDraw(self.current - self.origin, self.pinPen,
+        #                      self.pinName, self.pinDir, self.pinType,
+        #                      self.gridTuple, )  # draw pin
+        #     elif self.addLabel:
+        #         self.labelDraw(self.current, self.labelPen, self.labelName,
+        #                        self.gridTuple, self.labelType,
+        #                        self.labelHeight, self.labelAlignment,
+        #                        self.labelOrient, self.labelUse)
+        # if hasattr(self, "start"):
+        #     del self.start
         super().mouseReleaseEvent(mouse_event)
 
     def lineDraw(self, start: QPoint, current: QPoint, pen: QPen,
@@ -1057,7 +1124,7 @@ class symbol_scene(editor_scene):
             json.dump(items, f, cls=se.symbolEncoder, indent=4)
 
     def stretchSelectedItem(self):
-        if self.selectedItem is not None:
+        if self.selectedItems is not None:
             self.selectedItem.stretch = True
 
     def viewSymbolProperties(self):
