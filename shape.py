@@ -652,9 +652,3 @@ class symbolShape(shape):
     def boundingRect(self):
         return self.childrenBoundingRect()
 
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        self.setSelected(True)
-        for item in self.childItems():
-            item.setSelected(True)
-        print("Selected")
-        super().mousePressEvent(event)

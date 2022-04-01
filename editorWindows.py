@@ -651,6 +651,7 @@ class displayConfigDialog(QDialog):
         self.setLayout(self.vLayout)
         self.show()
 
+
 class symbolContainer(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
@@ -1093,6 +1094,7 @@ class symbol_scene(editor_scene):
                                                i].text(), ))
                 self.attributeList = copy.deepcopy(localAttributeList)
 
+
 class schematic_scene(editor_scene):
     def __init__(self, parent):
         super().__init__(parent)
@@ -1102,21 +1104,38 @@ class schematic_scene(editor_scene):
         self.symbolContextMenu = QMenu()
 
     def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
-        snapped_pos = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
         if mouse_event.button() == Qt.LeftButton:
-            if self.items(snapped_pos):
-                self.itemsAtMousePress = self.items(snapped_pos)
-                self.selectedItem = self.itemsAtMousePress[0]
+            self.current = self.snap2Grid(mouse_event.scenePos(),
+                                          self.gridTuple)
+            self.itemsAtMousePress = self.items(self.current)
+            if len(self.itemsAtMousePress) == 0:
+                self.parent.parent.statusLine.showMessage(
+                    "No item selected")
+            elif len(self.itemsAtMousePress) != 0:
+                self.parent.parent.statusLine.showMessage(
+                    "Item selected")
+                self.selectedItem = self.itemsAtMousePress[0].parentItem()
                 self.selectedItem.setSelected(True)
-                self.selectedItem.setFocus()
         super().mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         self.current = self.snap2Grid(event.scenePos(), self.gridTuple)
-
         self.parent.parent.statusLine.showMessage(
             "Cursor Position: " + str(self.current.toTuple()))
         super().mouseMoveEvent(event)
+
+
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mouseReleaseEvent(event)
+        if self.selectedItem is not None:
+            for item in self.selectedItem.childItems():
+                if type(item) is shp.pin:
+                    self.selectedItem.pinLocations[
+                        item.pinName] = item.start + item.scenePos().toPoint()
+            print(self.selectedItem.pinLocations)
+            self.selectedItem.setSelected(False)
+            self.selectedItem = None
+        print(self.items())
 
     def instSymbol(self, file: pathlib.Path):
         itemShapes = []
@@ -1136,11 +1155,16 @@ class schematic_scene(editor_scene):
                         itemAttributes[item["name"]] = [item["attributeType"],
                                                         item["definition"]]
                 symbolInstance = shp.symbolShape(draftPen, self.gridTuple,
-                                                 *itemShapes,**itemAttributes)
+                                                 *itemShapes, **itemAttributes)
                 symbolInstance.setData(0, self.instCounter)
                 self.addItem(symbolInstance)  # add symbol instance to scene
                 self.instCounter += 1
-
+                symbolInstance.pinLocations = {}
+                for item in symbolInstance.childItems():
+                    if type(item) is shp.pin:
+                        symbolInstance.pinLocations[
+                            item.pinName] = item.start + item.pos().toPoint()
+                symbolInstance.setData(1, symbolInstance.pinLocations)
             except json.decoder.JSONDecodeError:
                 print("Invalid JSON file")
 
