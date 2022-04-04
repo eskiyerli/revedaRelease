@@ -362,6 +362,7 @@ class schematicEditor(editorWindow):
         self.symbolChooser = None
         self.cellViews = [
             'symbol']  # only symbol can be instantiated in the schematic window.
+        self._schematicActions()
 
     def init_UI(self):
         self.resize(1600, 800)
@@ -371,11 +372,16 @@ class schematicEditor(editorWindow):
         self.centralW = schematicContainer(self)
         self.setCentralWidget(self.centralW)
         self.statusLine = self.statusBar()
+        self.messageLine = QLabel()  # message line
+        self.statusLine.addPermanentWidget(self.messageLine)
 
     def _createTriggers(self):
         super()._createTriggers()
+        self.checkCellAction.triggered.connect(self.checkSaveCell)
         self.createWireAction.triggered.connect(self.createWireClick)
         self.createInstAction.triggered.connect(self.createInstClick)
+        self.copyAction.triggered.connect(self.copyClick)
+        self.deleteAction.triggered.connect(self.deleteClick)
 
     def _createMenuBar(self):
         super()._createMenuBar()
@@ -435,6 +441,12 @@ class schematicEditor(editorWindow):
         self.schematicToolbar.addSeparator()
         self.schematicToolbar.addAction(self.viewCheckAction)
 
+    def _schematicActions(self):
+        self.centralW.scene.itemContextMenu.addAction(self.copyAction)
+        self.centralW.scene.itemContextMenu.addAction(self.moveAction)
+        self.centralW.scene.itemContextMenu.addAction(self.deleteAction)
+        self.centralW.scene.itemContextMenu.addAction(self.objPropAction)
+
     def _createShortcuts(self):
         super()._createShortcuts()
         self.createInstAction.setShortcut(Qt.Key_I)
@@ -443,10 +455,13 @@ class schematicEditor(editorWindow):
     def createWireClick(self, s):
         pass
 
+    def deleteClick(self, s):
+        self.centralW.scene.deleteSelectedItem()
+
     def createInstClick(self, s):
         revEDAPathObj = pathlib.Path(__file__)
         revEDADirObj = revEDAPathObj.parent
-        print(f'schematic scene: {self.centralW.scene}')
+        # print(f'schematic scene: {self.centralW.scene}')
         if self.symbolChooser is None:
             self.symbolChooser = libw.symbolChooser(self.libraryDict,
                                                     self.cellViews,
@@ -455,11 +470,20 @@ class schematicEditor(editorWindow):
         else:
             self.symbolChooser.show()
 
+    def copyClick(self, s):
+        pass
+
+    def checkSaveCell(self):
+        self.centralW.scene.saveSchematicCell(self.file)
+
+    def loadSchematic(self):
+        self.centralW.scene.loadSchematicCell(self.file)
+
 
 class symbolEditor(editorWindow):
     def __init__(self, file, libraryDict):
         super().__init__(file=file, libraryDict=libraryDict)
-        self.file = file
+        # self.file = file
         self.setWindowTitle(f"Symbol Editor - {file.parent.stem}")
         self._symbolActions()
 
@@ -531,11 +555,11 @@ class symbolEditor(editorWindow):
         super()._createTriggers()
 
     def _symbolActions(self):
-        self.centralW.scene.symbolContextMenu.addAction(self.copyAction)
-        self.centralW.scene.symbolContextMenu.addAction(self.moveAction)
-        self.centralW.scene.symbolContextMenu.addAction(self.stretchAction)
-        self.centralW.scene.symbolContextMenu.addAction(self.deleteAction)
-        self.centralW.scene.symbolContextMenu.addAction(self.objPropAction)
+        self.centralW.scene.itemContextMenu.addAction(self.copyAction)
+        self.centralW.scene.itemContextMenu.addAction(self.moveAction)
+        self.centralW.scene.itemContextMenu.addAction(self.stretchAction)
+        self.centralW.scene.itemContextMenu.addAction(self.deleteAction)
+        self.centralW.scene.itemContextMenu.addAction(self.objPropAction)
 
     def objPropClick(self):
         self.centralW.scene.itemProperties()
@@ -704,6 +728,9 @@ class editor_scene(QGraphicsScene):
         self.undoStack = QUndoStack()
         self.changeOrigin = False
         self.origin = QPoint(0, 0)
+        self.cellName = self.parent.parent.file.parent.stem
+        self.libraryName = self.parent.parent.file.parent.parent.stem
+        self.libraryDict = self.parent.parent.libraryDict
 
     def setPens(self):
         self.wirePen = QPen(self.wireLayer.color, 2)
@@ -753,54 +780,37 @@ class symbol_scene(editor_scene):
         self.resetSceneMode()  # reset to select mode
         # pen definitions
         self.setPens()
-        self.symbolContextMenu = QMenu()
+        self.itemContextMenu = QMenu()
 
     def mousePressEvent(self, mouse_event):
         self.draftPen = QPen(self.guideLineLayer.color, 1)
         if mouse_event.button() == Qt.LeftButton:
             self.start = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
-            if self.changeOrigin: # change origin of the symbol
+            if self.changeOrigin:  # change origin of the symbol
                 self.origin = self.start
                 self.changeOrigin = False
-            elif self.selectItem and self.items(self.start): # item select mode True
+            elif self.selectItem and self.items(
+                    self.start):  # item select mode True
                 self.itemsAtMousePress = self.items(self.start)
                 self.selectedItem = self.itemsAtMousePress[0]
                 self.selectedItem.setSelected(True)
             elif self.drawPin:
-                if hasattr(self,'draftPin'):
+                if hasattr(self, 'draftPin'):
                     self.removeItem(self.draftPin)
                 self.draftPin = shp.pin(self.start, self.draftPen, self.pinName,
-                                         self.pinDir, self.pinType, self.gridTuple, )
+                                        self.pinDir, self.pinType,
+                                        self.gridTuple, )
                 self.addItem(self.draftPin)
             elif self.addLabel:
-                if hasattr(self,'draftLabel'):
+                if hasattr(self, 'draftLabel'):
                     self.removeItem(self.draftLabel)
-                self.draftLabel = shp.label(self.start, self.draftPen, self.labelName,
-                                       self.gridTuple, self.labelType,
-                                       self.labelHeight, self.labelAlignment,
-                                       self.labelOrient, self.labelUse, )
+                self.draftLabel = shp.label(self.start, self.draftPen,
+                                            self.labelName,
+                                            self.gridTuple, self.labelType,
+                                            self.labelHeight,
+                                            self.labelAlignment,
+                                            self.labelOrient, self.labelUse, )
                 self.addItem(self.draftLabel)
-        # if self.selectItem and self.items(snapped_pos):
-        #     self.itemsAtMousePress = self.items(snapped_pos)
-        #     self.selectedItem = self.itemsAtMousePress[0]
-        #     self.selectedItem.setSelected(True)
-        # elif self.changeOrigin:
-        #     self.origin = snapped_pos  # set origin
-        #     self.changeOrigin = False
-        # elif self.drawPin:  # draw pin
-        #     self.draftItem = shp.pin(snapped_pos, pen, self.pinName,
-        #                              self.pinDir, self.pinType,
-        #                              self.gridTuple, )  # draw pin
-        #     self.addItem(self.draftItem)
-        # elif self.addLabel:  # draw label
-        #     self.draftItem = shp.label(snapped_pos, pen, self.labelName,
-        #                                self.gridTuple, self.labelType,
-        #                                self.labelHeight, self.labelAlignment,
-        #                                self.labelOrient, self.labelUse, )
-        #     self.addItem(self.draftItem)
-        # elif not (self.selectItem or hasattr(self, "start")):
-        #     self.start = snapped_pos
-        #     self.selectedItem = None
         super().mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, mouse_event):
@@ -809,33 +819,20 @@ class symbol_scene(editor_scene):
             if hasattr(self, "draftItem"):
                 self.removeItem(self.draftItem)
             if self.drawLine and hasattr(self, "start"):
-                self.draftItem = shp.line(self.start, self.current, self.draftPen,
-                                      self.gridTuple)
+                self.draftItem = shp.line(self.start, self.current,
+                                          self.draftPen,
+                                          self.gridTuple)
                 self.addItem(self.draftItem)
             elif self.drawRect and hasattr(self, "start"):
-                self.draftItem = shp.rectangle(self.start, self.current, self.draftPen,
-                                      self.gridTuple)
+                self.draftItem = shp.rectangle(self.start, self.current,
+                                               self.draftPen,
+                                               self.gridTuple)
                 self.addItem(self.draftItem)
-            elif self.drawPin and hasattr(self, "draftPin"): # there is a pin draft
+            elif self.drawPin and hasattr(self,
+                                          "draftPin"):  # there is a pin draft
                 self.draftPin.setSelected(True)
             elif self.addLabel and hasattr(self, "draftLabel"):
                 self.draftLabel.setSelected(True)
-
-        # self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
-        # pen = QPen(self.guideLineLayer.color, 1)
-        # pen.setStyle(Qt.DashLine)
-        # if hasattr(self, "draftItem"):
-        #     self.removeItem(self.draftItem)  # remove ghost item
-        #     del self.draftItem
-        # elif self.drawLine and hasattr(self, "start") == True:
-        #     self.draftItem = shp.line(self.start, self.current, pen,
-        #                               self.gridTuple)
-        #     self.addItem(self.draftItem)
-        # elif self.drawRect and hasattr(self, "start") == True:
-        #     self.draftItem = shp.rectangle(self.start, self.current, pen,
-        #                                    self.gridTuple)
-        #     self.addItem(self.draftItem)
-        #
         self.parent.parent.statusLine.showMessage(
             "Cursor Position: " + str((self.current - self.origin).toTuple()))
 
@@ -868,26 +865,7 @@ class symbol_scene(editor_scene):
             elif hasattr(self, "draftLabel"):
                 self.removeItem(self.draftLabel)
                 del self.draftLabel
-        # if hasattr(self, "draftItem"):  # remove ghost item
-        #     self.removeItem(self.draftItem)
-        #     del self.draftItem
-        #     if self.drawLine:
-        #         self.lineDraw(self.start, self.current - self.origin,
-        #                       self.symbolPen, self.gridTuple)
-        #     elif self.drawRect:
-        #         self.rectDraw(self.start, self.current - self.origin,
-        #                       self.symbolPen, self.gridTuple)
-        #     elif self.drawPin:
-        #         self.pinDraw(self.current - self.origin, self.pinPen,
-        #                      self.pinName, self.pinDir, self.pinType,
-        #                      self.gridTuple, )  # draw pin
-        #     elif self.addLabel:
-        #         self.labelDraw(self.current, self.labelPen, self.labelName,
-        #                        self.gridTuple, self.labelType,
-        #                        self.labelHeight, self.labelAlignment,
-        #                        self.labelOrient, self.labelUse)
-        # if hasattr(self, "start"):
-        #     del self.start
+
         super().mouseReleaseEvent(mouse_event)
 
     def lineDraw(self, start: QPoint, current: QPoint, pen: QPen,
@@ -987,6 +965,7 @@ class symbol_scene(editor_scene):
             itemCopyDict = json.loads(selectedItemJson)
             shape = self.createSymbolItems(itemCopyDict)
             self.addItem(shape)
+            # shift position by one grid unit to right and down
             shape.setPos(QPoint(self.selectedItem.pos().x() + self.gridTuple[0],
                                 self.selectedItem.pos().y() + self.gridTuple[
                                     1], ))
@@ -1168,7 +1147,7 @@ class schematic_scene(editor_scene):
         self.instCounter = 0
         self.current = QPoint(0, 0)
         self.itemsAtMousePress = []
-        self.symbolContextMenu = QMenu()
+        self.itemContextMenu = QMenu()
 
     def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         if mouse_event.button() == Qt.LeftButton:
@@ -1176,10 +1155,10 @@ class schematic_scene(editor_scene):
                                           self.gridTuple)
             self.itemsAtMousePress = self.items(self.current)
             if len(self.itemsAtMousePress) == 0:
-                self.parent.parent.statusLine.showMessage(
+                self.parent.parent.messageLine.setText(
                     "No item selected")
             elif len(self.itemsAtMousePress) != 0:
-                self.parent.parent.statusLine.showMessage(
+                self.parent.parent.messageLine.setText(
                     "Item selected")
                 self.selectedItem = self.itemsAtMousePress[0].parentItem()
                 self.selectedItem.setSelected(True)
@@ -1191,18 +1170,14 @@ class schematic_scene(editor_scene):
             "Cursor Position: " + str(self.current.toTuple()))
         super().mouseMoveEvent(event)
 
-
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        if event.button() == Qt.LeftButton:
+            if hasattr(self, "selectedItem") and self.selectedItem is not None:
+                for item in self.selectedItem.childItems():
+                    if type(item) is shp.pin:
+                        self.selectedItem.pinLocations[
+                            item.pinName] = item.start + item.scenePos().toPoint()
         super().mouseReleaseEvent(event)
-        if self.selectedItem is not None:
-            for item in self.selectedItem.childItems():
-                if type(item) is shp.pin:
-                    self.selectedItem.pinLocations[
-                        item.pinName] = item.start + item.scenePos().toPoint()
-            print(self.selectedItem.pinLocations)
-            self.selectedItem.setSelected(False)
-            self.selectedItem = None
-        print(self.items())
 
     def instSymbol(self, file: pathlib.Path):
         itemShapes = []
@@ -1218,20 +1193,60 @@ class schematic_scene(editor_scene):
                         # append recreated shapes to items list
                         itemShapes.append(
                             lj.createSymbolItems(item, self.gridTuple))
+
                     elif item["type"] == "attribute":
                         itemAttributes[item["name"]] = [item["attributeType"],
                                                         item["definition"]]
                 symbolInstance = shp.symbolShape(draftPen, self.gridTuple,
                                                  *itemShapes, **itemAttributes)
-                symbolInstance.setData(0, self.instCounter)
                 self.addItem(symbolInstance)  # add symbol instance to scene
+                symbolInstance.setPos(self.current)
                 self.instCounter += 1
                 symbolInstance.pinLocations = {}
                 for item in symbolInstance.childItems():
-                    if type(item) is shp.pin:
+                    if type(item) is shp.label and item.labelType == "NLPLabel":
+                        if item.labelName == '[@cellName]':
+                            item.setText(str(file.parent.stem))
+                        elif item.labelName == '[@instName]':
+                            item.setText(f'I{self.instCounter}')
+                    elif type(item) is shp.pin:
                         symbolInstance.pinLocations[
                             item.pinName] = item.start + item.pos().toPoint()
-                symbolInstance.setData(1, symbolInstance.pinLocations)
+                # data to add to item
+                symbolInstance.setData(0, self.libraryName)  # library name
+                symbolInstance.setData(1, self.cellName)  # symbol name
+                symbolInstance.setData(2, self.instCounter)
+            except json.decoder.JSONDecodeError:
+                print("Invalid JSON file")
+
+    def deleteSelectedItem(self):
+        if hasattr(self, "selectedItem"):
+            self.removeItem(self.selectedItem)
+            del self.selectedItem
+            self.update()
+            self.selectItem = True
+
+    def saveSchematicCell(self, file: pathlib.Path):
+        self.sceneR = self.sceneRect()  # get scene rect
+        items = self.items(self.sceneR)  # get items in scene rect
+        # only save symbol shapes
+        symbolItems = [item for item in items if type(item) is shp.symbolShape]
+        # TODO: save attributes
+        with open(file, "w") as f:
+            # json.dump({'instanceCounter': self.instCounter,}, f,indent=4)
+            json.dump(symbolItems, f, cls=se.schematicEncoder, indent=4)
+
+    def loadSchematicCell(self, file: pathlib.Path):
+        with open(file, 'r') as temp:
+            try:
+                items = json.load(temp)
+                for item in items:
+                    if item is not None and item["type"] == "symbolShape":
+                        itemShape = lj.createSchematicItems(item,
+                                                            self.libraryDict,
+                                                            'symbol',
+                                                            self.gridTuple)
+                        self.addItem(itemShape)
             except json.decoder.JSONDecodeError:
                 print("Invalid JSON file")
 

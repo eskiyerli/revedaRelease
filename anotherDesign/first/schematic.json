@@ -1,0 +1,22 @@
+[
+    {
+        "type": "symbolShape",
+        "library": "anotherDesign",
+        "name": "third",
+        "instCounter": 1,
+        "location": [
+            -1440.0,
+            -1090.0
+        ]
+    },
+    {
+        "type": "symbolShape",
+        "library": "anotherDesign",
+        "name": "third",
+        "instCounter": 2,
+        "location": [
+            -940.0,
+            -850.0
+        ]
+    }
+]

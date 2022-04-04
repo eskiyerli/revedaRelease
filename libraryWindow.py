@@ -87,7 +87,8 @@ class designLibrariesView(QTreeView):
     def init_UI(self):
         self.setSortingEnabled(True)
         self.initModel()
-        # iterate design library directories
+        # iterate design library directories. Designpath is the path of library
+        # obtained from libraryDict
         for designPath in self.libraryDict.values():  # type: Path
             self.addLibrary(designPath, self.parentItem)
         self.setModel(self.libraryModel)
@@ -135,26 +136,28 @@ class designLibrariesView(QTreeView):
             index = self.selectedIndexes()[0]
         except IndexError:
             pass
-        self.selectedItem = self.libraryModel.itemFromIndex(index)
-        if self.selectedItem.data(Qt.UserRole + 1) == "library":
-            menu.addAction("Save Library As...", self.saveLibAs)
-            menu.addAction("Rename Library", self.renameLib)
-            menu.addAction("Remove Library", self.removeLibrary)
-            menu.addAction("Create Cell", self.createCell)
-        elif self.selectedItem.data(Qt.UserRole + 1) == "cell":
-            menu.addAction(
-                QAction("Create CellView...", self, triggered=self.createCellView)
-            )
-            menu.addAction(QAction("Copy Cell...", self, triggered=self.copyCell))
-            menu.addAction(QAction("Rename Cell...", self, triggered=self.renameCell))
-            menu.addAction(QAction("Delete Cell...", self, triggered=self.deleteCell))
-        elif self.selectedItem.data(Qt.UserRole + 1) == "view":
-            menu.addAction(QAction("Open View", self, triggered=self.openView))
-            menu.addAction(QAction("Copy View...", self, triggered=self.copyView))
-            menu.addAction(QAction("Rename View...", self, triggered=self.renameView))
-            menu.addAction(QAction("Delete View...", self, triggered=self.deleteView))
-        menu.exec(event.globalPos())
-
+        try:
+            self.selectedItem = self.libraryModel.itemFromIndex(index)
+            if self.selectedItem.data(Qt.UserRole + 1) == "library":
+                menu.addAction("Save Library As...", self.saveLibAs)
+                menu.addAction("Rename Library", self.renameLib)
+                menu.addAction("Remove Library", self.removeLibrary)
+                menu.addAction("Create Cell", self.createCell)
+            elif self.selectedItem.data(Qt.UserRole + 1) == "cell":
+                menu.addAction(
+                    QAction("Create CellView...", self, triggered=self.createCellView)
+                )
+                menu.addAction(QAction("Copy Cell...", self, triggered=self.copyCell))
+                menu.addAction(QAction("Rename Cell...", self, triggered=self.renameCell))
+                menu.addAction(QAction("Delete Cell...", self, triggered=self.deleteCell))
+            elif self.selectedItem.data(Qt.UserRole + 1) == "view":
+                menu.addAction(QAction("Open View", self, triggered=self.openView))
+                menu.addAction(QAction("Copy View...", self, triggered=self.copyView))
+                menu.addAction(QAction("Rename View...", self, triggered=self.renameView))
+                menu.addAction(QAction("Delete View...", self, triggered=self.deleteView))
+            menu.exec(event.globalPos())
+        except UnboundLocalError:
+            pass
     # library related methods
 
     def removeLibrary(self):
@@ -213,7 +216,7 @@ class designLibrariesView(QTreeView):
                 file=self.selectedItem.data(Qt.UserRole + 2),
                 libraryDict=self.libraryDict
             )
-            # self.schematicWindow.instSymbol() # instantiate symbol
+            schematicWindow.loadSchematic()
             schematicWindow.show()
         elif self.selectedItem.text() == "symbol":
             # create a symbol editor window and load the symbol JSON file.

@@ -81,5 +81,16 @@ class symbolEncoder(json.JSONEncoder):
             }
             return itemDict
 
+class schematicEncoder(json.JSONEncoder):
+    def default(self, item):
+        if isinstance(item, shp.symbolShape):
+            itemDict = {
+                "type": "symbolShape",
+                "library": str(item.data(0).stem),
+                "name": str(item.data(1)),
+                "instCounter": item.data(2),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
+            }
+            return itemDict
 
 

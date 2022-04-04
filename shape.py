@@ -107,7 +107,7 @@ class shape(QGraphicsItem):
         self.clearFocus()
 
     def contextMenuEvent(self, event):
-        self.scene().symbolContextMenu.exec_(event.screenPos())
+        self.scene().itemContextMenu.exec_(event.screenPos())
 
     def snap2grid(self, pos: QPoint) -> QPoint:
         return self.scene().snap2Grid(pos, self.gridTuple)
@@ -466,6 +466,7 @@ class label(shape):
         self.start = start  # top left corner
         self.pen = pen
         self.labelName = labelName
+        self.labelText = None # label text can be different from label name
         self.labelHeight = labelHeight
         self.labelAlign = labelAlign
         self.labelOrient = labelOrient
@@ -487,11 +488,17 @@ class label(shape):
         painter.setFont(self.labelFont)
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
-            painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
+            if self.labelText:
+                painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelText)
+            else:
+                painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
             painter.drawRect(self.boundingRect())
         else:
             painter.setPen(self.pen)
-            painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
+            if self.labelText:
+                painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelText)
+            else:
+                painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
         self.fm = QFontMetrics(self.labelFont)
         self.rect = self.fm.boundingRect(self.labelName)
 
@@ -513,9 +520,9 @@ class label(shape):
     def height(self):
         return self.rect.boundingRect().height()
 
-    def setLabel(self, label):
-        self.labelName = label
-        self.rect = self.fm.boundingRect(self.labelName)
+    def setText(self, label):
+        self.labelText = label
+        self.rect = self.fm.boundingRect(self.labelText)
 
     def objName(self):
         return "LABEL"
@@ -618,7 +625,7 @@ class symbolInst(QGraphicsItemGroup):
         self.clearFocus()
 
     def contextMenuEvent(self, event):
-        self.scene().symbolContextMenu.exec_(event.screenPos())
+        self.scene().itemContextMenu.exec_(event.screenPos())
 
     def snap2grid(self, pos: QPoint) -> QPoint:
         return self.scene().snap2Grid(pos, self.gridTuple)

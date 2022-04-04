@@ -1,13 +1,60 @@
 [
     {
+        "type": "pin",
+        "start": [
+            -220,
+            -160
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "OUT",
+        "pinDir": "Input",
+        "pinType": "Signal",
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
         "type": "line",
         "start": [
-            460,
-            0
+            -220,
+            -160
         ],
         "end": [
-            359,
-            -1
+            -291,
+            -161
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -630,
+            -130
+        ],
+        "end": [
+            -571,
+            -131
         ],
         "color": [
             0,
@@ -24,105 +71,32 @@
         ]
     },
     {
-        "type": "pin",
-        "start": [
-            460,
-            -20
+        "type": "rect",
+        "rect": [
+            -570,
+            -210,
+            -291,
+            -61
         ],
         "color": [
-            139,
             0,
+            128,
             0,
             255
         ],
-        "width": 2,
+        "width": 3,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "pinName": "Zout",
-        "pinDir": "Output",
-        "pinType": "Signal",
+        "cosmetic": true,
         "location": [
             0.0,
             0.0
         ]
     },
     {
-        "type": "rect",
-        "rect": [
-            -600,
-            -510,
-            -351,
-            -341
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            710.0,
-            450.0
-        ]
-    },
-    {
-        "type": "label",
-        "start": [
-            -510,
-            -380
-        ],
-        "color": [
-            255,
-            255,
-            0,
-            255
-        ],
-        "width": 1,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "labelName": "[@instName]",
-        "labelType": "NLPLabel",
-        "labelHeight": "20",
-        "labelAlign": "Left",
-        "labelOrient": "R0",
-        "labelUse": "Normal",
-        "location": [
-            660.0,
-            330.0
-        ]
-    },
-    {
-        "type": "line",
-        "start": [
-            -600,
-            -470
-        ],
-        "end": [
-            -711,
-            -471
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            710.0,
-            450.0
-        ]
-    },
-    {
         "type": "pin",
         "start": [
-            -710,
-            -470
+            -110,
+            -50
         ],
         "color": [
             139,
@@ -133,42 +107,12 @@
         "width": 2,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": false,
-        "pinName": "Zin",
+        "pinName": "PIN",
         "pinDir": "Input",
         "pinType": "Signal",
         "location": [
-            710.0,
-            450.0
+            -520.0,
+            -100.0
         ]
-    },
-    {
-        "type": "attribute",
-        "name": "hello",
-        "attributeType": "Normal",
-        "definition": "mello"
-    },
-    {
-        "type": "attribute",
-        "name": "nello",
-        "attributeType": "Normal",
-        "definition": "sello"
-    },
-    {
-        "type": "attribute",
-        "name": "allo",
-        "attributeType": "NLPLabel",
-        "definition": "kello"
-    },
-    {
-        "type": "attribute",
-        "name": "sello",
-        "attributeType": "Normal",
-        "definition": "yello"
-    },
-    {
-        "type": "attribute",
-        "name": "hullo",
-        "attributeType": "NLPLabel",
-        "definition": "zello"
     }
 ]
