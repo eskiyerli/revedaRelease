@@ -17,9 +17,7 @@
   Primary Author: Murat Eskiyerli
 
 """
-import json
-import pathlib
-import shutil
+
 import sys
 from contextlib import redirect_stderr, redirect_stdout
 
@@ -95,7 +93,7 @@ class mainwContainer(QWidget):
         # treeView = designLibrariesView(self)
         self.console = pcon.pythonConsole(globals())
         self.console.writeoutput("Welcome to RevEDA")
-        self.console.writeoutput("Revolution Semiconductor (C) 2021.")
+        self.console.writeoutput("Revolution Semiconductor (C) 2022.")
         self.console.setfont(QFont("Fira Mono Regular", 12))
         # layout statements, using a grid layout
         gLayout = QVBoxLayout()
@@ -170,6 +168,10 @@ class mainWindow(QMainWindow):
 
     def exitApp(self):
         self.app.closeAllWindows()
+
+    def closeEvent(self, event):
+        self.app.closeAllWindows()
+        event.accept()
 
 # Start Main application window
 app = QApplication(sys.argv)

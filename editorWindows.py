@@ -22,24 +22,58 @@
 import pathlib
 import json
 import shutil
+
 # import numpy as np
 import copy
 
 from PySide6.QtCore import QRect, QTemporaryFile
-from PySide6.QtGui import (QAction, QBrush, QColor, QCursor, QFont,
-                           QFontMetrics, QIcon, QKeySequence, QPainter, QPen,
-                           QStandardItemModel, QTransform, QUndoCommand,
-                           QUndoStack, )
-from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDialog,
-                               QDialogButtonBox, QFileDialog,
-                               QFormLayout, QGraphicsItem, QGraphicsLineItem,
-                               QGraphicsItemGroup, QGraphicsRectItem,
-                               QGraphicsScene, QGraphicsView, QGridLayout,
-                               QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-                               QMainWindow, QMenu, QMessageBox, QPushButton,
-                               QRadioButton, QTabWidget, QToolBar,
-                               QTreeView, QVBoxLayout, QGraphicsSceneMouseEvent,
-                               QWidget, )
+from PySide6.QtGui import (
+    QAction,
+    QBrush,
+    QColor,
+    QCursor,
+    QFont,
+    QFontMetrics,
+    QIcon,
+    QKeySequence,
+    QPainter,
+    QPen,
+    QStandardItemModel,
+    QTransform,
+    QUndoCommand,
+    QUndoStack,
+)
+from PySide6.QtWidgets import (
+    QApplication,
+    QButtonGroup,
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
+    QFormLayout,
+    QGraphicsItem,
+    QGraphicsLineItem,
+    QGraphicsItemGroup,
+    QGraphicsRectItem,
+    QGraphicsScene,
+    QGraphicsView,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QRadioButton,
+    QTabWidget,
+    QToolBar,
+    QTreeView,
+    QVBoxLayout,
+    QGraphicsSceneMouseEvent,
+    QWidget,
+)
 
 import circuitElements as cel
 import libraryWindow as libw
@@ -56,11 +90,13 @@ from Vector import *
 
 
 class editorWindow(QMainWindow):
-    def __init__(self, file: pathlib.Path,
-                 libraryDict: dict):  # file is a pathlib.Path object
+    def __init__(
+        self, file: pathlib.Path, libraryDict: dict, libraryView
+    ):  # file is a pathlib.Path object
         super().__init__()
         self.file = file
         self.libraryDict = libraryDict
+        self.libraryView = libraryView
         self._createActions()
         self._createTriggers()
         self._createShortcuts()
@@ -86,8 +122,7 @@ class editorWindow(QMainWindow):
         self.checkCellAction = QAction(checkCellIcon, "Check-Save", self)
 
         self.readOnlyCellIcon = QIcon(":/icons/lock.png")
-        self.readOnlyCellAction = QAction(self.readOnlyCellIcon,
-                                          "Make Read Only", self)
+        self.readOnlyCellAction = QAction(self.readOnlyCellIcon, "Make Read Only", self)
 
         printIcon = QIcon(":/icons/printer--arrow.png")
         self.printAction = QAction(printIcon, "Print...", self)
@@ -123,16 +158,15 @@ class editorWindow(QMainWindow):
 
         # display options
         dispConfigIcon = QIcon(":/icons/resource-monitor.png")
-        self.dispConfigAction = QAction(dispConfigIcon, "Display Config...",
-                                        self)
+        self.dispConfigAction = QAction(dispConfigIcon, "Display Config...", self)
 
         selectConfigIcon = QIcon(":/icons/zone-select.png")
-        self.selectConfigAction = QAction(selectConfigIcon,
-                                          "Selection Config...", self)
+        self.selectConfigAction = QAction(selectConfigIcon, "Selection Config...", self)
 
         panZoomConfigIcon = QIcon(":/icons/selection-resize.png")
-        self.panZoomConfigAction = QAction(panZoomConfigIcon,
-                                           "Pan/Zoom Config...", self)
+        self.panZoomConfigAction = QAction(
+            panZoomConfigIcon, "Pan/Zoom Config...", self
+        )
 
         undoIcon = QIcon(":/icons/arrow-circle-315-left.png")
         self.undoAction = QAction(undoIcon, "Undo", self)
@@ -175,8 +209,7 @@ class editorWindow(QMainWindow):
 
         # create label action but do not add to any menu.
         createLabelIcon = QIcon(":/icons/tag-label-yellow.png")
-        self.createLabelAction = QAction(createLabelIcon, "Create Label...",
-                                         self)
+        self.createLabelAction = QAction(createLabelIcon, "Create Label...", self)
 
         createPinIcon = QIcon(":/icons/pin--plus.png")
         self.createPinAction = QAction(createPinIcon, "Create Pin...", self)
@@ -197,8 +230,7 @@ class editorWindow(QMainWindow):
         self.objPropAction = QAction(objPropIcon, "Object Properties...", self)
 
         viewPropIcon = QIcon(":/icons/property.png")
-        self.viewPropAction = QAction(viewPropIcon, "Cellview Properties...",
-                                      self)
+        self.viewPropAction = QAction(viewPropIcon, "Cellview Properties...", self)
 
         viewCheckIcon = QIcon(":/icons/ui-check-box.png")
         self.viewCheckAction = QAction(viewCheckIcon, "Check CellView", self)
@@ -207,8 +239,7 @@ class editorWindow(QMainWindow):
         self.viewErrorsAction = QAction(viewErrorsIcon, "View Errors...", self)
 
         deleteErrorsIcon = QIcon(":/icons/report--minus.png")
-        self.deleteErrorsAction = QAction(deleteErrorsIcon, "Delete Errors...",
-                                          self)
+        self.deleteErrorsAction = QAction(deleteErrorsIcon, "Delete Errors...", self)
 
         netlistIcon = QIcon(":/icons/script-text.png")
         self.netlistAction = QAction(netlistIcon, "Create Netlist...", self)
@@ -220,23 +251,19 @@ class editorWindow(QMainWindow):
         self.createLineAction = QAction(createLineIcon, "Create Line...", self)
 
         createRectIcon = QIcon(":/icons/layer-shape.png")
-        self.createRectAction = QAction(createRectIcon, "Create Rectangle...",
-                                        self)
+        self.createRectAction = QAction(createRectIcon, "Create Rectangle...", self)
 
         createPolyIcon = QIcon(":/icons/layer-shape-polygon.png")
-        self.createPolyAction = QAction(createPolyIcon, "Create Polygon...",
-                                        self)
+        self.createPolyAction = QAction(createPolyIcon, "Create Polygon...", self)
 
         createCircleIcon = QIcon(":/icons/layer-shape-ellipse.png")
-        self.createCircleAction = QAction(createCircleIcon, "Create Circle...",
-                                          self)
+        self.createCircleAction = QAction(createCircleIcon, "Create Circle...", self)
 
         createArcIcon = QIcon(":/icons/layer-shape-polyline.png")
         self.createArcAction = QAction(createArcIcon, "Create Arc...", self)
 
         createInstIcon = QIcon(":/icons/block--plus.png")
-        self.createInstAction = QAction(createInstIcon, "Create Instance...",
-                                        self)
+        self.createInstAction = QAction(createInstIcon, "Create Instance...", self)
 
         createWireIcon = QIcon(":/icons/node-insert.png")
         self.createWireAction = QAction(createWireIcon, "Create Wire...", self)
@@ -245,15 +272,13 @@ class editorWindow(QMainWindow):
         self.createBusAction = QAction(createBusIcon, "Create Bus...", self)
 
         createLabelIcon = QIcon(":/icons/tag-label-yellow.png")
-        self.createLabelAction = QAction(createLabelIcon, "Create Label...",
-                                         self)
+        self.createLabelAction = QAction(createLabelIcon, "Create Label...", self)
 
         createPinIcon = QIcon(":/icons/pin--plus.png")
         self.createPinAction = QAction(createPinIcon, "Create Pin...", self)
 
         createSymbolIcon = QIcon(":/icons/application-block.png")
-        self.createSymbolAction = QAction(createSymbolIcon, "Create Symbol...",
-                                          self)
+        self.createSymbolAction = QAction(createSymbolIcon, "Create Symbol...", self)
 
     def _createToolBars(self):
         # Create tools bar called "main toolbar"
@@ -355,13 +380,14 @@ class editorWindow(QMainWindow):
 
 
 class schematicEditor(editorWindow):
-    def __init__(self, file: pathlib.Path, libraryDict: dict) -> None:
-        super().__init__(file=file, libraryDict=libraryDict)
+    def __init__(self, file: pathlib.Path, libraryDict: dict, libraryView) -> None:
+        super().__init__(file=file, libraryDict=libraryDict, libraryView=libraryView)
         self.setWindowTitle(f"Schematic Editor - {file.parent.stem}")
         self.setWindowIcon(QIcon(":/icons/layer-shape.png"))
         self.symbolChooser = None
         self.cellViews = [
-            'symbol']  # only symbol can be instantiated in the schematic window.
+            "symbol"
+        ]  # only symbol can be instantiated in the schematic window.
         self._schematicActions()
 
     def init_UI(self):
@@ -453,7 +479,7 @@ class schematicEditor(editorWindow):
         self.createWireAction.setShortcut(Qt.Key_W)
 
     def createWireClick(self, s):
-        pass
+        self.centralW.scene.drawWire = True
 
     def deleteClick(self, s):
         self.centralW.scene.deleteSelectedItem()
@@ -463,9 +489,9 @@ class schematicEditor(editorWindow):
         revEDADirObj = revEDAPathObj.parent
         # print(f'schematic scene: {self.centralW.scene}')
         if self.symbolChooser is None:
-            self.symbolChooser = libw.symbolChooser(self.libraryDict,
-                                                    self.cellViews,
-                                                    self.centralW.scene)  # create the library browser
+            self.symbolChooser = libw.symbolChooser(
+                self.libraryDict, self.cellViews, self.centralW.scene
+            )  # create the library browser
             self.symbolChooser.show()
         else:
             self.symbolChooser.show()
@@ -479,10 +505,15 @@ class schematicEditor(editorWindow):
     def loadSchematic(self):
         self.centralW.scene.loadSchematicCell(self.file)
 
+    def closeEvent(self, event):
+        self.centralW.scene.saveSchematicCell(self.file)
+        self.libraryView.openViews.pop(f"{self.file.parent.parent.stem}_{self.file.parent.stem}_schematic")
+        event.accept()
+
 
 class symbolEditor(editorWindow):
-    def __init__(self, file, libraryDict):
-        super().__init__(file=file, libraryDict=libraryDict)
+    def __init__(self, file: pathlib.Path, libraryDict: dict, libraryView):
+        super().__init__(file=file, libraryDict=libraryDict, libraryView=libraryView)
         # self.file = file
         self.setWindowTitle(f"Symbol Editor - {file.parent.stem}")
         self._symbolActions()
@@ -608,9 +639,15 @@ class symbolEditor(editorWindow):
     def viewPropClick(self, s):
         self.centralW.scene.viewSymbolProperties()
 
-    def setDrawMode(self, drawPin: bool, selectItem: bool, drawArc: bool,
-                    drawRect: bool, drawLine: bool,
-                    addLabel: bool, ):
+    def setDrawMode(
+        self,
+        drawPin: bool,
+        selectItem: bool,
+        drawArc: bool,
+        drawRect: bool,
+        drawLine: bool,
+        addLabel: bool,
+    ):
         """
         Sets the drawing mode in the symbol editor.
         """
@@ -636,11 +673,14 @@ class symbolEditor(editorWindow):
             # directly setting scene class attributes here to pass the information.
             self.centralW.scene.labelName = createLabelDlg.labelNameEdit.text()
             self.centralW.scene.labelHeight = (
-                createLabelDlg.labelHeightEdit.text().strip())
+                createLabelDlg.labelHeightEdit.text().strip()
+            )
             self.centralW.scene.labelAlignment = (
-                createLabelDlg.labelAlignCombo.currentText())
+                createLabelDlg.labelAlignCombo.currentText()
+            )
             self.centralW.scene.labelOrient = (
-                createLabelDlg.labelOrientCombo.currentText())
+                createLabelDlg.labelOrientCombo.currentText()
+            )
             self.centralW.scene.labelUse = createLabelDlg.labelUseCombo.currentText()
             self.centralW.scene.labelType = "Normal"  # default button
             if createLabelDlg.normalType.isChecked():
@@ -649,6 +689,14 @@ class symbolEditor(editorWindow):
                 self.centralW.scene.labelType = "NLPLabel"
             elif createLabelDlg.pyLType.isChecked():
                 self.centralW.scene.labelType = "PyLabel"
+
+    def closeEvent(self, event):
+        """
+        Closes the application.
+        """
+        self.centralW.scene.saveSymbolCell(self.file)
+        self.libraryView.openViews.pop(f"{self.file.parent.parent.stem}_{self.file.parent.stem}_symbol")
+        event.accept()
 
 
 class displayConfigDialog(QDialog):
@@ -665,8 +713,7 @@ class displayConfigDialog(QDialog):
         self.majorGridEntry = QLineEdit()
         fLayout.addRow("Major Grid:", self.majorGridEntry)
         if self.parent.centralW.scene.gridMajor:
-            self.majorGridEntry.setText(
-                str(self.parent.centralW.scene.gridMajor))
+            self.majorGridEntry.setText(str(self.parent.centralW.scene.gridMajor))
         else:
             self.majorGridEntry.setText("10")
         self.vLayout.addLayout(fLayout)
@@ -743,20 +790,24 @@ class editor_scene(QGraphicsScene):
         self.labelPen = QPen(self.labelLayer.color, 1)
 
     def defineSceneLayers(self):
-        self.wireLayer = cel.layer(name="wireLayer", color=QColor("aqua"), z=1,
-                                   visible=True)
-        self.symbolLayer = cel.layer(name="symbolLayer", color=QColor("green"),
-                                     z=1, visible=True)
-        self.guideLineLayer = cel.layer(name="guideLineLayer",
-                                        color=QColor("white"), z=1,
-                                        visible=True)
-        self.selectedWireLayer = cel.layer(name="selectedWireLayer",
-                                           color=QColor("red"), z=1,
-                                           visible=True)
-        self.pinLayer = cel.layer(name="pinLayer", color=QColor("darkRed"), z=2,
-                                  visible=True)
-        self.labelLayer = cel.layer(name="labelLayer", color=QColor("yellow"),
-                                    z=3, visible=True)
+        self.wireLayer = cel.layer(
+            name="wireLayer", color=QColor("cyan"), z=1, visible=True
+        )
+        self.symbolLayer = cel.layer(
+            name="symbolLayer", color=QColor("green"), z=1, visible=True
+        )
+        self.guideLineLayer = cel.layer(
+            name="guideLineLayer", color=QColor("white"), z=1, visible=True
+        )
+        self.selectedWireLayer = cel.layer(
+            name="selectedWireLayer", color=QColor("red"), z=1, visible=True
+        )
+        self.pinLayer = cel.layer(
+            name="pinLayer", color=QColor("darkRed"), z=2, visible=True
+        )
+        self.labelLayer = cel.layer(
+            name="labelLayer", color=QColor("yellow"), z=3, visible=True
+        )
 
     def snapGrid(self, number, base):
         return base * int(round(number / base))
@@ -765,14 +816,16 @@ class editor_scene(QGraphicsScene):
         """
         snap point to grid. Divides and multiplies by grid size.
         """
-        return QPoint(gridTuple[0] * int(round(point.x() / gridTuple[0])),
-                      gridTuple[1] * int(round(point.y() / gridTuple[1])), )
+        return QPoint(
+            gridTuple[0] * int(round(point.x() / gridTuple[0])),
+            gridTuple[1] * int(round(point.y() / gridTuple[1])),
+        )
 
 
 class symbol_scene(editor_scene):
-    '''
+    """
     Scene for Symbol editor.
-    '''
+    """
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -781,35 +834,45 @@ class symbol_scene(editor_scene):
         # pen definitions
         self.setPens()
         self.itemContextMenu = QMenu()
+        self.draftPen = QPen(self.guideLineLayer.color, 1)
 
     def mousePressEvent(self, mouse_event):
-        self.draftPen = QPen(self.guideLineLayer.color, 1)
+
         if mouse_event.button() == Qt.LeftButton:
             self.start = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
             if self.changeOrigin:  # change origin of the symbol
                 self.origin = self.start
                 self.changeOrigin = False
-            elif self.selectItem and self.items(
-                    self.start):  # item select mode True
+            elif self.selectItem and self.items(self.start):  # item select mode True
                 self.itemsAtMousePress = self.items(self.start)
                 self.selectedItem = self.itemsAtMousePress[0]
                 self.selectedItem.setSelected(True)
             elif self.drawPin:
-                if hasattr(self, 'draftPin'):
+                if hasattr(self, "draftPin"):
                     self.removeItem(self.draftPin)
-                self.draftPin = shp.pin(self.start, self.draftPen, self.pinName,
-                                        self.pinDir, self.pinType,
-                                        self.gridTuple, )
+                self.draftPin = shp.pin(
+                    self.start,
+                    self.draftPen,
+                    self.pinName,
+                    self.pinDir,
+                    self.pinType,
+                    self.gridTuple,
+                )
                 self.addItem(self.draftPin)
             elif self.addLabel:
-                if hasattr(self, 'draftLabel'):
+                if hasattr(self, "draftLabel"):
                     self.removeItem(self.draftLabel)
-                self.draftLabel = shp.label(self.start, self.draftPen,
-                                            self.labelName,
-                                            self.gridTuple, self.labelType,
-                                            self.labelHeight,
-                                            self.labelAlignment,
-                                            self.labelOrient, self.labelUse, )
+                self.draftLabel = shp.label(
+                    self.start,
+                    self.draftPen,
+                    self.labelName,
+                    self.gridTuple,
+                    self.labelType,
+                    self.labelHeight,
+                    self.labelAlignment,
+                    self.labelOrient,
+                    self.labelUse,
+                )
                 self.addItem(self.draftLabel)
         super().mousePressEvent(mouse_event)
 
@@ -819,43 +882,52 @@ class symbol_scene(editor_scene):
             if hasattr(self, "draftItem"):
                 self.removeItem(self.draftItem)
             if self.drawLine and hasattr(self, "start"):
-                self.draftItem = shp.line(self.start, self.current,
-                                          self.draftPen,
-                                          self.gridTuple)
+                self.draftItem = shp.line(
+                    self.start, self.current, self.draftPen, self.gridTuple
+                )
                 self.addItem(self.draftItem)
             elif self.drawRect and hasattr(self, "start"):
-                self.draftItem = shp.rectangle(self.start, self.current,
-                                               self.draftPen,
-                                               self.gridTuple)
+                self.draftItem = shp.rectangle(
+                    self.start, self.current, self.draftPen, self.gridTuple
+                )
                 self.addItem(self.draftItem)
-            elif self.drawPin and hasattr(self,
-                                          "draftPin"):  # there is a pin draft
+            elif self.drawPin and hasattr(self, "draftPin"):  # there is a pin draft
                 self.draftPin.setSelected(True)
             elif self.addLabel and hasattr(self, "draftLabel"):
                 self.draftLabel.setSelected(True)
         self.parent.parent.statusLine.showMessage(
-            "Cursor Position: " + str((self.current - self.origin).toTuple()))
+            "Cursor Position: " + str((self.current - self.origin).toTuple())
+        )
 
         super().mouseMoveEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
         if mouse_event.button() == Qt.LeftButton:
             if self.drawLine and hasattr(self, "start"):
-                self.lineDraw(self.start, self.current,
-                              self.symbolPen, self.gridTuple)
+                self.lineDraw(self.start, self.current, self.symbolPen, self.gridTuple)
             elif self.drawRect and hasattr(self, "start"):
-                self.rectDraw(self.start, self.current,
-                              self.symbolPen, self.gridTuple)
+                self.rectDraw(self.start, self.current, self.symbolPen, self.gridTuple)
             elif self.drawPin and hasattr(self, "draftPin"):
-                self.pinDraw(self.current, self.pinPen,
-                             self.pinName, self.pinDir, self.pinType,
-                             self.gridTuple, )  # draw pin
+                self.pinDraw(
+                    self.current,
+                    self.pinPen,
+                    self.pinName,
+                    self.pinDir,
+                    self.pinType,
+                    self.gridTuple,
+                )  # draw pin
             elif self.addLabel and hasattr(self, "draftLabel"):
-                self.labelDraw(self.current, self.labelPen,
-                               self.labelName, self.gridTuple,
-                               self.labelType, self.labelHeight,
-                               self.labelAlignment, self.labelOrient,
-                               self.labelUse, )  # draw label
+                self.labelDraw(
+                    self.current,
+                    self.labelPen,
+                    self.labelName,
+                    self.gridTuple,
+                    self.labelType,
+                    self.labelHeight,
+                    self.labelAlignment,
+                    self.labelOrient,
+                    self.labelUse,
+                )  # draw label
             if hasattr(self, "draftItem"):
                 self.removeItem(self.draftItem)
                 del self.draftItem
@@ -868,11 +940,10 @@ class symbol_scene(editor_scene):
 
         super().mouseReleaseEvent(mouse_event)
 
-    def lineDraw(self, start: QPoint, current: QPoint, pen: QPen,
-                 gridTuple: tuple):
-        line = shp.line(start,
-                        current - QPoint(pen.width() / 2, pen.width() / 2), pen,
-                        gridTuple)
+    def lineDraw(self, start: QPoint, current: QPoint, pen: QPen, gridTuple: tuple):
+        line = shp.line(
+            start, current - QPoint(pen.width() / 2, pen.width() / 2), pen, gridTuple
+        )
         self.addItem(line)
         undoCommand = us.addShapeUndo(self, line)
         self.undoStack.push(undoCommand)
@@ -882,28 +953,46 @@ class symbol_scene(editor_scene):
         """
         Draws a rectangle on the scene
         """
-        rect = shp.rectangle(start,
-                             end - QPoint(pen.width() / 2, pen.width() / 2),
-                             pen, gridTuple)
+        rect = shp.rectangle(
+            start, end - QPoint(pen.width() / 2, pen.width() / 2), pen, gridTuple
+        )
         self.addItem(rect)
         undoCommand = us.addShapeUndo(self, rect)
         self.undoStack.push(undoCommand)
         self.drawRect = False
 
-    def pinDraw(self, current, pen: QPen, pinName: str, pinDir, pinType,
-                gridTuple: tuple):
+    def pinDraw(
+        self, current, pen: QPen, pinName: str, pinDir, pinType, gridTuple: tuple
+    ):
         pin = shp.pin(current, pen, pinName, pinDir, pinType, gridTuple)
         self.addItem(pin)
         undoCommand = us.addShapeUndo(self, pin)
         self.undoStack.push(undoCommand)
         self.drawPin = False
 
-    def labelDraw(self, current, pen: QPen, labelName, gridTuple, labelType,
-                  labelHeight, labelAlignment, labelOrient,
-                  labelUse):
-        label = shp.label(current, pen, labelName, gridTuple, labelType,
-                          labelHeight, labelAlignment, labelOrient,
-                          labelUse, )
+    def labelDraw(
+        self,
+        current,
+        pen: QPen,
+        labelName,
+        gridTuple,
+        labelType,
+        labelHeight,
+        labelAlignment,
+        labelOrient,
+        labelUse,
+    ):
+        label = shp.label(
+            current,
+            pen,
+            labelName,
+            gridTuple,
+            labelType,
+            labelHeight,
+            labelAlignment,
+            labelOrient,
+            labelUse,
+        )
         self.addItem(label)
         undoCommand = us.addShapeUndo(self, label)
         self.undoStack.push(undoCommand)
@@ -966,31 +1055,38 @@ class symbol_scene(editor_scene):
             shape = self.createSymbolItems(itemCopyDict)
             self.addItem(shape)
             # shift position by one grid unit to right and down
-            shape.setPos(QPoint(self.selectedItem.pos().x() + self.gridTuple[0],
-                                self.selectedItem.pos().y() + self.gridTuple[
-                                    1], ))
+            shape.setPos(
+                QPoint(
+                    self.selectedItem.pos().x() + self.gridTuple[0],
+                    self.selectedItem.pos().y() + self.gridTuple[1],
+                )
+            )
 
     def itemProperties(self):
         if self.selectedItem is not None:
             if isinstance(self.selectedItem, shp.rectangle):
-                self.queryDlg = pdlg.rectPropertyDialog(self.parent.parent,
-                                                        self.selectedItem)
+                self.queryDlg = pdlg.rectPropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
                 if self.queryDlg.exec() == QDialog.Accepted:
                     self.updateRectangleShape()
             elif isinstance(self.selectedItem, shp.line):
-                self.queryDlg = pdlg.linePropertyDialog(self.parent.parent,
-                                                        self.selectedItem)
+                self.queryDlg = pdlg.linePropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
                 if self.queryDlg.exec() == QDialog.Accepted:
                     self.updateLineShape()
 
             elif isinstance(self.selectedItem, shp.pin):
-                self.queryDlg = pdlg.pinPropertyDialog(self.parent.parent,
-                                                       self.selectedItem)
+                self.queryDlg = pdlg.pinPropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
                 if self.queryDlg.exec() == QDialog.Accepted:
                     self.updatePinShape()
             elif isinstance(self.selectedItem, shp.label):
-                self.queryDlg = pdlg.labelPropertyDialog(self.parent.parent,
-                                                         self.selectedItem)
+                self.queryDlg = pdlg.labelPropertyDialog(
+                    self.parent.parent, self.selectedItem
+                )
                 if self.queryDlg.exec() == QDialog.Accepted:
                     self.updateLabelShape()
 
@@ -1002,53 +1098,63 @@ class symbol_scene(editor_scene):
         location = self.selectedItem.scenePos().toTuple()
         newLeft = self.snapGrid(
             float(self.queryDlg.rectLeftLine.text()) - float(location[0]),
-            self.gridTuple[0], )
+            self.gridTuple[0],
+        )
         newTop = self.snapGrid(
             float(self.queryDlg.rectTopLine.text()) - float(location[1]),
-            self.gridTuple[1], )
-        newWidth = self.snapGrid(float(self.queryDlg.rectWidthLine.text()),
-                                 self.gridTuple[0])
-        newHeight = self.snapGrid(float(self.queryDlg.rectHeightLine.text()),
-                                  self.gridTuple[1])
+            self.gridTuple[1],
+        )
+        newWidth = self.snapGrid(
+            float(self.queryDlg.rectWidthLine.text()), self.gridTuple[0]
+        )
+        newHeight = self.snapGrid(
+            float(self.queryDlg.rectHeightLine.text()), self.gridTuple[1]
+        )
         undoUpdateRectangle = us.updateShapeUndo()
-        us.keepOriginalShape(self, self.selectedItem, self.gridTuple,
-                             parent=undoUpdateRectangle)
+        us.keepOriginalShape(
+            self, self.selectedItem, self.gridTuple, parent=undoUpdateRectangle
+        )
         self.selectedItem.start = QPoint(newLeft, newTop)
         self.selectedItem.end = QPoint(newLeft + newWidth, newTop + newHeight)
         self.selectedItem.setLeft(newLeft)
         self.selectedItem.setTop(newTop)
         self.selectedItem.setWidth(newWidth)
         self.selectedItem.setHeight(newHeight)
-        us.changeOriginalShape(self, self.selectedItem,
-                               parent=undoUpdateRectangle)
+        us.changeOriginalShape(self, self.selectedItem, parent=undoUpdateRectangle)
         self.undoStack.push(undoUpdateRectangle)
         self.selectedItem.update()
 
     def updateLineShape(self):
         location = self.selectedItem.scenePos().toTuple()
         self.selectedItem.start = self.snap2Grid(
-            QPoint(int(float(self.queryDlg.startXLine.text()) - float(
-                location[0])),
-                   int(float(self.queryDlg.startYLine.text()) - float(
-                       location[1])), ),
-            self.gridTuple, )
+            QPoint(
+                int(float(self.queryDlg.startXLine.text()) - float(location[0])),
+                int(float(self.queryDlg.startYLine.text()) - float(location[1])),
+            ),
+            self.gridTuple,
+        )
         self.selectedItem.end = self.snap2Grid(
             QPoint(
                 int(float(self.queryDlg.endXLine.text()) - float(location[0])),
-                int(float(self.queryDlg.endYLine.text()) - float(
-                    location[1])), ),
-            self.gridTuple, )
+                int(float(self.queryDlg.endYLine.text()) - float(location[1])),
+            ),
+            self.gridTuple,
+        )
 
         self.selectedItem.update()
 
     def updatePinShape(self):
         location = self.selectedItem.scenePos().toTuple()
         self.selectedItem.start = self.snap2Grid(
-            QPoint(float(self.queryDlg.pinXLine.text()) - float(location[0]),
-                   float(self.queryDlg.pinYLine.text()) - float(location[1]), ),
-            self.gridTuple, )
-        self.selectedItem.rect = QRect(self.selectedItem.start.x() - 5,
-                                       self.selectedItem.start.y() - 5, 10, 10)
+            QPoint(
+                float(self.queryDlg.pinXLine.text()) - float(location[0]),
+                float(self.queryDlg.pinYLine.text()) - float(location[1]),
+            ),
+            self.gridTuple,
+        )
+        self.selectedItem.rect = QRect(
+            self.selectedItem.start.x() - 5, self.selectedItem.start.y() - 5, 10, 10
+        )
         self.selectedItem.pinName = self.queryDlg.pinName.text()
         self.selectedItem.pinType = self.queryDlg.pinType.currentText()
         self.selectedItem.pinDir = self.queryDlg.pinDir.currentText()
@@ -1060,10 +1166,12 @@ class symbol_scene(editor_scene):
         """
         location = self.selectedItem.scenePos().toTuple()
         self.selectedItem.start = self.snap2Grid(
-            QPoint(float(self.queryDlg.labelXLine.text()) - float(location[0]),
-                   float(self.queryDlg.labelYLine.text()) - float(
-                       location[1]), ),
-            self.gridTuple, )
+            QPoint(
+                float(self.queryDlg.labelXLine.text()) - float(location[0]),
+                float(self.queryDlg.labelYLine.text()) - float(location[1]),
+            ),
+            self.gridTuple,
+        )
         self.selectedItem.labelName = self.queryDlg.labelNameEdit.text()
         self.selectedItem.labelHeight = self.queryDlg.labelHeightEdit.text()
         self.selectedItem.labelAlign = self.queryDlg.labelAlignCombo.currentText()
@@ -1079,13 +1187,16 @@ class symbol_scene(editor_scene):
 
     def loadSymbol(self, file):
         self.attributeList = []
-        with open(file, 'r') as temp:
+        with open(file, "r") as temp:
             try:
                 items = json.load(temp)
                 for item in items:
-                    if (item["type"] == "rect" or item["type"] == "line" or
-                            item["type"] == "pin" or item[
-                                "type"] == "label"):
+                    if (
+                        item["type"] == "rect"
+                        or item["type"] == "line"
+                        or item["type"] == "pin"
+                        or item["type"] == "label"
+                    ):
                         itemShape = lj.createSymbolItems(item, self.gridTuple)
                         self.addItem(itemShape)
                     elif item["type"] == "attribute":
@@ -1107,25 +1218,24 @@ class symbol_scene(editor_scene):
             self.selectedItem.stretch = True
 
     def viewSymbolProperties(self):
-        '''
+        """
         View symbol properties dialog.
-        '''
+        """
         # copy symbol attribute list to another list by deepcopy to be safe
         attributeListCopy = copy.deepcopy(self.attributeList)
-        symbolPropDialogue = pdlg.symbolLabelsDialogue(self.parent.parent,
-                                                       self.items(),
-                                                       attributeListCopy)
+        symbolPropDialogue = pdlg.symbolLabelsDialogue(
+            self.parent.parent, self.items(), attributeListCopy
+        )
         if symbolPropDialogue.exec() == QDialog.Accepted:
             for i, item in enumerate(symbolPropDialogue.labelItemList):
                 # label name is not changed.
                 item.labelHeight = symbolPropDialogue.labelHeightList[i].text()
-                item.labelAlign = symbolPropDialogue.labelAlignmentList[
-                    i].currentText()
+                item.labelAlign = symbolPropDialogue.labelAlignmentList[i].currentText()
                 item.labelOrient = symbolPropDialogue.labelOrientationList[
-                    i].currentText()
+                    i
+                ].currentText()
                 item.labelUse = symbolPropDialogue.labelUseList[i].currentText()
-                item.labelType = symbolPropDialogue.labelTypeList[
-                    i].currentText()
+                item.labelType = symbolPropDialogue.labelTypeList[i].currentText()
                 item.update(item.boundingRect())
             # create an empty attribute list. If the dialog is OK, the local attribute list
             # will be copied to the symbol attribute list.
@@ -1133,89 +1243,143 @@ class symbol_scene(editor_scene):
             for i, item in enumerate(symbolPropDialogue.attributeNameList):
                 if item.text().strip() != "":
                     localAttributeList.append(
-                        se.symbolAttribute(item.text(),
-                                           symbolPropDialogue.attributeTypeList[
-                                               i].currentText(),
-                                           symbolPropDialogue.attributeDefList[
-                                               i].text(), ))
+                        se.symbolAttribute(
+                            item.text(),
+                            symbolPropDialogue.attributeTypeList[i].currentText(),
+                            symbolPropDialogue.attributeDefList[i].text(),
+                        )
+                    )
                 self.attributeList = copy.deepcopy(localAttributeList)
 
 
 class schematic_scene(editor_scene):
     def __init__(self, parent):
         super().__init__(parent)
-        self.instCounter = 0
+        self.instCounter = self.findMaxCounter()
         self.current = QPoint(0, 0)
         self.itemsAtMousePress = []
         self.itemContextMenu = QMenu()
+        self.drawWire = False  # flag to add wire
+        self.itemSelect = True  # flag to select item
+        self.draftPen = QPen(self.guideLineLayer.color, 1)
+        self.draftPen.setStyle(Qt.DashLine)
+
+    def findMaxCounter(self):
+        """
+        Find the maximum counter in the scene.
+        """
+        maxCounter = 0
+        for item in self.items():
+            if item.counter > maxCounter:
+                maxCounter = item.counter
+        return maxCounter
 
     def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         if mouse_event.button() == Qt.LeftButton:
-            self.current = self.snap2Grid(mouse_event.scenePos(),
-                                          self.gridTuple)
-            self.itemsAtMousePress = self.items(self.current)
-            if len(self.itemsAtMousePress) == 0:
-                self.parent.parent.messageLine.setText(
-                    "No item selected")
-            elif len(self.itemsAtMousePress) != 0:
-                self.parent.parent.messageLine.setText(
-                    "Item selected")
-                self.selectedItem = self.itemsAtMousePress[0].parentItem()
-                self.selectedItem.setSelected(True)
+            self.start = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+            if self.itemSelect:
+                self.itemsAtMousePress = self.items(self.start)
+                if len(self.itemsAtMousePress) == 0:
+                    self.parent.parent.messageLine.setText("No item selected")
+                elif len(self.itemsAtMousePress) != 0:
+                    self.parent.parent.messageLine.setText("Item selected")
+                    self.selectedItem = self.itemsAtMousePress[0].parentItem()
+                    self.selectedItem.setSelected(True)
+
         super().mousePressEvent(mouse_event)
 
-    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        self.current = self.snap2Grid(event.scenePos(), self.gridTuple)
-        self.parent.parent.statusLine.showMessage(
-            "Cursor Position: " + str(self.current.toTuple()))
-        super().mouseMoveEvent(event)
+    def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
 
-    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        if event.button() == Qt.LeftButton:
-            if hasattr(self, "selectedItem") and self.selectedItem is not None:
-                for item in self.selectedItem.childItems():
-                    if type(item) is shp.pin:
-                        self.selectedItem.pinLocations[
-                            item.pinName] = item.start + item.scenePos().toPoint()
-        super().mouseReleaseEvent(event)
+        self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+        if mouse_event.buttons() == Qt.LeftButton:
+            if hasattr(self, "draftItem"):
+                self.removeItem(self.draftItem)
+            if self.drawWire and hasattr(self, "start"):
+                self.parent.parent.messageLine.setText("Wire Mode")
+                self.draftItem = shp.line(
+                    self.start, self.current, self.draftPen, self.gridTuple
+                )
+                self.addItem(self.draftItem)
+        self.parent.parent.statusLine.showMessage(
+            "Cursor Position: " + str(self.current.toTuple())
+        )
+        super().mouseMoveEvent(mouse_event)
+
+    def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
+        if mouse_event.button() == Qt.LeftButton:
+            if self.drawWire and hasattr(self, "start"):
+                self.wireDraw(self.start, self.current, self.wirePen, self.gridTuple)
+            # if hasattr(self, "selectedItem") and self.selectedItem is not None:
+            #     for item in self.selectedItem.childItems():
+            #         if type(item) is shp.pin:
+            #             self.selectedItem.pinLocations[
+            #                 item.pinName] = (item.start + item.scenePos().toPoint()).toTuple()
+        super().mouseReleaseEvent(mouse_event)
+
+    def keyPressEvent(self, key_event):
+        if key_event.key() == Qt.Key_Escape:
+            self.resetSceneMode()
+        super().keyPressEvent(key_event)
+
+    def resetSceneMode(self):
+        self.itemSelect = True
+        self.drawWire = False
+        self.parent.parent.messageLine.setText("Select Mode")
+
+    def wireDraw(self, start: QPoint, current: QPoint, pen: QPen, gridTuple: tuple):
+        line = shp.line(
+            start, current - QPoint(pen.width() / 2, pen.width() / 2), pen, gridTuple
+        )
+        self.addItem(line)
+        undoCommand = us.addShapeUndo(self, line)
+        self.undoStack.push(undoCommand)
 
     def instSymbol(self, file: pathlib.Path):
         itemShapes = []
         itemAttributes = {}
         draftPen = QPen(self.guideLineLayer.color, 1)
-        with open(file, 'r') as temp:
+        with open(file, "r") as temp:
             try:
                 items = json.load(temp)
                 for item in items:
-                    if (item["type"] == "rect" or item["type"] == "line" or
-                            item["type"] == "pin" or item[
-                                "type"] == "label"):
+                    if (
+                        item["type"] == "rect"
+                        or item["type"] == "line"
+                        or item["type"] == "pin"
+                        or item["type"] == "label"
+                    ):
                         # append recreated shapes to items list
-                        itemShapes.append(
-                            lj.createSymbolItems(item, self.gridTuple))
+                        itemShapes.append(lj.createSymbolItems(item, self.gridTuple))
 
                     elif item["type"] == "attribute":
-                        itemAttributes[item["name"]] = [item["attributeType"],
-                                                        item["definition"]]
-                symbolInstance = shp.symbolShape(draftPen, self.gridTuple,
-                                                 *itemShapes, **itemAttributes)
+                        itemAttributes[item["name"]] = [
+                            item["attributeType"],
+                            item["definition"],
+                        ]
+                symbolInstance = shp.symbolShape(
+                    draftPen, self.gridTuple, *itemShapes, **itemAttributes
+                )
                 self.addItem(symbolInstance)  # add symbol instance to scene
-                symbolInstance.setPos(self.current)
-                self.instCounter += 1
-                symbolInstance.pinLocations = {}
+                symbolInstance.setPos(QPoint(0,0))
+                symbolInstance.counter = self.instCounter+1
                 for item in symbolInstance.childItems():
                     if type(item) is shp.label and item.labelType == "NLPLabel":
-                        if item.labelName == '[@cellName]':
+                        if item.labelName == "[@cellName]":
                             item.setText(str(file.parent.stem))
-                        elif item.labelName == '[@instName]':
-                            item.setText(f'I{self.instCounter}')
+                        elif item.labelName == "[@instName]":
+                            item.setText(f"I{symbolInstance.counter}")
                     elif type(item) is shp.pin:
-                        symbolInstance.pinLocations[
-                            item.pinName] = item.start + item.pos().toPoint()
+                        symbolInstance.pinLocations[item.pinName] = (
+                            item.start + item.scenePos().toPoint()
+                        ).toTuple()
                 # data to add to item
                 symbolInstance.setData(0, self.libraryName)  # library name
-                symbolInstance.setData(1, self.cellName)  # symbol name
+                symbolInstance.setData(1, file.parent.stem)  # symbol name
                 symbolInstance.setData(2, self.instCounter)
+                symbolInstance.setData(3, symbolInstance.pinLocations)
+                symbolInstance.setData(4, itemAttributes)
+                undoCommand = us.addShapeUndo(self, symbolInstance)
+                self.undoStack.push(undoCommand)
             except json.decoder.JSONDecodeError:
                 print("Invalid JSON file")
 
@@ -1233,19 +1397,17 @@ class schematic_scene(editor_scene):
         symbolItems = [item for item in items if type(item) is shp.symbolShape]
         # TODO: save attributes
         with open(file, "w") as f:
-            # json.dump({'instanceCounter': self.instCounter,}, f,indent=4)
             json.dump(symbolItems, f, cls=se.schematicEncoder, indent=4)
 
     def loadSchematicCell(self, file: pathlib.Path):
-        with open(file, 'r') as temp:
+        with open(file, "r") as temp:
             try:
                 items = json.load(temp)
                 for item in items:
                     if item is not None and item["type"] == "symbolShape":
-                        itemShape = lj.createSchematicItems(item,
-                                                            self.libraryDict,
-                                                            'symbol',
-                                                            self.gridTuple)
+                        itemShape = lj.createSchematicItems(
+                            item, self.libraryDict, "symbol", self.gridTuple
+                        )
                         self.addItem(itemShape)
             except json.decoder.JSONDecodeError:
                 print("Invalid JSON file")
@@ -1270,20 +1432,21 @@ class editor_view(QGraphicsView):
         self.setCursor(self.standardCursor)  # set cursor to standard arrow
         self.setRenderHint(QPainter.Antialiasing)
         self.setRenderHint(QPainter.TextAntialiasing)
-        self.setMouseTracking(
-            True)  # self.setDragMode(QGraphicsView.RubberBandDrag)
+        self.setMouseTracking(True)  # self.setDragMode(QGraphicsView.RubberBandDrag)
 
     def wheelEvent(self, mouse_event):
         factor = 1.1
         if mouse_event.angleDelta().y() < 0:
             factor = 0.9
-        view_pos = QPoint(int(mouse_event.globalPosition().x()),
-                          int(mouse_event.globalPosition().y()))
+        view_pos = QPoint(
+            int(mouse_event.globalPosition().x()), int(mouse_event.globalPosition().y())
+        )
         scene_pos = self.mapToScene(view_pos)
         self.centerOn(scene_pos)
         self.scale(factor, factor)
         delta = self.mapToScene(view_pos) - self.mapToScene(
-            self.viewport().rect().center())
+            self.viewport().rect().center()
+        )
         self.centerOn(scene_pos - delta)
         super().wheelEvent(mouse_event)
 
@@ -1300,8 +1463,9 @@ class editor_view(QGraphicsView):
         num_y_points = math.floor(rectCoord[3] / self.gridMajor)
         for i in range(int(num_x_points)):  # rect width
             for j in range(int(num_y_points)):  # rect length
-                painter.drawPoint(grid_x_start + i * self.gridMajor,
-                                  grid_y_start + j * self.gridMajor)
+                painter.drawPoint(
+                    grid_x_start + i * self.gridMajor, grid_y_start + j * self.gridMajor
+                )
         super().drawBackground(painter, rect)
 
     def keyPressEvent(self, key_event):

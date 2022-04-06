@@ -1,0 +1,166 @@
+[
+    {
+        "type": "pin",
+        "start": [
+            -760,
+            -310
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "INN",
+        "pinDir": "Input",
+        "pinType": "Signal",
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            -760,
+            -420
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "INP",
+        "pinDir": "Input",
+        "pinType": "Signal",
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -220,
+            -310
+        ],
+        "end": [
+            -331,
+            -311
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -220,
+            -420
+        ],
+        "end": [
+            -331,
+            -421
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -750,
+            -310
+        ],
+        "end": [
+            -661,
+            -311
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -760,
+            -420
+        ],
+        "end": [
+            -661,
+            -421
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "rect",
+        "rect": [
+            -660,
+            -470,
+            -331,
+            -261
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    }
+]

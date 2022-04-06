@@ -644,12 +644,16 @@ class symbolShape(shape):
         super().__init__(pen, gridTuple)
         self.args = args
         self.kwargs = kwargs
+        self.pinLocations = {}
+        self.counter = 0
+
         for item in self.args:
             item.setParentItem(self)
 
         self.setFiltersChildEvents(True)
         self.setHandlesChildEvents(True)
         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
+
 
     def paint(self, painter, option, widget):
         if self.isSelected():
@@ -659,3 +663,12 @@ class symbolShape(shape):
     def boundingRect(self):
         return self.childrenBoundingRect()
 
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        if self.scene().drawWire:
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
+            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+        else:
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            super().mousePressEvent(event)
+            self.setCursor(Qt.OpenHandCursor)

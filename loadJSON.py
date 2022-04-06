@@ -111,14 +111,13 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple):
     '''
     if item["type"] == "symbolShape":
         position = QPoint(item["location"][0], item["location"][1])
-        library = pathlib.Path(libraryDict[item["library"]])
+        libraryPath = pathlib.Path(libraryDict[item["library"]])
         name = item["name"]
         instCounter = item["instCounter"]
         itemAttributes = {}
         itemShapes = []
         draftPen = QPen(QColor("white"), 1)
-        file = library.joinpath(name, viewName + '.json')
-        print(file)
+        file = libraryPath.joinpath(name, viewName + '.json')
         with open(file, 'r') as temp:
             try:
                 shapes = json.load(temp)
@@ -147,7 +146,7 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple):
                 #         symbolInstance.pinLocations[
                 #             child.pinName] = child.start + child.pos().toPoint()
         symbolInstance.setPos(position)
-        symbolInstance.setData(0, library)
+        symbolInstance.setData(0, libraryPath)
         symbolInstance.setData(1, name)
         symbolInstance.setData(2, instCounter)
         return symbolInstance

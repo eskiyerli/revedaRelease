@@ -1,22 +1,41 @@
 [
     {
         "type": "symbolShape",
-        "library": "anotherDesign",
+        "counter": 0,
+        "library": "C:\\Users\\eskiye50\\OneDrive\\Documents\\Projects\\RevEDA\\schematicEditor\\anotherDesign",
         "name": "third",
-        "instCounter": 1,
+        "instCounter": 0,
+        "pinLocations": null,
+        "attributes": null,
         "location": [
-            -1440.0,
-            -1090.0
+            0.0,
+            0.0
         ]
     },
     {
         "type": "symbolShape",
-        "library": "anotherDesign",
+        "counter": 0,
+        "library": "C:\\Users\\eskiye50\\OneDrive\\Documents\\Projects\\RevEDA\\schematicEditor\\anotherDesign",
         "name": "third",
-        "instCounter": 2,
+        "instCounter": 0,
+        "pinLocations": null,
+        "attributes": null,
         "location": [
-            -940.0,
-            -850.0
+            -730.0,
+            -320.0
+        ]
+    },
+    {
+        "type": "symbolShape",
+        "counter": 0,
+        "library": "C:\\Users\\eskiye50\\OneDrive\\Documents\\Projects\\RevEDA\\schematicEditor\\anotherDesign",
+        "name": "third",
+        "instCounter": 0,
+        "pinLocations": null,
+        "attributes": null,
+        "location": [
+            -220.0,
+            -330.0
         ]
     }
 ]

@@ -114,5 +114,63 @@
             -520.0,
             -100.0
         ]
+    },
+    {
+        "type": "label",
+        "start": [
+            -500,
+            -140
+        ],
+        "color": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "width": 1,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "labelName": "[@cellName]",
+        "labelType": "NLPLabel",
+        "labelHeight": "20",
+        "labelAlign": "Left",
+        "labelOrient": "R0",
+        "labelUse": "Normal",
+        "location": [
+            0.0,
+            -30.0
+        ]
+    },
+    {
+        "type": "label",
+        "start": [
+            -350,
+            -240
+        ],
+        "color": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "width": 1,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "labelName": "[@instName]",
+        "labelType": "NLPLabel",
+        "labelHeight": "12",
+        "labelAlign": "Left",
+        "labelOrient": "R0",
+        "labelUse": "Normal",
+        "location": [
+            20.0,
+            0.0
+        ]
+    },
+    {
+        "type": "attribute",
+        "name": "hello",
+        "attributeType": "Normal",
+        "definition": "mello"
     }
 ]

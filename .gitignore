@@ -2,3 +2,5 @@
 *.pyc*
 *.zip
 *.yaml
+*.json
+icons/

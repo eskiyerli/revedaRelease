@@ -5,7 +5,7 @@ from PySide6.QtGui import (QAction, QKeySequence, QColor, QFont, QIcon, QPainter
                            QStandardItemModel, QTransform, QCursor, QUndoCommand, QUndoStack)
 
 class symbolAttribute(object):
-    def __init__(self, name:str,  type:str, definition:str):   # type: str, str, str
+    def __init__(self, name:str,  type:str, definition:str):
         self.name = name
         self.type = type
         self.definition = definition
@@ -86,9 +86,12 @@ class schematicEncoder(json.JSONEncoder):
         if isinstance(item, shp.symbolShape):
             itemDict = {
                 "type": "symbolShape",
-                "library": str(item.data(0).stem),
+                "counter": item.__dict__["counter"],
+                "library": str(item.data(0)),
                 "name": str(item.data(1)),
                 "instCounter": item.data(2),
+                "pinLocations": item.data(3),
+                "attributes": item.data(4),
                 "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict
