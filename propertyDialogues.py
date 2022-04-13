@@ -12,7 +12,11 @@ from PySide6.QtWidgets import (
     QRadioButton,
     QGridLayout,
     QCheckBox,
+    QWidget,
+    QFrame,
 )
+
+from PySide6.QtCore import (Qt,)
 
 import shape as shp
 
@@ -349,14 +353,83 @@ class symbolLabelsDialogue(QDialog):
         if i == 0:  # no labels to edit
             self.symbolLabelsLayout.addWidget(QLabel("No symbol labels found."), 1, 0)
 
+class instanceProperties(QDialog):
+    def __init__(self, parent, instance: shp.symbolShape = None):
+        super().__init__(parent)
+        self.parent = parent
+        self.instance = instance
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Instance Properties")
+        self.mainLayout = QVBoxLayout()
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        formLayout = QFormLayout()
+        self.libName = longLineEdit()
+        self.libName.setText(self.instance.libraryName)
+        formLayout.addRow(boldLabel("Library Name",self), self.libName)
+        self.cellName = longLineEdit()
+        self.cellName.setText(self.instance.cellName)
+        formLayout.addRow(boldLabel("Cell Name",self), self.cellName)
+        self.instName = longLineEdit()
+        for shape in self.instance.shapes:
+            if type(shape) == shp.label and shape.labelName == "[@instName]":
+                self.instName.setText(shape.labelText)
+        formLayout.addRow(boldLabel("Instance Name",self), self.instName)
+        location = (self.instance.scenePos()-self.instance.scene().origin).toTuple()
+        self.xLocation = shortLineEdit()
+        self.xLocation.setText(str(location[0]))
+        formLayout.addRow(boldLabel("x location",self), self.xLocation)
+        self.yLocation = shortLineEdit()
+        self.yLocation.setText(str(location[1]))
+        formLayout.addRow(boldLabel("y location",self), self.yLocation)
+        formLayout.setVerticalSpacing(10)
+        self.instanceLabelsLayout = QGridLayout()
+        for counter, shape in enumerate(self.instance.shapes):
+            if type(shape) == shp.label and shape.labelName != "[@instName]" and shape.labelName != "[@cellName]":
+                self.instanceLabelsLayout.addWidget(boldLabel(shape.labelName,self), counter, 0)
+                self.instanceLabelsLayout.addWidget(longLineEdit(), counter, 1)
+
+        instanceAttributesLayout = QGridLayout()
+        instanceAttributesLayout.setColumnMinimumWidth(0, 100)
+        for counter, name in enumerate(self.instance.attr.keys()):
+            instanceAttributesLayout.addWidget(boldLabel(name,self), counter, 0)
+            labelType = longLineEdit()
+            labelType.setReadOnly(True)
+            labelType.setText(self.instance.attr[name][0])
+            instanceAttributesLayout.addWidget(labelType, counter, 1)
+            labelName = longLineEdit()
+            labelName.setText(self.instance.attr[name][1])
+            instanceAttributesLayout.addWidget(labelName, counter, 2)
+
+        self.mainLayout.addLayout(formLayout)
+        self.mainLayout.addWidget(boldLabel("Instance Labels",self))
+        self.mainLayout.addLayout(self.instanceLabelsLayout)
+        self.mainLayout.addSpacing(40)
+        self.mainLayout.addWidget(boldLabel("Instance Attributes",self))
+        self.mainLayout.addLayout(instanceAttributesLayout)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
 
 class shortLineEdit(QLineEdit):
     def __init__(self):
         super().__init__(None)
-        self.setMaximumWidth(50)
+        self.setMaximumWidth(80)
+
+
+class boldLabel(QLabel):
+    def __init__(self, text: str, parent: QWidget = None):
+        super().__init__(text, parent)
+        self.setTextFormat(Qt.RichText)
+        self.setText("<b>" + text + "</b>")
 
 
 class longLineEdit(QLineEdit):
     def __init__(self):
         super().__init__(None)
-        self.setMaximumWidth(250)
+        self.setMaximumWidth(350)

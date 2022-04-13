@@ -86,12 +86,13 @@ class schematicEncoder(json.JSONEncoder):
         if isinstance(item, shp.symbolShape):
             itemDict = {
                 "type": "symbolShape",
-                "counter": item.__dict__["counter"],
-                "library": str(item.data(0)),
-                "name": str(item.data(1)),
-                "instCounter": item.data(2),
-                "pinLocations": item.data(3),
-                "attributes": item.data(4),
+                "library": item.__dict__["libraryName"],
+                "name": item.__dict__["cellName"],
+                "view": item.__dict__["viewName"],
+                "instCounter": item.__dict__["counter"],
+                "pinLocations": item.__dict__["pinLocations"],
+                "attributes": item.__dict__["attr"],
+                "labelDict": item.__dict__["labelDict"],
                 "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict

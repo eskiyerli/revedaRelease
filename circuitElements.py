@@ -15,7 +15,7 @@ class layer:
         return f'{self.name}  {str(self.color.toTuple())} {str(self.z)} {str(self.visible)}'
 
     def __eq__(self, other):
-        return self.name == other.name and self.color == other.color and self.z == other.z and self.visible == other.visible
+        return self.name == other.cellName and self.color == other.color and self.z == other.z and self.visible == other.visible
     
     def __ne__(self, other):
         return not self.__eq__(other)

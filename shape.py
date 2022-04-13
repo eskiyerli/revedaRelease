@@ -555,99 +555,103 @@ class label(shape):
         self.start += delta
 
 
-class symbolInst(QGraphicsItemGroup):
-    def __init__(self, scene):
-        self.scene = scene
-        self.gridTuple = self.scene.gridTuple
-        self.pins = []
-        super().__init__()
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
-        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
-        self.setAcceptHoverEvents(True)
-
-    def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionChange and self.scene is not None:
-            newPos = value.toPoint()
-            sceneRect = self.scene.sceneRect()
-            viewRect = self.scene.views()[0].viewport().rect()
-            newPos.setX(round(newPos.x() / self.gridTuple[0]) * self.gridTuple[0])
-            newPos.setY(round(newPos.y() / self.gridTuple[1]) * self.gridTuple[1])
-
-            if not sceneRect.contains(newPos):
-                # Keep the item inside the scene rect.
-                if newPos.x() > sceneRect.right():
-                    sceneRect.setRight(newPos.x())
-                    viewRect.setRight(newPos.x())
-                elif newPos.x() < sceneRect.left():
-                    sceneRect.setLeft(newPos.x())
-                    viewRect.setLeft(newPos.x())
-                if newPos.y() > sceneRect.bottom():
-                    sceneRect.setBottom(newPos.y())
-                    viewRect.setBottom(newPos.y())
-                elif newPos.y() < sceneRect.top():
-                    sceneRect.setTop(newPos.y())
-                    viewRect.setTop(newPos.y())
-            return newPos
-        return super().itemChange(change, value)
-
-    def setSnapGrid(self, gridSize: int) -> None:
-        self.gridSize = gridSize
-
-    def snapGrid(self):
-        return self.gridSize
-
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().mousePressEvent(event)
-        self.setCursor(Qt.OpenHandCursor)
-        # if hasattr(self, "pins"):
-        #     print("Pins: ", self.pins)
-        #     print("Pins: ", self.pins[0].scenePos())
-
-    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().mouseMoveEvent(event)
-
-    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().mouseReleaseEvent(event)
-        # self.setSelected(False)
-
-    def hoverEnterEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().hoverEnterEvent(event)
-        self.setCursor(Qt.ArrowCursor)
-        self.setOpacity(0.75)
-        self.setFocus()
-
-    def hoverLeaveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().hoverLeaveEvent(event)
-        self.setCursor(Qt.CrossCursor)
-        self.setOpacity(1)
-        self.clearFocus()
-
-    def contextMenuEvent(self, event):
-        self.scene().itemContextMenu.exec_(event.screenPos())
-
-    def snap2grid(self, pos: QPoint) -> QPoint:
-        return self.scene().snap2Grid(pos, self.gridTuple)
-
-    def addToGroup(self, item):
-        if type(item) is pin:
-            self.pins.append(item)
-        super().addToGroup(item)
-
-    def boundingRect(self):
-        return self.childrenBoundingRect()
+# class symbolInst(QGraphicsItemGroup):
+#     def __init__(self, scene):
+#         self.scene = scene
+#         self.gridTuple = self.scene.gridTuple
+#         self.pins = []
+#         super().__init__()
+#         self.setFlag(QGraphicsItem.ItemIsMovable, True)
+#         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+#         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+#         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
+#         self.setAcceptHoverEvents(True)
+#
+#     def itemChange(self, change, value):
+#         if change == QGraphicsItem.ItemPositionChange and self.scene is not None:
+#             newPos = value.toPoint()
+#             sceneRect = self.scene.sceneRect()
+#             viewRect = self.scene.views()[0].viewport().rect()
+#             newPos.setX(round(newPos.x() / self.gridTuple[0]) * self.gridTuple[0])
+#             newPos.setY(round(newPos.y() / self.gridTuple[1]) * self.gridTuple[1])
+#
+#             if not sceneRect.contains(newPos):
+#                 # Keep the item inside the scene rect.
+#                 if newPos.x() > sceneRect.right():
+#                     sceneRect.setRight(newPos.x())
+#                     viewRect.setRight(newPos.x())
+#                 elif newPos.x() < sceneRect.left():
+#                     sceneRect.setLeft(newPos.x())
+#                     viewRect.setLeft(newPos.x())
+#                 if newPos.y() > sceneRect.bottom():
+#                     sceneRect.setBottom(newPos.y())
+#                     viewRect.setBottom(newPos.y())
+#                 elif newPos.y() < sceneRect.top():
+#                     sceneRect.setTop(newPos.y())
+#                     viewRect.setTop(newPos.y())
+#             return newPos
+#         return super().itemChange(change, value)
+#
+#     def setSnapGrid(self, gridSize: int) -> None:
+#         self.gridSize = gridSize
+#
+#     def snapGrid(self):
+#         return self.gridSize
+#
+#     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+#         super().mousePressEvent(event)
+#         self.setCursor(Qt.OpenHandCursor)
+#         # if hasattr(self, "pins"):
+#         #     print("Pins: ", self.pins)
+#         #     print("Pins: ", self.pins[0].scenePos())
+#
+#     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+#         super().mouseMoveEvent(event)
+#
+#     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+#         super().mouseReleaseEvent(event)
+#         # self.setSelected(False)
+#
+#     def hoverEnterEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+#         super().hoverEnterEvent(event)
+#         self.setCursor(Qt.ArrowCursor)
+#         self.setOpacity(0.75)
+#         self.setFocus()
+#
+#     def hoverLeaveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+#         super().hoverLeaveEvent(event)
+#         self.setCursor(Qt.CrossCursor)
+#         self.setOpacity(1)
+#         self.clearFocus()
+#
+#     def contextMenuEvent(self, event):
+#         self.scene().itemContextMenu.exec_(event.screenPos())
+#
+#     def snap2grid(self, pos: QPoint) -> QPoint:
+#         return self.scene().snap2Grid(pos, self.gridTuple)
+#
+#     def addToGroup(self, item):
+#         if type(item) is pin:
+#             self.pins.append(item)
+#         super().addToGroup(item)
+#
+#     def boundingRect(self):
+#         return self.childrenBoundingRect()
 
 
 class symbolShape(shape):
-    def __init__(self, pen: QPen, gridTuple: tuple, *args, **kwargs):
+    def __init__(self, pen: QPen, gridTuple: tuple, shapes:list, attr:dict):
         super().__init__(pen, gridTuple)
-        self.args = args
-        self.kwargs = kwargs
+        self.shapes = shapes
+        self.attr = attr # item specific parameters
         self.pinLocations = {}
-        self.counter = 0
+        self.counter = 0 # item's number on schematic
+        self.libraryName = ""
+        self.cellName = ""
+        self.viewName = ""
+        self.labelDict = {}
 
-        for item in self.args:
+        for item in self.shapes:
             item.setParentItem(self)
 
         self.setFiltersChildEvents(True)

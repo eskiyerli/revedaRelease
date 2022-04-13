@@ -30,13 +30,13 @@ class libraryItem(QStandardItem):
 
 
 class cellItem(QStandardItem):
-    def __init__(self, libraryPath: pathlib.Path, name: str) -> None:
-        super().__init__(name)
-        self.name = name
+    def __init__(self, libraryPath: pathlib.Path, cellName: str) -> None:
+        super().__init__(cellName)
+        self.cellName = cellName
         self.libraryPath = libraryPath
         self.setEditable(False)
         self.setData("cell", Qt.UserRole + 1)
-        self.setData(libraryPath / name, Qt.UserRole + 2)
+        self.setData(libraryPath / cellName, Qt.UserRole + 2)
 
     def type(self):
         return QStandardItem.UserType + 1
@@ -88,6 +88,10 @@ def createCellView(parent, viewName, cellItem):
     cellItem.appendRow(viewItem)
     # needs to decide on how to handle the view type
     print(f"Created {viewName} at {str(viewPath)}")
+    with open(viewPath, "w") as f: # write an empty json file
+        f.writelines('[')
+        f.writelines({'type': 'view', 'name': viewName})
+        f.writelines(']')
     return viewItem
 
 
@@ -109,11 +113,11 @@ def copyCell(parent, model, cellItem, copyName, selectedLibPath):
     else:
         assert cellPath.exists()
         shutil.copytree(cellPath, copyPath)  # copied the cell
-        libraryItem = model.findItems(selectedLibPath.name, flags=Qt.MatchExactly)[
+        libraryItem = model.findItems(selectedLibPath.cellName, flags=Qt.MatchExactly)[
             0
         ]  # find the library item
         # create new cell item
-        cellItem = QStandardItem(copyPath.name)
+        cellItem = QStandardItem(copyPath.cellName)
         cellItem.setEditable(False)
         cellItem.setData("cell", Qt.UserRole + 1)
         cellItem.setData(copyPath, Qt.UserRole + 2)
@@ -157,7 +161,7 @@ def createCell(parent, model, selectedItem, cellName):
             else:
                 cellPath.mkdir()
                 libraryItem = model.findItems(
-                    selectedLibPath.name, flags=Qt.MatchExactly
+                    selectedLibPath.stem, flags=Qt.MatchExactly
                 )[0]
         cellItem = QStandardItem(cellName)
         cellItem.setData(cellPath, Qt.UserRole + 2)

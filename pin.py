@@ -36,7 +36,7 @@ class pin:
             + " "
             + self.use
             + " "
-            + self.net.name
+            + self.net.cellName
             + " "
             + str(self.ports)
         )
@@ -49,7 +49,7 @@ class pin:
             + " "
             + self.use
             + " "
-            + self.net.name
+            + self.net.cellName
             + " "
             + str(self.ports)
         )
@@ -87,7 +87,7 @@ class pin:
         return self.net
 
     def getNetName(self):
-        return self.net.name # net is a net object
+        return self.net.cellName # net is a net object
 
     def dbObjType(self):
         return "PIN"

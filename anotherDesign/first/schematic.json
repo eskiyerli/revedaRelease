@@ -1,41 +1,34 @@
 [
     {
         "type": "symbolShape",
-        "counter": 0,
-        "library": "C:\\Users\\eskiye50\\OneDrive\\Documents\\Projects\\RevEDA\\schematicEditor\\anotherDesign",
+        "library": "anotherDesign",
         "name": "third",
-        "instCounter": 0,
-        "pinLocations": null,
-        "attributes": null,
+        "view": "symbol",
+        "instCounter": 4,
+        "pinLocations": {
+            "PIN": [
+                -630,
+                -150
+            ],
+            "OUT": [
+                -220,
+                -160
+            ]
+        },
+        "attributes": {
+            "w": [
+                "NLPLabel",
+                ""
+            ]
+        },
+        "labelDict": {
+            "[@instName]": "I4",
+            "[@cellName]": "third",
+            "[@w:w=%]": "w="
+        },
         "location": [
             0.0,
             0.0
-        ]
-    },
-    {
-        "type": "symbolShape",
-        "counter": 0,
-        "library": "C:\\Users\\eskiye50\\OneDrive\\Documents\\Projects\\RevEDA\\schematicEditor\\anotherDesign",
-        "name": "third",
-        "instCounter": 0,
-        "pinLocations": null,
-        "attributes": null,
-        "location": [
-            -730.0,
-            -320.0
-        ]
-    },
-    {
-        "type": "symbolShape",
-        "counter": 0,
-        "library": "C:\\Users\\eskiye50\\OneDrive\\Documents\\Projects\\RevEDA\\schematicEditor\\anotherDesign",
-        "name": "third",
-        "instCounter": 0,
-        "pinLocations": null,
-        "attributes": null,
-        "location": [
-            -220.0,
-            -330.0
         ]
     }
 ]

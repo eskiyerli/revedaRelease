@@ -539,7 +539,7 @@ class copyViewDialog(QDialog):
         layout.addRow(QLabel("Library:"), self.libraryComboBox)
         self.cellComboBox = QComboBox()
         cellList = [
-            str(cell.name) for cell in self.selectedLibPath.iterdir() if
+            str(cell.cellName) for cell in self.selectedLibPath.iterdir() if
             cell.is_dir()
             ]
         self.cellComboBox.addItems(cellList)
@@ -576,7 +576,7 @@ class copyViewDialog(QDialog):
             self.libraryComboBox.currentIndex(), Qt.UserRole + 2
             )
         cellList = [
-            str(cell.name) for cell in self.selectedLibPath.iterdir() if
+            str(cell.cellName) for cell in self.selectedLibPath.iterdir() if
             cell.is_dir()
             ]
         self.cellComboBox.clear()
@@ -749,7 +749,7 @@ class libraryPathEditC(QLineEdit):
 
 
 class symbolChooser(libraryBrowser):
-    def __init__(self, libraryDict, cellViews, scene):
+    def __init__(self, libraryDict:dict, cellViews, scene):
         self.scene = scene
         super().__init__(libraryDict, cellViews)
         self.setWindowTitle("Symbol Chooser")
@@ -765,12 +765,10 @@ class symbolChooser(libraryBrowser):
 class symbolBrowserContainer(libraryBrowserContainer):
     def __init__(self, parent, libraryDict) -> None:
         self.parent = parent
-        self.scene = self.parent.scene
         super().__init__(parent, libraryDict)
 
     def initUI(self):
         self.layout = QVBoxLayout()
-        print(self.scene)
         self.designView = symLibrariesView(
             self, self.libraryDict,
             self.parent.cellViews
@@ -784,7 +782,7 @@ class symLibrariesView(designLibrariesView):
                  cellViews: list = ['symbol']
                  ):
         self.parent = parent
-        self.scene = self.parent.scene
+        self.scene = self.parent.parent.scene
         super().__init__(parent, libraryDict, cellViews)
 
     def contextMenuEvent(self, event):
@@ -837,8 +835,8 @@ class symLibrariesView(designLibrariesView):
 
     def addSymbol(self):
         assert type(self.scene) is edw.schematic_scene, 'not a schematic scene'
-        if self.selectedItem.text() == "symbol":
-            symbolFile = self.selectedItem.data(Qt.UserRole + 2)
-            self.scene.instSymbol(symbolFile)
-
-            # print(type(self.scene))
+        symbolFile = self.selectedItem.data(Qt.UserRole + 2)
+        cellName=self.selectedItem.parent().cellName
+        libraryName=self.selectedItem.parent().parent().libraryName
+        self.scene.instSymbol(symbolFile, cellName, libraryName)
+        self.scene.itemCounter += 1

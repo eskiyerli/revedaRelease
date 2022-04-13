@@ -33,7 +33,7 @@ class net:
         return self.name
 
     def __eq__(self, other):
-        return self.name == other.name
+        return self.name == other.cellName
 
     def cellview(self):
         return self.cellview

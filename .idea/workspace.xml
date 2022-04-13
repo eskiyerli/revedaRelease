@@ -8,23 +8,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f443f3ba-db20-42bb-8de4-fefb1e9339d6" name="Changes" comment="Symbol and schematic formats are independent of &#10;library paths.">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/first/schematic.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/schematic.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/second/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/second/symbol.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anotherDesign/first/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/symbol.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anotherDesign/second/schematic.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/second/schematic.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/third/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/third/symbol.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/circuitElements.py" beforeDir="false" afterPath="$PROJECT_DIR$/circuitElements.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/libraryWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/libraryWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/loadJSON.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pythonConsole.py" beforeDir="false" afterPath="$PROJECT_DIR$/pythonConsole.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/revedaMainW.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaMainW.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/net.py" beforeDir="false" afterPath="$PROJECT_DIR$/net.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pin.py" beforeDir="false" afterPath="$PROJECT_DIR$/pin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/propertyDialogues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/schBackEnd.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/symbolEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/symbolEncoder.py" afterDir="false" />
     </list>
@@ -42,6 +41,7 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="MIXED" />
   </component>
   <component name="GitSEFilterConfiguration">
     <file-type-list>
@@ -72,7 +72,7 @@
     <property name="TODO_SCOPE" value="All Places" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/libraryWindow-ICT0122331.py" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Python" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/libraryWindow-ICT0122331.py" />
   </component>
   <component name="ReaderModeSettings">
@@ -91,9 +91,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Users\eskiye50\WPy64-31020\python-3.10.2.amd64\python.exe" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/revedaMainW.py" />
