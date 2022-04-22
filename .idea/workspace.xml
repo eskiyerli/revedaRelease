@@ -1,27 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="AnalysisUIOptions">
-    <option name="SCOPE_TYPE" value="3" />
-  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f443f3ba-db20-42bb-8de4-fefb1e9339d6" name="Changes" comment="Symbol and schematic formats are independent of &#10;library paths.">
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
+    <list default="true" id="0f540448-1673-406e-8678-33a793573211" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/loadJSON.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace-imperial.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/first/schematic.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/schematic.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/first/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/symbol.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/second/schematic.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/second/schematic.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/third/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/third/symbol.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/circuitElements.py" beforeDir="false" afterPath="$PROJECT_DIR$/circuitElements.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libraryWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/libraryWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/net.py" beforeDir="false" afterPath="$PROJECT_DIR$/net.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pin.py" beforeDir="false" afterPath="$PROJECT_DIR$/pin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/propertyDialogues.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/schBackEnd.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
@@ -32,68 +26,34 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="RESET_MODE" value="MIXED" />
-  </component>
-  <component name="GitSEFilterConfiguration">
-    <file-type-list>
-      <filtered-out-file-type name="LOCAL_BRANCH" />
-      <filtered-out-file-type name="REMOTE_BRANCH" />
-      <filtered-out-file-type name="TAG" />
-      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
-    </file-type-list>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
-  </component>
-  <component name="ProjectId" id="24pU0n7EpoOuAv9MCeO4GuBBhg0" />
+  <component name="ProjectId" id="27tj0m6QnGf86oZGpiBqXfuDT6I" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
-    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="GitStage.ChangesTree.GroupingKeys" value="directory&#10;module&#10;repository" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="TODO_SCOPE" value="All Places" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/libraryWindow-ICT0122331.py" />
-    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
-    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/libraryWindow-ICT0122331.py" />
-  </component>
-  <component name="ReaderModeSettings">
-    <option name="showLigatures" value="true" />
-  </component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\eskiye50\OneDrive\Documents\Projects\RevEDA\schematicEditor" />
-    </key>
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/revedaMainW.py" />
   </component>
   <component name="RunManager">
-    <configuration name="revedaMainW" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="revedaMainW" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="schematicEditor" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Users\eskiye50\WPy64-31020\python-3.10.2.amd64\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/revedaMainW.py" />
@@ -105,64 +65,16 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.revedaMainW" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="f443f3ba-db20-42bb-8de4-fefb1e9339d6" name="Changes" comment="" />
-      <created>1644326803188</created>
+      <changelist id="0f540448-1673-406e-8678-33a793573211" name="Changes" comment="" />
+      <created>1650146060403</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1644326803188</updated>
+      <updated>1650146060403</updated>
     </task>
-    <task id="LOCAL-00001" summary="pin and line property dialogues are now working.">
-      <created>1644612215683</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1644612215683</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Copy and property dialogues are now working.">
-      <created>1645138950802</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1645138950802</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Started symbol properties dialogue work.">
-      <created>1645481347100</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1645481347100</updated>
-    </task>
-    <task id="LOCAL-00004" summary="Symbol attributes can be saved and recovered.">
-      <created>1646945065950</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1646945065950</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Cleaned up drawing code for symbols.">
-      <created>1648844277861</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1648844277862</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Symbol and schematic formats are independent of &#10;library paths.">
-      <created>1649090314612</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1649090314612</updated>
-    </task>
-    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -175,15 +87,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="pin and line property dialogues are now working." />
-    <MESSAGE value="Copy and property dialogues are now working." />
-    <MESSAGE value="Started symbol properties dialogue work." />
-    <MESSAGE value="Symbol attributes can be saved and recovered." />
-    <MESSAGE value="Pin locations are correct and can be tracked." />
-    <MESSAGE value="Cleaned up drawing code for symbols." />
-    <MESSAGE value="Symbol and schematic formats are independent of &#10;library paths." />
-    <option name="LAST_COMMIT_MESSAGE" value="Symbol and schematic formats are independent of &#10;library paths." />
   </component>
 </project>

@@ -2,33 +2,7 @@
     {
         "type": "label",
         "start": [
-            -350,
-            -240
-        ],
-        "color": [
-            255,
-            255,
-            0,
-            255
-        ],
-        "width": 1,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "labelName": "[@instName]",
-        "labelType": "NLPLabel",
-        "labelHeight": "12",
-        "labelAlign": "Left",
-        "labelOrient": "R0",
-        "labelUse": "Normal",
-        "location": [
-            20.0,
-            0.0
-        ]
-    },
-    {
-        "type": "label",
-        "start": [
-            -500,
+            -340,
             -140
         ],
         "color": [
@@ -40,95 +14,26 @@
         "width": 1,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": false,
-        "labelName": "[@cellName]",
+        "labelName": null,
+        "labelDefinition": "[@w:w=%]",
+        "labelText": null,
         "labelType": "NLPLabel",
-        "labelHeight": "20",
+        "labelHeight": "12",
         "labelAlign": "Left",
         "labelOrient": "R0",
         "labelUse": "Normal",
         "location": [
             0.0,
-            -30.0
-        ]
-    },
-    {
-        "type": "pin",
-        "start": [
-            -110,
-            -50
-        ],
-        "color": [
-            139,
-            0,
-            0,
-            255
-        ],
-        "width": 2,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "pinName": "PIN",
-        "pinDir": "Input",
-        "pinType": "Signal",
-        "location": [
-            -520.0,
-            -100.0
+            0.0
         ]
     },
     {
         "type": "rect",
         "rect": [
-            -570,
-            -210,
-            -291,
-            -61
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            0.0,
-            -10.0
-        ]
-    },
-    {
-        "type": "line",
-        "start": [
-            -630,
-            -130
-        ],
-        "end": [
-            -571,
-            -131
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            0.0,
-            -20.0
-        ]
-    },
-    {
-        "type": "line",
-        "start": [
-            -220,
-            -160
-        ],
-        "end": [
-            -291,
-            -161
+            -490,
+            -120,
+            -211,
+            39
         ],
         "color": [
             0,
@@ -145,10 +50,106 @@
         ]
     },
     {
+        "type": "line",
+        "start": [
+            -130,
+            -100
+        ],
+        "end": [
+            -210,
+            -100
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            -360.0,
+            0.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -130,
+            -100
+        ],
+        "end": [
+            -210,
+            -100
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            110.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -130,
+            -100
+        ],
+        "end": [
+            -210,
+            -100
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -130,
+            -100
+        ],
+        "end": [
+            -210,
+            -100
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            -360.0,
+            110.0
+        ]
+    },
+    {
         "type": "pin",
         "start": [
-            -220,
-            -160
+            -570,
+            -100
         ],
         "color": [
             139,
@@ -159,8 +160,77 @@
         "width": 2,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": false,
-        "pinName": "OUT",
+        "pinName": "INP",
         "pinDir": "Input",
+        "pinType": "Signal",
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            -570,
+            10
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "INN",
+        "pinDir": "Input",
+        "pinType": "Signal",
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            -130,
+            -100
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "OUTP",
+        "pinDir": "Output",
+        "pinType": "Signal",
+        "location": [
+            0.0,
+            0.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            -130,
+            10
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "OUTN",
+        "pinDir": "Output",
         "pinType": "Signal",
         "location": [
             0.0,
@@ -170,8 +240,8 @@
     {
         "type": "label",
         "start": [
-            -390,
-            -250
+            -380,
+            -40
         ],
         "color": [
             255,
@@ -182,21 +252,51 @@
         "width": 1,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": false,
-        "labelName": "[@w:w=%]",
+        "labelName": null,
+        "labelDefinition": "[@cellName]",
+        "labelText": null,
+        "labelType": "NLPLabel",
+        "labelHeight": "20",
+        "labelAlign": "Left",
+        "labelOrient": "R0",
+        "labelUse": "Normal",
+        "location": [
+            -40.0,
+            -20.0
+        ]
+    },
+    {
+        "type": "label",
+        "start": [
+            -200,
+            -130
+        ],
+        "color": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "width": 1,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "labelName": null,
+        "labelDefinition": "[@instName]",
+        "labelText": null,
         "labelType": "NLPLabel",
         "labelHeight": "12",
         "labelAlign": "Left",
         "labelOrient": "R0",
         "labelUse": "Normal",
         "location": [
-            -90.0,
-            130.0
+            -10.0,
+            -10.0
         ]
     },
     {
         "type": "attribute",
-        "name": "w",
-        "attributeType": "NLPLabel",
-        "definition": ""
+        "name": "type",
+        "attributeType": "Normal",
+        "definition": "mos"
     }
 ]

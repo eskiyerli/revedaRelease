@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 )
 import shutil
 from ruamel.yaml import YAML
-import json
+import shape as shp
 from pathlib import Path
 
 from PySide6.QtCore import (
@@ -193,3 +193,44 @@ def readLibDefFile(libPath):
 
 def decodeSymbol(item):
     print(type(item))
+
+def decodeLabel(label: shp.label):
+    assert isinstance(label, shp.label)
+    if label.labelType == "Normal":
+        label.setText(label.labelDefinition)
+    elif label.labelType == "NLPLabel":
+        try:
+            if label.labelDefinition == "[@cellName]":
+                label.labelText=label.parentItem().cellName
+                label.labelName = "cellName"
+            elif label.labelDefinition == "[@instName]":
+                label.labelText=f'I{label.parentItem().counter}'
+                label.labelName = "instName"
+            elif label.labelDefinition == "[@libName]":
+                label.labelText=label.parentItem().libraryName
+                label.labelName = "libName"
+            elif label.labelDefinition == "[@viewName]":
+                label.labelText=label.parentItem().viewName
+                label.labelName = "viewName"
+            elif label.labelDefinition == "[@modelName]":
+                label.labelText=label.parentItem().attr["modelName"]
+                label.labelName = "modelName"
+            elif label.labelDefinition == "[@elementNum]":
+                label.labelText=label.parentItem().counter
+                label.labelName = "elementNum"
+            else:
+                if ':' in label.labelDefinition: # there is at least one colon
+                    fieldsLength = len(label.labelDefinition.split(':'))
+                    if fieldsLength == 1:
+                        label.labelName = label.labelDefinition[1:-1]
+                        label.labelText = f'{label.labelDefinition[1:-1]}=?'
+                    elif len(label.labelDefinition.split(':')) == 2: # there is only one colon
+                        label.labelName = label.labelDefinition.split(":")[0].split("@")[1]
+                        label.labelText = f'{label.labelDefinition[1:-1]}=?'
+                    elif len(label.labelDefinition.split(':')) == 3: # there are two colons
+                        label.labelName = label.labelDefinition.split(":")[0].split("@")[1]
+                        label.labelText = f'{label.labelDefinition.split(":")[2][:-1]}'
+                    else:
+                        print('label format error.')
+        except Exception as e:
+            print(e)

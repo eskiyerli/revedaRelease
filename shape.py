@@ -443,7 +443,7 @@ class pin(shape):
 
 class label(shape):
     """
-    rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
+    label:
     """
     labelAlignments = ["Left", "Center", "Right"]
     labelOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
@@ -454,7 +454,7 @@ class label(shape):
             self,
             start: QPoint,
             pen: QPen,
-            labelName: str,
+            labelDefinition: str,
             grid: tuple,
             labelType: str,
             labelHeight: str = "12",
@@ -465,8 +465,10 @@ class label(shape):
         super().__init__(pen, grid)
         self.start = start  # top left corner
         self.pen = pen
-        self.labelName = labelName
-        self.labelText = None # label text can be different from label name
+        self.labelDefinition = labelDefinition #
+        self.labelName = None # symbol property name
+        self.labelText = None # label text can be different from label definition
+
         self.labelHeight = labelHeight
         self.labelAlign = labelAlign
         self.labelOrient = labelOrient
@@ -475,7 +477,7 @@ class label(shape):
         self.labelFont = QFont("Arial")
         self.labelFont.setPointSize(int(self.labelHeight))
         self.fm = QFontMetrics(self.labelFont)
-        self.rect = self.fm.boundingRect(self.labelName)
+        self.rect = self.fm.boundingRect(self.labelDefinition)
 
     def boundingRect(self):
         return QRect(
@@ -488,19 +490,15 @@ class label(shape):
         painter.setFont(self.labelFont)
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
-            if self.labelText:
-                painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelText)
-            else:
-                painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
             painter.drawRect(self.boundingRect())
         else:
             painter.setPen(self.pen)
-            if self.labelText:
-                painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelText)
-            else:
-                painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelName)
+        if self.labelText:
+            painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelText)
+        else:
+            painter.drawText(QPoint(self.start.x(), self.start.y() + self.rect.height()), self.labelDefinition)
         self.fm = QFontMetrics(self.labelFont)
-        self.rect = self.fm.boundingRect(self.labelName)
+        self.rect = self.fm.boundingRect(self.labelDefinition)
 
     def left(self):
         return self.start.x()
@@ -553,7 +551,6 @@ class label(shape):
 
     def moveBy(self, delta: QPoint):
         self.start += delta
-
 
 # class symbolInst(QGraphicsItemGroup):
 #     def __init__(self, scene):
@@ -643,13 +640,13 @@ class symbolShape(shape):
     def __init__(self, pen: QPen, gridTuple: tuple, shapes:list, attr:dict):
         super().__init__(pen, gridTuple)
         self.shapes = shapes
-        self.attr = attr # item specific parameters
+        self.attr = attr # generic symbol parameters
         self.pinLocations = {}
         self.counter = 0 # item's number on schematic
         self.libraryName = ""
         self.cellName = ""
         self.viewName = ""
-        self.labelDict = {}
+        self.labelDict = {} # instance specific parameters
 
         for item in self.shapes:
             item.setParentItem(self)

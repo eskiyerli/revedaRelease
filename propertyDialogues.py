@@ -152,10 +152,10 @@ class createSymbolLabelDialog(QDialog):
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.mainLayout = QVBoxLayout()
         self.fLayout = QFormLayout()
-        self.labelNameEdit = QLineEdit()
-        self.labelNameEdit.setPlaceholderText("Label Definition")
-        self.labelNameEdit.setToolTip("Enter label Definition")
-        self.fLayout.addRow(QLabel("Label Definition"), self.labelNameEdit)
+        self.labelDefinition = QLineEdit()
+        self.labelDefinition.setPlaceholderText("Label Definition")
+        self.labelDefinition.setToolTip("Enter label Definition")
+        self.fLayout.addRow(QLabel("Label Definition"), self.labelDefinition)
         self.labelHeightEdit = QLineEdit()
         self.labelHeightEdit.setPlaceholderText("Label Height")
         self.labelHeightEdit.setToolTip("Enter label Height")
@@ -191,13 +191,14 @@ class createSymbolLabelDialog(QDialog):
 
 class labelPropertyDialog(createSymbolLabelDialog):
     def __init__(self, parent, labelItem: shp.label):
+        assert isinstance(labelItem, shp.label)
         super().__init__(parent)
         self.parent = parent
         self.labelItem = labelItem
         self.location = self.labelItem.scenePos().toTuple()
 
         self.setWindowTitle("Label Properties")
-        self.labelNameEdit.setText(str(labelItem.labelName))
+        self.labelDefinition.setText(str(labelItem.labelDefinition))
         self.labelHeightEdit.setText(str(labelItem.labelHeight))
         self.labelAlignCombo.setCurrentText(labelItem.labelAlign)
         self.labelOrientCombo.setCurrentText(labelItem.labelOrient)

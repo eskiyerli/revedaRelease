@@ -4,27 +4,93 @@
         "library": "anotherDesign",
         "name": "third",
         "view": "symbol",
-        "instCounter": 4,
+        "instCounter": 1,
         "pinLocations": {
-            "PIN": [
-                -630,
-                -150
+            "OUTN": [
+                -130,
+                10
             ],
-            "OUT": [
-                -220,
-                -160
+            "OUTP": [
+                -130,
+                -100
+            ],
+            "INN": [
+                -570,
+                10
+            ],
+            "INP": [
+                -570,
+                -100
             ]
         },
         "attributes": {
-            "w": [
-                "NLPLabel",
-                ""
+            "type": [
+                "Normal",
+                "mos"
             ]
         },
         "labelDict": {
-            "[@instName]": "I4",
-            "[@cellName]": "third",
-            "[@w:w=%]": "w="
+            "[@instName]": [
+                "instName",
+                "I1"
+            ],
+            "[@cellName]": [
+                "cellName",
+                "third"
+            ],
+            "[@w:w=%]": [
+                "w",
+                "@w:w=%=?"
+            ]
+        },
+        "location": [
+            520.0,
+            150.0
+        ]
+    },
+    {
+        "type": "symbolShape",
+        "library": "anotherDesign",
+        "name": "third",
+        "view": "symbol",
+        "instCounter": 2,
+        "pinLocations": {
+            "OUTN": [
+                -130,
+                10
+            ],
+            "OUTP": [
+                -130,
+                -100
+            ],
+            "INN": [
+                -570,
+                10
+            ],
+            "INP": [
+                -570,
+                -100
+            ]
+        },
+        "attributes": {
+            "type": [
+                "Normal",
+                "mos"
+            ]
+        },
+        "labelDict": {
+            "[@instName]": [
+                "instName",
+                "I2"
+            ],
+            "[@cellName]": [
+                "cellName",
+                "third"
+            ],
+            "[@w:w=%]": [
+                "w",
+                "@w:w=%=?"
+            ]
         },
         "location": [
             0.0,

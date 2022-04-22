@@ -63,7 +63,9 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "labelName": item.__dict__["labelName"],
+                "labelName": item.__dict__["labelName"], # property name
+                "labelDefinition": item.__dict__["labelDefinition"], # label as entered
+                "labelText": item.__dict__["labelText"], # shown label
                 "labelType": item.__dict__["labelType"],
                 "labelHeight": item.__dict__["labelHeight"],
                 "labelAlign": item.__dict__["labelAlign"],
