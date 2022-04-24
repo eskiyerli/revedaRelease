@@ -2,25 +2,26 @@
     {
         "type": "symbolShape",
         "library": "anotherDesign",
-        "name": "third",
+        "cell": "third",
         "view": "symbol",
-        "instCounter": 1,
+        "name": "I2",
+        "instCounter": 4,
         "pinLocations": {
             "OUTN": [
-                -130,
-                10
+                450,
+                0
             ],
             "OUTP": [
-                -130,
-                -100
+                450,
+                -110
             ],
             "INN": [
-                -570,
-                10
+                10,
+                0
             ],
             "INP": [
-                -570,
-                -100
+                10,
+                -110
             ]
         },
         "attributes": {
@@ -30,71 +31,22 @@
             ]
         },
         "labelDict": {
-            "[@instName]": [
-                "instName",
-                "I1"
-            ],
-            "[@cellName]": [
-                "cellName",
-                "third"
-            ],
-            "[@w:w=%]": [
-                "w",
-                "@w:w=%=?"
-            ]
-        },
-        "location": [
-            520.0,
-            150.0
-        ]
-    },
-    {
-        "type": "symbolShape",
-        "library": "anotherDesign",
-        "name": "third",
-        "view": "symbol",
-        "instCounter": 2,
-        "pinLocations": {
-            "OUTN": [
-                -130,
-                10
-            ],
-            "OUTP": [
-                -130,
-                -100
-            ],
-            "INN": [
-                -570,
-                10
-            ],
-            "INP": [
-                -570,
-                -100
-            ]
-        },
-        "attributes": {
-            "type": [
-                "Normal",
-                "mos"
-            ]
-        },
-        "labelDict": {
-            "[@instName]": [
-                "instName",
+            "instName": [
+                "[@instName]",
                 "I2"
             ],
-            "[@cellName]": [
-                "cellName",
+            "cellName": [
+                "[@cellName]",
                 "third"
             ],
-            "[@w:w=%]": [
-                "w",
-                "@w:w=%=?"
+            "w": [
+                "[@w:w=%]",
+                "w = 4u"
             ]
         },
         "location": [
-            0.0,
-            0.0
+            -610.0,
+            -140.0
         ]
     }
 ]

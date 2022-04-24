@@ -86,15 +86,19 @@ class symbolEncoder(json.JSONEncoder):
 class schematicEncoder(json.JSONEncoder):
     def default(self, item):
         if isinstance(item, shp.symbolShape):
+            # only label name, definition, and text can be changed in the symbol instance.
+            itemLabelDict = {item.labelName: [item.labelDefinition, item.labelText] for item in item.labels}
+            print(f'item label dictionary: {itemLabelDict}')
             itemDict = {
                 "type": "symbolShape",
                 "library": item.__dict__["libraryName"],
-                "name": item.__dict__["cellName"],
+                "cell": item.__dict__["cellName"],
                 "view": item.__dict__["viewName"],
+                "name": item.__dict__["instanceName"],
                 "instCounter": item.__dict__["counter"],
                 "pinLocations": item.__dict__["pinLocations"],
                 "attributes": item.__dict__["attr"],
-                "labelDict": item.__dict__["labelDict"],
+                "labelDict": itemLabelDict,
                 "location": (item.scenePos()-item.scene().origin).toTuple(),
             }
             return itemDict

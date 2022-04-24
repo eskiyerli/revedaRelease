@@ -4,18 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0f540448-1673-406e-8678-33a793573211" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadJSON.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace-imperial.xml" beforeDir="false" />
+    <list default="true" id="0f540448-1673-406e-8678-33a793573211" name="Changes" comment="Progress on label and attribute work.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/first/schematic.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/schematic.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/first/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/symbol.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anotherDesign/second/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/second/symbol.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/third/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/third/symbol.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/loadJSON.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/propertyDialogues.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/schBackEnd.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
@@ -38,11 +33,12 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/revedaMainW.py" />
-  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
+  }
+}</component>
   <component name="RunManager">
     <configuration name="revedaMainW" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="schematicEditor" />
@@ -51,9 +47,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Users\eskiye50\WPy64-31020\python-3.10.2.amd64\python.exe" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/revedaMainW.py" />
@@ -75,6 +71,14 @@
       <option name="presentableId" value="Default" />
       <updated>1650146060403</updated>
     </task>
+    <task id="LOCAL-00001" summary="Progress on label and attribute work.">
+      <created>1650636890480</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1650636890480</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -87,5 +91,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Progress on label and attribute work." />
+    <option name="LAST_COMMIT_MESSAGE" value="Progress on label and attribute work." />
   </component>
 </project>

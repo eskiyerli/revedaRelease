@@ -226,7 +226,7 @@ def decodeLabel(label: shp.label):
                         label.labelText = f'{label.labelDefinition[1:-1]}=?'
                     elif len(label.labelDefinition.split(':')) == 2: # there is only one colon
                         label.labelName = label.labelDefinition.split(":")[0].split("@")[1]
-                        label.labelText = f'{label.labelDefinition[1:-1]}=?'
+                        label.labelText = f'{label.labelName}=?'
                     elif len(label.labelDefinition.split(':')) == 3: # there are two colons
                         label.labelName = label.labelDefinition.split(":")[0].split("@")[1]
                         label.labelText = f'{label.labelDefinition.split(":")[2][:-1]}'

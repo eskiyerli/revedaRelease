@@ -1,59 +1,11 @@
 [
     {
-        "type": "pin",
-        "start": [
-            -760,
-            -310
-        ],
-        "color": [
-            139,
-            0,
-            0,
-            255
-        ],
-        "width": 2,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "pinName": "INN",
-        "pinDir": "Input",
-        "pinType": "Signal",
-        "location": [
-            0.0,
-            0.0
-        ]
-    },
-    {
-        "type": "pin",
-        "start": [
-            -760,
-            -420
-        ],
-        "color": [
-            139,
-            0,
-            0,
-            255
-        ],
-        "width": 2,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "pinName": "INP",
-        "pinDir": "Input",
-        "pinType": "Signal",
-        "location": [
-            0.0,
-            0.0
-        ]
-    },
-    {
-        "type": "line",
-        "start": [
-            -220,
-            -310
-        ],
-        "end": [
+        "type": "rect",
+        "rect": [
+            -660,
+            -470,
             -331,
-            -311
+            -261
         ],
         "color": [
             0,
@@ -65,18 +17,18 @@
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": true,
         "location": [
-            0.0,
-            0.0
+            780.0,
+            310.0
         ]
     },
     {
         "type": "line",
         "start": [
-            -220,
+            -760,
             -420
         ],
         "end": [
-            -331,
+            -661,
             -421
         ],
         "color": [
@@ -89,8 +41,8 @@
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": true,
         "location": [
-            0.0,
-            0.0
+            780.0,
+            310.0
         ]
     },
     {
@@ -113,18 +65,18 @@
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": true,
         "location": [
-            0.0,
-            0.0
+            780.0,
+            310.0
         ]
     },
     {
         "type": "line",
         "start": [
-            -760,
+            -220,
             -420
         ],
         "end": [
-            -661,
+            -331,
             -421
         ],
         "color": [
@@ -137,17 +89,19 @@
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": true,
         "location": [
-            0.0,
-            0.0
+            780.0,
+            310.0
         ]
     },
     {
-        "type": "rect",
-        "rect": [
-            -660,
-            -470,
+        "type": "line",
+        "start": [
+            -220,
+            -310
+        ],
+        "end": [
             -331,
-            -261
+            -311
         ],
         "color": [
             0,
@@ -159,8 +113,54 @@
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": true,
         "location": [
-            0.0,
-            0.0
+            780.0,
+            310.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            -760,
+            -420
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "INP",
+        "pinDir": "Input",
+        "pinType": "Signal",
+        "location": [
+            780.0,
+            310.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            -760,
+            -310
+        ],
+        "color": [
+            139,
+            0,
+            0,
+            255
+        ],
+        "width": 2,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "pinName": "INN",
+        "pinDir": "Input",
+        "pinType": "Signal",
+        "location": [
+            780.0,
+            310.0
         ]
     }
 ]

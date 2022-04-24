@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QFrame,
 )
 
-from PySide6.QtCore import (Qt,)
+from PySide6.QtCore import (Qt, )
 
 import shape as shp
 
@@ -282,14 +282,14 @@ class symbolLabelsDialogue(QDialog):
         attrTypeCombo.addItems(shp.label.labelTypes)
         self.attributeTypeList.append(attrTypeCombo)
         self.attributeDefList.append(longLineEdit())
-        self.symbolPropsLayout.addWidget(self.attributeNameList[-1], i+2, 0)
-        self.symbolPropsLayout.addWidget(self.attributeTypeList[-1], i+2, 1)
-        self.symbolPropsLayout.addWidget(self.attributeDefList[-1], i+2, 2)
+        self.symbolPropsLayout.addWidget(self.attributeNameList[-1], i + 2, 0)
+        self.symbolPropsLayout.addWidget(self.attributeTypeList[-1], i + 2, 1)
+        self.symbolPropsLayout.addWidget(self.attributeDefList[-1], i + 2, 2)
         self.attributeNameList[-1].setPlaceholderText("Enter Attribute Name")
         self.attributeTypeList[-1].setToolTip("Enter Attribute Type")
         self.attributeDefList[-1].setToolTip("Enter Attribute Definition")
         self.attributeDefList[-1].editingFinished.connect(
-            lambda: self.updateAttributeDef(i+1)
+            lambda: self.updateAttributeDef(i + 1)
         )
 
     def updateAttributeDef(self, i):
@@ -310,7 +310,7 @@ class symbolLabelsDialogue(QDialog):
         )
 
     def symbolLabelsMethod(self):
-        self.labelNameList = []
+        self.labelDefinitionList = []
         self.labelHeightList = []
         self.labelAlignmentList = []
         self.labelOrientationList = []
@@ -328,10 +328,10 @@ class symbolLabelsDialogue(QDialog):
             if type(item) == shp.label:
                 i += 1
                 self.labelItemList.append(item)
-                self.labelNameList.append(longLineEdit())
-                self.labelNameList[-1].setText(item.labelName)
-                self.labelNameList[-1].setReadOnly(True)
-                self.symbolLabelsLayout.addWidget(self.labelNameList[i - 1], i, 0)
+                self.labelDefinitionList.append(longLineEdit())
+                self.labelDefinitionList[-1].setText(item.labelDefinition)
+                self.labelDefinitionList[-1].setReadOnly(True)
+                self.symbolLabelsLayout.addWidget(self.labelDefinitionList[i - 1], i, 0)
                 self.labelHeightList.append(shortLineEdit())
                 self.labelHeightList[-1].setText(str(item.labelHeight))
                 self.symbolLabelsLayout.addWidget(self.labelHeightList[i - 1], i, 1)
@@ -354,12 +354,13 @@ class symbolLabelsDialogue(QDialog):
         if i == 0:  # no labels to edit
             self.symbolLabelsLayout.addWidget(QLabel("No symbol labels found."), 1, 0)
 
+
 class instanceProperties(QDialog):
     def __init__(self, parent, instance: shp.symbolShape = None):
+        assert isinstance(instance, shp.symbolShape)
         super().__init__(parent)
         self.parent = parent
         self.instance = instance
-
         self.initUI()
 
     def initUI(self):
@@ -370,33 +371,40 @@ class instanceProperties(QDialog):
         formLayout = QFormLayout()
         self.libName = longLineEdit()
         self.libName.setText(self.instance.libraryName)
-        formLayout.addRow(boldLabel("Library Name",self), self.libName)
+        formLayout.addRow(boldLabel("Library Name", self), self.libName)
         self.cellName = longLineEdit()
         self.cellName.setText(self.instance.cellName)
-        formLayout.addRow(boldLabel("Cell Name",self), self.cellName)
+        formLayout.addRow(boldLabel("Cell Name", self), self.cellName)
         self.instName = longLineEdit()
+        self.instName.setText(self.instance.instanceName)
         for shape in self.instance.shapes:
             if type(shape) == shp.label and shape.labelName == "[@instName]":
                 self.instName.setText(shape.labelText)
-        formLayout.addRow(boldLabel("Instance Name",self), self.instName)
-        location = (self.instance.scenePos()-self.instance.scene().origin).toTuple()
+        formLayout.addRow(boldLabel("Instance Name", self), self.instName)
+        location = (self.instance.scenePos() - self.instance.scene().origin).toTuple()
         self.xLocation = shortLineEdit()
         self.xLocation.setText(str(location[0]))
-        formLayout.addRow(boldLabel("x location",self), self.xLocation)
+        formLayout.addRow(boldLabel("x location", self), self.xLocation)
         self.yLocation = shortLineEdit()
         self.yLocation.setText(str(location[1]))
-        formLayout.addRow(boldLabel("y location",self), self.yLocation)
+        formLayout.addRow(boldLabel("y location", self), self.yLocation)
         formLayout.setVerticalSpacing(10)
         self.instanceLabelsLayout = QGridLayout()
-        for counter, shape in enumerate(self.instance.shapes):
-            if type(shape) == shp.label and shape.labelName != "[@instName]" and shape.labelName != "[@cellName]":
-                self.instanceLabelsLayout.addWidget(boldLabel(shape.labelName,self), counter, 0)
-                self.instanceLabelsLayout.addWidget(longLineEdit(), counter, 1)
+        row_index = 0
+        for shape in self.instance.shapes:
+            if type(shape) == shp.label and not (
+                    shape.labelDefinition == "[@instName]" or shape.labelDefinition == "[@cellName]"):
+                self.instanceLabelsLayout.addWidget(boldLabel(shape.labelName, self), row_index, 0)
+                instanceLabelDef = longLineEdit()
+                self.instanceLabelsLayout.addWidget(instanceLabelDef, row_index, 1)
+                instanceLabelDef.setText(shape.labelText.split("=")[1])
+                row_index += 1
+
 
         instanceAttributesLayout = QGridLayout()
         instanceAttributesLayout.setColumnMinimumWidth(0, 100)
         for counter, name in enumerate(self.instance.attr.keys()):
-            instanceAttributesLayout.addWidget(boldLabel(name,self), counter, 0)
+            instanceAttributesLayout.addWidget(boldLabel(name, self), counter, 0)
             labelType = longLineEdit()
             labelType.setReadOnly(True)
             labelType.setText(self.instance.attr[name][0])
@@ -406,10 +414,10 @@ class instanceProperties(QDialog):
             instanceAttributesLayout.addWidget(labelName, counter, 2)
 
         self.mainLayout.addLayout(formLayout)
-        self.mainLayout.addWidget(boldLabel("Instance Labels",self))
+        self.mainLayout.addWidget(boldLabel("Instance Labels", self))
         self.mainLayout.addLayout(self.instanceLabelsLayout)
         self.mainLayout.addSpacing(40)
-        self.mainLayout.addWidget(boldLabel("Instance Attributes",self))
+        self.mainLayout.addWidget(boldLabel("Instance Attributes", self))
         self.mainLayout.addLayout(instanceAttributesLayout)
         self.mainLayout.addWidget(self.buttonBox)
         self.setLayout(self.mainLayout)

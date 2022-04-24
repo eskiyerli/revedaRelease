@@ -225,7 +225,7 @@ class rectangle(shape):
             self.prepareGeometryChange()
             eventPos = self.snap2grid(event.pos())
             print(eventPos)
-            print(self.snapToGrid(self.rect.right(),self.gridTuple[1]))
+            print(self.snapToGrid(self.rect.right(), self.gridTuple[1]))
             if eventPos.x() == self.snapToGrid(self.rect.left(), self.gridTuple[0]):
                 if self.start.y() <= eventPos.y() <= self.end.y() or self.start.y() >= eventPos.y() >= self.end.y():
                     self.setCursor(Qt.SizeHorCursor)
@@ -465,9 +465,9 @@ class label(shape):
         super().__init__(pen, grid)
         self.start = start  # top left corner
         self.pen = pen
-        self.labelDefinition = labelDefinition #
-        self.labelName = None # symbol property name
-        self.labelText = None # label text can be different from label definition
+        self.labelDefinition = labelDefinition  #
+        self.labelName = None  # symbol property name
+        self.labelText = None  # label text can be different from label definition
 
         self.labelHeight = labelHeight
         self.labelAlign = labelAlign
@@ -478,6 +478,7 @@ class label(shape):
         self.labelFont.setPointSize(int(self.labelHeight))
         self.fm = QFontMetrics(self.labelFont)
         self.rect = self.fm.boundingRect(self.labelDefinition)
+        self.setLabelName()
 
     def boundingRect(self):
         return QRect(
@@ -516,7 +517,7 @@ class label(shape):
         return self.boundingRect().width()
 
     def height(self):
-        return self.rect.boundingRect().height()
+        return self.boundingRect().height()
 
     def setText(self, label):
         self.labelText = label
@@ -551,6 +552,84 @@ class label(shape):
 
     def moveBy(self, delta: QPoint):
         self.start += delta
+
+    def setLabelName(self):
+        if self.labelType == "Normal":
+            self.labelName = self.labelDefinition
+
+        elif self.labelType == "NLPLabel":
+            try:
+                if self.labelDefinition == "[@cellName]":
+                    self.labelName = "cellName"
+                elif self.labelDefinition == "[@instName]":
+                    self.labelName = "instName"
+                elif self.labelDefinition == "[@libName]":
+                    self.labelText = self.parentItem().libraryName
+                    self.labelName = "libName"
+                elif self.labelDefinition == "[@viewName]":
+                    self.labelName = "viewName"
+                elif self.labelDefinition == "[@modelName]":
+                    self.labelName = "modelName"
+                elif self.labelDefinition == "[@elementNum]":
+                    self.labelName = "elementNum"
+                else:
+                    if ':' in self.labelDefinition:  # there is at least one colon
+                        fieldsLength = len(self.labelDefinition.split(':'))
+                        if fieldsLength == 1:
+                            self.labelName = self.labelDefinition[1:-1]
+                        elif len(self.labelDefinition.split(':')) == 2:  # there is only one colon
+                            self.labelName = self.labelDefinition.split(":")[0].split("@")[1]
+                        elif len(self.labelDefinition.split(':')) == 3:  # there are two colons
+                            self.labelName = self.labelDefinition.split(":")[0].split("@")[1]
+                        else:
+                            print('label format error.')
+            except Exception as e:
+                print(e)
+
+    def labelDefs(self):
+        '''
+        This method will create label name and text from label definition.
+        '''
+        if self.labelType == "Normal":
+            self.labelName = self.labelDefinition
+            self.setText(self.labelDefinition)
+        elif self.labelType == "NLPLabel":
+            try:
+                if self.labelDefinition == "[@cellName]":
+                    self.labelText = self.parentItem().cellName
+                    self.labelName = "cellName"
+                elif self.labelDefinition == "[@instName]":
+                    self.labelText = f'I{self.parentItem().counter}'
+                    self.labelName = "instName"
+                elif self.labelDefinition == "[@libName]":
+                    self.labelText = self.parentItem().libraryName
+                    self.labelName = "libName"
+                elif self.labelDefinition == "[@viewName]":
+                    self.labelText = self.parentItem().viewName
+                    self.labelName = "viewName"
+                elif self.labelDefinition == "[@modelName]":
+                    self.labelText = self.parentItem().attr["modelName"]
+                    self.labelName = "modelName"
+                elif self.labelDefinition == "[@elementNum]":
+                    self.labelText = self.parentItem().counter
+                    self.labelName = "elementNum"
+                else:
+                    if ':' in self.labelDefinition:  # there is at least one colon
+                        fieldsLength = len(self.labelDefinition.split(':'))
+                        if fieldsLength == 1:
+                            self.labelName = self.labelDefinition[1:-1]
+                            self.labelText = f'{self.labelDefinition[1:-1]}=?'
+                        elif len(self.labelDefinition.split(':')) == 2:  # there is only one colon
+                            self.labelName = self.labelDefinition.split(":")[0].split("@")[1]
+                            self.labelText = f'{self.labelName}=?'
+                        elif len(self.labelDefinition.split(':')) == 3:  # there are two colons
+                            self.labelName = self.labelDefinition.split(":")[0].split("@")[1]
+                            self.labelText = f'{self.labelDefinition.split(":")[2][:-1]}'
+                        else:
+                            print('label format error.')
+            except Exception as e:
+                print(e)
+
 
 # class symbolInst(QGraphicsItemGroup):
 #     def __init__(self, scene):
@@ -637,24 +716,30 @@ class label(shape):
 
 
 class symbolShape(shape):
-    def __init__(self, pen: QPen, gridTuple: tuple, shapes:list, attr:dict):
+    def __init__(self, pen: QPen, gridTuple: tuple, shapes: list, attr: dict):
         super().__init__(pen, gridTuple)
-        self.shapes = shapes
-        self.attr = attr # generic symbol parameters
+        assert shapes is not None  # must not be an empty list
+        self.shapes = shapes  # list of shapes in the symbol
+        self.attr = attr  # generic symbol parameters
         self.pinLocations = {}
-        self.counter = 0 # item's number on schematic
+        self.counter = 0  # item's number on schematic
         self.libraryName = ""
         self.cellName = ""
         self.viewName = ""
-        self.labelDict = {} # instance specific parameters
-
+        self.instanceName = ""
+        self.labelDict = {}  # labelName: label
+        self.labels = []  # list of labels
+        self.pins = []  # list of pins
         for item in self.shapes:
             item.setParentItem(self)
+            if type(item) is pin:
+                self.pins.append(item)
+            elif type(item) is label:
+                self.labels.append(item)
 
         self.setFiltersChildEvents(True)
         self.setHandlesChildEvents(True)
         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
-
 
     def paint(self, painter, option, widget):
         if self.isSelected():
