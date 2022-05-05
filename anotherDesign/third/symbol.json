@@ -2,8 +2,8 @@
     {
         "type": "label",
         "start": [
-            -200,
-            -130
+            -340,
+            -140
         ],
         "color": [
             255,
@@ -14,8 +14,8 @@
         "width": 1,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": false,
-        "labelName": null,
-        "labelDefinition": "[@instName]",
+        "labelName": "w",
+        "labelDefinition": "[@w:w=%]",
         "labelText": null,
         "labelType": "NLPLabel",
         "labelHeight": "12",
@@ -23,65 +23,132 @@
         "labelOrient": "R0",
         "labelUse": "Normal",
         "location": [
-            570.0,
-            -40.0
+            580.0,
+            -10.0
         ]
     },
     {
-        "type": "label",
-        "start": [
-            -380,
-            -40
+        "type": "rect",
+        "rect": [
+            -490,
+            -120,
+            -211,
+            39
         ],
         "color": [
-            255,
-            255,
+            0,
+            128,
             0,
             255
         ],
-        "width": 1,
+        "width": 3,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "labelName": null,
-        "labelDefinition": "[@cellName]",
-        "labelText": null,
-        "labelType": "NLPLabel",
-        "labelHeight": "20",
-        "labelAlign": "Left",
-        "labelOrient": "R0",
-        "labelUse": "Normal",
-        "location": [
-            540.0,
-            -30.0
-        ]
-    },
-    {
-        "type": "pin",
-        "start": [
-            -130,
-            10
-        ],
-        "color": [
-            139,
-            0,
-            0,
-            255
-        ],
-        "width": 2,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "pinName": "OUTN",
-        "pinDir": "Output",
-        "pinType": "Signal",
+        "cosmetic": true,
         "location": [
             580.0,
             -10.0
         ]
     },
     {
-        "type": "pin",
+        "type": "line",
         "start": [
             -130,
+            -100
+        ],
+        "end": [
+            -210,
+            -100
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            220.0,
+            -10.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -130,
+            -100
+        ],
+        "end": [
+            -210,
+            -100
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            580.0,
+            100.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -130,
+            -100
+        ],
+        "end": [
+            -210,
+            -100
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            580.0,
+            -10.0
+        ]
+    },
+    {
+        "type": "line",
+        "start": [
+            -130,
+            -100
+        ],
+        "end": [
+            -210,
+            -100
+        ],
+        "color": [
+            0,
+            128,
+            0,
+            255
+        ],
+        "width": 3,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": true,
+        "location": [
+            220.0,
+            100.0
+        ]
+    },
+    {
+        "type": "pin",
+        "start": [
+            -570,
             -100
         ],
         "color": [
@@ -93,8 +160,8 @@
         "width": 2,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": false,
-        "pinName": "OUTP",
-        "pinDir": "Output",
+        "pinName": "INP",
+        "pinDir": "Input",
         "pinType": "Signal",
         "location": [
             580.0,
@@ -127,7 +194,7 @@
     {
         "type": "pin",
         "start": [
-            -570,
+            -130,
             -100
         ],
         "color": [
@@ -139,8 +206,8 @@
         "width": 2,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": false,
-        "pinName": "INP",
-        "pinDir": "Input",
+        "pinName": "OUTP",
+        "pinDir": "Output",
         "pinType": "Signal",
         "location": [
             580.0,
@@ -148,118 +215,23 @@
         ]
     },
     {
-        "type": "line",
+        "type": "pin",
         "start": [
             -130,
-            -100
-        ],
-        "end": [
-            -210,
-            -100
+            10
         ],
         "color": [
+            139,
             0,
-            128,
             0,
             255
         ],
-        "width": 3,
+        "width": 2,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            220.0,
-            100.0
-        ]
-    },
-    {
-        "type": "line",
-        "start": [
-            -130,
-            -100
-        ],
-        "end": [
-            -210,
-            -100
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            580.0,
-            -10.0
-        ]
-    },
-    {
-        "type": "line",
-        "start": [
-            -130,
-            -100
-        ],
-        "end": [
-            -210,
-            -100
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            580.0,
-            100.0
-        ]
-    },
-    {
-        "type": "line",
-        "start": [
-            -130,
-            -100
-        ],
-        "end": [
-            -210,
-            -100
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
-        "location": [
-            220.0,
-            -10.0
-        ]
-    },
-    {
-        "type": "rect",
-        "rect": [
-            -490,
-            -120,
-            -211,
-            39
-        ],
-        "color": [
-            0,
-            128,
-            0,
-            255
-        ],
-        "width": 3,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": true,
+        "cosmetic": false,
+        "pinName": "OUTN",
+        "pinDir": "Output",
+        "pinType": "Signal",
         "location": [
             580.0,
             -10.0
@@ -268,8 +240,8 @@
     {
         "type": "label",
         "start": [
-            -340,
-            -140
+            -380,
+            -40
         ],
         "color": [
             255,
@@ -280,17 +252,45 @@
         "width": 1,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": false,
-        "labelName": "w",
-        "labelDefinition": "[@w:w=%]",
-        "labelText": "w=?",
+        "labelName": "cellName",
+        "labelDefinition": "[@cellName]",
+        "labelText": null,
+        "labelType": "NLPLabel",
+        "labelHeight": "20",
+        "labelAlign": "Left",
+        "labelOrient": "R0",
+        "labelUse": "Normal",
+        "location": [
+            540.0,
+            -30.0
+        ]
+    },
+    {
+        "type": "label",
+        "start": [
+            -200,
+            -130
+        ],
+        "color": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "width": 1,
+        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
+        "cosmetic": false,
+        "labelName": "instName",
+        "labelDefinition": "[@instName]",
+        "labelText": null,
         "labelType": "NLPLabel",
         "labelHeight": "12",
         "labelAlign": "Left",
         "labelOrient": "R0",
         "labelUse": "Normal",
         "location": [
-            580.0,
-            -10.0
+            570.0,
+            -40.0
         ]
     },
     {

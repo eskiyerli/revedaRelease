@@ -88,7 +88,6 @@ class schematicEncoder(json.JSONEncoder):
         if isinstance(item, shp.symbolShape):
             # only label name, definition, and text can be changed in the symbol instance.
             itemLabelDict = {item.labelName: [item.labelDefinition, item.labelText] for item in item.labels}
-            print(f'item label dictionary: {itemLabelDict}')
             itemDict = {
                 "type": "symbolShape",
                 "library": item.__dict__["libraryName"],

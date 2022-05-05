@@ -4,24 +4,24 @@
         "library": "anotherDesign",
         "cell": "third",
         "view": "symbol",
-        "name": "I2",
-        "instCounter": 4,
+        "name": "I5",
+        "instCounter": 6,
         "pinLocations": {
-            "OUTN": [
-                450,
-                0
-            ],
-            "OUTP": [
-                450,
+            "INP": [
+                10,
                 -110
             ],
             "INN": [
                 10,
                 0
             ],
-            "INP": [
-                10,
+            "OUTP": [
+                450,
                 -110
+            ],
+            "OUTN": [
+                450,
+                0
             ]
         },
         "attributes": {
@@ -31,22 +31,72 @@
             ]
         },
         "labelDict": {
-            "instName": [
-                "[@instName]",
-                "I2"
+            "w": [
+                "[@w:w=%]",
+                "w = 2u"
             ],
             "cellName": [
                 "[@cellName]",
                 "third"
             ],
-            "w": [
-                "[@w:w=%]",
-                "w = 4u"
+            "instName": [
+                "[@instName]",
+                "I5"
             ]
         },
         "location": [
-            -610.0,
-            -140.0
+            -790.0,
+            -2110.0
+        ]
+    },
+    {
+        "type": "symbolShape",
+        "library": "anotherDesign",
+        "cell": "third",
+        "view": "symbol",
+        "name": "I7",
+        "instCounter": 7,
+        "pinLocations": {
+            "INP": [
+                10,
+                -110
+            ],
+            "INN": [
+                10,
+                0
+            ],
+            "OUTP": [
+                450,
+                -110
+            ],
+            "OUTN": [
+                450,
+                0
+            ]
+        },
+        "attributes": {
+            "type": [
+                "Normal",
+                "mos"
+            ]
+        },
+        "labelDict": {
+            "w": [
+                "[@w:w=%]",
+                "w = 4u"
+            ],
+            "cellName": [
+                "[@cellName]",
+                "third"
+            ],
+            "instName": [
+                "[@instName]",
+                "I7"
+            ]
+        },
+        "location": [
+            -1420.0,
+            -2240.0
         ]
     }
 ]

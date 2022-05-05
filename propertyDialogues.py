@@ -357,7 +357,7 @@ class symbolLabelsDialogue(QDialog):
 
 class instanceProperties(QDialog):
     def __init__(self, parent, instance: shp.symbolShape = None):
-        assert isinstance(instance, shp.symbolShape)
+        # assert isinstance(instance, shp.symbolShape)
         super().__init__(parent)
         self.parent = parent
         self.instance = instance
