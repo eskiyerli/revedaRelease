@@ -29,34 +29,35 @@ class schematicNet(QGraphicsLineItem):
         x1, y1 = self.start.x(), self.start.y()
         x2, y2 = self.end.x(), self.end.y()
         if abs(x1 - x2) >= abs(y1 - y2):  # horizontal
-            super().__init__(x1, y1, x2, y1)
+            self.horizontal = True
+            self.start = QPoint(min(x1,x2),y1)
+            self.end = QPoint(max(x1,x2),y1)
+            super().__init__(self.start.x(),y1,self.end.x(),y1)
         else:
-            super().__init__(x1, y1, x1, y2)
             self.horizontal = False
+            self.start = QPoint(x1,min(y1,y2))
+            self.end = QPoint(x1,max(y1,y2))
+            super().__init__(self.start.x(),self.start.y(),self.end.x(),self.end.y())
         self.setPen(self.pen)
 
     def setName(self, name):
         self.name = name
-
-    def horizontalMerge(self, net):
-        if self.end.x() < net.end.x():
-            self.end = net.end
-        elif self.start.x() > net.start.x():
-            self.start = net.start
-        self.setLine(
-            self.start.x(), self.start.y(), self.end.x(), self.end.y()
-            )
-        self.name = net.name
-
-    def verticalMerge(self,net):
-        if self.end.y() < net.end.y():
-            self.end = net.end
-        elif self.start.y() > net.start.y():
-            self.start = net.start
-        self.setLine(
-            self.start.x(), self.start.y(), self.end.x(), self.end.y()
-            )
-        self.name = net.name
+    #
+    # def horizontalMerge(self, net):
+    #     x1 = min(self.start.x(),net.start.x())
+    #     x2 = max(self.end.x(),net.end.x())
+    #     self.setLine(x1,self.start.y(),x2,self.start.y())
+    #     self.name = net.name
+    #
+    # def verticalMerge(self,net):
+    #     if self.end.y() < net.end.y():
+    #         self.end = net.end
+    #     elif self.start.y() > net.start.y():
+    #         self.start = net.start
+    #     self.setLine(
+    #         self.start.x(), self.start.y(), self.end.x(), self.end.y()
+    #         )
+    #     self.name = net.name
 # class net:
 #     def __init__(self, name: str, pins:list, instPins:list, cellview: str):
 #         self.name = name
