@@ -4,6 +4,56 @@
         "library": "anotherDesign",
         "cell": "third",
         "view": "symbol",
+        "name": "I7",
+        "instCounter": 7,
+        "pinLocations": {
+            "INP": [
+                10,
+                -110
+            ],
+            "INN": [
+                10,
+                0
+            ],
+            "OUTP": [
+                450,
+                -110
+            ],
+            "OUTN": [
+                450,
+                0
+            ]
+        },
+        "attributes": {
+            "type": [
+                "Normal",
+                "mos"
+            ]
+        },
+        "labelDict": {
+            "w": [
+                "[@w:w=%]",
+                "w = 4u"
+            ],
+            "cellName": [
+                "[@cellName]",
+                "third"
+            ],
+            "instName": [
+                "[@instName]",
+                "I7"
+            ]
+        },
+        "location": [
+            -1410.0,
+            -2240.0
+        ]
+    },
+    {
+        "type": "symbolShape",
+        "library": "anotherDesign",
+        "cell": "third",
+        "view": "symbol",
         "name": "I5",
         "instCounter": 6,
         "pinLocations": {
@@ -47,56 +97,6 @@
         "location": [
             -790.0,
             -2110.0
-        ]
-    },
-    {
-        "type": "symbolShape",
-        "library": "anotherDesign",
-        "cell": "third",
-        "view": "symbol",
-        "name": "I7",
-        "instCounter": 7,
-        "pinLocations": {
-            "INP": [
-                10,
-                -110
-            ],
-            "INN": [
-                10,
-                0
-            ],
-            "OUTP": [
-                450,
-                -110
-            ],
-            "OUTN": [
-                450,
-                0
-            ]
-        },
-        "attributes": {
-            "type": [
-                "Normal",
-                "mos"
-            ]
-        },
-        "labelDict": {
-            "w": [
-                "[@w:w=%]",
-                "w = 4u"
-            ],
-            "cellName": [
-                "[@cellName]",
-                "third"
-            ],
-            "instName": [
-                "[@instName]",
-                "I7"
-            ]
-        },
-        "location": [
-            -1420.0,
-            -2240.0
         ]
     }
 ]

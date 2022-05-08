@@ -37,27 +37,12 @@ class schematicNet(QGraphicsLineItem):
             self.horizontal = False
             self.start = QPoint(x1,min(y1,y2))
             self.end = QPoint(x1,max(y1,y2))
-            super().__init__(self.start.x(),self.start.y(),self.end.x(),self.end.y())
+            super().__init__(x1,self.start.y(),x1,self.end.y())
         self.setPen(self.pen)
 
     def setName(self, name):
         self.name = name
-    #
-    # def horizontalMerge(self, net):
-    #     x1 = min(self.start.x(),net.start.x())
-    #     x2 = max(self.end.x(),net.end.x())
-    #     self.setLine(x1,self.start.y(),x2,self.start.y())
-    #     self.name = net.name
-    #
-    # def verticalMerge(self,net):
-    #     if self.end.y() < net.end.y():
-    #         self.end = net.end
-    #     elif self.start.y() > net.start.y():
-    #         self.start = net.start
-    #     self.setLine(
-    #         self.start.x(), self.start.y(), self.end.x(), self.end.y()
-    #         )
-    #     self.name = net.name
+
 # class net:
 #     def __init__(self, name: str, pins:list, instPins:list, cellview: str):
 #         self.name = name
