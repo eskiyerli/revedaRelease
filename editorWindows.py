@@ -1361,7 +1361,10 @@ class schematic_scene(editor_scene):
                     self.parent.parent.messageLine.setText("No item selected")
                 elif len(self.itemsAtMousePress) != 0:
                     self.parent.parent.messageLine.setText("Item selected")
-                    self.selectedItem = self.itemsAtMousePress[0].parentItem()
+                    if self.itemsAtMousePress[0].parentItem() is not None:
+                        self.selectedItem = self.itemsAtMousePress[0].parentItem()
+                    else:
+                        self.selectedItem = self.itemsAtMousePress[0]
                     try:
                         self.selectedItem.setSelected(True)
                     except AttributeError:
@@ -1399,10 +1402,9 @@ class schematic_scene(editor_scene):
                     )
                     netMergedFlag = False
                     netAddedFlag = False
-                    dnetBRect = drawnNet.boundingRect()
                     del self.start
                     del self.current
-
+                    dnetBRect = drawnNet.boundingRect()
                     # check if it intersects another net and merge them.
                     for name, netItemList in self.schematicNets.items():
                         for netItem in netItemList:
@@ -1412,47 +1414,54 @@ class schematic_scene(editor_scene):
                                 elif not (drawnNet.horizontal or netItem.horizontal):
                                     netMergedFlag = self.mergeVerticalNets(dnetBRect, drawnNet, netItem)
                                 elif drawnNet.horizontal and not netItem.horizontal:
-                                    print('cross net')
+                                    # print('cross net')
                                     crossRect = dnetBRect.intersected(netItem.boundingRect()).normalized().marginsAdded(
                                         QMargins(2, 2, 2, 2))
                                     crossRectCenter = crossRect.center()
                                     # check if drawn net is starts or ends in the existing net.
 
                                     if not (drawnNet.start.x() < crossRectCenter.x() < drawnNet.end.x()):
-                                        if ((netItem.start.y() != crossRectCenter.y()) and (netItem.end.y() != crossRectCenter.y())):
-                                            crossDot = QGraphicsEllipseItem(crossRect) # create a dot to mark the cross net
-                                            crossDot.setPen(self.wirePen)
-                                            crossDot.setBrush(self.wirePen.color())
-                                            crossDot.setParentItem(drawnNet) # its parent is the drawn net
-                                            self.addItem(crossDot)
+                                        if ((netItem.start.y() != crossRectCenter.y()) and (
+                                                netItem.end.y() != crossRectCenter.y())):
+                                            self.createCrossDot(crossRect, drawnNet)
                                         drawnNet.name = netItem.name  # get the net name from the connected net
                                         netAddedFlag = True
+                                elif not drawnNet.horizontal and netItem.horizontal:
+                                    crossRect = dnetBRect.intersected(netItem.boundingRect()).normalized().marginsAdded(
+                                        QMargins(2, 2, 2, 2))
+                                    crossRectCenter = crossRect.center()
+                                    # check if drawn net is starts or ends in the existing net.
 
+                                    if not (drawnNet.start.y() < crossRectCenter.y() < drawnNet.end.y()):
+                                        if ((netItem.start.x() != crossRectCenter.x()) and (
+                                                netItem.end.x() != crossRectCenter.x())):
+                                            self.createCrossDot(crossRect, drawnNet)
+                                        drawnNet.name = netItem.name  # get the net name from the connected net
+                                        netAddedFlag = True
                     if not (netMergedFlag or netAddedFlag):
                         self.schematicNets[drawnNet.name] = [drawnNet]
                         self.netCounter += 1
                     elif netAddedFlag:  # a new net is added but shares a name with another net.
                         self.schematicNets[drawnNet.name] += [drawnNet]
+            # elif hasattr(self, "selectedItem"):
+            #     if isinstance(self.selectedItem, shp.symbolShape):
+            #         for item in self.selectedItem.childItems():
+            #             if type(item) is shp.pin:
+            #                 self.selectedItem.pinLocations[
+            #                     item.pinName] = (item.start + item.scenePos().toPoint()).toTuple()
 
-                    print(self.schematicNets)
+                    self.selectedItem = None
 
-                # elif hasattr(self, "selectedItem"):
-                # if isinstance(self.selectedItem, shp.symbolShape):
-                # # update the pin locations of a symbol if it is moved
-                #     for pin in self.selectedItem.pins:
-                # self.selectedItem.pinLocations[pin.pinName] = (
-                #         pin.start + pin.scenePos().toPoint()
-                # ).toTuple()
-                # self.pinLocations[
-                #     self.selectedItem.instanceName] = self.selectedItem.pinLocations
 
-                        # self.selectedItem = None
-                        # if hasattr(self, "selectedItem") and self.selectedItem is not None:
-                        #     for item in self.selectedItem.childItems():
-                        #         if type(item) is shp.pin:
-                        #             self.selectedItem.pinLocations[
-                        #                 item.pinName] = (item.start + item.scenePos().toPoint()).toTuple()
         super().mouseReleaseEvent(mouse_event)
+
+    def createCrossDot(self, crossRect, drawnNet):
+        crossDot = QGraphicsEllipseItem(
+            crossRect)  # create a dot to mark the cross net
+        crossDot.setPen(self.wirePen)
+        crossDot.setBrush(self.wirePen.color())
+        crossDot.setParentItem(drawnNet)  # its parent is the drawn net
+        self.addItem(crossDot)
 
     def mergeHorizontalNets(self, dnetBRect, drawnNet, netItem):
         mergedRect = dnetBRect.united(
@@ -1544,11 +1553,11 @@ class schematic_scene(editor_scene):
                     item.labelDefs()  # assign label name and text
                     symbolInstance.labelDict[
                         item.labelName] = item  # labelName: label object
-                for pin in symbolInstance.pins:
-                    symbolInstance.pinLocations[pin.pinName] = (
-                            pin.start + pin.scenePos().toPoint()
-                    ).toTuple()
-
+                # for pin in symbolInstance.pins:
+                #     symbolInstance.pinLocations[pin.pinName] = (
+                #             pin.start + pin.scenePos().toPoint()
+                #     ).toTuple()
+                print(symbolInstance.pinLocations)
                 undoCommand = us.addShapeUndo(self, symbolInstance)
                 self.undoStack.push(undoCommand)
                 return symbolInstance
@@ -1591,7 +1600,7 @@ class schematic_scene(editor_scene):
         print(self.pinLocations)
 
     def viewObjProperties(self):
-        if hasattr(self, "selectedItem"):
+        if hasattr(self, "selectedItem") and self.selectedItem is not None:
             # assert isinstance(self.selectedItem, shp.symbolShape)
 
             dlg = pdlg.instanceProperties(

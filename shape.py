@@ -449,6 +449,7 @@ class label(shape):
     labelOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
     labelUses = ["Normal", "Instance", "Pin", "Device", "Annotation"]
     labelTypes = ["Normal", "NLPLabel", "PyLabel"]
+    predefinedLabels = ["[@cellName]","[@modelName]","[@instName]", "[@libName]", "[@viewName]", "[@elementNum]"]
 
     def __init__(
             self,
@@ -646,13 +647,17 @@ class symbolShape(shape):
         self.labelDict = {}  # labelName: label
         self.labels = []  # list of labels
         self.pins = []  # list of pins
+        self.pinLocations = {}  # pinName: pinLocation
         for item in self.shapes:
             item.setParentItem(self)
             if type(item) is pin:
                 self.pins.append(item)
             elif type(item) is label:
                 self.labels.append(item)
-
+        for item in self.shapes:
+            if type(item) is pin:
+                self.pinLocations[
+                    item.pinName] = (item.start + item.scenePos().toPoint()).toTuple()
         self.setFiltersChildEvents(True)
         self.setHandlesChildEvents(True)
         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
@@ -674,3 +679,11 @@ class symbolShape(shape):
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
             super().mousePressEvent(event)
             self.setCursor(Qt.OpenHandCursor)
+
+    def itemChange(self, change, value):
+        if change == QGraphicsItem.ItemPositionChange:
+            for item in self.shapes:
+                if type(item) is pin:
+                    self.pinLocations[
+                        item.pinName] = (item.start + item.scenePos().toPoint()).toTuple()
+        return super().itemChange(change, value)

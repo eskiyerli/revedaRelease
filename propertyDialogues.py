@@ -392,14 +392,14 @@ class instanceProperties(QDialog):
         self.instanceLabelsLayout = QGridLayout()
         row_index = 0
         for shape in self.instance.shapes:
-            if type(shape) == shp.label and not (
-                    shape.labelDefinition == "[@instName]" or shape.labelDefinition == "[@cellName]"):
+            # if type(shape) == shp.label and not (
+            #         shape.labelDefinition == "[@instName]" or shape.labelDefinition == "[@cellName]"):
+            if type(shape) == shp.label and shape.labelDefinition not in shp.label.predefinedLabels:
                 self.instanceLabelsLayout.addWidget(boldLabel(shape.labelName, self), row_index, 0)
                 instanceLabelDef = longLineEdit()
                 self.instanceLabelsLayout.addWidget(instanceLabelDef, row_index, 1)
                 instanceLabelDef.setText(shape.labelText.split("=")[1])
                 row_index += 1
-
 
         instanceAttributesLayout = QGridLayout()
         instanceAttributesLayout.setColumnMinimumWidth(0, 100)
