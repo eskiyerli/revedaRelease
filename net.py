@@ -10,16 +10,9 @@ import net
 
 
 class schematicNet(QGraphicsLineItem):
-    uses = [
-        "SIGNAL",
-        "ANALOG",
-        "CLOCK",
-        "GROUND",
-        "POWER",
-        ]
+    uses = ["SIGNAL", "ANALOG", "CLOCK", "GROUND", "POWER", ]
 
-    def __init__(self, start: QPoint, end: QPoint, pen: QPen,
-                 name: str
+    def __init__(self, start: QPoint, end: QPoint, pen: QPen, name: str
                  ):
         assert isinstance(pen, QPen)
         self.pen = pen
@@ -94,81 +87,171 @@ class schematicNet(QGraphicsLineItem):
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        newNet = True
         dnetBRect = self.mapRectToScene(self.boundingRect()).toRect()
-        netMergedFlag = False
-        netAddedFlag = False
-        # check if it intersects another net and merge them.
-        for name, netItemList in self.scene().schematicNets.items():
-            for netItem in netItemList:
-                netItemBRect = netItem.mapRectToScene(netItem.boundingRect()).toRect()
-                if netItem.name != self.name and dnetBRect.intersects(netItemBRect):
-                    if self.horizontal and netItem.horizontal:
-                        netMergedFlag = self.mergeHorizontalNets(dnetBRect, netItem, netItemBRect)
-                    elif not (self.horizontal or netItem.horizontal):
-                        netMergedFlag = self.mergeVerticalNets(dnetBRect, netItem, netItemBRect)
-                    elif self.horizontal and not netItem.horizontal:
-                        crossRect = dnetBRect.intersected(netItemBRect).marginsAdded(
-                            QMargins(2, 2, 2, 2))
-                        crossRectCenter = crossRect.center()
-                    # check if the net is starts or ends in the existing net.
-                        if not (netItem.start.y() < crossRectCenter.y() < netItem.end.y()):
-                            crossDot = QGraphicsEllipseItem(crossRect)  # create a dot to mark the cross net
-                            crossDot.setPen(self.pen)
-                            crossDot.setBrush(self.pen.color())
-                            crossDot.setParentItem(self)
-                            self.scene().addItem(crossDot)
-                            self.name = netItem.name  # get the net name from the connected net
-                            netAddedFlag = True
+        viewRect = self.scene().parent.view.mapToScene(
+            self.scene().parent.view.viewport().rect()
+            ).boundingRect()
+        netsInView = [item for item in self.scene().items(viewRect) if
+                      isinstance(item, net.schematicNet)]
+        scene = self.scene()
+        # print(f'nets in view {netsInView}')
+        # check any overlapping nets in the view
+        # editing is done in the view and thus there is no need to check all nets in the scene
+        for netItem in netsInView:
+            netItemBRect = netItem.mapRectToScene(
+                netItem.boundingRect()
+                ).toRect()
+            if dnetBRect.intersects(netItemBRect) and netItem != self:
+                if self.horizontal and netItem.horizontal:
+                    mergedRect = dnetBRect.united(
+                        netItemBRect
+                        )  # create a merged horizontal rectangle
+                    print(mergedRect)
+                    scene.removeItem(
+                        netItem
+                        )  # remove the old net from the scene
+                    scene.removeItem(
+                        self
+                        )  # remove the drawn net from the scene
+                    scene.schematicNets[netItem.name].remove(
+                        netItem
+                        )  # remove the old net from the nets dict
+                    self = scene.netDraw(
+                        mergedRect.bottomLeft(), mergedRect.bottomRight(),
+                        scene.wirePen, netItem.name
+                        )  # create a new net with the merged rectangle
+                    print(self.boundingRect().width())
+                    scene.schematicNets[netItem.name].extend(
+                        [self]
+                        )  # add the new net to the list
+                    scene.addItem(self)  # add the new net to the scene
+                    scene.parent.parent.messageLine.setText(
+                        "Net merged"
+                        )  # newNet = False
+        #         elif not (drawnNet.horizontal or netItem.horizontal):
+        #             mergedRect = dnetBRect.united(
+        #                 netItem.boundingRect()
+        #                 ).toRect()  # create a merged horizontal rectangle
+        #             self.removeItem(
+        #                 netItem
+        #                 )  # remove the old net from the scene
+        #             self.removeItem(
+        #                 drawnNet
+        #                 )  # remove the drawn net from the scene
+        #             self.schematicNets[netItem.name].remove(
+        #                 netItem
+        #                 )  # remove the old net from the net list
+        #             netItem = self.netDraw(
+        #                 mergedRect.bottomRight(),
+        #                 mergedRect.topLeft(),
+        #                 self.wirePen, netItem.name
+        #                 )  # create a new net with the merged rectangle
+        #             self.schematicNets[netItem.name].extend(
+        #                 [
+        #                     netItem]
+        #                 )  # add the new net to the list
+        #             self.addItem(netItem)  # add the new net to the scene
+        #             self.parent.parent.messageLine.setText(
+        #                 "Net merged"
+        #                 )
+        #             newNet = False
+        #         # drawn net is horizontal and existing net is vertical
+        #         # drawn net is split into two nets
+        #         elif drawnNet.horizontal and not netItem.horizontal:
+        #             crossRectCenter = dnetBRect.intersected(
+        #                 netItem.boundingRect()
+        #                 ).center()
+        #             # check if crossing point is either end of existing net
+        #             if (
+        #                     netItem.start.y() == crossRectCenter.y()
+        #                     or netItem.end.y() == crossRectCenter.y()
+        #             ) and not (
+        #                     drawnNet.start.x() == crossRectCenter.x()
+        #                     or drawnNet.end.x() == crossRectCenter.x()):
+        #                 net1 = self.netDraw(
+        #                     drawnNet.start, crossRectCenter,
+        #                     self.wirePen, netItem.name
+        #                     )
+        #                 net2 = self.netDraw(
+        #                     crossRectCenter, drawnNet.end,
+        #                     self.wirePen,
+        #                     netItem.name
+        #                     )
+        #                 # remove net from scene after splitting
+        #                 self.removeItem(drawnNet)
+        #                 # add split nets
+        #                 self.addItem(net1)
+        #                 self.addItem(net2)
+        #                 self.schematicNets[netItem.name].extend(
+        #                     [
+        #                         net1, net2]
+        #                     )
+        #                 self.parent.parent.messageLine.setText(
+        #                     "Net split"
+        #                     )
+        #                 newNet = False
+        #
+        #         elif not drawnNet.horizontal and netItem.horizontal:
+        #             crossRectCenter = dnetBRect.intersected(
+        #                 netItem.boundingRect()
+        #                 ).center()
+        #             # check if crossing point is either end of existing net
+        #             if (
+        #                     netItem.start.x() == crossRectCenter.x()
+        #                     or netItem.end.x() == crossRectCenter.x()
+        #             ) and not (
+        #                     drawnNet.start.y() == crossRectCenter.y()
+        #                     or drawnNet.end.y() == crossRectCenter.y()):
+        #                 net1 = self.netDraw(
+        #                     drawnNet.start, crossRectCenter,
+        #                     self.wirePen, netItem.name
+        #                     )
+        #                 net2 = self.netDraw(
+        #                     crossRectCenter, drawnNet.end,
+        #                     self.wirePen,
+        #                     netItem.name
+        #                     )
+        #                 # remove net from scene after splitting
+        #                 self.removeItem(drawnNet)
+        #                 # add split nets
+        #                 self.addItem(net1)
+        #                 self.addItem(net2)
+        #                 self.schematicNets[netItem.name].extend(
+        #                     [
+        #                         net1, net2]
+        #                     )
+        #                 self.parent.parent.messageLine.setText(
+        #                     "Net split"
+        #                     )
+        #                 newNet = False
+        # dnetBRect = self.mapRectToScene(self.boundingRect()).toRect()
+        # netMergedFlag = False
+        # netAddedFlag = False
+        # # check if it intersects another net and merge them.
+        # for name, netItemList in self.scene().schematicNets.items():
+        #     for netItem in netItemList:
+        #         netItemBRect = netItem.mapRectToScene(netItem.boundingRect()).toRect()
+        #         if netItem.name != self.name and dnetBRect.intersects(netItemBRect):
+        #             if self.horizontal and netItem.horizontal:
+        #                 netMergedFlag = self.mergeHorizontalNets(dnetBRect, netItem, netItemBRect)
+        #             elif not (self.horizontal or netItem.horizontal):
+        #                 netMergedFlag = self.mergeVerticalNets(dnetBRect, netItem, netItemBRect)
+        #             elif self.horizontal and not netItem.horizontal:
+        #                 crossRect = dnetBRect.intersected(netItemBRect).marginsAdded(
+        #                     QMargins(2, 2, 2, 2))
+        #                 crossRectCenter = crossRect.center()
+        #             # check if the net is starts or ends in the existing net.
+        #                 if not (netItem.start.y() < crossRectCenter.y() < netItem.end.y()):
+        #                     crossDot = QGraphicsEllipseItem(crossRect)  # create a dot to mark the cross net
+        #                     crossDot.setPen(self.pen)
+        #                     crossDot.setBrush(self.pen.color())
+        #                     crossDot.setParentItem(self)
+        #                     self.scene().addItem(crossDot)
+        #                     self.name = netItem.name  # get the net name from the connected net
+        #                     netAddedFlag = True
 
         super().mouseReleaseEvent(event)
-
-    def createCrossDot(self, crossRect, drawnNet):
-        crossDot = QGraphicsEllipseItem(crossRect)  # create a dot to mark the cross net
-        crossDot.setPen(self.pen)
-        crossDot.setBrush(self.pen.color())
-        crossDot.setParentItem(drawnNet)  # its parent is the drawn net
-        self.scene().addItem(crossDot)
-
-    def mergeHorizontalNets(self, dnetBRect, netItem, netItemBRect):
-        # pass
-        mergedRect = dnetBRect.united(
-            netItemBRect)  # create a merged horizontal rectangle
-        self.scene().schematicNets[netItem.name].remove(
-            netItem
-            )  # remove the old net from the list
-        self.scene().removeItem(netItem)  # remove the old net from the scene
-        netItem = self.scene().netDraw(
-            mergedRect.bottomLeft(), mergedRect.bottomRight(),
-            self.pen, netItem.name
-            )  # create a new net with the merged rectangle
-        self.scene().schematicNets[netItem.name].append(
-            netItem
-            )  # add the new net to the list
-
-        self.scene().parent.parent.messageLine.setText("Net merged")
-        self.scene().removeItem(self)  # remove the drawn net from the scene
-        del self
-        return True
-
-    def mergeVerticalNets(self, dnetBRect, netItem ,netItemBRect):
-        mergedRect = dnetBRect.united(
-            netItemBRect)  # create a merged horizontal rectangle
-        self.scene().schematicNets[netItem.name].remove(
-            netItem
-            )  # remove the old net from the list
-        self.scene().removeItem(netItem)  # remove the old net from the scene
-        netItem = self.scene().netDraw(
-            mergedRect.bottomRight(), mergedRect.topLeft(),
-            self.pen, netItem.name
-            )  # create a new net with the merged rectangle
-        self.scene().schematicNets[netItem.name].append(
-            netItem
-            )  # add the new net to the list
-
-        self.scene().parent.parent.messageLine.setText("Net merged")
-        self.scene().removeItem(self)  # remove the drawn net from the scene
-        del self
-        return True
 
 # class net:
 #     def __init__(self, name: str, pins:list, instPins:list, cellview: str):
