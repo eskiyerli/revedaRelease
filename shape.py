@@ -224,8 +224,7 @@ class rectangle(shape):
         if self.stretch:
             self.prepareGeometryChange()
             eventPos = self.snap2grid(event.pos())
-            print(eventPos)
-            print(self.snapToGrid(self.rect.right(), self.gridTuple[1]))
+
             if eventPos.x() == self.snapToGrid(self.rect.left(), self.gridTuple[0]):
                 if self.start.y() <= eventPos.y() <= self.end.y() or self.start.y() >= eventPos.y() >= self.end.y():
                     self.setCursor(Qt.SizeHorCursor)
