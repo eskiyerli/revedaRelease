@@ -1159,11 +1159,12 @@ class schematic_scene(editor_scene):
                     del self.current
                     dnetBRect = drawnNet.boundingRect()
                     viewRect = self.parent.view.mapToScene(self.parent.view.viewport().rect()).boundingRect()
-                    netsInView = [item for item in self.items(viewRect) if isinstance(item, net.schematicNet)]
+                    netsInView = {item for item in self.items(viewRect) if isinstance(item, net.schematicNet)}
                     # check any overlapping nets in the view
                     # editing is done in the view and thus there is no need to check all nets in the scene
-                    for netItem in netsInView:
-                        if dnetBRect.intersects(netItem.boundingRect()) and netItem != drawnNet:
+                    otherNetsSet = netsInView.discard(drawnNet)
+                    for netItem in otherNetsSet:
+                        if dnetBRect.intersects(netItem.boundingRect()):
                             if drawnNet.horizontal and netItem.horizontal:
                                 mergedRect = dnetBRect.united(
                                     netItem.boundingRect()).toRect()  # create a merged horizontal rectangle
@@ -1241,34 +1242,36 @@ class schematic_scene(editor_scene):
         Creates a netlist from the schematic. For the moment only a dictionary is returned.
         """
         nameCounter = 0
-        netsSceneList = [item for item in self.items(self.sceneRect()) if isinstance(item, net.schematicNet)]
-        for netItem in netsSceneList:
+        netsSceneSet = {item for item in self.items(self.sceneRect()) if isinstance(item, net.schematicNet)}
+        for netItem in netsSceneSet:
             if not netItem.nameSet:
                 netItem.name = None  # empty all net names
-        self.scanNets(nameCounter, netsSceneList)
+        self.groupNets(netsSceneSet,nameCounter)
         self.update()
 
-    def scanNets(self, nameCounter, netsSceneList):
-        initialNet = netsSceneList[0]
-        initialNet.name = f'net{nameCounter}'
-        modNetList = netsSceneList[1:]
-        netList = [initialNet]
-        # recursively follow the net until you exhaust the nets
-        self.traverseNets(netList, modNetList)
 
-    def traverseNets(self, conList, netsList: list):
-        listLen = len(conList)
-        extConList = []
-        extConList.extend(conList)
-        assert isinstance(conList, list)
-        for netItem in conList:
-            for netItem2 in netsList:
-                if self.checkConnect(netItem, netItem2):
-                    extConList += [netItem2]
+    def groupNets(self, netsSceneSet, nameCounter):
+        initialNet = netsSceneSet.pop()
+        initialNet.name = "net" + str(nameCounter)
+        otherNets=self.traverseNets({initialNet,}, netsSceneSet)
+        nameCounter += 1
+        if len(otherNets) > 1:
+            self.groupNets(otherNets, nameCounter)
+        elif len(otherNets) == 1:
+            otherNets.pop().name = "net" + str(nameCounter)
+
+    def traverseNets(self,connectedSet, otherNetsSet):
+        newFoundConnectedSet = set()
+        for netItem in connectedSet:
+            for netItem2 in otherNetsSet:
+                if self.checkConnect(netItem,netItem2):
                     netItem2.name = netItem.name
-        modNetsList = [netItem for netItem in netsList if netItem not in conList]
-        if len(extConList) > listLen:
-            self.traverseNets(extConList, modNetsList)
+                    newFoundConnectedSet.add(netItem2)
+        if len(newFoundConnectedSet) > 0:
+            connectedSet.update(newFoundConnectedSet)
+            otherNetsSet -= newFoundConnectedSet
+            self.traverseNets(connectedSet,otherNetsSet)
+        return otherNetsSet
 
 
     def checkConnect(self, netItem, otherNetItem):
