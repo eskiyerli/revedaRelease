@@ -21,33 +21,20 @@
 # Load symbol and maybe later schematic from json file.
 # import pathlib
 
+import json
+
 from PySide6.QtCore import (
-    QDir,
-    QLine,
-    QRect,
-    QRectF,
     QPoint,
-    QPointF,
-    QSize,
     Qt,
     )  # QtCore
 from PySide6.QtGui import (
-    QAction,
-    QKeySequence,
     QColor,
-    QFont,
-    QIcon,
-    QPainter,
     QPen,
     )
-from PySide6.QtWidgets import (
-    QGraphicsItem,
-    )
 
-import schBackEnd as scb
 import shape as shp
 import symbolEncoder as se
-import json
+import net as net
 
 
 def createSymbolItems(item, gridTuple):
@@ -128,7 +115,7 @@ def createSymbolAttribute(item):
             )
 
 
-def createSchematicItems(item, libraryDict, viewName, gridTuple):
+def createSchematicItems(item, libraryDict, viewName, gridTuple:(int, int)):
     """
     Create schematic items from json file.
     """
@@ -189,3 +176,21 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple):
                 label.labelText = labelDict[label.labelName][1]
         symbolInstance.setPos(position)
         return symbolInstance
+
+def createSchematicNets(item):
+    """
+    Create schematic items from json file.
+    """
+    if item["type"] == "schematicNet":
+        start = QPoint(item["start"][0], item["start"][1])
+        end = QPoint(item["end"][0], item["end"][1])
+        penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
+        penWidth = item["width"]
+        penColor = QColor(*item["color"])
+        pen = QPen(penColor, penWidth, penStyle)
+        pen.setCosmetic(item["cosmetic"])
+        netItem = net.schematicNet(start, end, pen)
+        netItem.name = item["name"]
+        netItem.nameSet = item["nameSet"]
+        return netItem
+

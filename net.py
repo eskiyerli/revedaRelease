@@ -1,8 +1,7 @@
 # net class definition.
 from PySide6.QtCore import (QPoint, Qt)
-from PySide6.QtGui import (QPen, QStaticText,)
-from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem,
-                               QGraphicsSceneMouseEvent, )
+from PySide6.QtGui import (QPen, QStaticText, )
+from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsSceneMouseEvent, )
 
 # import shape as shp
 # import math
@@ -12,16 +11,14 @@ import net
 class schematicNet(QGraphicsLineItem):
     uses = ["SIGNAL", "ANALOG", "CLOCK", "GROUND", "POWER", ]
 
-    def __init__(self, start: QPoint, end: QPoint, pen: QPen
-                 ):
+    def __init__(self, start: QPoint, end: QPoint, pen: QPen):
         assert isinstance(pen, QPen)
         self.pen = pen
         self.name = None
         self.horizontal = True
         self.start = start
         self.end = end
-        self.nameSet = False # if a name has been set
-
+        self.nameSet = False  # if a name has been set
 
         x1, y1 = self.start.x(), self.start.y()
         x2, y2 = self.end.x(), self.end.y()
@@ -50,7 +47,6 @@ class schematicNet(QGraphicsLineItem):
         painter.drawLine(self.start, self.end)
         if self.name is not None:
             painter.drawStaticText(self.start, QStaticText(self.name))
-
 
     def setName(self, name):
         self.name = name
@@ -94,5 +90,6 @@ class schematicNet(QGraphicsLineItem):
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-
         super().mouseReleaseEvent(event)
+
+
