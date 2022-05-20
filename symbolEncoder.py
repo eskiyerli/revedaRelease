@@ -1,5 +1,8 @@
 import json
+
+import net
 import shape as shp
+import net
 from PySide6.QtCore import (QDir, QLine, QRect, QRectF, QPoint, QPointF, QSize, )
 from PySide6.QtGui import (QAction, QKeySequence, QColor, QFont, QIcon, QPainter, QPen, QBrush, QFontMetrics,
                            QStandardItemModel, QTransform, QCursor, QUndoCommand, QUndoStack)
@@ -99,6 +102,20 @@ class schematicEncoder(json.JSONEncoder):
                 "attributes": item.__dict__["attr"],
                 "labelDict": itemLabelDict,
                 "location": (item.scenePos()-item.scene().origin).toTuple(),
+            }
+            return itemDict
+        elif isinstance(item, net.schematicNet):
+            itemDict = {
+                "type": "schematicNet",
+                "start": item.__dict__["start"].toTuple(),
+                "end": item.__dict__["end"].toTuple(),
+                "color": item.__dict__["pen"].color().toTuple(),
+                "width": item.__dict__["pen"].width(),
+                "lineStyle": str(item.__dict__["pen"].style()),
+                "cosmetic": item.__dict__["pen"].isCosmetic(),
+                "location": (item.scenePos()-item.scene().origin).toTuple(),
+                "name": item.__dict__["name"],
+                "nameSet": item.__dict__["nameSet"],
             }
             return itemDict
 
