@@ -1,11 +1,11 @@
 # net class definition.
 from PySide6.QtCore import (QPoint, Qt)
 from PySide6.QtGui import (QPen, QStaticText, )
-from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsSceneMouseEvent, )
+from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsEllipseItem)
+
 
 # import shape as shp
 # import math
-import net
 
 
 class schematicNet(QGraphicsLineItem):
@@ -26,7 +26,7 @@ class schematicNet(QGraphicsLineItem):
             self.horizontal = True
             self.start = QPoint(min(x1, x2), y1)
             self.end = QPoint(max(x1, x2), y1)
-            super().__init__(self.start.x(), y1, self.end.x(), y1)
+            super().__init__(start.x(), y1, self.end.x(), y1)
         else:
             self.horizontal = False
             self.start = QPoint(x1, min(y1, y2))
@@ -83,13 +83,32 @@ class schematicNet(QGraphicsLineItem):
         if self.scene().drawWire:
             self.setFlag(QGraphicsItem.ItemIsSelectable, False)
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
+
         else:
             self.setFlag(QGraphicsItem.ItemIsSelectable, True)
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
-            self.prepareGeometryChange()
+
+            # self.prepareGeometryChange()
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(event)
 
 
+class crossingDot(QGraphicsEllipseItem):
+    def __init__(self, point: QPoint, radius: int, pen: QPen):
+        self.radius = radius
+        self.pen = pen
+        self.point = point
+        super().__init__(point.x()-radius, point.y()-radius, 2*radius, 2*radius)
+        self.setPen(pen)
+        self.setBrush(pen.color())
+
+    def paint(self, painter, option, widget) -> None:
+        if self.isSelected():
+            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+            painter.setBrush(Qt.white)
+        else:
+            painter.setPen(self.pen)
+            painter.setBrush(self.pen.color())
+        painter.drawEllipse(self.point, self.radius, self.radius)

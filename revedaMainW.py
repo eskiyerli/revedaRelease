@@ -30,48 +30,27 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import (
     QAction,
-    QKeySequence,
-    QColor,
     QFont,
     QIcon,
 )
 from PySide6.QtWidgets import (
     QApplication,
-    QButtonGroup,
-    QComboBox,
-    QDialog,
-    QDialogButtonBox,
-    QFileDialog,
-    QFormLayout,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
     QMainWindow,
-    QMenu,
-    QMessageBox,
-    QPushButton,
-    QRadioButton,
-    QTabWidget,
-    QToolBar,
-    QTreeView,
     QVBoxLayout,
     QWidget,
-
 )
 
-import circuitElements as cel
-import propertyDialogues as pdlg
+# import circuitElements as cel
+# import propertyDialogues as pdlg
 import pythonConsole as pcon
 import schBackEnd as scb  # import the backend
-import shape as shp  # import the shapes
+# import shape as shp  # import the shapes
 import libraryWindow as libw  # import the library window
-import loadJSON as lj
-import undoStack as us
-import symbolEncoder as se
-from Point import *
-from Vector import *
+# import loadJSON as lj
+# import undoStack as us
+# import symbolEncoder as se
+# from Point import *
+# from Vector import *
 import resources
 
 
@@ -173,9 +152,10 @@ class mainWindow(QMainWindow):
         self.app.closeAllWindows()
         event.accept()
 
+
 # Start Main application window
 app = QApplication(sys.argv)
-app.setStyle('Fusion')
+app.setStyle("Fusion")
 # empty argument as there is no parent window.
 mainW = mainWindow(app)
 mainW.setWindowTitle("Revolution EDA Main Window")

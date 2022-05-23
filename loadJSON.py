@@ -26,11 +26,11 @@ import json
 from PySide6.QtCore import (
     QPoint,
     Qt,
-    )  # QtCore
+)  # QtCore
 from PySide6.QtGui import (
     QColor,
     QPen,
-    )
+) 
 
 import shape as shp
 import symbolEncoder as se
@@ -53,10 +53,10 @@ def createSymbolItems(item, gridTuple):
         pen.setCosmetic(item["cosmetic"])
         rect = shp.rectangle(
             start, end, pen, gridTuple
-            )  # note that we are using grid values for scene
+        )  # note that we are using grid values for scene
         rect.setPos(
             QPoint(item["location"][0], item["location"][1]),
-            )
+        )
         return rect
     elif item["type"] == "line":
         start = QPoint(item["start"][0], item["start"][1])
@@ -83,7 +83,7 @@ def createSymbolItems(item, gridTuple):
             item["pinDir"],
             item["pinType"],
             gridTuple,
-            )
+        )
         pin.setPos(QPoint(item["location"][0], item["location"][1]))
         return pin
     elif item["type"] == "label":
@@ -103,7 +103,7 @@ def createSymbolItems(item, gridTuple):
             item["labelAlign"],
             item["labelOrient"],
             item["labelUse"],
-            )
+        )
         label.setPos(QPoint(item["location"][0], item["location"][1]))
         return label
 
@@ -112,10 +112,10 @@ def createSymbolAttribute(item):
     if item["type"] == "attribute":
         return se.symbolAttribute(
             item["name"], item["attributeType"], item["definition"]
-            )
+        )
 
 
-def createSchematicItems(item, libraryDict, viewName, gridTuple:(int, int)):
+def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
     """
     Create schematic items from json file.
     """
@@ -139,20 +139,20 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple:(int, int)):
                 shapes = json.load(temp)
                 for shape in shapes:
                     if (
-                            shape["type"] == "rect"
-                            or shape["type"] == "line"
-                            or shape["type"] == "pin"
-                            or shape["type"] == "label"
+                        shape["type"] == "rect"
+                        or shape["type"] == "line"
+                        or shape["type"] == "pin"
+                        or shape["type"] == "label"
                     ):
                         # append recreated shapes to items list
                         itemShapes.append(createSymbolItems(shape, gridTuple))
                     elif (
-                            shape["type"] == "attribute"
+                        shape["type"] == "attribute"
                     ):  # just recreate attributes dictionary
                         symbolAttributes[shape["name"]] = [
                             shape["attributeType"],
                             shape["definition"],
-                            ]
+                        ]
             except json.decoder.JSONDecodeError:
                 print("Error: Invalid Symbol file")
         # now go over attributes and assign the values from JSON file
@@ -161,10 +161,11 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple:(int, int)):
                 symbolAttributes[key] = instAttributes[key]
         symbolInstance = shp.symbolShape(
             draftPen, gridTuple, itemShapes, symbolAttributes
-            )
+        )
         symbolInstance.pinLocations = {
-            item.pinName:(item.start + item.scenePos().toPoint()).toTuple() for
-            item in symbolInstance.pins }
+            item.pinName: (item.start + item.scenePos().toPoint()).toTuple()
+            for item in symbolInstance.pins
+        }
         symbolInstance.libraryName = item["library"]
         symbolInstance.cellName = item["cell"]
         symbolInstance.counter = instCounter
@@ -177,6 +178,7 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple:(int, int)):
         symbolInstance.setPos(position)
         return symbolInstance
 
+
 def createSchematicNets(item):
     """
     Create schematic items from json file.
@@ -184,6 +186,7 @@ def createSchematicNets(item):
     if item["type"] == "schematicNet":
         start = QPoint(item["start"][0], item["start"][1])
         end = QPoint(item["end"][0], item["end"][1])
+        position = QPoint(item["location"][0], item["location"][1])
         penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
         penWidth = item["width"]
         penColor = QColor(*item["color"])
@@ -192,5 +195,5 @@ def createSchematicNets(item):
         netItem = net.schematicNet(start, end, pen)
         netItem.name = item["name"]
         netItem.nameSet = item["nameSet"]
+        netItem.setPos(position)
         return netItem
-

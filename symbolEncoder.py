@@ -117,6 +117,7 @@ class schematicEncoder(json.JSONEncoder):
                 "name": item.__dict__["name"],
                 "nameSet": item.__dict__["nameSet"],
             }
+            print(itemDict["location"])
             return itemDict
 
 
