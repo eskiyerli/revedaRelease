@@ -26,7 +26,7 @@ import shutil
 # import numpy as np
 import copy
 
-from PySide6.QtCore import (QRect, QTemporaryFile, QMargins, QPoint, Qt, )
+from PySide6.QtCore import (QRect, QTemporaryFile, QLine, QPoint, Qt, )
 from PySide6.QtGui import (QAction, QBrush, QColor, QCursor, QFont, QFontMetrics, QIcon, QKeySequence, QPainter, QPen,
                            QStandardItemModel, QTransform, QUndoCommand, QUndoStack, QTextDocument, )
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDialog, QDialogButtonBox, QFileDialog,
@@ -1145,8 +1145,7 @@ class schematic_scene(editor_scene):
             elif self.drawWire:  # cross dot points can change, find the list of corners in the viewport.
                 # self.findDotPoints(self.viewRect)
                 # self.crossDotsMousePress = self.crossDots
-                pass
-                # now
+                pass  # now
 
         super().mousePressEvent(mouse_event)
 
@@ -1155,6 +1154,7 @@ class schematic_scene(editor_scene):
         if mouse_event.buttons() == Qt.LeftButton:
             if hasattr(self, "draftItem"):
                 self.removeItem(self.draftItem)
+                del self.draftItem
             if self.drawWire and hasattr(self, "start"):
                 self.parent.parent.messageLine.setText("Wire Mode")
                 self.draftItem = net.schematicNet(self.start, self.current, self.draftPen)
@@ -1164,6 +1164,7 @@ class schematic_scene(editor_scene):
 
     def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+        self.viewRect = self.parent.view.mapToScene(self.parent.view.viewport().rect()).boundingRect()
         if mouse_event.button() == Qt.LeftButton:
             if self.drawWire and hasattr(self, "start"):
                 if hasattr(self, "draftItem"):
@@ -1172,121 +1173,103 @@ class schematic_scene(editor_scene):
                     drawnNet = self.netDraw(self.start, self.current, self.wirePen)
                     del self.start
                     del self.current
-                    # find the cross dots locations in the viewport
+                    self.removeDotsInView(self.viewRect)
+                    self.mergeNets(drawnNet, self.viewRect)
+                    self.splitNets(self.viewRect)
                     self.findDotPoints(self.viewRect)
-                    # newCrossDotPoints = self.viewportCrossDots - self.crossDotsMousePress
-                    # removedCrossDotPoints = self.crossDotsMousePress - self.viewportCrossDots
-                    # self.crossDots |= newCrossDotPoints
-                    # self.crossDots -= removedCrossDotPoints
-                    self.drawingOverlaps(drawnNet)
-            elif self.itemSelect:
-                if isinstance(self.selectedItem, net.schematicNet
-                              ) and self.selectedItem.ItemPositionHasChanged:
-                    # find the cross dots locations in the viewport
-                    self.findDotPoints(self.viewRect)
-                    self.drawingOverlaps(self.selectedItem)
-                    # self.findDotPoints(self.viewRect)
-                    # newCrossDotPoints = self.viewportCrossDots - self.crossDotsMousePress
-                    # removedCrossDotPoints = self.crossDotsMousePress - self.viewportCrossDots
-                    # self.crossDots |= newCrossDotPoints
-                    # self.crossDots -= removedCrossDotPoints
-                    self.selectedItem = None
-            # remove existing dots
-            dotsInView = {item for item in self.items(self.viewRect)
-                          if isinstance(item, net.crossingDot)}
-            for dot in dotsInView:
-                self.removeItem(dot)
-            for point in self.viewportCrossDots:
-                self.addItem(net.crossingDot(point, 3, self.wirePen))
-            self.update()
 
-            # print(self.schematicNets)  # elif hasattr(self, "selectedItem"):  #     if isinstance(self.selectedItem, shp.symbolShape):  #         for item in self.selectedItem.childItems():  #             if type(item) is shp.pin:  #                 self.selectedItem.pinLocations[  #                     item.pinName] = (item.start + item.scenePos().toPoint()).toTuple()
-        super().mouseReleaseEvent(mouse_event)
+            elif self.itemSelect:
+                if isinstance(self.selectedItem, net.schematicNet) and self.selectedItem.ItemPositionHasChanged:
+                    # find the cross dots locations in the viewport
+                    # self.removeDotsInView(self.viewRect)
+                    self.mergeNets(self.selectedItem, self.viewRect)
+                    self.splitNets(self.viewRect)
+                    self.findDotPoints(self.viewRect)
+                    self.selectedItem = None
+
+    def removeDotsInView(self, viewRect):
+        dotsInView = {item for item in self.items(viewRect) if isinstance(item, net.crossingDot)}
+        for dot in dotsInView:
+            self.removeItem(dot)
+        self.viewportCrossDots = set()
 
     def findDotPoints(self, viewRect):
         self.viewportCrossDots = set()  # empty the set.
         netsInView = {item for item in self.items(viewRect) if isinstance(item, net.schematicNet)}
         for netItem in netsInView:
+            netItemEnd = netItem.mapToScene(netItem.end)
             for netItem2 in netsInView.difference({netItem, }):
-                if (netItem.horizontal and netItem2.horizontal) and (netItem.end == netItem2.start):
+                netItem2Start = netItem.mapToScene(netItem2.start)
+                if (netItem.horizontal and netItem2.horizontal) and (netItemEnd == netItem2Start):
                     for netItem3 in netsInView.difference({netItem, }).difference({netItem2, }):
-                        if (netItem.end == netItem3.end) or (netItem.end == netItem3.start):
-                            cornerPoint = netItem.end
+                        netItem3End = netItem3.mapToScene(netItem3.end)
+                        netItem3Start = netItem3.mapToScene(netItem3.start)
+                        if (netItemEnd == netItem3End) or (netItemEnd == netItem3Start):
+                            cornerPoint = netItemEnd.toPoint()
                             self.viewportCrossDots.add(cornerPoint)
-                elif not (netItem.horizontal or netItem2.horizontal) and (netItem.end == netItem2.start):
+                elif not (netItem.horizontal or netItem2.horizontal) and (netItemEnd == netItem2Start):
                     for netItem3 in netsInView.difference({netItem, }).difference({netItem2, }):
-                        if (netItem.end == netItem3.end) or (netItem.end == netItem3.start):
-                            cornerPoint = netItem.end
+                        netItem3End = netItem3.mapToScene(netItem3.end)
+                        netItem3Start = netItem3.mapToScene(netItem3.start)
+                        if (netItemEnd == netItem3End) or (netItemEnd == netItem3Start):
+                            cornerPoint = netItemEnd.toPoint()
                             self.viewportCrossDots.add(cornerPoint)
+        for cornerPoint in self.viewportCrossDots:
+            self.createCrossDot(cornerPoint, 3)
 
-    def drawingOverlaps(self, drawnNet):
-        newNet = True
-        viewRect = self.parent.view.mapToScene(self.parent.view.viewport().rect()).boundingRect()
-        netsInView = {item for item in self.items(viewRect) if isinstance(item, net.schematicNet)}
+    def mergeNets(self, drawnNet, viewRect):
         # check any overlapping nets in the view
         # editing is done in the view and thus there is no need to check all nets in the scene
-        netsInView.discard(drawnNet)
-        dnetBRect = drawnNet.sceneBoundingRect()
-        for netItem in netsInView:
-            netItemBRect = netItem.sceneBoundingRect()
-            if dnetBRect.intersects(netItemBRect):
-                if drawnNet.horizontal and netItem.horizontal:
-                    mergedRect = dnetBRect.united(
-                        netItem.boundingRect()).toRect()  # create a merged horizontal rectangle
-                    if mergedRect.center() not in self.viewportCrossDots:
-                        self.removeItem(netItem)  # remove the old net from the scene
-                        self.removeItem(drawnNet)  # remove the drawn net from the scene
-                        drawnNet = self.netDraw(mergedRect.bottomLeft(), mergedRect.bottomRight(),
-                                                self.wirePen)  # create a new net with the merged rectangle
-                        dnetBRect = drawnNet.sceneBoundingRect()
-                        self.addItem(drawnNet)  # add the new net to the scene
-                        self.parent.parent.messageLine.setText("Net merged")
-                        newNet = False
-                elif not (drawnNet.horizontal or netItem.horizontal):
-                    mergedRect = dnetBRect.united(netItemBRect).toRect()  # create a merged horizontal rectangle
-                    if mergedRect.center() not in self.viewportCrossDots:
-                        self.removeItem(netItem)  # remove the old net from the scene
-                        self.removeItem(drawnNet)  # remove the drawn net from the scene
-                        drawnNet = self.netDraw(mergedRect.bottomRight(), mergedRect.topLeft(),
-                                                self.wirePen)  # create a new net with the merged rectangle
-                        dnetBRect = drawnNet.sceneBoundingRect()
-                        self.addItem(drawnNet)  # add the new net to the scene
-                        self.parent.parent.messageLine.setText("Net merged")
-                        newNet = False
-                # drawn net is horizontal and existing net is vertical
-                # drawn net is split into two nets
-                elif drawnNet.horizontal and not netItem.horizontal:
-                    crossRectCenter = dnetBRect.intersected(netItemBRect).center()
-                    # check if crossing point is either end of existing net
-                    if netItem.start.x() == crossRectCenter.x() and not (
-                            netItem.start.y() == crossRectCenter.y() or netItem.end.y() == crossRectCenter.y()):
-                        net1 = self.netDraw(netItem.start, crossRectCenter, self.wirePen)
-                        net2 = self.netDraw(crossRectCenter, netItem.end, self.wirePen)
-                        # remove net from scene after splitting
-                        self.removeItem(netItem)
-                        # add split nets
-                        self.addItem(net1)
-                        self.addItem(net2)
-                        self.parent.parent.messageLine.setText("Net split")
-                        newNet = False
+        horizontalNetsInView = {item for item in self.items(viewRect) if
+                                (isinstance(item, net.schematicNet) and item.horizontal)}
+        verticalNetsInView = {item for item in self.items(viewRect) if
+                              (isinstance(item, net.schematicNet) and not item.horizontal)}
+        dBNetRect = drawnNet.sceneBoundingRect()
+        if len(horizontalNetsInView) > 1 and drawnNet.horizontal:
+            for netItem in horizontalNetsInView - {drawnNet, }:
+                netItemBRect = netItem.sceneBoundingRect()
+                if dBNetRect.intersects(netItemBRect):
+                    mergedRect = dBNetRect.united(netItemBRect).toRect()
+                    self.removeItem(netItem)  # remove the old net from the scene
+                    self.removeItem(drawnNet)  # remove the drawn net from the scene
+                    mergedNet = self.netDraw(self.snap2Grid(mergedRect.bottomLeft(), self.gridTuple),
+                                             self.snap2Grid(mergedRect.bottomRight(), self.gridTuple), self.wirePen)
+                    horizontalNetsInView.discard(netItem)
+                    self.mergeNets(mergedNet, viewRect)
+                    self.parent.parent.messageLine.setText("Merged Nets")
+        elif len(verticalNetsInView) > 1 and not drawnNet.horizontal:
+            for netItem in verticalNetsInView - {drawnNet, }:
+                netItemBRect = netItem.sceneBoundingRect()
+                if dBNetRect.intersects(netItemBRect):
+                    mergedRect = dBNetRect.united(netItemBRect).toRect()
+                    self.removeItem(netItem)  # remove the old net from the scene
+                    self.removeItem(drawnNet)  # remove the drawn net from the scene
+                    mergedNet = self.netDraw(self.snap2Grid(mergedRect.bottomRight(), self.gridTuple),
+                                             self.snap2Grid(mergedRect.topRight(), self.gridTuple),
+                                             self.wirePen)  # create a new net with the merged rectangle
+                    verticalNetsInView.discard(netItem)
+                    self.mergeNets(mergedNet, viewRect)
+                    self.parent.parent.messageLine.setText("Net merged")
 
-                elif not drawnNet.horizontal and netItem.horizontal:
-                    crossRectCenter = dnetBRect.intersected(netItemBRect).center()
-                    # check if crossing point is either end of existing net
-                    if netItem.start.y() == crossRectCenter.y() and not (
-                            netItem.start.x() == crossRectCenter.x() or netItem.end.x() == crossRectCenter.x()):
-                        net1 = self.netDraw(netItem.start, crossRectCenter, self.wirePen)
-                        net2 = self.netDraw(crossRectCenter, netItem.end, self.wirePen)
-                        # remove net from scene after splitting
-                        self.removeItem(netItem)
-                        # add split nets
-                        self.addItem(net1)
-                        self.addItem(net2)
-                        self.parent.parent.messageLine.setText("Net split")
-                        newNet = False
+    def splitNets(self, viewRect):
+        horizontalNetsInView = {item for item in self.items(viewRect) if
+                                (isinstance(item, net.schematicNet) and item.horizontal)}
+        netSplit = False
+        for hNetItem in horizontalNetsInView:
+            verticalNetsInView = {item for item in self.items(viewRect) if
+                                  (isinstance(item, net.schematicNet) and not item.horizontal)}
+            hNetBRect = hNetItem.sceneBoundingRect()
+            for vNetItem in verticalNetsInView:
+                vNetBRect = vNetItem.sceneBoundingRect()
+                if vNetBRect.intersects(hNetBRect):
+                    crossPoint = self.snap2Grid(hNetBRect.intersected(vNetBRect),self.gridTuple)
+                    print(crossPoint)
+                    if crossPoint != vNetItem.end:
+                        self.netDraw(crossPoint, vNetItem.end, self.wirePen)
+                        # self.addItem(vNetNew)
+                        vNetItem.cutNet(crossPoint)
+                        break
 
-        if newNet:
-            self.parent.parent.messageLine.setText("Net drawn")
 
     def createNetlist(self):
         """
@@ -1359,8 +1342,8 @@ class schematic_scene(editor_scene):
     def netDraw(self, start: QPoint, current: QPoint, pen: QPen) -> net.schematicNet:
         line = net.schematicNet(start, current, pen)
         self.addItem(line)
-        undoCommand = us.addShapeUndo(self, line)
-        self.undoStack.push(undoCommand)
+        # undoCommand = us.addShapeUndo(self, line)
+        # self.undoStack.push(undoCommand)
         return line
 
     def instSymbol(self, file: pathlib.Path, cellName: str, libraryName: str):
@@ -1422,8 +1405,7 @@ class schematic_scene(editor_scene):
         # only save symbol shapes
         symbolItems = [item for item in items if type(item) is shp.symbolShape]
         netItems = [item for item in items if type(item) is net.schematicNet]
-        items = [item for item in items if type(item) is shp.symbolShape or
-                 type(item) is net.schematicNet]
+        items = [item for item in items if type(item) is shp.symbolShape or type(item) is net.schematicNet]
         with open(file, "w") as f:
             json.dump(items, f, cls=se.schematicEncoder, indent=4)
 
@@ -1446,12 +1428,11 @@ class schematic_scene(editor_scene):
         # increment item counter for next symbol
         self.itemCounter += 1
         self.pinLocations = self.pinLocs()
+
         self.findDotPoints(self.sceneRect())
-        for point in self.viewportCrossDots:
-            self.addItem(net.crossingDot(point, 3, self.wirePen))
         # now create a deepcopy of the scene dot locations set
-        self.sceneCrossDots = copy.deepcopy(self.viewportCrossDots)
         self.update()
+
     def viewObjProperties(self):
         if hasattr(self, "selectedItem") and self.selectedItem is not None:
             # assert isinstance(self.selectedItem, shp.symbolShape)

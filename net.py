@@ -22,11 +22,12 @@ class schematicNet(QGraphicsLineItem):
 
         x1, y1 = self.start.x(), self.start.y()
         x2, y2 = self.end.x(), self.end.y()
+
         if abs(x1 - x2) >= abs(y1 - y2):  # horizontal
             self.horizontal = True
             self.start = QPoint(min(x1, x2), y1)
             self.end = QPoint(max(x1, x2), y1)
-            super().__init__(start.x(), y1, self.end.x(), y1)
+            super().__init__(self.start.x(), y1, self.end.x(), y1)
         else:
             self.horizontal = False
             self.start = QPoint(x1, min(y1, y2))
@@ -47,6 +48,13 @@ class schematicNet(QGraphicsLineItem):
         painter.drawLine(self.start, self.end)
         if self.name is not None:
             painter.drawStaticText(self.start, QStaticText(self.name))
+
+    def cutNet(self,end):
+        self.prepareGeometryChange()
+        self.end = end
+        self.setLine(self.start.x(), self.start.y(), self.end.x(), self.end.y())
+
+        self.update()
 
     def setName(self, name):
         self.name = name
@@ -92,6 +100,7 @@ class schematicNet(QGraphicsLineItem):
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        print(self.sceneBoundingRect())
         super().mouseReleaseEvent(event)
 
 
