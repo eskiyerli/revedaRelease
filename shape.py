@@ -24,6 +24,7 @@ from PySide6.QtCore import (
     QPoint,
     QPointF,
     QRect,
+    QRectF,
     Qt,
     QLine,
 )
@@ -41,8 +42,6 @@ from PySide6.QtWidgets import (
     QGraphicsItemGroup,
 )
 import math
-import circuitElements as cel
-import copy
 
 
 class shape(QGraphicsItem):
@@ -89,8 +88,8 @@ class shape(QGraphicsItem):
         return self.gridSize
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().mousePressEvent(event)
         self.setCursor(Qt.OpenHandCursor)
+        super().mousePressEvent(event)
         # self.setSelected(True)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
@@ -101,10 +100,10 @@ class shape(QGraphicsItem):
         # self.setSelected(False)
 
     def hoverEnterEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().hoverEnterEvent(event)
         self.setCursor(Qt.ArrowCursor)
         self.setOpacity(0.75)
         self.setFocus()
+        super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().hoverLeaveEvent(event)
@@ -228,7 +227,7 @@ class rectangle(shape):
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
         if self.stretch:
-            self.prepareGeometryChange()
+
             eventPos = self.snap2grid(event.pos())
 
             if eventPos.x() == self.snapToGrid(self.rect.left(), self.gridTuple[0]):
@@ -266,6 +265,7 @@ class rectangle(shape):
 
         if self.stretch:
             eventPos = self.snap2grid(event.pos())
+            self.prepareGeometryChange()
             if self.stretchSide == "left":
                 self.setCursor(Qt.SizeHorCursor)
                 self.rect.setLeft(eventPos.x())
@@ -293,6 +293,53 @@ class rectangle(shape):
         self.stretchSide = None
         super().mouseReleaseEvent(event)
 
+
+class circle(shape):
+    def __init__(self, centre:QPoint,end:QPoint, pen: QPen, gridTuple):
+        super().__init__(pen, gridTuple)
+        xlen = abs(end.x() - centre.x())
+        ylen = abs(end.y() - centre.y())
+        self.radius = math.sqrt(xlen ** 2 + ylen ** 2)
+        self.centre = centre
+        self.end = self.centre + QPoint(self.radius, 0)
+        self.pen = pen
+        self.rect = QRect(self.centre-QPoint(self.radius,self.radius),
+                          self.centre+QPoint(self.radius,self.radius))
+        self.stretch = False
+        self.stretchSide = None
+
+    def paint(self, painter, option, widget) -> None:
+        if self.isSelected():
+            painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
+            painter.drawEllipse(self.centre, self.radius, self.radius)
+        else:
+            painter.setPen(self.pen)
+            painter.drawEllipse(self.centre, self.radius, self.radius)
+
+    def setCentre(self, centre: QPoint):
+        self.prepareGeometryChange()
+        self.centre = centre.toPoint()
+        self.rect = QRect(self.centre-QPoint(self.radius,self.radius),
+                          self.centre+QPoint(self.radius,self.radius))
+
+    def setRadius(self, radius: int):
+        self.prepareGeometryChange()
+        self.radius = radius
+        self.end = self.centre + QPoint(self.radius, 0)
+        self.rect = QRect(self.centre-QPoint(self.radius,self.radius),
+                          self.centre+QPoint(self.radius,self.radius))
+
+    def boundingRect(self):
+        return self.rect.normalized().adjusted(-2, -2, 2, 2)
+
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mouseReleaseEvent(event)
 
 class line(shape):
     """
@@ -730,8 +777,9 @@ class symbolShape(shape):
         else:
             self.setFlag(QGraphicsItem.ItemIsSelectable, True)
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
-            super().mousePressEvent(event)
             self.setCursor(Qt.OpenHandCursor)
+        super().mousePressEvent(event)
+
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:

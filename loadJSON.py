@@ -26,93 +26,117 @@ import json
 from PySide6.QtCore import (
     QPoint,
     Qt,
-)  # QtCore
+    )  # QtCore
 from PySide6.QtGui import (
     QColor,
     QPen,
-) 
+    )
 
 import shape as shp
 import symbolEncoder as se
 import net as net
 
 
-def createSymbolItems(item, gridTuple):
+def createRectItem(item, gridTuple):
     """
     Create symbol items from json file.
     """
-    if item["type"] == "rect":
-        start = QPoint(item["rect"][0], item["rect"][1])
-        end = QPoint(item["rect"][2], item["rect"][3])
-        penStyle = Qt.PenStyle.__dict__[
-            item["lineStyle"].split(".")[-1]
-        ]  # convert string to enum
-        penWidth = item["width"]
-        penColor = QColor(*item["color"])
-        pen = QPen(penColor, penWidth, penStyle)
-        pen.setCosmetic(item["cosmetic"])
-        rect = shp.rectangle(
-            start, end, pen, gridTuple
+    start = QPoint(item["rect"][0], item["rect"][1])
+    end = QPoint(item["rect"][2], item["rect"][3])
+    penStyle = Qt.PenStyle.__dict__[
+        item["lineStyle"].split(".")[-1]
+    ]  # convert string to enum
+    penWidth = item["width"]
+    penColor = QColor(*item["color"])
+    pen = QPen(penColor, penWidth, penStyle)
+    pen.setCosmetic(item["cosmetic"])
+    rect = shp.rectangle(
+        start, end, pen, gridTuple
         )  # note that we are using grid values for scene
-        rect.setPos(
-            QPoint(item["location"][0], item["location"][1]),
+    rect.setPos(
+        QPoint(item["location"][0], item["location"][1]),
         )
-        return rect
-    elif item["type"] == "line":
-        start = QPoint(item["start"][0], item["start"][1])
-        end = QPoint(item["end"][0], item["end"][1])
-        penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
-        penWidth = item["width"]
-        penColor = QColor(*item["color"])
-        pen = QPen(penColor, penWidth, penStyle)
-        pen.setCosmetic(item["cosmetic"])
-        line = shp.line(start, end, pen, gridTuple)
-        line.setPos(QPoint(item["location"][0], item["location"][1]))
-        return line
-    elif item["type"] == "pin":
-        start = QPoint(item["start"][0], item["start"][1])
-        penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
-        penWidth = item["width"]
-        penColor = QColor(*item["color"])
-        pen = QPen(penColor, penWidth, penStyle)
-        pen.setCosmetic(item["cosmetic"])
-        pin = shp.pin(
-            start,
-            pen,
-            item["pinName"],
-            item["pinDir"],
-            item["pinType"],
-            gridTuple,
+    return rect
+
+
+def createCircleItem(item, gridTuple):
+    centre = QPoint(item["centre"][0], item["centre"][1])
+    end = QPoint(item["end"][0], item["end"][1])
+    penStyle = Qt.PenStyle.__dict__[
+        item["lineStyle"].split(".")[-1]
+    ]  # convert string to enum
+    penWidth = item["width"]
+    penColor = QColor(*item["color"])
+    pen = QPen(penColor, penWidth, penStyle)
+    pen.setCosmetic(item["cosmetic"])
+    circle = shp.circle(
+        centre, end, pen, gridTuple
+        )  # note that we are using grid values for scene
+    circle.setPos(
+        QPoint(item["location"][0], item["location"][1]),
         )
-        pin.setPos(QPoint(item["location"][0], item["location"][1]))
-        return pin
-    elif item["type"] == "label":
-        start = QPoint(item["start"][0], item["start"][1])
-        penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
-        penWidth = item["width"]
-        penColor = QColor(*item["color"])
-        pen = QPen(penColor, penWidth, penStyle)
-        pen.setCosmetic(item["cosmetic"])
-        label = shp.label(
-            start,
-            pen,
-            item["labelDefinition"],
-            gridTuple,
-            item["labelType"],
-            item["labelHeight"],
-            item["labelAlign"],
-            item["labelOrient"],
-            item["labelUse"],
+    return circle
+
+
+def createLineItem(item, gridTuple):
+    start = QPoint(item["start"][0], item["start"][1])
+    end = QPoint(item["end"][0], item["end"][1])
+    penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
+    penWidth = item["width"]
+    penColor = QColor(*item["color"])
+    pen = QPen(penColor, penWidth, penStyle)
+    pen.setCosmetic(item["cosmetic"])
+    line = shp.line(start, end, pen, gridTuple)
+    line.setPos(QPoint(item["location"][0], item["location"][1]))
+    return line
+
+
+def createPinItem(item, gridTuple):
+    start = QPoint(item["start"][0], item["start"][1])
+    penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
+    penWidth = item["width"]
+    penColor = QColor(*item["color"])
+    pen = QPen(penColor, penWidth, penStyle)
+    pen.setCosmetic(item["cosmetic"])
+    pin = shp.pin(
+        start,
+        pen,
+        item["pinName"],
+        item["pinDir"],
+        item["pinType"],
+        gridTuple,
         )
-        label.setPos(QPoint(item["location"][0], item["location"][1]))
-        return label
+    pin.setPos(QPoint(item["location"][0], item["location"][1]))
+    return pin
+
+
+def createLabelItem(item, gridTuple):
+    start = QPoint(item["start"][0], item["start"][1])
+    penStyle = Qt.PenStyle.__dict__[item["lineStyle"].split(".")[-1]]
+    penWidth = item["width"]
+    penColor = QColor(*item["color"])
+    pen = QPen(penColor, penWidth, penStyle)
+    pen.setCosmetic(item["cosmetic"])
+    label = shp.label(
+        start,
+        pen,
+        item["labelDefinition"],
+        gridTuple,
+        item["labelType"],
+        item["labelHeight"],
+        item["labelAlign"],
+        item["labelOrient"],
+        item["labelUse"],
+        )
+    label.setPos(QPoint(item["location"][0], item["location"][1]))
+    return label
 
 
 def createSymbolAttribute(item):
     if item["type"] == "attribute":
         return se.symbolAttribute(
             item["name"], item["attributeType"], item["definition"]
-        )
+            )
 
 
 def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
@@ -138,21 +162,22 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
             try:
                 shapes = json.load(temp)
                 for shape in shapes:
-                    if (
-                        shape["type"] == "rect"
-                        or shape["type"] == "line"
-                        or shape["type"] == "pin"
-                        or shape["type"] == "label"
-                    ):
-                        # append recreated shapes to items list
-                        itemShapes.append(createSymbolItems(shape, gridTuple))
-                    elif (
-                        shape["type"] == "attribute"
-                    ):  # just recreate attributes dictionary
+                    if shape["type"] == "rect":
+                        itemShapes.append(createRectItem(shape, gridTuple))
+                    elif shape["type"] == "circle":
+                        itemShapes.append(createCircleItem(shape, gridTuple))
+                    elif shape["type"] == "line":
+                        itemShapes.append(createLineItem(shape, gridTuple))
+                    elif shape["type"] == "pin":
+                        itemShapes.append(createPinItem(shape, gridTuple))
+                    elif shape["type"] == "label":
+                        itemShapes.append(createLabelItem(shape, gridTuple))
+                    # just recreate attributes dictionary
+                    elif shape["type"] == "attribute":
                         symbolAttributes[shape["name"]] = [
                             shape["attributeType"],
                             shape["definition"],
-                        ]
+                            ]
             except json.decoder.JSONDecodeError:
                 print("Error: Invalid Symbol file")
         # now go over attributes and assign the values from JSON file
@@ -161,11 +186,11 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
                 symbolAttributes[key] = instAttributes[key]
         symbolInstance = shp.symbolShape(
             draftPen, gridTuple, itemShapes, symbolAttributes
-        )
+            )
         symbolInstance.pinLocations = {
             item.pinName: (item.start + item.scenePos().toPoint()).toTuple()
             for item in symbolInstance.pins
-        }
+            }
         symbolInstance.libraryName = item["library"]
         symbolInstance.cellName = item["cell"]
         symbolInstance.counter = instCounter

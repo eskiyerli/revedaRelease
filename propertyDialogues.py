@@ -59,6 +59,37 @@ class rectPropertyDialog(QDialog):
         self.show()
 
 
+class circlePropertyDialog(QDialog):
+    def __init__(self, parent, circleItem: shp.circle):
+        super().__init__(parent)
+        self.parent = parent
+        self.circleItem = circleItem
+        self.location = self.circleItem.scenePos().toTuple()
+        self.centre = self.circleItem.mapToScene(self.circleItem.centre).toTuple()
+        self.radius = self.circleItem.radius
+
+        self.setWindowTitle("Circle Properties")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.mainLayout = QVBoxLayout()
+        self.fLayout = QFormLayout()
+        self.fLayout.setContentsMargins(10, 10, 10, 10)
+        self.centerXEdit = QLineEdit()
+        self.centerXEdit.setText(str(self.centre[0]))
+        self.fLayout.addRow(QLabel("center x-coord:"), self.centerXEdit)
+        self.centerYEdit = QLineEdit()
+        self.centerYEdit.setText(str(self.centre[1]))
+        self.fLayout.addRow(QLabel("center y-coord:"), self.centerYEdit)
+        self.radiusEdit = QLineEdit()
+        self.radiusEdit.setText(str(self.radius))
+        self.fLayout.addRow(QLabel("radius:"), self.radiusEdit)
+        self.mainLayout.addLayout(self.fLayout)
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.show()
+
 class linePropertyDialog(QDialog):
     def __init__(self, parent, lineItem: shp.line):
         super().__init__(parent)
