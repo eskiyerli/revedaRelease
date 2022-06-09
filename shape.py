@@ -114,8 +114,8 @@ class shape(QGraphicsItem):
     def contextMenuEvent(self, event):
         self.scene().itemContextMenu.exec_(event.screenPos())
 
-    def snap2grid(self, pos: QPoint) -> QPoint:
-        return self.scene().snap2Grid(pos, self.gridTuple)
+    def snap2grid(self, pos: QPoint,gridTuple: tuple) -> QPoint:
+        return self.scene().snap2Grid(pos, gridTuple)
 
     def snapToGrid(self, number: int, base: int) -> int:
         return self.scene().snapGrid(number, base)
@@ -134,9 +134,11 @@ class rectangle(shape):
         grid: tuple,
     ):
         super().__init__(pen, grid)
-        self.start = start  # top left corner
-        self.end = end  # bottom right corner
+        # self.start = start  # top left corner
+        # self.end = end  # bottom right corner
         self.rect = QRect(start, end).normalized()
+        self.start = self.rect.topLeft()
+        self.end = self.rect.bottomRight()
         self.pen = pen
         self.stretch = False
         self.rectPos = self.scenePos()
@@ -228,19 +230,17 @@ class rectangle(shape):
         super().mousePressEvent(event)
         if self.stretch:
 
-            eventPos = self.snap2grid(event.pos())
+            eventPos = self.snap2grid(event.pos(),self.gridTuple)
 
             if eventPos.x() == self.snapToGrid(self.rect.left(), self.gridTuple[0]):
                 if (
                     self.start.y() <= eventPos.y() <= self.end.y()
-                    or self.start.y() >= eventPos.y() >= self.end.y()
                 ):
                     self.setCursor(Qt.SizeHorCursor)
                     self.stretchSide = "left"
             elif eventPos.x() == self.snapToGrid(self.rect.right(), self.gridTuple[0]):
                 if (
                     self.start.y() <= eventPos.y() <= self.end.y()
-                    or self.start.y() >= eventPos.y() >= self.end.y()
                 ):
                     self.setCursor(Qt.SizeHorCursor)
                     self.stretchSide = "right"
@@ -248,7 +248,6 @@ class rectangle(shape):
             elif eventPos.y() == self.snapToGrid(self.rect.top(), self.gridTuple[1]):
                 if (
                     self.start.x() <= eventPos.x() <= self.end.x()
-                    or self.start.x() >= eventPos.x() >= self.end.x()
                 ):
                     self.setCursor(Qt.SizeVerCursor)
                     self.stretchSide = "top"
@@ -256,7 +255,6 @@ class rectangle(shape):
             elif eventPos.y() == self.snapToGrid(self.rect.bottom(), self.gridTuple[1]):
                 if (
                     self.start.x() <= eventPos.x() <= self.end.x()
-                    or self.start.x() >= eventPos.x() >= self.end.x()
                 ):
                     self.setCursor(Qt.SizeVerCursor)
                     self.stretchSide = "bottom"
@@ -264,7 +262,7 @@ class rectangle(shape):
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
 
         if self.stretch:
-            eventPos = self.snap2grid(event.pos())
+            eventPos = self.snap2grid(event.pos(),self.gridTuple)
             self.prepareGeometryChange()
             if self.stretchSide == "left":
                 self.setCursor(Qt.SizeHorCursor)
@@ -301,16 +299,18 @@ class circle(shape):
         ylen = abs(end.y() - centre.y())
         self.radius = math.sqrt(xlen ** 2 + ylen ** 2)
         self.centre = centre
-        self.end = self.centre + QPoint(self.radius, 0)
+        self.topLeft = self.centre - QPoint(self.radius, self.radius)
+        self.rightBottom = self.centre + QPoint(self.radius, self.radius)
+        self.end = self.centre + QPoint(self.radius,0)
         self.pen = pen
-        self.rect = QRect(self.centre-QPoint(self.radius,self.radius),
-                          self.centre+QPoint(self.radius,self.radius))
         self.stretch = False
-        self.stretchSide = None
+        self.startStretch = False
 
     def paint(self, painter, option, widget) -> None:
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
+            if self.startStretch:
+                painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawEllipse(self.centre, self.radius, self.radius)
         else:
             painter.setPen(self.pen)
@@ -318,25 +318,35 @@ class circle(shape):
 
     def setCentre(self, centre: QPoint):
         self.prepareGeometryChange()
-        self.centre = centre.toPoint()
-        self.rect = QRect(self.centre-QPoint(self.radius,self.radius),
-                          self.centre+QPoint(self.radius,self.radius))
+        self.centre = self.snap2grid(centre,self.gridTuple)
+        # self.topLeft = self.centre - QPoint(self.radius, self.radius)
+        # self.rightBottom = self.centre + QPoint(self.radius, self.radius)
+        self.end = self.centre + QPoint(self.radius, 0)
 
     def setRadius(self, radius: int):
         self.prepareGeometryChange()
-        self.radius = radius
+        self.radius = self.snapToGrid(radius, self.gridTuple[0])
+        # self.topLeft = self.centre - QPoint(self.radius, self.radius)
+        # self.rightBottom = self.centre + QPoint(self.radius, self.radius)
         self.end = self.centre + QPoint(self.radius, 0)
-        self.rect = QRect(self.centre-QPoint(self.radius,self.radius),
-                          self.centre+QPoint(self.radius,self.radius))
 
     def boundingRect(self):
-        return self.rect.normalized().adjusted(-2, -2, 2, 2)
+        return QRect(self.topLeft, self.rightBottom).normalized().adjusted(-2, -2, 2, 2)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        if self.stretch:
+            eventPos = self.snap2grid(event.pos(),self.gridTuple)
+            if (eventPos == self.centre - QPoint(self.radius,0)
+                or eventPos == self.centre - QPoint(0, self.radius)
+                or eventPos == self.centre + QPoint(self.radius,0)
+                or eventPos == self.centre + QPoint(0,self.radius)):
+                self.startStrech = True
+                print('start stretch')
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(event)
+
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(event)

@@ -1,58 +1,26 @@
 [
     {
-        "type": "label",
-        "start": [
-            -110,
-            50
+        "type": "circle",
+        "centre": [
+            -20,
+            -60
+        ],
+        "end": [
+            30,
+            -60
         ],
         "color": [
-            255,
-            255,
+            0,
+            128,
             0,
             255
         ],
-        "width": 1,
+        "width": 3,
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "labelName": "w",
-        "labelDefinition": "[@w:w=%]",
-        "labelText": null,
-        "labelType": "NLPLabel",
-        "labelHeight": "12",
-        "labelAlign": "Left",
-        "labelOrient": "R0",
-        "labelUse": "Normal",
+        "cosmetic": true,
         "location": [
-            0.0,
-            0.0
-        ]
-    },
-    {
-        "type": "label",
-        "start": [
-            -100,
-            0
-        ],
-        "color": [
-            255,
-            255,
-            0,
-            255
-        ],
-        "width": 1,
-        "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
-        "cosmetic": false,
-        "labelName": "w",
-        "labelDefinition": "w",
-        "labelText": null,
-        "labelType": "Normal",
-        "labelHeight": "12",
-        "labelAlign": "Left",
-        "labelOrient": "R0",
-        "labelUse": "Normal",
-        "location": [
-            0.0,
-            0.0
+            100.0,
+            60.0
         ]
     }
 ]
