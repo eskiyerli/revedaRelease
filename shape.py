@@ -114,7 +114,7 @@ class shape(QGraphicsItem):
     def contextMenuEvent(self, event):
         self.scene().itemContextMenu.exec_(event.screenPos())
 
-    def snap2grid(self, pos: QPoint,gridTuple: tuple) -> QPoint:
+    def snap2grid(self, pos: QPoint, gridTuple: tuple) -> QPoint:
         return self.scene().snap2Grid(pos, gridTuple)
 
     def snapToGrid(self, number: int, base: int) -> int:
@@ -127,11 +127,11 @@ class rectangle(shape):
     """
 
     def __init__(
-        self,
-        start: QPoint,
-        end: QPoint,
-        pen: QPen,
-        grid: tuple,
+            self,
+            start: QPoint,
+            end: QPoint,
+            pen: QPen,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         # self.start = start  # top left corner
@@ -230,31 +230,31 @@ class rectangle(shape):
         super().mousePressEvent(event)
         if self.stretch:
 
-            eventPos = self.snap2grid(event.pos(),self.gridTuple)
+            eventPos = self.snap2grid(event.pos(), self.gridTuple)
 
             if eventPos.x() == self.snapToGrid(self.rect.left(), self.gridTuple[0]):
                 if (
-                    self.start.y() <= eventPos.y() <= self.end.y()
+                        self.start.y() <= eventPos.y() <= self.end.y()
                 ):
                     self.setCursor(Qt.SizeHorCursor)
                     self.stretchSide = "left"
             elif eventPos.x() == self.snapToGrid(self.rect.right(), self.gridTuple[0]):
                 if (
-                    self.start.y() <= eventPos.y() <= self.end.y()
+                        self.start.y() <= eventPos.y() <= self.end.y()
                 ):
                     self.setCursor(Qt.SizeHorCursor)
                     self.stretchSide = "right"
 
             elif eventPos.y() == self.snapToGrid(self.rect.top(), self.gridTuple[1]):
                 if (
-                    self.start.x() <= eventPos.x() <= self.end.x()
+                        self.start.x() <= eventPos.x() <= self.end.x()
                 ):
                     self.setCursor(Qt.SizeVerCursor)
                     self.stretchSide = "top"
 
             elif eventPos.y() == self.snapToGrid(self.rect.bottom(), self.gridTuple[1]):
                 if (
-                    self.start.x() <= eventPos.x() <= self.end.x()
+                        self.start.x() <= eventPos.x() <= self.end.x()
                 ):
                     self.setCursor(Qt.SizeVerCursor)
                     self.stretchSide = "bottom"
@@ -262,7 +262,7 @@ class rectangle(shape):
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
 
         if self.stretch:
-            eventPos = self.snap2grid(event.pos(),self.gridTuple)
+            eventPos = self.snap2grid(event.pos(), self.gridTuple)
             self.prepareGeometryChange()
             if self.stretchSide == "left":
                 self.setCursor(Qt.SizeHorCursor)
@@ -293,7 +293,7 @@ class rectangle(shape):
 
 
 class circle(shape):
-    def __init__(self, centre:QPoint,end:QPoint, pen: QPen, gridTuple):
+    def __init__(self, centre: QPoint, end: QPoint, pen: QPen, gridTuple):
         super().__init__(pen, gridTuple)
         xlen = abs(end.x() - centre.x())
         ylen = abs(end.y() - centre.y())
@@ -301,7 +301,7 @@ class circle(shape):
         self.centre = centre
         self.topLeft = self.centre - QPoint(self.radius, self.radius)
         self.rightBottom = self.centre + QPoint(self.radius, self.radius)
-        self.end = self.centre + QPoint(self.radius,0)
+        self.end = self.centre + QPoint(self.radius, 0)
         self.pen = pen
         self.stretch = False
         self.startStretch = False
@@ -309,16 +309,15 @@ class circle(shape):
     def paint(self, painter, option, widget) -> None:
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
-            if self.startStretch:
+            if self.stretch:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-            painter.drawEllipse(self.centre, self.radius, self.radius)
         else:
             painter.setPen(self.pen)
-            painter.drawEllipse(self.centre, self.radius, self.radius)
+        painter.drawEllipse(self.centre, self.radius, self.radius)
 
     def setCentre(self, centre: QPoint):
         self.prepareGeometryChange()
-        self.centre = self.snap2grid(centre,self.gridTuple)
+        self.centre = self.snap2grid(centre, self.gridTuple)
         # self.topLeft = self.centre - QPoint(self.radius, self.radius)
         # self.rightBottom = self.centre + QPoint(self.radius, self.radius)
         self.end = self.centre + QPoint(self.radius, 0)
@@ -334,22 +333,35 @@ class circle(shape):
         return QRect(self.topLeft, self.rightBottom).normalized().adjusted(-2, -2, 2, 2)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        if self.stretch:
-            eventPos = self.snap2grid(event.pos(),self.gridTuple)
-            if (eventPos == self.centre - QPoint(self.radius,0)
-                or eventPos == self.centre - QPoint(0, self.radius)
-                or eventPos == self.centre + QPoint(self.radius,0)
-                or eventPos == self.centre + QPoint(0,self.radius)):
-                self.startStrech = True
-                print('start stretch')
+        if self.isSelected() and self.stretch:
+            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+            eventPos = self.snap2grid(event.pos(), self.gridTuple)
+            distance = self.snapToGrid(
+                math.sqrt((eventPos.x() - self.centre.x()) ** 2 + (eventPos.y() - self.centre.y()) ** 2),
+                self.gridTuple[0])
+            if distance == self.radius:
+                self.startStretch = True
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        if self.startStretch:
+            eventPos = self.snap2grid(event.pos(), self.gridTuple)
+            distance = self.snapToGrid(
+            math.sqrt((eventPos.x() - self.centre.x()) ** 2 + (eventPos.y() - self.centre.y()) ** 2), self.gridTuple[0])
+            self.prepareGeometryChange()
+            self.radius = distance
         super().mouseMoveEvent(event)
 
-
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        if self.startStretch:
+            self.startStretch = False
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+            self.topLeft = self.centre - QPoint(self.radius, self.radius)
+            self.rightBottom = self.centre + QPoint(self.radius, self.radius)
+            self.end = self.centre + QPoint(self.radius, 0)
         super().mouseReleaseEvent(event)
+
 
 class line(shape):
     """
@@ -357,11 +369,11 @@ class line(shape):
     """
 
     def __init__(
-        self,
-        start: QPoint,
-        end: QPoint,
-        pen: QPen,
-        grid: tuple,
+            self,
+            start: QPoint,
+            end: QPoint,
+            pen: QPen,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         self.end = end
@@ -473,13 +485,13 @@ class pin(shape):
     pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
 
     def __init__(
-        self,
-        start: QPoint,
-        pen: QPen,
-        pinName: str,
-        pinDir: str,
-        pinType: str,
-        grid: tuple,
+            self,
+            start: QPoint,
+            pen: QPen,
+            pinName: str,
+            pinDir: str,
+            pinType: str,
+            grid: tuple,
     ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
@@ -537,16 +549,16 @@ class label(shape):
     ]
 
     def __init__(
-        self,
-        start: QPoint,
-        pen: QPen,
-        labelDefinition: str,
-        grid: tuple,
-        labelType: str,
-        labelHeight: str = "12",
-        labelAlign: str = "Left",
-        labelOrient: str = "R0",
-        labelUse: str = "Normal",
+            self,
+            start: QPoint,
+            pen: QPen,
+            labelDefinition: str,
+            grid: tuple,
+            labelType: str,
+            labelHeight: str = "12",
+            labelAlign: str = "Left",
+            labelOrient: str = "R0",
+            labelUse: str = "Normal",
     ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
@@ -670,13 +682,13 @@ class label(shape):
                         if fieldsLength == 1:
                             self.labelName = self.labelDefinition[1:-1]
                         elif (
-                            len(self.labelDefinition.split(":")) == 2
+                                len(self.labelDefinition.split(":")) == 2
                         ):  # there is only one colon
                             self.labelName = self.labelDefinition.split(":")[0].split(
                                 "@"
                             )[1]
                         elif (
-                            len(self.labelDefinition.split(":")) == 3
+                                len(self.labelDefinition.split(":")) == 3
                         ):  # there are two colons
                             self.labelName = self.labelDefinition.split(":")[0].split(
                                 "@"
@@ -720,14 +732,14 @@ class label(shape):
                             self.labelName = self.labelDefinition[1:-1]
                             self.labelText = f"{self.labelDefinition[1:-1]}=?"
                         elif (
-                            len(self.labelDefinition.split(":")) == 2
+                                len(self.labelDefinition.split(":")) == 2
                         ):  # there is only one colon
                             self.labelName = self.labelDefinition.split(":")[0].split(
                                 "@"
                             )[1]
                             self.labelText = f"{self.labelName}=?"
                         elif (
-                            len(self.labelDefinition.split(":")) == 3
+                                len(self.labelDefinition.split(":")) == 3
                         ):  # there are two colons
                             self.labelName = self.labelDefinition.split(":")[0].split(
                                 "@"
@@ -766,7 +778,7 @@ class symbolShape(shape):
         for item in self.shapes:
             if type(item) is pin:
                 self.pinLocations[item.pinName] = (
-                    item.start + item.scenePos().toPoint()
+                        item.start + item.scenePos().toPoint()
                 ).toTuple()
         self.setFiltersChildEvents(True)
         self.setHandlesChildEvents(True)
@@ -790,12 +802,11 @@ class symbolShape(shape):
             self.setCursor(Qt.OpenHandCursor)
         super().mousePressEvent(event)
 
-
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
             for item in self.shapes:
                 if type(item) is pin:
                     self.pinLocations[item.pinName] = (
-                        item.start + item.scenePos().toPoint()
+                            item.start + item.scenePos().toPoint()
                     ).toTuple()
         return super().itemChange(change, value)

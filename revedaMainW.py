@@ -38,6 +38,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
     QWidget,
+    QMenuBar,
 )
 
 # import circuitElements as cel
@@ -113,6 +114,7 @@ class mainWindow(QMainWindow):
 
     def _createMenuBar(self):
         self.mainW_menubar = self.menuBar()
+        self.mainW_menubar.setNativeMenuBar(False)
         # Returns QMenu object.
         self.menuFile = self.mainW_menubar.addMenu("&File")
         self.menuTools = self.mainW_menubar.addMenu("&Tools")

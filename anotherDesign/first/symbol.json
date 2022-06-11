@@ -2,11 +2,11 @@
     {
         "type": "circle",
         "centre": [
-            -20,
+            40,
             -60
         ],
         "end": [
-            30,
+            100,
             -60
         ],
         "color": [
@@ -19,8 +19,8 @@
         "lineStyle": "PySide6.QtCore.Qt.PenStyle.SolidLine",
         "cosmetic": true,
         "location": [
-            100.0,
-            60.0
+            -480.0,
+            0.0
         ]
     }
 ]

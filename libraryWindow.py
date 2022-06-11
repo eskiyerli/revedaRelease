@@ -313,6 +313,7 @@ class libraryBrowser(QMainWindow):
 
     def _createMenuBar(self):
         self.browserMenubar = self.menuBar()
+        self.browserMenubar.setNativeMenuBar(False)
         self.libraryMenu = self.browserMenubar.addMenu("&Library")
 
     def _createActions(self):

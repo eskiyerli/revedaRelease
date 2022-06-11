@@ -36,6 +36,20 @@ import shape as shp
 import symbolEncoder as se
 import net as net
 
+def createSymbolItems(item, gridTuple):
+    """
+    Create symbol items from json file.
+    """
+    if item["type"] == "rect":
+        return createRectItem(item, gridTuple)
+    elif item["type"] == "circle":
+        return createCircleItem(item, gridTuple)
+    elif item["type"] == "line":
+        return createLineItem(item, gridTuple)
+    elif item["type"] == "pin":
+        return createPinItem(item, gridTuple)
+    elif item["type"] == "label":
+        return createLabelItem(item, gridTuple)
 
 def createRectItem(item, gridTuple):
     """

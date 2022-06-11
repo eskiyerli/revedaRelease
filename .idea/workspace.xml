@@ -7,15 +7,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="Net Split in a reasonable shape.">
+    <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="circles added but need more work for stretch.">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/first/schematic.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/schematic.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anotherDesign/first/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/symbol.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/second/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/second/symbol.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/third/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/third/symbol.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libraryWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/libraryWindow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/loadJSON.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/revedaMainW.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaMainW.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/undoStack.py" beforeDir="false" afterPath="$PROJECT_DIR$/undoStack.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,9 +71,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="/usr/bin/python3.10" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/revedaMainW.py" />
@@ -128,7 +130,14 @@
       <option name="project" value="LOCAL" />
       <updated>1654458229679</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="circles added but need more work for stretch.">
+      <created>1654768629153</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1654768629153</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -149,18 +158,10 @@
     <MESSAGE value="Net drawing and merging work. Not finished yet. &#10;Probably a blind alley." />
     <MESSAGE value="Net drawing and merging for co-directional nets are working." />
     <MESSAGE value="circle shape is OK." />
-    <option name="LAST_COMMIT_MESSAGE" value="circle shape is OK." />
+    <MESSAGE value="circles added but need more work for stretch." />
+    <option name="LAST_COMMIT_MESSAGE" value="circles added but need more work for stretch." />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/shape.py</url>
-          <line>306</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="self.topLeft" />
