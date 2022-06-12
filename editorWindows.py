@@ -851,6 +851,7 @@ class symbol_scene(editor_scene):
         self.drawCircle = False
         self.drawMode = self.drawLine or self.drawArc or self.drawRect or self.drawCircle
         self.symbolShapes = ["line", "arc", "rect", "circle", "pin", "label"]
+        self.changeOrigin = False
 
     def mousePressEvent(self, mouse_event):
 
@@ -1245,8 +1246,10 @@ class symbol_scene(editor_scene):
 
     def stretchSelectedItem(self):
         if self.selectedItems is not None:
-            self.selectedItem.stretch = True
-
+            try:
+                self.selectedItem.stretch = True
+            except AttributeError:
+                self.parent.parent.messageLine.setText("Nothing selected")
 
     def viewSymbolProperties(self):
         """
@@ -1297,7 +1300,7 @@ class schematic_scene(editor_scene):
         self.draftPen.setStyle(Qt.DashLine)
         self.itemCounter = 0
         self.netCounter = 0
-        self.pinLocations = self.pinLocs()  # dictionary to store pin locations
+        # self.pinLocations = self.pinLocs()  # dictionary to store pin locations
         self.schematicNets = {}  # netName: list of nets with the same name
         self.crossDots = set()  # list of cross dots
         self.draftItem = None
@@ -1307,22 +1310,22 @@ class schematic_scene(editor_scene):
         self.crossDotsMousePress = set()  # a temporary set to hold the crossdots locations
         self.start = QPoint(0, 0)
 
-    def symbolItems(self):
-        """
-        Return a list of all symbol items in the view
-        """
-        return {item.instanceName: item for item in self.items() if
-                isinstance(item, shp.symbolShape)}
+    # def symbolItems(self):
+    #     """
+    #     Return a list of all symbol items in the view
+    #     """
+    #     return {item.instanceName: item for item in self.items() if
+    #             isinstance(item, shp.symbolShape)}
+    #
+    # def pinLocs(self):
+    #     symbolsDict = self.symbolItems()
+    #     return {item.instanceName: item.pinLocations for item in
+    #             symbolsDict.values()}
 
-    def pinLocs(self):
-        symbolsDict = self.symbolItems()
-        return {item.instanceName: item.pinLocations for item in
-                symbolsDict.values()}
-
-    def viewportItemPinLocs(self):
-        # create a dictionary of items and their pin locations that are visible
-        return {item.instanceName: item.pinLocations for item in
-                self.parent.view.viewItems}
+    # def viewportItemPinLocs(self):
+    #     # create a dictionary of items and their pin locations that are visible
+    #     return {item.instanceName: item.pinLocations for item in
+    #             self.parent.view.viewItems}
 
     def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         if mouse_event.button() == Qt.LeftButton:
@@ -1555,18 +1558,47 @@ class schematic_scene(editor_scene):
         Creates a netlist from the schematic. For the moment only a dictionary is returned.
         """
         nameCounter = 0
+        # all the nets in the schematic in a set to remove duplicates
         netsSceneSet = {item for item in self.items(self.sceneRect()) if
                         isinstance(item, net.schematicNet)}
         for netItem in netsSceneSet:
             if not netItem.nameSet:
-                netItem.name = None  # empty all net names
+                netItem.name = None  # empty all net names not set by the user
+        # now group connected nets together
         self.groupNets(netsSceneSet, nameCounter)
+        netsSceneSet = {item for item in self.items(self.sceneRect()) if
+                        isinstance(item, net.schematicNet)}
+        symbolSceneSet = {item for item in self.items(self.sceneRect()) if
+                          isinstance(item, shp.symbolShape)}
+        for symbolItem in symbolSceneSet:
+            self.findSymbolPinLocs(symbolItem)
+            for pinItem in symbolItem.pins:
+                for netItem in netsSceneSet:
+                    if pinItem.sceneBoundingRect().intersects(netItem.sceneBoundingRect()):
+                        symbolItem.pinNetMap[pinItem.pinName] = netItem.name
+
+            print(symbolItem.pinNetMap)
+
         self.update()
 
+    def findSymbolPinLocs(self,symbol):
+        """
+        Finds bounding rectangles for the pins of a symbol and stores them in the symbol.
+        """
+        for pin in symbol.pins:
+            symbol.pinLocations[pin.pinName] = pin.sceneBoundingRect()
+
     def groupNets(self, netsSceneSet, nameCounter):
+        """
+        Groups nets together if they are connected and assign them default names.
+        """
+        # select a net from the set and remove it from the set
         initialNet = netsSceneSet.pop()
+        # assign it a name, net0
         initialNet.name = "net" + str(nameCounter)
-        otherNets = self.traverseNets({initialNet, }, netsSceneSet, )
+        # now go through the set and see if any of the nets are connected to the initial net
+        # remove them from the set and add them to the initial net's set
+        otherNets, self.schematicNets[initialNet.name] = self.traverseNets({initialNet, }, netsSceneSet, )
         nameCounter += 1
         if len(otherNets) > 1:
             self.groupNets(otherNets, nameCounter)
@@ -1574,17 +1606,23 @@ class schematic_scene(editor_scene):
             otherNets.pop().name = "net" + str(nameCounter)
 
     def traverseNets(self, connectedSet, otherNetsSet):
+        """
+        Start from a net and traverse the schematic to find all connected nets. If the connected net search
+        is exhausted, remove those nets from the scene nets set and start again in another net until all
+        the nets in the scene are exhausted.
+        """
         newFoundConnectedSet = set()
         for netItem in connectedSet:
             for netItem2 in otherNetsSet:
                 if self.checkConnect(netItem, netItem2):
                     netItem2.name = netItem.name
                     newFoundConnectedSet.add(netItem2)
+        # keep searching if you already found a net connected to the initial net
         if len(newFoundConnectedSet) > 0:
             connectedSet.update(newFoundConnectedSet)
             otherNetsSet -= newFoundConnectedSet
             self.traverseNets(connectedSet, otherNetsSet)
-        return otherNetsSet
+        return otherNetsSet,connectedSet
 
     def checkConnect(self, netItem, otherNetItem):
         """
@@ -1724,7 +1762,7 @@ class schematic_scene(editor_scene):
                 print("Invalid JSON file")
         # increment item counter for next symbol
         self.itemCounter += 1
-        self.pinLocations = self.pinLocs()
+        # self.pinLocations = self.pinLocs()
 
         self.findDotPoints(self.sceneRect())
         # now create a deepcopy of the scene dot locations set
