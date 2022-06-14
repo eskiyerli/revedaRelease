@@ -234,3 +234,23 @@ def decodeLabel(label: shp.label):
                         print('label format error.')
         except Exception as e:
             print(e)
+
+def createNetlistLine(symbolItem: shp.symbolShape):
+    """
+    Create a netlist line from a nlp device format line.
+    """
+    nlpDeviceFormatLine= symbolItem.attr["NLPDeviceFormat"][1].strip()
+    # nlpDeviceFormatLine.replace("[@instName]", f'{symbolItem.instanceName}')
+    for labelItem in symbolItem.labels:
+        if labelItem.labelDefinition in nlpDeviceFormatLine:
+            nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
+                labelItem.labelDefinition, labelItem.labelText
+            )
+    for pinName, netName in symbolItem.pinNetMap.items():
+        if pinName in nlpDeviceFormatLine:
+            nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
+                f'[|{pinName}:%]', netName
+            )
+    return nlpDeviceFormatLine
+    #
+    #     return ""

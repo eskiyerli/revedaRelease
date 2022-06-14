@@ -49,10 +49,10 @@ class schematicNet(QGraphicsLineItem):
         if self.name is not None:
             painter.drawStaticText(self.start, QStaticText(self.name))
 
-    def cutNet(self,end):
-        self.prepareGeometryChange()
-        self.end = end
-        self.setLine(self.start.x(), self.start.y(), self.end.x(), self.end.y())
+    # def cutNet(self,end):
+    #     self.prepareGeometryChange()
+    #     self.end = end
+    #     self.setLine(self.start.x(), self.start.y(), self.end.x(), self.end.y())
 
         self.update()
 

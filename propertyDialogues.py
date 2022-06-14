@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 
 from PySide6.QtCore import (Qt, )
 
+import net
 import shape as shp
 
 
@@ -455,6 +456,29 @@ class instanceProperties(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
+class netProperties(QDialog):
+    def __init__(self, parent, net: net.schematicNet = None):
+        # assert isinstance(instance, shp.symbolShape)
+        super().__init__(parent)
+        self.parent = parent
+        self.net = net
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Net Properties")
+        self.mainLayout = QVBoxLayout()
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        formLayout = QFormLayout()
+        self.netNameEdit = longLineEdit()
+        self.netNameEdit.setText(self.net.name)
+        formLayout.addRow(boldLabel("Net Name", self), self.netNameEdit)
+        self.mainLayout.addLayout(formLayout)
+        self.mainLayout.addSpacing(40)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
 class shortLineEdit(QLineEdit):
     def __init__(self):

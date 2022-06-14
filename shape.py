@@ -89,6 +89,12 @@ class shape(QGraphicsItem):
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         self.setCursor(Qt.OpenHandCursor)
+        if self.scene().changeOrigin:
+            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
+        else:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         super().mousePressEvent(event)
         # self.setSelected(True)
 
@@ -329,6 +335,12 @@ class circle(shape):
         # self.rightBottom = self.centre + QPoint(self.radius, self.radius)
         self.end = self.centre + QPoint(self.radius, 0)
 
+    def objName(self):
+        return "LINE"
+
+    def bBox(self):
+        return QRect(self.topLeft, self.rightBottom)
+
     def boundingRect(self):
         return QRect(self.topLeft, self.rightBottom).normalized().adjusted(-2, -2, 2, 2)
 
@@ -396,25 +408,11 @@ class line(shape):
     def paint(self, painter, option, widget):
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
-            # if self.stretch:
-            #     painter.setPen(QPen(Qt.red, 1, Qt.SolidLine))
-            #     if self.stretchSide == "x1_horizontal" or self.stretchSide == "y1_vertical":
-            #         painter.drawRect(self.line.x1() - 5, self.line.y1() - 5, 10, 10)
-            #     elif self.stretchSide == "x2_horizontal" or self.stretchSide == "y2_vertical":
-            #         painter.drawRect(self.line.x2() - 5, self.line.y2() - 5, 10, 10)
+            if self.stretch:
+                painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
         else:
             painter.setPen(self.pen)
-        painter.drawLine(QLine(self.start, self.end))
-        # length = self.line.x1() - self.line.x2()
-        # height = self.line.y1() - self.line.y2()
-        # if abs(length) >= abs(height):  # horizontal
-        #     self.line = QLine(self.start, QPoint(self.end.x(), self.start.y()))
-        #     painter.drawLine(self.line)
-        #     self.horizontal = True
-        # else:  # vertical
-        #     self.line = QLine(self.start, QPoint(self.start.x(), self.end.y()))
-        #     painter.drawLine(self.line)
-        #     self.horizontal = False
+        painter.drawLine(self.line)
 
     def objName(self):
         return "LINE"
@@ -438,47 +436,41 @@ class line(shape):
         )
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-
+        if self.isSelected() and self.stretch:
+            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+            eventPos = self.snap2grid(event.pos(), self.gridTuple)
+            if eventPos == self.start:
+                self.stretchSide = "start"
+            elif eventPos == self.end:
+                self.stretchSide = "end"
         super().mousePressEvent(event)
-        # if self.stretch:
-        #     eventPos = self.snap2grid(event.pos())
-        #     if eventPos == self.line.p1() or eventPos == self.line.p2():
-        #         if self.horizontal:
-        #             if eventPos.x() == self.line.x1():
-        #                 self.stretchSide = "x1_horizontal"
-        #             elif eventPos.x() == self.line.x2():
-        #                 self.stretchSide = "x2_horizontal"
-        #         elif not self.horizontal:
-        #             if eventPos.y() == self.line.y1():
-        #                 self.stretchSide = "y1_vertical"
-        #             elif eventPos.y() == self.line.y2():
-        #                 self.stretchSide = "y2_vertical"
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        # if self.stretch:
-        #     eventPos = self.snap2grid(event.pos())
-        #     if self.stretchSide == "x1_horizontal":
-        #         self.line.setP1(QPoint(eventPos.x(), self.line.y1()))
-        #     elif self.stretchSide == "x2_horizontal":
-        #         self.line.setP2(QPoint(eventPos.x(), self.line.y2()))
-        #     elif self.stretchSide == "y1_vertical":
-        #         self.line.setP1(QPoint(self.line.x1(), eventPos.y()))
-        #     elif self.stretchSide == "y2_vertical":
-        #         self.line.setP2(QPoint(self.line.x2(), eventPos.y()))
-        # elif self.isSelected():
+        eventPos = self.snap2grid(event.pos(), self.gridTuple)
+        if self.stretchSide == "start":
+            self.prepareGeometryChange()
+            self.start = eventPos
+            self.line = QLine(self.start, self.end)
+            self.rect = QRect(self.start, self.end).normalized()
+        elif self.stretchSide == "end":
+            self.prepareGeometryChange()
+            self.end = eventPos
+            self.line = QLine(self.start, self.end)
+            self.rect = QRect(self.start, self.end).normalized()
+
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        self.stretch = False
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.stretchSide = ""
         super().mouseReleaseEvent(event)
-        # self.start = self.line.p1()
-        # self.end = self.line.p2()
-        # self.stretch = False
-        # self.stretchSide = ""
 
 
 class pin(shape):
     """
-    rect: QRect defined by top left corner and bottom right corner. QRect(Point1,Point2)
+    symbol pin class definition for symbol drawing.
     """
 
     pinDirs = ["Input", "Output", "Inout"]
@@ -488,13 +480,13 @@ class pin(shape):
             self,
             start: QPoint,
             pen: QPen,
-            pinName: str,
-            pinDir: str,
-            pinType: str,
-            grid: tuple,
+            pinName : str = "",
+            pinDir: str = "Input",
+            pinType: str = "Signal",
+            grid: tuple = (10, 10),
     ):
         super().__init__(pen, grid)
-        self.start = start  # top left corner
+        self.start = start  # centre of pin
         self.pen = pen
         self.pinName = pinName
         self.pinDir = pinDir
@@ -532,7 +524,7 @@ class pin(shape):
 
 class label(shape):
     """
-    label:
+    label: text class definition for symbol drawing.
     """
 
     labelAlignments = ["Left", "Center", "Right"]
@@ -552,9 +544,9 @@ class label(shape):
             self,
             start: QPoint,
             pen: QPen,
-            labelDefinition: str,
-            grid: tuple,
-            labelType: str,
+            labelDefinition: str = "",
+            grid: tuple = (10, 10),
+            labelType: str = "Normal",
             labelHeight: str = "12",
             labelAlign: str = "Left",
             labelOrient: str = "R0",
@@ -682,14 +674,8 @@ class label(shape):
                         if fieldsLength == 1:
                             self.labelName = self.labelDefinition[1:-1]
                         elif (
-                                len(self.labelDefinition.split(":")) == 2
+                                2<=len(self.labelDefinition.split(":")) <= 3
                         ):  # there is only one colon
-                            self.labelName = self.labelDefinition.split(":")[0].split(
-                                "@"
-                            )[1]
-                        elif (
-                                len(self.labelDefinition.split(":")) == 3
-                        ):  # there are two colons
                             self.labelName = self.labelDefinition.split(":")[0].split(
                                 "@"
                             )[1]
@@ -768,18 +754,14 @@ class symbolShape(shape):
         self.labelDict = {}  # labelName: label
         self.labels = []  # list of labels
         self.pins = []  # list of pins
-        self.pinLocations = {}  # pinName: pinLocation
+        self.pinLocations = {}  # pinName: pinRect
+        self.pinNetMap = {}  # pinName: netName
         for item in self.shapes:
             item.setParentItem(self)
             if type(item) is pin:
                 self.pins.append(item)
             elif type(item) is label:
                 self.labels.append(item)
-        for item in self.shapes:
-            if type(item) is pin:
-                self.pinLocations[item.pinName] = (
-                        item.start + item.scenePos().toPoint()
-                ).toTuple()
         self.setFiltersChildEvents(True)
         self.setHandlesChildEvents(True)
         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
@@ -802,11 +784,3 @@ class symbolShape(shape):
             self.setCursor(Qt.OpenHandCursor)
         super().mousePressEvent(event)
 
-    def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionChange:
-            for item in self.shapes:
-                if type(item) is pin:
-                    self.pinLocations[item.pinName] = (
-                            item.start + item.scenePos().toPoint()
-                    ).toTuple()
-        return super().itemChange(change, value)
