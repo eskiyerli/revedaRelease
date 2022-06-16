@@ -336,7 +336,7 @@ class circle(shape):
         self.end = self.centre + QPoint(self.radius, 0)
 
     def objName(self):
-        return "LINE"
+        return "CIRCLE"
 
     def bBox(self):
         return QRect(self.topLeft, self.rightBottom)
@@ -481,8 +481,8 @@ class pin(shape):
             start: QPoint,
             pen: QPen,
             pinName : str = "",
-            pinDir: str = "Input",
-            pinType: str = "Signal",
+            pinDir: str = pinDirs[0],
+            pinType: str = pinTypes[0],
             grid: tuple = (10, 10),
     ):
         super().__init__(pen, grid)
@@ -745,7 +745,6 @@ class symbolShape(shape):
         assert shapes is not None  # must not be an empty list
         self.shapes = shapes  # list of shapes in the symbol
         self.attr = attr  # generic symbol parameters
-        self.pinLocations = {}
         self.counter = 0  # item's number on schematic
         self.libraryName = ""
         self.cellName = ""
@@ -775,6 +774,7 @@ class symbolShape(shape):
         return self.childrenBoundingRect()
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mousePressEvent(event)
         if self.scene().drawWire:
             self.setFlag(QGraphicsItem.ItemIsSelectable, False)
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
@@ -782,5 +782,43 @@ class symbolShape(shape):
             self.setFlag(QGraphicsItem.ItemIsSelectable, True)
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
             self.setCursor(Qt.OpenHandCursor)
-        super().mousePressEvent(event)
 
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        self.setPos(event.scenePos()-event.buttonDownPos(Qt.LeftButton))
+
+class schematicPin(shape):
+    pinDirs = ["Input", "Output", "Inout"]
+    pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
+
+    def __init__(self, start: QPoint, pen: QPen, pinName, pinDir, pinType, gridTuple: tuple):
+        super().__init__(pen, gridTuple)
+        self.start = start
+        self.pinName = pinName
+        self.pinDir = pinDir
+        self.pinType = pinType
+        self.gridTuple = gridTuple
+
+    def paint(self, painter, option, widget):
+        # if self.pinType == "Signal":
+        painter.setPen(self.pen)
+        painter.setBrush(self.pen.color())
+        painter.drawPolygon([QPoint(self.start.x()-10,self.start.y()-10),QPoint(self.start.x() + 10, self.start.y() - 10),
+                             QPoint(self.start.x() + 30, self.start.y()),
+                            QPoint(self.start.x() +10 , self.start.y() + 10),
+                             QPoint(self.start.x() - 10, self.start.y() + 10)])
+
+    def boundingRect(self):
+        return QRect(self.start.x() - 10, self.start.y() - 10, 30, 20)
+
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mousePressEvent(event)
+        if self.scene().drawWire:
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
+            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+        else:
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setCursor(Qt.OpenHandCursor)
+
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        self.setPos(event.scenePos()-event.buttonDownPos(Qt.LeftButton))

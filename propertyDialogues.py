@@ -430,7 +430,8 @@ class instanceProperties(QDialog):
                 self.instanceLabelsLayout.addWidget(boldLabel(shape.labelName, self), row_index, 0)
                 instanceLabelDef = longLineEdit()
                 self.instanceLabelsLayout.addWidget(instanceLabelDef, row_index, 1)
-                instanceLabelDef.setText(shape.labelText.split("=")[1])
+                if len(shape.labelText.split("=")) > 1:
+                    instanceLabelDef.setText(shape.labelText.split("=")[1])
                 row_index += 1
 
         instanceAttributesLayout = QGridLayout()
@@ -496,4 +497,4 @@ class boldLabel(QLabel):
 class longLineEdit(QLineEdit):
     def __init__(self):
         super().__init__(None)
-        self.setMaximumWidth(350)
+        self.setMaximumWidth(500)

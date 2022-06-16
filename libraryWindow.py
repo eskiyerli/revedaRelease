@@ -839,5 +839,9 @@ class symLibrariesView(designLibrariesView):
         symbolFile = self.selectedItem.data(Qt.UserRole + 2)
         cellName=self.selectedItem.parent().cellName
         libraryName=self.selectedItem.parent().parent().libraryName
-        self.scene.instSymbol(symbolFile, cellName, libraryName)
+        self.scene.instanceSymbolFile = symbolFile
+        self.scene.instanceCell = cellName
+        self.scene.instanceLib = libraryName
+        self.scene.addInstance = True
+        # self.scene.instSymbol(symbolFile, cellName, libraryName)
         self.scene.itemCounter += 1
