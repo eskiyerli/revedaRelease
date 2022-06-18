@@ -519,7 +519,12 @@ class schematicEditor(editorWindow):
             self.symbolChooser.show()
 
     def createPinClick(self, s):
-        self.centralW.scene.drawPin = True
+        createPinDlg = pdlg.createSchematicPinDialog(self)
+        if createPinDlg.exec() == QDialog.Accepted:
+            self.centralW.scene.pinName = createPinDlg.pinName.text()
+            self.centralW.scene.pinType = createPinDlg.pinType.currentText()
+            self.centralW.scene.pinDir = createPinDlg.pinDir.currentText()
+            self.centralW.scene.drawPin = True
 
     def undoClick(self, s):
         self.centralW.scene.undoStack.undo()
@@ -1396,6 +1401,10 @@ class schematic_scene(editor_scene):
         self.instanceSymbolFile = None
         self.instanceLib = None
         self.instanceCell = None
+        # pin attribute defaults
+        self.pinName = ""
+        self.pinType = "Signal"
+        self.pinDir = "Input"
 
 
     def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
@@ -1424,10 +1433,8 @@ class schematic_scene(editor_scene):
             elif self.drawPin:
                 pin= self.addPin(self.start)
                 pin.setSelected(True)
-                self.selectedItem = pin
                 self.parent.parent.messageLine.setText("Pin added")
                 self.drawPin = False
-                self.itemSelect = True
         super().mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
@@ -1635,22 +1642,14 @@ class schematic_scene(editor_scene):
         """
         nameCounter = 0
         # all the nets in the schematic in a set to remove duplicates
-        netsSceneSet = {
-            item
-            for item in self.items(self.sceneRect())
-            if isinstance(item, net.schematicNet)
-        }
+        netsSceneSet = self.findSceneNetsSet()
         for netItem in netsSceneSet:
             if not netItem.nameSet:
                 netItem.name = None  # empty all net names not set by the user
         # now group connected nets together
         self.groupNets(netsSceneSet, nameCounter)
         # Check if the nets are connected to instance pins.
-        symbolSceneSet = {
-            item
-            for item in self.items(self.sceneRect())
-            if isinstance(item, shp.symbolShape)
-        }
+        symbolSceneSet = self.findSceneSymbolSet()
         for symbolItem in symbolSceneSet:
             self.findSymbolPinLocs(symbolItem)
             for pinItem in symbolItem.pins:
@@ -1668,6 +1667,30 @@ class schematic_scene(editor_scene):
                     if symbolItem.attr["NLPDeviceFormat"] != "":
                         line = scb.createNetlistLine(symbolItem)
                         cirFile.write(f"{line}\n")
+
+    def findSceneSymbolSet(self):
+        symbolSceneSet = {
+            item
+            for item in self.items(self.sceneRect())
+            if isinstance(item, shp.symbolShape)
+            }
+        return symbolSceneSet
+
+    def findSceneNetsSet(self):
+        netsSceneSet = {
+            item
+            for item in self.items(self.sceneRect())
+            if isinstance(item, net.schematicNet)
+            }
+        return netsSceneSet
+
+    def findScenePinsSet(self):
+        pinsSceneSet = {
+            item
+            for item in self.items(self.sceneRect())
+            if isinstance(item, shp.schematicPin)
+            }
+        return pinsSceneSet
 
     def findSymbolPinLocs(self, symbol):
         """
@@ -1767,7 +1790,7 @@ class schematic_scene(editor_scene):
         return line
 
     def addPin(self, pos: QPoint):
-        pin= shp.schematicPin(pos, self.pinPen, "", "Input", "Signal",self.gridTuple)
+        pin= shp.schematicPin(pos,self.pinPen, self.pinName, self.pinDir, self.pinType,self.gridTuple)
         undoCommand = us.addShapeUndo(self, pin)
         self.undoStack.push(undoCommand)
         return pin
@@ -1776,7 +1799,6 @@ class schematic_scene(editor_scene):
         """
         Add an instance of a symbol to the scene.
         """
-        print('adding instance')
         instance = self.instSymbol(self.instanceSymbolFile,self.instanceCell, self.instanceLib, pos)
         self.addItem(instance)
         undoCommand = us.addShapeUndo(self, instance)
@@ -1845,15 +1867,12 @@ class schematic_scene(editor_scene):
         self.sceneR = self.sceneRect()  # get scene rect
         items = self.items(self.sceneR)  # get items in scene rect
         # only save symbol shapes
-        symbolItems = [item for item in items if type(item) is shp.symbolShape]
-        netItems = [item for item in items if type(item) is net.schematicNet]
-        items = [
-            item
-            for item in items
-            if type(item) is shp.symbolShape or type(item) is net.schematicNet
-        ]
+        symbolItems = self.findSceneSymbolSet()
+        netItems = self.findSceneNetsSet()
+        pinItems = self.findScenePinsSet()
+        netlistedItems = list(symbolItems | netItems | pinItems)
         with open(file, "w") as f:
-            json.dump(items, f, cls=se.schematicEncoder, indent=4)
+            json.dump(netlistedItems, f, cls=se.schematicEncoder, indent=4)
 
     def loadSchematicCell(self, file: pathlib.Path):
         with open(file, "r") as temp:
@@ -1870,6 +1889,9 @@ class schematic_scene(editor_scene):
                     elif item is not None and item["type"] == "schematicNet":
                         netShape = lj.createSchematicNets(item)
                         self.addItem(netShape)
+                    elif item is not None and item["type"] == "schematicPin":
+                        pinShape = lj.createSchematicPins(item,self.gridTuple)
+                        self.addItem(pinShape)
 
             except json.decoder.JSONDecodeError:
                 print("Invalid JSON file")
@@ -2005,7 +2027,7 @@ class editor_view(QGraphicsView):
 
 
 class symbol_view(editor_view):
-    def __int__(self, scene, parent):
+    def __init__(self, scene, parent):
         self.scene = scene
         self.parent = parent
         super().__init__(self.scene, self.parent)

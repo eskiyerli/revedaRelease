@@ -481,6 +481,11 @@ class netProperties(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
+class createSchematicPinDialog(createPinDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setWindowTitle("Create Schematic Pin")
+
 class shortLineEdit(QLineEdit):
     def __init__(self):
         super().__init__(None)

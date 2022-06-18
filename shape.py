@@ -226,12 +226,6 @@ class rectangle(shape):
     def bBox(self):
         return self.rect
 
-    def Move(self, offset: QPoint):  # starts with capital letter
-        self.moveBy(offset.x(), offset.y())
-
-    def setScale(self, scale: float):
-        self.setScale(scale, scale)
-
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
         if self.stretch:
@@ -359,7 +353,8 @@ class circle(shape):
         if self.startStretch:
             eventPos = self.snap2grid(event.pos(), self.gridTuple)
             distance = self.snapToGrid(
-            math.sqrt((eventPos.x() - self.centre.x()) ** 2 + (eventPos.y() - self.centre.y()) ** 2), self.gridTuple[0])
+                math.sqrt((eventPos.x() - self.centre.x()) ** 2 + (eventPos.y() - self.centre.y()) ** 2),
+                self.gridTuple[0])
             self.prepareGeometryChange()
             self.radius = distance
         super().mouseMoveEvent(event)
@@ -480,7 +475,7 @@ class pin(shape):
             self,
             start: QPoint,
             pen: QPen,
-            pinName : str = "",
+            pinName: str = "",
             pinDir: str = pinDirs[0],
             pinType: str = pinTypes[0],
             grid: tuple = (10, 10),
@@ -674,7 +669,7 @@ class label(shape):
                         if fieldsLength == 1:
                             self.labelName = self.labelDefinition[1:-1]
                         elif (
-                                2<=len(self.labelDefinition.split(":")) <= 3
+                                2 <= len(self.labelDefinition.split(":")) <= 3
                         ):  # there is only one colon
                             self.labelName = self.labelDefinition.split(":")[0].split(
                                 "@"
@@ -784,7 +779,8 @@ class symbolShape(shape):
             self.setCursor(Qt.OpenHandCursor)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        self.setPos(event.scenePos()-event.buttonDownPos(Qt.LeftButton))
+        self.setPos(event.scenePos() - event.buttonDownPos(Qt.LeftButton))
+
 
 class schematicPin(shape):
     pinDirs = ["Input", "Output", "Inout"]
@@ -799,16 +795,37 @@ class schematicPin(shape):
         self.gridTuple = gridTuple
 
     def paint(self, painter, option, widget):
-        # if self.pinType == "Signal":
+
         painter.setPen(self.pen)
         painter.setBrush(self.pen.color())
-        painter.drawPolygon([QPoint(self.start.x()-10,self.start.y()-10),QPoint(self.start.x() + 10, self.start.y() - 10),
-                             QPoint(self.start.x() + 30, self.start.y()),
-                            QPoint(self.start.x() +10 , self.start.y() + 10),
-                             QPoint(self.start.x() - 10, self.start.y() + 10)])
+        painter.setFont(QFont("Arial", 12))
+        match self.pinDir:
+            case "Input":
+                painter.drawPolygon(
+                    [QPoint(self.start.x() - 10, self.start.y() - 10),
+                     QPoint(self.start.x() + 10, self.start.y() - 10),
+                     QPoint(self.start.x() + 20, self.start.y()),
+                     QPoint(self.start.x() + 10, self.start.y() + 10),
+                     QPoint(self.start.x() - 10, self.start.y() + 10)])
+            case "Output":
+                painter.drawPolygon(
+                    [QPoint(self.start.x() - 20, self.start.y()),
+                     QPoint(self.start.x() - 10 , self.start.y() - 10),
+                     QPoint(self.start.x() + 10, self.start.y()-10),
+                     QPoint(self.start.x() + 10, self.start.y() + 10),
+                     QPoint(self.start.x() - 10, self.start.y() + 10)])
+            case "Inout":
+                painter.drawPolygon(
+                    [QPoint(self.start.x() - 20, self.start.y()),
+                     QPoint(self.start.x() - 10, self.start.y() - 10),
+                     QPoint(self.start.x() + 10, self.start.y() - 10),
+                     QPoint(self.start.x() + 20, self.start.y()),
+                     QPoint(self.start.x() + 10, self.start.y() + 10),
+                     QPoint(self.start.x() - 10, self.start.y() + 10)])
+        painter.drawText(self.start.x(), self.start.y() - 20, self.pinName)
 
     def boundingRect(self):
-        return QRect(self.start.x() - 10, self.start.y() - 10, 30, 20)
+        return QRect(self.start.x() - 10, self.start.y() - 10, 30, 20).adjusted(-5, -10, 5, 5)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
@@ -821,4 +838,4 @@ class schematicPin(shape):
             self.setCursor(Qt.OpenHandCursor)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        self.setPos(event.scenePos()-event.buttonDownPos(Qt.LeftButton))
+        self.setPos(event.scenePos() - event.buttonDownPos(Qt.LeftButton))

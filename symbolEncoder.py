@@ -120,3 +120,15 @@ class schematicEncoder(json.JSONEncoder):
                 "name": item.__dict__["name"],
                 "nameSet": item.__dict__["nameSet"], }
             return itemDict
+        elif isinstance(item, shp.schematicPin):
+            itemDict = {"type": "schematicPin",
+                "start": item.__dict__["start"].toTuple(),
+                "color": item.__dict__["pen"].color().toTuple(),
+                "width": item.__dict__["pen"].width(),
+                "lineStyle": str(item.__dict__["pen"].style()),
+                "cosmetic": item.__dict__["pen"].isCosmetic(),
+                "pinName": item.__dict__["pinName"],
+                "pinDir": item.__dict__["pinDir"],
+                "pinType": item.__dict__["pinType"],
+                "location": (item.scenePos() - item.scene().origin).toTuple(), }
+            return itemDict

@@ -13,6 +13,6 @@ They are not used in netlisting.
 	only **@propertyName** part is mandatory. The second and third parts
 	may not exist in all NLPLabels. 
 
-	If only first part exists, there are a limited number of 
+	If only first part exists, there are a limited number of *predefined* labels that can be used.
 
 	If the second part exists, it is value is determined  
