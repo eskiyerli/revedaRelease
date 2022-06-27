@@ -19,6 +19,7 @@ class schematicNet(QGraphicsLineItem):
         self.start = start
         self.end = end
         self.nameSet = False  # if a name has been set
+        self.nameConflict = False  # if a name conflict has been detected
 
         x1, y1 = self.start.x(), self.start.y()
         x2, y2 = self.end.x(), self.end.y()
@@ -48,13 +49,11 @@ class schematicNet(QGraphicsLineItem):
         painter.drawLine(self.start, self.end)
         if self.name is not None:
             painter.drawStaticText(self.start, QStaticText(self.name))
-
-    # def cutNet(self,end):
-    #     self.prepareGeometryChange()
-    #     self.end = end
-    #     self.setLine(self.start.x(), self.start.y(), self.end.x(), self.end.y())
-
-        self.update()
+            # if there is name conflict, draw the line and name in red.
+            if self.nameConflict:
+                painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+                painter.drawStaticText(self.start, QStaticText(self.name))
+                painter.drawLine(self.start, self.end)
 
     def setName(self, name):
         self.name = name
@@ -86,23 +85,6 @@ class schematicNet(QGraphicsLineItem):
                     viewRect.setTop(newPos.y())
             return newPos
         return super().itemChange(change, value)
-
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        if self.scene().drawWire:
-            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
-            self.setFlag(QGraphicsItem.ItemIsMovable, False)
-
-        else:
-            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-            self.setFlag(QGraphicsItem.ItemIsMovable, True)
-
-            # self.prepareGeometryChange()
-        super().mousePressEvent(event)
-
-    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        print(self.sceneBoundingRect())
-        super().mouseReleaseEvent(event)
-
 
 class crossingDot(QGraphicsEllipseItem):
     def __init__(self, point: QPoint, radius: int, pen: QPen):

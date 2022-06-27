@@ -1,20 +1,20 @@
 # schematic editor backend
 import pathlib
-
-from PySide6.QtGui import (
-    QStandardItem,
-)
-from PySide6.QtWidgets import (
-    QMessageBox,
-)
 import shutil
-from ruamel.yaml import YAML
-import shape as shp
 from pathlib import Path
 
 from PySide6.QtCore import (
     Qt,
-)
+    )
+from PySide6.QtGui import (
+    QStandardItem,
+    )
+from PySide6.QtWidgets import (
+    QMessageBox,
+    )
+from ruamel.yaml import YAML
+
+import shape as shp
 
 
 class libraryItem(QStandardItem):
@@ -88,10 +88,10 @@ def createCellView(parent, viewName, cellItem):
     cellItem.appendRow(viewItem)
     # needs to decide on how to handle the view type
     print(f"Created {viewName} at {str(viewPath)}")
-    with open(viewPath, "w") as f: # write an empty json file
-        f.writelines('[')
-        f.writelines({'type': 'view', 'name': viewName})
-        f.writelines(']')
+    # with open(viewPath, "w") as f: # write an empty json file
+    #     f.writelines('[')
+    #     f.writelines({'type': 'view', 'name': viewName})
+    #     f.writelines(']')
     return viewItem
 
 

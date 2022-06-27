@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QCheckBox,
     QWidget,
-    QFrame,
+    QCheckBox,
 )
 
 from PySide6.QtCore import (Qt, )
@@ -485,6 +485,75 @@ class createSchematicPinDialog(createPinDialog):
     def __init__(self, parent):
         super().__init__(parent)
         self.setWindowTitle("Create Schematic Pin")
+
+class symbolCreateDialog(QDialog):
+    def __init__(self, parent, inputPins: list, outputPins: list, inoutPins: list):
+        super().__init__(parent)
+        self.parent = parent
+        self.inputPinNames = [pinItem.pinName for pinItem in inputPins]
+        self.outputPinNames = [pinItem.pinName for pinItem in outputPins]
+        self.inoutPinNames = [pinItem.pinName for pinItem in inoutPins]
+        self.setWindowTitle("Create Symbol")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.mainLayout = QVBoxLayout()
+        self.cellNameLayout = QHBoxLayout()
+        self.libNameView = QLineEdit()
+        self.libNameView.setPlaceholderText(self.parent.libName)
+        self.libNameView.setReadOnly(True)
+
+        self.fLayout = QFormLayout()
+        self.topPinsEdit = longLineEdit()
+        self.topPinsEdit.setText(', '.join(self.inoutPinNames))
+        self.topPinsEdit.setToolTip("Enter top pins")
+        self.fLayout.addRow(QLabel("Top Pins:"), self.topPinsEdit)
+        self.leftPinsEdit = longLineEdit()
+        self.leftPinsEdit.setText(', '.join(self.inputPinNames))
+        self.leftPinsEdit.setToolTip("Enter left pins")
+        self.fLayout.addRow(QLabel("Left Pins:"), self.leftPinsEdit)
+        self.bottomPinsEdit = longLineEdit()
+        self.bottomPinsEdit.setToolTip("Enter bottom pins")
+        self.fLayout.addRow(QLabel("Bottom Pins:"), self.bottomPinsEdit)
+        self.rightPinsEdit = longLineEdit()
+        self.rightPinsEdit.setText(', '.join(self.outputPinNames))
+        self.rightPinsEdit.setToolTip("Enter right pins")
+        self.fLayout.addRow(QLabel("Right Pins:"), self.rightPinsEdit)
+        self.mainLayout.addLayout(self.fLayout)
+        self.mainLayout.addSpacing(20)
+        self.geomLayout = QFormLayout()
+        self.stubLengthEdit = QLineEdit()
+        self.stubLengthEdit.setText('20')
+        self.stubLengthEdit.setToolTip('Enter stub lengths')
+        self.geomLayout.addRow(QLabel("Stub Length:"),self.stubLengthEdit)
+        self.pinDistanceEdit = QLineEdit()
+        self.pinDistanceEdit.setText('40')
+        self.pinDistanceEdit.setToolTip('Enter pin spacing')
+        self.geomLayout.addRow(QLabel("Pin spacing:"),self.pinDistanceEdit)
+        self.mainLayout.addLayout(self.geomLayout)
+        self.mainLayout.addSpacing(40)
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.show()
+
+class deleteCellViewDialog(QDialog):
+    def __init__(self, cellName, viewName,*args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setWindowTitle(f'Delete {cellName}-{viewName} CellView?')
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.layout = QVBoxLayout()
+        message = QLabel("{cellName}-{viewName} will be recreated!")
+        self.layout.addWidget(message)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
+
 
 class shortLineEdit(QLineEdit):
     def __init__(self):

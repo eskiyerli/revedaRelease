@@ -21,6 +21,8 @@
 import sys
 from contextlib import redirect_stderr, redirect_stdout
 
+
+
 # from hashlib import new
 from pathlib import Path
 
@@ -41,17 +43,12 @@ from PySide6.QtWidgets import (
     QMenuBar,
 )
 
-# import circuitElements as cel
-# import propertyDialogues as pdlg
 import pythonConsole as pcon
 import schBackEnd as scb  # import the backend
-# import shape as shp  # import the shapes
-import libraryWindow as libw  # import the library window
-# import loadJSON as lj
-# import undoStack as us
-# import symbolEncoder as se
-# from Point import *
-# from Vector import *
+
+# import libraryWindow as libw
+from libraryWindow import libraryBrowser
+
 import resources
 
 
@@ -140,7 +137,7 @@ class mainWindow(QMainWindow):
     # open library browser window
     def libraryBrowserClick(self):
         if self.libraryBrowser is None:
-            self.libraryBrowser = libw.libraryBrowser(
+            self.libraryBrowser = libraryBrowser(
                 self.libraryDict, self.cellViews
             )  # create the library browser
             self.libraryBrowser.show()

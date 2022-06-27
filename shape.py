@@ -88,15 +88,15 @@ class shape(QGraphicsItem):
         return self.gridSize
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        self.setCursor(Qt.OpenHandCursor)
+        # self.setCursor(Qt.OpenHandCursor)
+        super().mousePressEvent(event)
         if self.scene().changeOrigin:
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
             self.setFlag(QGraphicsItem.ItemIsSelectable, False)
         else:
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
             self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        super().mousePressEvent(event)
-        # self.setSelected(True)
+
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(event)
@@ -768,15 +768,12 @@ class symbolShape(shape):
     def boundingRect(self):
         return self.childrenBoundingRect()
 
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().mousePressEvent(event)
+    def sceneEvent(self, event):
         if self.scene().drawWire:
-            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
-            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+            return False
         else:
-            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-            self.setFlag(QGraphicsItem.ItemIsMovable, True)
-            self.setCursor(Qt.OpenHandCursor)
+            super().sceneEvent(event)
+            return True
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         self.setPos(event.scenePos() - event.buttonDownPos(Qt.LeftButton))
@@ -827,15 +824,12 @@ class schematicPin(shape):
     def boundingRect(self):
         return QRect(self.start.x() - 10, self.start.y() - 10, 30, 20).adjusted(-5, -10, 5, 5)
 
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().mousePressEvent(event)
+    def sceneEvent(self, event):
         if self.scene().drawWire:
-            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
-            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+            return False
         else:
-            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-            self.setFlag(QGraphicsItem.ItemIsMovable, True)
-            self.setCursor(Qt.OpenHandCursor)
+            super().sceneEvent(event)
+            return True
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         self.setPos(event.scenePos() - event.buttonDownPos(Qt.LeftButton))
