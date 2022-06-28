@@ -1892,20 +1892,18 @@ class designLibrariesView(QTreeView):
         # iterate design library directories. Designpath is the path of library
         # obtained from libraryDict
         for designPath in self.libraryDict.values():  # type: Path
-            self.addLibrary(designPath, self.parentItem)
+            self.populateLibrary(designPath, self.rootItem)
         self.setModel(self.libraryModel)
 
     def initModel(self):
         self.libraryModel = QStandardItemModel()
         self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
-        self.parentItem = self.libraryModel.invisibleRootItem()
+        self.rootItem = self.libraryModel.invisibleRootItem()
 
     # populate the library model
-    def addLibrary(self, designPath, parentItem):  # designPath: Path
+    def populateLibrary(self, designPath, parentItem):  # designPath: Path
         if designPath.is_dir():
-            libraryEntry = scb.libraryItem(designPath, designPath.name)
-            parentItem.appendRow(libraryEntry)
-
+            libraryItem = self.addLibraryToModel(designPath, parentItem)
             cellList = [str(cell.name) for cell in designPath.iterdir() if
                 cell.is_dir()]
             for cell in cellList:  # type: str
@@ -1913,70 +1911,16 @@ class designLibrariesView(QTreeView):
                     designPath.joinpath(cell).iterdir() if
                     view.suffix == ".json" and str(view.stem) in self.cellViews]
                 if len(viewList) >= 0:
-                    cellEntry = self.addCell(designPath, libraryEntry, cell)
-                    for viewName in viewList:
-                        # self.addCellView(designPath, cell, cellEntry, view)
-                        scb.createCellView(self, viewName,cellEntry)
-
-    def addCell(self, designPath, libraryNameItem, cell):
-        cellEntry = scb.cellItem(designPath, cell)
-        libraryNameItem.appendRow(cellEntry)
-        # libraryNameItem.appendRow(cellItem)
-        return cellEntry
-
-    # def addCellView(self, designPath, cell, cellItem, view):
-        # viewEntry = scb.viewItem(designPath, cell, view)
-        # cellItem.appendRow(viewEntry)
-        # return viewEntry
-
-    # context menu
-    def contextMenuEvent(self, event):
-        menu = QMenu(self)
-        try:
-            index = self.selectedIndexes()[0]
-        except IndexError:
-            pass
-        try:
-            self.selectedItem = self.libraryModel.itemFromIndex(index)
-            if self.selectedItem.data(Qt.UserRole + 1) == "library":
-                menu.addAction("Save Library As...", self.saveLibAs)
-                menu.addAction("Rename Library", self.renameLib)
-                menu.addAction("Remove Library", self.removeLibrary)
-                menu.addAction("Create Cell", self.createCell)
-            elif self.selectedItem.data(Qt.UserRole + 1) == "cell":
-                menu.addAction(
-                    QAction(
-                        "Create CellView...", self,
-                        triggered=self.createCellView
-                        )
-                    )
-                menu.addAction(
-                    QAction("Copy Cell...", self, triggered=self.copyCell)
-                    )
-                menu.addAction(
-                    QAction("Rename Cell...", self, triggered=self.renameCell)
-                    )
-                menu.addAction(
-                    QAction("Delete Cell...", self, triggered=self.deleteCell)
-                    )
-            elif self.selectedItem.data(Qt.UserRole + 1) == "view":
-                menu.addAction(
-                    QAction("Open View", self, triggered=self.openView)
-                    )
-                menu.addAction(
-                    QAction("Copy View...", self, triggered=self.copyView)
-                    )
-                menu.addAction(
-                    QAction("Rename View...", self, triggered=self.renameView)
-                    )
-                menu.addAction(
-                    QAction("Delete View...", self, triggered=self.deleteView)
-                    )
-            menu.exec(event.globalPos())
-        except UnboundLocalError:
-            pass
+                    cellItem = self.addCellToModel(designPath.joinpath(cell),libraryItem)
+                    for view in viewList:
+                        self.addViewToModel(designPath.joinpath(cell,view),cellItem)
 
     # library related methods
+
+    def addLibraryToModel(self,designPath, parentItem):
+        libraryEntry = scb.libraryItem(designPath)
+        parentItem.appendRow(libraryEntry)
+        return libraryEntry
 
     def removeLibrary(self):
         shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
@@ -1989,6 +1933,11 @@ class designLibrariesView(QTreeView):
         pass
 
     # cell related methods
+    def addCellToModel(self, cellPath, parentItem):
+        cellEntry = scb.cellItem(cellPath)
+        parentItem.appendRow(cellEntry)
+        return cellEntry
+
 
     def createCell(self):
         dlg = createCellDialog(self, self.libraryModel, self.selectedItem)
@@ -2020,6 +1969,11 @@ class designLibrariesView(QTreeView):
             print(f"Error:{e.strerror}")
 
     # cellview related methods
+
+    def addViewToModel(self,viewPath, parentItem):
+        viewEntry = scb.viewItem(viewPath)
+        parentItem.appendRow(viewEntry)
+        return viewEntry
 
     def createCellView(self):
         dlg = createCellViewDialog(
@@ -2100,6 +2054,53 @@ class designLibrariesView(QTreeView):
         self.setModel(self.libraryModel)
         for designPath in self.libraryDict.values():  # type: Path
             self.addLibrary(designPath, self.parentItem)
+
+    # context menu
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        try:
+            index = self.selectedIndexes()[0]
+        except IndexError:
+            pass
+        try:
+            self.selectedItem = self.libraryModel.itemFromIndex(index)
+            if self.selectedItem.data(Qt.UserRole + 1) == "library":
+                menu.addAction("Save Library As...", self.saveLibAs)
+                menu.addAction("Rename Library", self.renameLib)
+                menu.addAction("Remove Library", self.removeLibrary)
+                menu.addAction("Create Cell", self.createCell)
+            elif self.selectedItem.data(Qt.UserRole + 1) == "cell":
+                menu.addAction(
+                    QAction(
+                        "Create CellView...", self,
+                        triggered=self.createCellView
+                        )
+                    )
+                menu.addAction(
+                    QAction("Copy Cell...", self, triggered=self.copyCell)
+                    )
+                menu.addAction(
+                    QAction("Rename Cell...", self, triggered=self.renameCell)
+                    )
+                menu.addAction(
+                    QAction("Delete Cell...", self, triggered=self.deleteCell)
+                    )
+            elif self.selectedItem.data(Qt.UserRole + 1) == "view":
+                menu.addAction(
+                    QAction("Open View", self, triggered=self.openView)
+                    )
+                menu.addAction(
+                    QAction("Copy View...", self, triggered=self.copyView)
+                    )
+                menu.addAction(
+                    QAction("Rename View...", self, triggered=self.renameView)
+                    )
+                menu.addAction(
+                    QAction("Delete View...", self, triggered=self.deleteView)
+                    )
+            menu.exec(event.globalPos())
+        except UnboundLocalError:
+            pass
 
 
 class libraryBrowser(QMainWindow):
@@ -2464,7 +2465,7 @@ class libraryPathEditorDialog(QDialog):
             self.parent.libBrowserCont.designView.libraryModel
             )
         for designPath in self.libraryDict.values():  # type: Path
-            self.parent.libBrowserCont.designView.addLibrary(
+            self.parent.libBrowserCont.designView.populateLibrary(
                 designPath, self.parent.libBrowserCont.designView.parentItem
                 )
 

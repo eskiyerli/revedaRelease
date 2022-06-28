@@ -8,24 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="Schematic pins are in good shape.">
-      <change afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/schematicEditor/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/schematicEditor/revedaMainW.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/voltResistor.cir" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/first/schematic.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/schematic.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anotherDesign/first/symbol.json" beforeDir="false" afterPath="$PROJECT_DIR$/anotherDesign/first/symbol.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libraryWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/libraryWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/loadJSON.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/net.py" beforeDir="false" afterPath="$PROJECT_DIR$/net.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/propertyDialogues.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/revedaMainW.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaMainW.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/schBackEnd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

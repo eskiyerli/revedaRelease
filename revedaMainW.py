@@ -45,10 +45,7 @@ from PySide6.QtWidgets import (
 
 import pythonConsole as pcon
 import schBackEnd as scb  # import the backend
-
-# import libraryWindow as libw
-from libraryWindow import libraryBrowser
-
+import editorWindows as edw
 import resources
 
 
@@ -137,7 +134,7 @@ class mainWindow(QMainWindow):
     # open library browser window
     def libraryBrowserClick(self):
         if self.libraryBrowser is None:
-            self.libraryBrowser = libraryBrowser(
+            self.libraryBrowser = edw.libraryBrowser(
                 self.libraryDict, self.cellViews
             )  # create the library browser
             self.libraryBrowser.show()
