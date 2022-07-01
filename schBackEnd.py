@@ -170,7 +170,7 @@ def createCell(parent, model, selectedItem, cellName):
         cellItem.setData(cellPath, Qt.UserRole + 2)
         cellItem.setData("cell", Qt.UserRole + 1)
         libraryItem.appendRow(cellItem)
-        print(f"Created {cellName} at {str(cellPath)}")
+        print(f"Created {cellName} cell at {str(cellPath)}")
 
 
 def writeLibDefFile(libPathDict, libPath):

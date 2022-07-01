@@ -33,7 +33,8 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": (item.scenePos() - item.scene().origin).toTuple(), }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"],}
             return itemDict
         elif isinstance(item, shp.line):
             itemDict = {"type": "line",
@@ -43,7 +44,8 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": (item.scenePos() - item.scene().origin).toTuple(), }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"], }
             return itemDict
         elif isinstance(item, shp.circle):
             itemDict = {"type": "circle",
@@ -53,7 +55,8 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": (item.scenePos() - item.scene().origin).toTuple(), }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"], }
             return itemDict
         elif isinstance(item, shp.pin):
             itemDict = {"type": "pin",
@@ -65,7 +68,9 @@ class symbolEncoder(json.JSONEncoder):
                 "pinName": item.__dict__["pinName"],
                 "pinDir": item.__dict__["pinDir"],
                 "pinType": item.__dict__["pinType"],
-                "location": (item.scenePos() - item.scene().origin).toTuple(), }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"], }
+
             return itemDict
         elif isinstance(item, shp.label):
             itemDict = {"type": "label",
@@ -83,7 +88,8 @@ class symbolEncoder(json.JSONEncoder):
                 "labelAlign": item.__dict__["labelAlign"],
                 "labelOrient": item.__dict__["labelOrient"],
                 "labelUse": item.__dict__["labelUse"],
-                "location": (item.scenePos() - item.scene().origin).toTuple(), }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"], }
             return itemDict
         elif isinstance(item, symbolAttribute):
             itemDict = {"type": "attribute", "name": item.name,

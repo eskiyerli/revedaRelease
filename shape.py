@@ -55,6 +55,7 @@ class shape(QGraphicsItem):
         # self.setZValue(self.layer.z)
         self.pen = pen
         self.gridTuple = gridTuple
+        self.angle = 0 # rotation angle
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange and self.scene():
@@ -97,6 +98,15 @@ class shape(QGraphicsItem):
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
             self.setFlag(QGraphicsItem.ItemIsSelectable, True)
 
+    def sceneEvent(self, event):
+        '''
+        Do not propagate event if shape needs to keep still.
+        '''
+        if self.scene().changeOrigin:
+            return False
+        else:
+            super().sceneEvent(event)
+            return True
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(event)
@@ -560,7 +570,7 @@ class label(shape):
         self.labelUse = labelUse
         self.labelType = labelType
         self.labelFont = QFont("Arial")
-        self.labelFont.setPointSize(int(self.labelHeight))
+        self.labelFont.setPointSize(int(float(self.labelHeight)))
         self.fm = QFontMetrics(self.labelFont)
         self.rect = self.fm.boundingRect(self.labelDefinition)
         self.setLabelName()

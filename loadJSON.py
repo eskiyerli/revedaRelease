@@ -64,6 +64,8 @@ def createRectItem(item, gridTuple):
         )  # note that we are using grid values for scene
     rect.setPos(
         QPoint(item["location"][0], item["location"][1]), )
+    rect.setRotation(item["angle"])
+    rect.angle = item["angle"]
     return rect
 
 
@@ -81,6 +83,8 @@ def createCircleItem(item, gridTuple):
         )  # note that we are using grid values for scene
     circle.setPos(
         QPoint(item["location"][0], item["location"][1]), )
+    circle.setRotation(item["angle"])
+    circle.angle = item["angle"]
     return circle
 
 
@@ -94,6 +98,8 @@ def createLineItem(item, gridTuple):
     pen.setCosmetic(item["cosmetic"])
     line = shp.line(start, end, pen, gridTuple)
     line.setPos(QPoint(item["location"][0], item["location"][1]))
+    line.setRotation(item["angle"])
+    line.angle = [item["angle"]]
     return line
 
 
@@ -108,6 +114,8 @@ def createPinItem(item, gridTuple):
         start, pen, item["pinName"], item["pinDir"], item["pinType"],
         gridTuple, )
     pin.setPos(QPoint(item["location"][0], item["location"][1]))
+    pin.setRotation(item["angle"])
+    pin.angle = item["angle"]
     return pin
 
 
@@ -123,6 +131,8 @@ def createLabelItem(item, gridTuple):
         item["labelHeight"], item["labelAlign"], item["labelOrient"],
         item["labelUse"], )
     label.setPos(QPoint(item["location"][0], item["location"][1]))
+    label.setRotation(item["angle"])
+    label.angle = item["angle"]
     return label
 
 

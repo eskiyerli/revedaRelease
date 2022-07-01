@@ -539,8 +539,8 @@ class symbolCreateDialog(QDialog):
         self.show()
 
 class deleteCellViewDialog(QDialog):
-    def __init__(self, cellName, viewName,*args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, cellName, viewName, *args):
+        super().__init__(*args)
         self.setWindowTitle(f'Delete {cellName}-{viewName} CellView?')
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
@@ -549,7 +549,7 @@ class deleteCellViewDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
         self.layout = QVBoxLayout()
-        message = QLabel("{cellName}-{viewName} will be recreated!")
+        message = QLabel(f"{cellName}-{viewName} will be recreated!")
         self.layout.addWidget(message)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)

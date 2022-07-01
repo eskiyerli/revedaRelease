@@ -7,12 +7,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="Schematic pins are in good shape.">
-      <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
+    <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="Working on symbol generation.">
+      <change afterPath="$PROJECT_DIR$/lowPassRC.cir" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anotherDesign/first/schematic.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anotherDesign/first/symbol.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anotherDesign/second/schematic.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anotherDesign/second/symbol.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anotherDesign/third/symbol.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/revedaMainW.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaMainW.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/loadJSON.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/propertyDialogues.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/schBackEnd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symbolEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/symbolEncoder.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +68,28 @@
     &quot;two.files.diff.last.used.file&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/schematicEditor/editorWindows.py&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.revedaMainW">
+    <configuration name="muratEskiyerliCV" type="LATEX_RUN_CONFIGURATION" factoryName="LaTeX configuration factory" temporary="true">
+      <texify>
+        <compiler>LUALATEX</compiler>
+        <compiler-path />
+        <sumatra-path />
+        <pdf-viewer>NONE</pdf-viewer>
+        <viewer-command />
+        <compiler-arguments />
+        <envs />
+        <main-file>$PROJECT_DIR$/../../../Professional/Resumes/muratEskiyerliCV.tex</main-file>
+        <output-path>$PROJECT_DIR$/../../../Professional/Resumes</output-path>
+        <auxil-path>$PROJECT_DIR$/../../../Professional/Resumes</auxil-path>
+        <compile-twice>false</compile-twice>
+        <output-format>PDF</output-format>
+        <latex-distribution>MIKTEX</latex-distribution>
+        <has-been-run>true</has-been-run>
+        <bib-run-config>[]</bib-run-config>
+        <makeindex-run-config>[]</makeindex-run-config>
+      </texify>
+      <method v="2" />
+    </configuration>
     <configuration name="revedaMainW" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="schematicEditor" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -160,7 +191,14 @@
       <option name="project" value="LOCAL" />
       <updated>1655536708095</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="LibraryView rework.">
+      <created>1656435830778</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1656435830778</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -186,7 +224,8 @@
     <MESSAGE value="Some bugfixes." />
     <MESSAGE value="Start of schematic pin work.&#10;Move of symbols are fixed." />
     <MESSAGE value="Schematic pins are in good shape." />
-    <option name="LAST_COMMIT_MESSAGE" value="Schematic pins are in good shape." />
+    <MESSAGE value="LibraryView rework." />
+    <option name="LAST_COMMIT_MESSAGE" value="LibraryView rework." />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>
