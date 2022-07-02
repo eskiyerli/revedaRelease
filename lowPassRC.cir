@@ -1,0 +1,12 @@
+********************************************************************************
+* Revolution EDA CDL Netlist
+* Library: designs
+* Top Cell Name: lowPassRC
+* View Name: schematic
+* Date: 2022-06-29 20:11:45.717616
+********************************************************************************
+.GLOBAL gnd!
+
+R[@instNumber]  INP 0 
+R[@instNumber]  [|PLUS:%] OUT [@R:R=%:]
+.END

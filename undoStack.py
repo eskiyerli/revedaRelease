@@ -34,7 +34,6 @@ class keepOriginalShape(QUndoCommand):
         self.originalShape = lj.createSymbolItems(item, self.gridTuple)
 
     def undo(self):
-        print(self.originalShape)
         self.scene.addItem(self.originalShape)
 
     def redo(self):
@@ -48,7 +47,6 @@ class changeOriginalShape(QUndoCommand):
         self.setText("Change Original Shape")
 
     def undo(self):
-        print(self.shape)
         self.scene.removeItem(self.shape)
 
     def redo(self):

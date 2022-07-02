@@ -194,7 +194,7 @@ class pythonConsole(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     console = pythonConsole()
-    console.setWindowTitle('Console')
+    console.setWindowTitle('Revolution EDA Console')
     console.setfont(QFont('Lucida Sans Typewriter', 12))
  
     # Redirect stdout to console.write and stderr to console.errorwrite

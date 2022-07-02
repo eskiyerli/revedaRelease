@@ -1,38 +1,65 @@
 import json
+
+import net
 import shape as shp
-from PySide6.QtCore import (QDir, QLine, QRect, QRectF, QPoint, QPointF, QSize, )
-from PySide6.QtGui import (QAction, QKeySequence, QColor, QFont, QIcon, QPainter, QPen, QBrush, QFontMetrics,
-                           QStandardItemModel, QTransform, QCursor, QUndoCommand, QUndoStack)
+import net
+from PySide6.QtCore import (QDir, QLine, QRect, QRectF, QPoint, QPointF,
+                            QSize, )
+from PySide6.QtGui import (QAction, QKeySequence, QColor, QFont, QIcon,
+                           QPainter, QPen, QBrush, QFontMetrics,
+                           QStandardItemModel, QTransform, QCursor,
+                           QUndoCommand, QUndoStack, )
+
+
+class symbolAttribute(object):
+    def __init__(self, name: str, type: str, definition: str):
+        self.name = name
+        self.type = type
+        self.definition = definition
+
+    def __str__(self):
+        return f'{self.name}: {self.type}  {self.definition}'
+
+    def __repr__(self):
+        return f'{self.name}: {self.type}  {self.definition}'
 
 
 class symbolEncoder(json.JSONEncoder):
     def default(self, item):
         if isinstance(item, shp.rectangle):
-            itemDict = {
-                "type": "rect",
+            itemDict = {"type": "rect",
                 "rect": item.__dict__["rect"].getCoords(),
                 "color": item.__dict__["pen"].color().toTuple(),
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": item.scenePos().toTuple(),
-            }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"],}
             return itemDict
         elif isinstance(item, shp.line):
-            itemDict = {
-                "type": "line",
+            itemDict = {"type": "line",
                 "start": item.__dict__["start"].toTuple(),
                 "end": item.__dict__["end"].toTuple(),
                 "color": item.__dict__["pen"].color().toTuple(),
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "location": item.scenePos().toTuple(),
-            }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"], }
+            return itemDict
+        elif isinstance(item, shp.circle):
+            itemDict = {"type": "circle",
+                "centre": item.__dict__["centre"].toTuple(),
+                "end": item.__dict__["end"].toTuple(),
+                "color": item.__dict__["pen"].color().toTuple(),
+                "width": item.__dict__["pen"].width(),
+                "lineStyle": str(item.__dict__["pen"].style()),
+                "cosmetic": item.__dict__["pen"].isCosmetic(),
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"], }
             return itemDict
         elif isinstance(item, shp.pin):
-            itemDict = {
-                "type": "pin",
+            itemDict = {"type": "pin",
                 "start": item.__dict__["start"].toTuple(),
                 "color": item.__dict__["pen"].color().toTuple(),
                 "width": item.__dict__["pen"].width(),
@@ -41,27 +68,73 @@ class symbolEncoder(json.JSONEncoder):
                 "pinName": item.__dict__["pinName"],
                 "pinDir": item.__dict__["pinDir"],
                 "pinType": item.__dict__["pinType"],
-                "location": item.scenePos().toTuple(),
-            }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"], }
+
             return itemDict
         elif isinstance(item, shp.label):
-            itemDict = {
-                "type": "label",
+            itemDict = {"type": "label",
                 "start": item.__dict__["start"].toTuple(),
                 "color": item.__dict__["pen"].color().toTuple(),
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "labelName": item.__dict__["labelName"],
+                "labelName": item.__dict__["labelName"],  # property name
+                "labelDefinition": item.__dict__["labelDefinition"],
+                # label as entered
+                "labelText": item.__dict__["labelText"],  # shown label
                 "labelType": item.__dict__["labelType"],
                 "labelHeight": item.__dict__["labelHeight"],
                 "labelAlign": item.__dict__["labelAlign"],
                 "labelOrient": item.__dict__["labelOrient"],
                 "labelUse": item.__dict__["labelUse"],
-                "location": item.scenePos().toTuple(),
-            }
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "angle": item.__dict__["angle"], }
+            return itemDict
+        elif isinstance(item, symbolAttribute):
+            itemDict = {"type": "attribute", "name": item.name,
+                "attributeType": item.type, "definition": item.definition, }
             return itemDict
 
-        else:
-            return super().default(item)
 
+class schematicEncoder(json.JSONEncoder):
+    def default(self, item):
+        if isinstance(item, shp.symbolShape):
+            # only label name, definition, and text can be changed in the symbol instance.
+            itemLabelDict = {
+                item.labelName: [item.labelDefinition, item.labelText] for item
+                in item.labels}
+            itemDict = {"type": "symbolShape",
+                "library": item.__dict__["libraryName"],
+                "cell": item.__dict__["cellName"],
+                "view": item.__dict__["viewName"],
+                "name": item.__dict__["instanceName"],
+                "instCounter": item.__dict__["counter"],
+                "pinLocations": item.__dict__["pinLocations"],
+                "attributes": item.__dict__["attr"], "labelDict": itemLabelDict,
+                "location": (item.scenePos() - item.scene().origin).toTuple(), }
+            return itemDict
+        elif isinstance(item, net.schematicNet):
+            itemDict = {"type": "schematicNet",
+                "start": item.__dict__["start"].toTuple(),
+                "end": item.__dict__["end"].toTuple(),
+                "color": item.__dict__["pen"].color().toTuple(),
+                "width": item.__dict__["pen"].width(),
+                "lineStyle": str(item.__dict__["pen"].style()),
+                "cosmetic": item.__dict__["pen"].isCosmetic(),
+                "location": (item.scenePos() - item.scene().origin).toTuple(),
+                "name": item.__dict__["name"],
+                "nameSet": item.__dict__["nameSet"], }
+            return itemDict
+        elif isinstance(item, shp.schematicPin):
+            itemDict = {"type": "schematicPin",
+                "start": item.__dict__["start"].toTuple(),
+                "color": item.__dict__["pen"].color().toTuple(),
+                "width": item.__dict__["pen"].width(),
+                "lineStyle": str(item.__dict__["pen"].style()),
+                "cosmetic": item.__dict__["pen"].isCosmetic(),
+                "pinName": item.__dict__["pinName"],
+                "pinDir": item.__dict__["pinDir"],
+                "pinType": item.__dict__["pinType"],
+                "location": (item.scenePos() - item.scene().origin).toTuple(), }
+            return itemDict

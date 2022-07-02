@@ -12,8 +12,13 @@ from PySide6.QtWidgets import (
     QRadioButton,
     QGridLayout,
     QCheckBox,
+    QWidget,
+    QCheckBox,
 )
 
+from PySide6.QtCore import (Qt, )
+
+import net
 import shape as shp
 
 
@@ -54,6 +59,37 @@ class rectPropertyDialog(QDialog):
         self.setLayout(self.mainLayout)
         self.show()
 
+
+class circlePropertyDialog(QDialog):
+    def __init__(self, parent, circleItem: shp.circle):
+        super().__init__(parent)
+        self.parent = parent
+        self.circleItem = circleItem
+        self.location = self.circleItem.scenePos().toTuple()
+        self.centre = self.circleItem.mapToScene(self.circleItem.centre).toTuple()
+        self.radius = self.circleItem.radius
+
+        self.setWindowTitle("Circle Properties")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.mainLayout = QVBoxLayout()
+        self.fLayout = QFormLayout()
+        self.fLayout.setContentsMargins(10, 10, 10, 10)
+        self.centerXEdit = QLineEdit()
+        self.centerXEdit.setText(str(self.centre[0]))
+        self.fLayout.addRow(QLabel("center x-coord:"), self.centerXEdit)
+        self.centerYEdit = QLineEdit()
+        self.centerYEdit.setText(str(self.centre[1]))
+        self.fLayout.addRow(QLabel("center y-coord:"), self.centerYEdit)
+        self.radiusEdit = QLineEdit()
+        self.radiusEdit.setText(str(self.radius))
+        self.fLayout.addRow(QLabel("radius:"), self.radiusEdit)
+        self.mainLayout.addLayout(self.fLayout)
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.show()
 
 class linePropertyDialog(QDialog):
     def __init__(self, parent, lineItem: shp.line):
@@ -148,10 +184,10 @@ class createSymbolLabelDialog(QDialog):
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.mainLayout = QVBoxLayout()
         self.fLayout = QFormLayout()
-        self.labelNameEdit = QLineEdit()
-        self.labelNameEdit.setPlaceholderText("Label Definition")
-        self.labelNameEdit.setToolTip("Enter label Definition")
-        self.fLayout.addRow(QLabel("Label Definition"), self.labelNameEdit)
+        self.labelDefinition = QLineEdit()
+        self.labelDefinition.setPlaceholderText("Label Definition")
+        self.labelDefinition.setToolTip("Enter label Definition")
+        self.fLayout.addRow(QLabel("Label Definition"), self.labelDefinition)
         self.labelHeightEdit = QLineEdit()
         self.labelHeightEdit.setPlaceholderText("Label Height")
         self.labelHeightEdit.setToolTip("Enter label Height")
@@ -187,13 +223,14 @@ class createSymbolLabelDialog(QDialog):
 
 class labelPropertyDialog(createSymbolLabelDialog):
     def __init__(self, parent, labelItem: shp.label):
+        assert isinstance(labelItem, shp.label)
         super().__init__(parent)
         self.parent = parent
         self.labelItem = labelItem
         self.location = self.labelItem.scenePos().toTuple()
 
         self.setWindowTitle("Label Properties")
-        self.labelNameEdit.setText(str(labelItem.labelName))
+        self.labelDefinition.setText(str(labelItem.labelDefinition))
         self.labelHeightEdit.setText(str(labelItem.labelHeight))
         self.labelAlignCombo.setCurrentText(labelItem.labelAlign)
         self.labelOrientCombo.setCurrentText(labelItem.labelOrient)
@@ -219,50 +256,19 @@ class symbolLabelsDialogue(QDialog):
     Dialog for changing symbol labels and attributes. Symbol properties... menu item.
     """
 
-    def __init__(self, parent, items: list):
+    def __init__(self, parent, items: list, attributes: list):
         super().__init__(parent)
         self.parent = parent
         self.items = items
+        self.attributes = attributes
         self.setWindowTitle("Symbol Labels")
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.mainLayout = QVBoxLayout()
         self.symbolPropsLayout = QGridLayout()
         self.symbolLabelsLayout = QGridLayout()
-        self.labelNameList = []
-        self.labelHeightList = []
-        self.labelAlignmentList = []
-        self.labelOrientationList = []
-        self.labelUseList = []
-        self.labelTypeList = []
-        self.labelItemList = []
-        self.attributeNameList = []
-        self.attributeTypeList = []
-        self.attributeDefList = []
-
-        # Symbol Properties
-        self.symbolPropsLayout.addWidget(QLabel("Attribute Name"), 0, 0)
-        self.symbolPropsLayout.addWidget(QLabel("Type"), 0, 1)
-        self.symbolPropsLayout.addWidget(QLabel("Definition"), 0, 2)
-        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 0)
-        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 1)
-        self.symbolPropsLayout.addWidget(QLineEdit(), 1, 2)
-        i = 0
-        self.attributeNameList.append(longLineEdit())
-        attrTypeCombo = QComboBox()
-        attrTypeCombo.addItems(shp.label.labelTypes)
-        self.attributeTypeList.append(attrTypeCombo)
-        self.attributeDefList.append(longLineEdit())
-        self.symbolPropsLayout.addWidget(self.attributeNameList[-1], 1, 0)
-        self.symbolPropsLayout.addWidget(self.attributeTypeList[-1], 1, 1)
-        self.symbolPropsLayout.addWidget(self.attributeDefList[-1], 1, 2)
-        self.attributeNameList[-1].setPlaceholderText("Enter Attribute Name")
-        self.attributeTypeList[-1].setToolTip("Enter Attribute Type")
-        self.attributeDefList[-1].setToolTip("Enter Attribute Definition")
-        self.attributeDefList[-1].editingFinished.connect(
-            lambda: self.updateAttributeDef(i)
-        )
-        # Symbol Labels
+        self.symbolAttrsMethod()
+        # Symbol Labels Layout
         self.symbolLabelsMethod()
         labelsGroup = QGroupBox("Symbol Labels")
         labelsGroup.setLayout(self.symbolLabelsLayout)
@@ -278,6 +284,45 @@ class symbolLabelsDialogue(QDialog):
         self.setLayout(self.mainLayout)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
+
+    def symbolAttrsMethod(self):
+        self.attributeNameList = []
+        self.attributeTypeList = []
+        self.attributeDefList = []
+        # Symbol Properties
+        self.symbolPropsLayout.addWidget(QLabel("Attribute Name"), 0, 0)
+        self.symbolPropsLayout.addWidget(QLabel("Type"), 0, 1)
+        self.symbolPropsLayout.addWidget(QLabel("Definition"), 0, 2)
+        i = 0
+        for item in self.attributes:
+            # print(f'item is :{item}')
+            self.attributeNameList.append(longLineEdit())
+            self.attributeNameList[i].setText(item.name)
+            self.symbolPropsLayout.addWidget(self.attributeNameList[i], i + 1, 0)
+            attrTypeCombo = QComboBox()
+            attrTypeCombo.addItems(shp.label.labelTypes)
+            self.attributeTypeList.append(attrTypeCombo)
+            self.attributeTypeList[i].setCurrentText(item.type)
+            self.symbolPropsLayout.addWidget(self.attributeTypeList[i], i + 1, 1)
+            self.attributeDefList.append(longLineEdit())
+            self.attributeDefList[i].setText(item.definition)
+            self.symbolPropsLayout.addWidget(self.attributeDefList[i], i + 1, 2)
+            i += 1
+
+        self.attributeNameList.append(longLineEdit())
+        attrTypeCombo = QComboBox()
+        attrTypeCombo.addItems(shp.label.labelTypes)
+        self.attributeTypeList.append(attrTypeCombo)
+        self.attributeDefList.append(longLineEdit())
+        self.symbolPropsLayout.addWidget(self.attributeNameList[-1], i + 2, 0)
+        self.symbolPropsLayout.addWidget(self.attributeTypeList[-1], i + 2, 1)
+        self.symbolPropsLayout.addWidget(self.attributeDefList[-1], i + 2, 2)
+        self.attributeNameList[-1].setPlaceholderText("Enter Attribute Name")
+        self.attributeTypeList[-1].setToolTip("Enter Attribute Type")
+        self.attributeDefList[-1].setToolTip("Enter Attribute Definition")
+        self.attributeDefList[-1].editingFinished.connect(
+            lambda: self.updateAttributeDef(i + 1)
+        )
 
     def updateAttributeDef(self, i):
         i += 1
@@ -297,7 +342,7 @@ class symbolLabelsDialogue(QDialog):
         )
 
     def symbolLabelsMethod(self):
-        self.labelNameList = []
+        self.labelDefinitionList = []
         self.labelHeightList = []
         self.labelAlignmentList = []
         self.labelOrientationList = []
@@ -314,10 +359,11 @@ class symbolLabelsDialogue(QDialog):
         for item in self.items:
             if type(item) == shp.label:
                 i += 1
-                self.labelNameList.append(longLineEdit())
-                self.labelNameList[-1].setText(item.labelName)
-                self.labelNameList[-1].setReadOnly(True)
-                self.symbolLabelsLayout.addWidget(self.labelNameList[i - 1], i, 0)
+                self.labelItemList.append(item)
+                self.labelDefinitionList.append(longLineEdit())
+                self.labelDefinitionList[-1].setText(item.labelDefinition)
+                self.labelDefinitionList[-1].setReadOnly(True)
+                self.symbolLabelsLayout.addWidget(self.labelDefinitionList[i - 1], i, 0)
                 self.labelHeightList.append(shortLineEdit())
                 self.labelHeightList[-1].setText(str(item.labelHeight))
                 self.symbolLabelsLayout.addWidget(self.labelHeightList[i - 1], i, 1)
@@ -341,13 +387,188 @@ class symbolLabelsDialogue(QDialog):
             self.symbolLabelsLayout.addWidget(QLabel("No symbol labels found."), 1, 0)
 
 
+class instanceProperties(QDialog):
+    def __init__(self, parent, instance: shp.symbolShape = None):
+        # assert isinstance(instance, shp.symbolShape)
+        super().__init__(parent)
+        self.parent = parent
+        self.instance = instance
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Instance Properties")
+        self.mainLayout = QVBoxLayout()
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        formLayout = QFormLayout()
+        self.libName = longLineEdit()
+        self.libName.setText(self.instance.libraryName)
+        formLayout.addRow(boldLabel("Library Name", self), self.libName)
+        self.cellName = longLineEdit()
+        self.cellName.setText(self.instance.cellName)
+        formLayout.addRow(boldLabel("Cell Name", self), self.cellName)
+        self.instName = longLineEdit()
+        self.instName.setText(self.instance.instanceName)
+        for shape in self.instance.shapes:
+            if type(shape) == shp.label and shape.labelName == "[@instName]":
+                self.instName.setText(shape.labelText)
+        formLayout.addRow(boldLabel("Instance Name", self), self.instName)
+        location = (self.instance.scenePos() - self.instance.scene().origin).toTuple()
+        self.xLocation = shortLineEdit()
+        self.xLocation.setText(str(location[0]))
+        formLayout.addRow(boldLabel("x location", self), self.xLocation)
+        self.yLocation = shortLineEdit()
+        self.yLocation.setText(str(location[1]))
+        formLayout.addRow(boldLabel("y location", self), self.yLocation)
+        formLayout.setVerticalSpacing(10)
+        self.instanceLabelsLayout = QGridLayout()
+        row_index = 0
+        for shape in self.instance.shapes:
+            # if type(shape) == shp.label and not (
+            #         shape.labelDefinition == "[@instName]" or shape.labelDefinition == "[@cellName]"):
+            if type(shape) == shp.label and shape.labelDefinition not in shp.label.predefinedLabels:
+                self.instanceLabelsLayout.addWidget(boldLabel(shape.labelName, self), row_index, 0)
+                instanceLabelDef = longLineEdit()
+                self.instanceLabelsLayout.addWidget(instanceLabelDef, row_index, 1)
+                if len(shape.labelText.split("=")) > 1:
+                    instanceLabelDef.setText(shape.labelText.split("=")[1])
+                row_index += 1
+
+        instanceAttributesLayout = QGridLayout()
+        instanceAttributesLayout.setColumnMinimumWidth(0, 100)
+        for counter, name in enumerate(self.instance.attr.keys()):
+            instanceAttributesLayout.addWidget(boldLabel(name, self), counter, 0)
+            labelType = longLineEdit()
+            labelType.setReadOnly(True)
+            labelType.setText(self.instance.attr[name][0])
+            instanceAttributesLayout.addWidget(labelType, counter, 1)
+            labelName = longLineEdit()
+            labelName.setText(self.instance.attr[name][1])
+            instanceAttributesLayout.addWidget(labelName, counter, 2)
+
+        self.mainLayout.addLayout(formLayout)
+        self.mainLayout.addWidget(boldLabel("Instance Labels", self))
+        self.mainLayout.addLayout(self.instanceLabelsLayout)
+        self.mainLayout.addSpacing(40)
+        self.mainLayout.addWidget(boldLabel("Instance Attributes", self))
+        self.mainLayout.addLayout(instanceAttributesLayout)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+class netProperties(QDialog):
+    def __init__(self, parent, net: net.schematicNet = None):
+        # assert isinstance(instance, shp.symbolShape)
+        super().__init__(parent)
+        self.parent = parent
+        self.net = net
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Net Properties")
+        self.mainLayout = QVBoxLayout()
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        formLayout = QFormLayout()
+        self.netNameEdit = longLineEdit()
+        self.netNameEdit.setText(self.net.name)
+        formLayout.addRow(boldLabel("Net Name", self), self.netNameEdit)
+        self.mainLayout.addLayout(formLayout)
+        self.mainLayout.addSpacing(40)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+class createSchematicPinDialog(createPinDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setWindowTitle("Create Schematic Pin")
+
+class symbolCreateDialog(QDialog):
+    def __init__(self, parent, inputPins: list, outputPins: list, inoutPins: list):
+        super().__init__(parent)
+        self.parent = parent
+        self.inputPinNames = [pinItem.pinName for pinItem in inputPins]
+        self.outputPinNames = [pinItem.pinName for pinItem in outputPins]
+        self.inoutPinNames = [pinItem.pinName for pinItem in inoutPins]
+        self.setWindowTitle("Create Symbol")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.mainLayout = QVBoxLayout()
+        self.cellNameLayout = QHBoxLayout()
+        self.libNameView = QLineEdit()
+        self.libNameView.setPlaceholderText(self.parent.libName)
+        self.libNameView.setReadOnly(True)
+
+        self.fLayout = QFormLayout()
+        self.topPinsEdit = longLineEdit()
+        self.topPinsEdit.setText(', '.join(self.inoutPinNames))
+        self.topPinsEdit.setToolTip("Enter top pins")
+        self.fLayout.addRow(QLabel("Top Pins:"), self.topPinsEdit)
+        self.leftPinsEdit = longLineEdit()
+        self.leftPinsEdit.setText(', '.join(self.inputPinNames))
+        self.leftPinsEdit.setToolTip("Enter left pins")
+        self.fLayout.addRow(QLabel("Left Pins:"), self.leftPinsEdit)
+        self.bottomPinsEdit = longLineEdit()
+        self.bottomPinsEdit.setToolTip("Enter bottom pins")
+        self.fLayout.addRow(QLabel("Bottom Pins:"), self.bottomPinsEdit)
+        self.rightPinsEdit = longLineEdit()
+        self.rightPinsEdit.setText(', '.join(self.outputPinNames))
+        self.rightPinsEdit.setToolTip("Enter right pins")
+        self.fLayout.addRow(QLabel("Right Pins:"), self.rightPinsEdit)
+        self.mainLayout.addLayout(self.fLayout)
+        self.mainLayout.addSpacing(20)
+        self.geomLayout = QFormLayout()
+        self.stubLengthEdit = QLineEdit()
+        self.stubLengthEdit.setText('20')
+        self.stubLengthEdit.setToolTip('Enter stub lengths')
+        self.geomLayout.addRow(QLabel("Stub Length:"),self.stubLengthEdit)
+        self.pinDistanceEdit = QLineEdit()
+        self.pinDistanceEdit.setText('40')
+        self.pinDistanceEdit.setToolTip('Enter pin spacing')
+        self.geomLayout.addRow(QLabel("Pin spacing:"),self.pinDistanceEdit)
+        self.mainLayout.addLayout(self.geomLayout)
+        self.mainLayout.addSpacing(40)
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.show()
+
+class deleteCellViewDialog(QDialog):
+    def __init__(self, cellName, viewName, *args):
+        super().__init__(*args)
+        self.setWindowTitle(f'Delete {cellName}-{viewName} CellView?')
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.layout = QVBoxLayout()
+        message = QLabel(f"{cellName}-{viewName} will be recreated!")
+        self.layout.addWidget(message)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
+
+
 class shortLineEdit(QLineEdit):
     def __init__(self):
         super().__init__(None)
-        self.setMaximumWidth(50)
+        self.setMaximumWidth(80)
+
+
+class boldLabel(QLabel):
+    def __init__(self, text: str, parent: QWidget = None):
+        super().__init__(text, parent)
+        self.setTextFormat(Qt.RichText)
+        self.setText("<b>" + text + "</b>")
 
 
 class longLineEdit(QLineEdit):
     def __init__(self):
         super().__init__(None)
-        self.setMaximumWidth(250)
+        self.setMaximumWidth(500)
