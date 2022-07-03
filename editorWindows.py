@@ -372,7 +372,6 @@ class editorWindow(QMainWindow):
     def moveOrigin(self):
         self.centralW.scene.changeOrigin = True
 
-
 class schematicEditor(editorWindow):
     def __init__(self, schematicView, libraryDict: dict, libraryView) -> None:
         super().__init__(
@@ -409,6 +408,8 @@ class schematicEditor(editorWindow):
         self.undoAction.triggered.connect(self.undoClick)
         self.redoAction.triggered.connect(self.redoClick)
         self.netlistAction.triggered.connect(self.createNetlistClick)
+        self.rotateAction.triggered.connect(self.rotateItemClick)
+
 
     def _createMenuBar(self):
         super()._createMenuBar()
@@ -519,6 +520,10 @@ class schematicEditor(editorWindow):
     def copyClick(self, s):
         pass
 
+    def rotateItemClick(self,s):
+        self.centralW.scene.rotateItem = True
+        self.centralW.scene.itemSelect = False
+
     def checkSaveCell(self):
         self.centralW.scene.saveSchematicCell(self.file)
 
@@ -534,7 +539,8 @@ class schematicEditor(editorWindow):
 
     def createNetlistClick(self, s):
         self.centralW.scene.createNetlist(True)
-
+        self.centralW.scene.selectItem = False
+        self.messageLine.setText("Click on an item to rotate CW 90 degrees.")
 
 class symbolEditor(editorWindow):
     def __init__(self, symbolView, libraryDict: dict, libraryView):
@@ -909,19 +915,10 @@ class symbol_scene(editor_scene):
                 self.addItem(self.draftLabel)
             elif self.rotateItem:
                 if self.items(self.start):
-                    self.itemsAtMousePress = self.items(self.start)
-                    self.itemToRotate = self.itemsAtMousePress[0]
-                    self.rotationOriginPoint = self.itemToRotate.mapFromScene(
-                        self.start
-                        )
-                    self.itemToRotate.setTransformOriginPoint(
-                        self.rotationOriginPoint
-                        )
-                    self.itemToRotate.angle += 90
-                    self.itemToRotate.setRotation(self.itemToRotate.angle)
-                    self.rotateItem = False
+                    self.rotateSelectedItem(self.start)
 
         super().mousePressEvent(mouse_event)
+
 
     def mouseMoveEvent(self, mouse_event):
         self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
@@ -1120,9 +1117,18 @@ class symbol_scene(editor_scene):
                     self.selectedItem.pos().y() + self.gridTuple[1], )
                 )
 
-    def rotateSelectedItem(self):
-        if hasattr(self, "selectedItem"):
-            pass
+    def rotateSelectedItem(self, point:QPoint):
+        self.itemsAtMousePress = self.items(point)
+        self.itemToRotate = self.itemsAtMousePress[0]
+        self.rotationOriginPoint = self.itemToRotate.mapFromScene(
+            self.start
+        )
+        self.itemToRotate.setTransformOriginPoint(
+            self.rotationOriginPoint
+        )
+        self.itemToRotate.angle += 90
+        self.itemToRotate.setRotation(self.itemToRotate.angle)
+        self.rotateItem = False
 
     def itemProperties(self):
         if self.selectedItem is not None:
@@ -1404,6 +1410,10 @@ class schematic_scene(editor_scene):
                 pin.setSelected(True)
                 self.parent.parent.messageLine.setText("Pin added")
                 self.drawPin = False
+
+            elif self.rotateItem:
+                if self.items(self.start):
+                    self.rotateSelectedItem(self.start)
 
     def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(mouse_event)
@@ -1817,6 +1827,22 @@ class schematic_scene(editor_scene):
         undoCommand = us.addShapeUndo(self, pin)
         self.undoStack.push(undoCommand)
         return pin
+
+    def rotateSelectedItem(self, point:QPoint):
+        self.itemsAtMousePress = self.items(point)
+        if self.itemsAtMousePress[0].parentItem() is not None:
+            self.itemToRotate = self.itemsAtMousePress[
+                0].parentItem()
+        self.rotationOriginPoint = self.itemToRotate.mapFromScene(
+            self.start
+        )
+        self.itemToRotate.setTransformOriginPoint(
+            self.rotationOriginPoint
+        )
+        self.itemToRotate.angle += 90
+        self.itemToRotate.setRotation(self.itemToRotate.angle)
+        self.rotateItem = False
+        self.selectItem = True
 
     def drawInstance(self, pos: QPoint):
         """

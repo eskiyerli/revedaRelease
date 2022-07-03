@@ -195,6 +195,7 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
         symbolInstance.cellName = item["cell"]
         symbolInstance.counter = instCounter
         symbolInstance.instanceName = item["name"]
+        symbolInstance.angle = item["angle"]
         symbolInstance.viewName = "symbol"
         symbolInstance.attr = symbolAttributes
         for label in symbolInstance.labels:
@@ -242,4 +243,5 @@ def createSchematicPins(item, gridTuple):
             start, pen, pinName, pinDir, pinType, gridTuple
             )
         pinItem.setPos(QPoint(item["location"][0], item["location"][1]))
+        pinItem.angle = item["angle"]
         return pinItem
