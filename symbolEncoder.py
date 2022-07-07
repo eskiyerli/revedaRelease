@@ -110,8 +110,9 @@ class schematicEncoder(json.JSONEncoder):
                 "view": item.__dict__["viewName"],
                 "name": item.__dict__["instanceName"],
                 "instCounter": item.__dict__["counter"],
-                "pinLocations": item.__dict__["pinLocations"],
-                "attributes": item.__dict__["attr"], "labelDict": itemLabelDict,
+                # "pinLocations": item.__dict__["pinLocations"],
+                # "attributes": item.__dict__["attr"],
+                "labelDict": itemLabelDict,
                 "location": (item.scenePos() - item.scene().origin).toTuple(),
                 "angle": item.__dict__["angle"],}
             return itemDict

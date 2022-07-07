@@ -99,7 +99,7 @@ def createLineItem(item, gridTuple):
     line = shp.line(start, end, pen, gridTuple)
     line.setPos(QPoint(item["location"][0], item["location"][1]))
     line.setRotation(item["angle"])
-    line.angle = [item["angle"]]
+    line.angle = item["angle"]
     return line
 
 
@@ -152,10 +152,10 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
         libraryPath = libraryDict[item["library"]]
         cell = item["cell"]
         instCounter = item["instCounter"]
-        instAttributes = item[
-            "attributes"]  # dictionary of attributes from schematic instance
-        itemShapes = []
-        symbolAttributes = {}
+        # instAttributes = item[
+        #     "attributes"]  # dictionary of attributes from schematic instance
+        itemShapes = list()
+        symbolAttributes = dict()
         labelDict = item["labelDict"]
         draftPen = QPen(QColor("white"), 1)
         # find the symbol file
@@ -182,15 +182,15 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
             except json.decoder.JSONDecodeError:
                 print("Error: Invalid Symbol file")
         # now go over attributes and assign the values from JSON file
-        for key, value in symbolAttributes.items():
-            if key in instAttributes:
-                symbolAttributes[key] = instAttributes[key]
+        # for key, value in symbolAttributes.items():
+        #     if key in instAttributes:
+        #         symbolAttributes[key] = instAttributes[key]
         symbolInstance = shp.symbolShape(
             draftPen, gridTuple, itemShapes, symbolAttributes
             )
-        symbolInstance.pinLocations = {
-            item.pinName: (item.start + item.scenePos().toPoint()).toTuple() for
-            item in symbolInstance.pins}
+        # symbolInstance.pinLocations = {
+        #     item.pinName: (item.start + item.scenePos().toPoint()).toTuple() for
+        #     item in symbolInstance.pins}
         symbolInstance.libraryName = item["library"]
         symbolInstance.cellName = item["cell"]
         symbolInstance.counter = instCounter
@@ -202,6 +202,7 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
             if label.labelName in labelDict.keys():
                 label.labelText = labelDict[label.labelName][1]
         symbolInstance.setPos(position)
+        symbolInstance.setRotation(symbolInstance.angle)
         return symbolInstance
 
 
