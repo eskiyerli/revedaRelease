@@ -1,12 +1,12 @@
 ********************************************************************************
 * Revolution EDA CDL Netlist
 * Library: designs
-* Top Cell Name: lowPassRC
+* Top Cell Name: lowPassFilter
 * View Name: schematic
-* Date: 2022-07-05 10:04:04.357899
+* Date: 2022-07-07 17:28:38.884588
 ********************************************************************************
 .GLOBAL gnd!
 
-CI4  OUT INP C = 20p
-RI2  OUT gnd! R = 100
+XI2 INP net0 lowPassRC
+XI3 net0 OUT lowPassRC
 .END
