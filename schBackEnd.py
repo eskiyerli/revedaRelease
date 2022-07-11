@@ -238,7 +238,6 @@ def decodeLabel(label: shp.label):
         except Exception as e:
             print(e)
 
-
 def createNetlistLine(symbolItem: shp.symbolShape):
     """
     Create a netlist line from a nlp device format line.
@@ -256,3 +255,10 @@ def createNetlistLine(symbolItem: shp.symbolShape):
                 f'[|{pinName}:%]', netName
                 )
     return nlpDeviceFormatLine  # #     return ""
+
+def createSubcktHeaderLine(symbolItem: shp.symbolShape):
+    """
+    create the subckt definition line
+    """
+    nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"][1].strip()
+    print(nlpDeviceFormatLine)
