@@ -479,11 +479,10 @@ class schematicEditor(editorWindow):
         revEDAPathObj = pathlib.Path(__file__)
         revEDADirObj = revEDAPathObj.parent
         if self.symbolChooser is None:
-            self.symbolChooser = symbolChooser(self.libraryDict, self.cellViews,
-                                               self.centralW.scene)  # create the library browser
+            self.symbolChooser = symbolChooser(self, self.centralW.scene)  # create the library browser
             self.symbolChooser.show()
         else:
-            self.symbolChooser.show()
+            self.symbolChooser.raise_()
 
     def createPinClick(self, s):
         createPinDlg = pdlg.createSchematicPinDialog(self)
@@ -1808,7 +1807,7 @@ class schematic_scene(editor_scene):
         self.rotateItem = False
         self.selectItem = True
 
-    def drawInstance(self, symbolFile:pathlib.Path, pos: QPoint):
+    def drawInstance(self,  pos: QPoint):
         """
         Add an instance of a symbol to the scene.
         """
@@ -2033,7 +2032,7 @@ class schematic_scene(editor_scene):
         symbolScene = symbolWindow.centralW.scene
         symbolScene.rectDraw(QPoint(0, 0), QPoint(rectXDim, rectYDim),
                              self.symbolPen, self.gridTuple)
-        symbolScene.labelDraw(QPoint(int(0.25 * rectXDim), int(0.5 * rectYDim)),
+        symbolScene.labelDraw(QPoint(int(0.25 * rectXDim), int(0.4 * rectYDim)),
                               self.labelPen, '[@cellName]', self.gridTuple,
                               "NLPLabel", "12", "Center", "R0", "Instance")
         symbolScene.labelDraw(QPoint(int(rectXDim), int(-0.2 * rectYDim)),
@@ -2079,7 +2078,7 @@ class schematic_scene(editor_scene):
                                      symbolScene.symbolPen,
                                      symbolScene.gridTuple)
                 symbolScene.addItem(schematicPins[schematicPinNames.index(
-                    topPinNames[i])].toSymbolPin(topPinLocs[i],
+                    bottomPinNames[i])].toSymbolPin(bottomPinLocs[i],
                                                  symbolScene.pinPen,
                                                  symbolScene.gridTuple))
             # symbol attribute generation for netlisting.
@@ -2188,14 +2187,153 @@ class schematic_view(editor_view):
                                  if isinstance(item, net.schematicNet)]
         super().mouseReleaseEvent(mouse_event)
 
+class libraryBrowser(QMainWindow):
+    def __init__(self, parent:QMainWindow) -> None:
+        super().__init__()
+        self.parent = parent
+        self.libraryDict = self.parent.libraryDict
+        self.cellViews = self.parent.cellViews
+        self.setWindowTitle("Library Browser")
+        self._createMenuBar()
+        self._createActions()
+        self._createToolBars()
+        self.initUI()
+
+    def initUI(self):
+        self.libBrowserCont = libraryBrowserContainer(self)
+        self.setCentralWidget(self.libBrowserCont)
+
+    def _createMenuBar(self):
+        self.browserMenubar = self.menuBar()
+        self.browserMenubar.setNativeMenuBar(False)
+        self.libraryMenu = self.browserMenubar.addMenu("&Library")
+
+    def _createActions(self):
+        openLibIcon = QIcon(":/icons/database--plus.png")
+        self.openLibAction = QAction(openLibIcon, "Create/Open Lib...", self)
+        self.libraryMenu.addAction(self.openLibAction)
+        self.openLibAction.triggered.connect(self.openLibDialog)
+
+        self.libraryEditorAction = QAction(openLibIcon, "Library Editor", self)
+        self.libraryMenu.addAction(self.libraryEditorAction)
+        self.libraryEditorAction.triggered.connect(self.libraryEditorClick)
+
+        newLibIcon = QIcon(":/icons/database--plus.png")
+        self.newLibAction = QAction(newLibIcon, "New Lib...", self)
+        self.libraryMenu.addAction(self.newLibAction)
+        self.newLibAction.triggered.connect(self.newLibClick)
+
+        saveLibIcon = QIcon(":/icons/database-import.png")
+        self.saveLibAction = QAction(saveLibIcon, "Save Lib...", self)
+        self.libraryMenu.addAction(self.saveLibAction)
+
+        closeLibIcon = QIcon(":/icons/database-delete.png")
+        self.closeLibAction = QAction(closeLibIcon, "Close Lib...", self)
+        self.libraryMenu.addAction(self.closeLibAction)
+
+        self.libraryMenu.addSeparator()
+        newCellIcon = QIcon(":/icons/document--plus.png")
+        self.newCellAction = QAction(newCellIcon, "New Cell...", self)
+        self.libraryMenu.addAction(self.newCellAction)
+
+        openCellIcon = QIcon(":/icons/document--pencil.png")
+        self.openCellAction = QAction(openCellIcon, "Open Cell...", self)
+        self.libraryMenu.addAction(self.openCellAction)
+
+        saveCellIcon = QIcon(":/icons/document-import.png")
+        self.saveCellAction = QAction(saveCellIcon, "Save Cell", self)
+        self.libraryMenu.addAction(self.saveCellAction)
+
+        closeCellIcon = QIcon(":/icons/document--minus.png")
+        closeCellAction = QAction(closeCellIcon, "Close Cell", self)
+        self.libraryMenu.addAction(closeCellAction)
+
+        deleteIcon = QIcon(":/icons/node-delete.png")
+        self.deleteCellAction = QAction(deleteIcon, "Delete", self)
+        self.libraryMenu.addAction(self.deleteCellAction)
+
+    def _createToolBars(self):
+        # Create tools bar called "main toolbar"
+        toolbar = QToolBar("Main Toolbar", self)
+        # place toolbar at top
+        self.addToolBar(toolbar)
+        toolbar.addAction(self.newLibAction)
+        toolbar.addAction(self.openLibAction)
+        toolbar.addAction(self.saveLibAction)
+        toolbar.addSeparator()
+        toolbar.addAction(self.newCellAction)
+        toolbar.addAction(self.openCellAction)
+        toolbar.addAction(self.saveCellAction)
+
+    def openLibDialog(self):
+        home_dir = str(pathlib.Path.cwd())
+        libDialog = QFileDialog(self, "Create/Open Library", home_dir)
+        libDialog.setFileMode(QFileDialog.Directory)
+        # libDialog.Option(QFileDialog.ShowDirsOnly)
+        if libDialog.exec() == QDialog.Accepted:
+            self.libraryDict[libDialog.selectedFiles()[0]] = pathlib.Path(
+                libDialog.selectedFiles()[0])
+            self.libBrowserCont.designView.reworkDesignLibrariesView()
+
+    def libraryEditorClick(self, s):
+        pathEditDlg=libraryPathEditorDialog(self)
+        # dlg.buttonBox.clicked(dlg.buttonBox.)
+
+        if pathEditDlg.exec() == QDialog.Accepted:
+            self.reworkLibraryModel(pathEditDlg)
+            #  now update root libraryDict
+            self.parent.libraryDict = self.libraryDict
+
+    def newLibClick(self, s):
+        print('not implemented yet.')
+
+
+    def reworkLibraryModel(self, dialog:QDialog):
+        libPath = pathlib.Path.cwd().joinpath("library.yaml")
+        tempLibDict = {}
+        for item in dialog.libraryEditRowList:
+            if item.libraryNameEdit.text().strip() != "":  # check if the key is empty
+                tempLibDict[
+                    item.libraryNameEdit.text()] = item.libraryPathEdit.text()
+        try:
+            with libPath.open(mode="w") as f:
+                scb.writeLibDefFile(tempLibDict, libPath)
+        except IOError:
+            print(f"Cannot save library definitions in {libPath}")
+        # self.parent.centralWidget.treeView.addLibrary()
+        self.libraryDict = {}  # now empty the library dict
+        for key, value in tempLibDict.items():
+            self.libraryDict[key] = pathlib.Path(
+                value)  # redefine  libraryDict with pathlib paths.
+        self.libBrowserCont.designView.libraryModel.clear()
+        self.libBrowserCont.designView.initModel()
+        self.libBrowserCont.designView.setModel(
+            self.libBrowserCont.designView.libraryModel)
+        for designPath in self.libraryDict.values():  # type: Path
+            self.libBrowserCont.designView.populateLibrary(designPath,
+                self.libBrowserCont.designView.rootItem)
+        self.libBrowserCont.designView.libraryDict = self.libraryDict
+
+
+class libraryBrowserContainer(QWidget):
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
+        self.parent = parent
+        self.initUI()
+
+    def initUI(self):
+        self.layout = QVBoxLayout()
+        self.designView = designLibrariesView(self)
+        self.layout.addWidget(self.designView)
+        self.setLayout(self.layout)
+
 
 class designLibrariesView(QTreeView):
-    def __init__(self, parent, libraryDict: dict,
-                 cellViews: list = ['schematic', 'symbol']):
+    def __init__(self, parent):
         super().__init__(parent=parent)  # QTreeView
         self.parent = parent  # type: QMainWindow
-        self.libraryDict = libraryDict  # type: dict
-        self.cellViews = cellViews  # type: list
+        self.libraryDict = self.parent.parent.libraryDict  # type: dict
+        self.cellViews = self.parent.parent.cellViews  # type: list
         self.openViews = {}  # type: dict
         self.viewCounter = 0
         self.init_UI()
@@ -2396,116 +2534,6 @@ class designLibrariesView(QTreeView):
             pass
 
 
-class libraryBrowser(QMainWindow):
-    def __init__(self, libraryDict, cellViews) -> None:
-        super().__init__()
-        self.libraryDict = libraryDict
-        self.cellViews = cellViews
-        self.setWindowTitle("Library Browser")
-        self._createMenuBar()
-        self._createActions()
-        self._createToolBars()
-        self.initUI()
-
-    def initUI(self):
-        self.libBrowserCont = libraryBrowserContainer(self, self.libraryDict)
-        self.setCentralWidget(self.libBrowserCont)
-
-    def _createMenuBar(self):
-        self.browserMenubar = self.menuBar()
-        self.browserMenubar.setNativeMenuBar(False)
-        self.libraryMenu = self.browserMenubar.addMenu("&Library")
-
-    def _createActions(self):
-        openLibIcon = QIcon(":/icons/database--plus.png")
-        self.openLibAction = QAction(openLibIcon, "Create/Open Lib...", self)
-        self.libraryMenu.addAction(self.openLibAction)
-        self.openLibAction.triggered.connect(self.openLibDialog)
-
-        self.libraryEditorAction = QAction(openLibIcon, "Library Editor", self)
-        self.libraryMenu.addAction(self.libraryEditorAction)
-        self.libraryEditorAction.triggered.connect(self.libraryEditorClick)
-
-        newLibIcon = QIcon(":/icons/database--plus.png")
-        self.newLibAction = QAction(newLibIcon, "New Lib...", self)
-        self.libraryMenu.addAction(self.newLibAction)
-        self.newLibAction.triggered.connect(self.newLibClick)
-
-        saveLibIcon = QIcon(":/icons/database-import.png")
-        self.saveLibAction = QAction(saveLibIcon, "Save Lib...", self)
-        self.libraryMenu.addAction(self.saveLibAction)
-
-        closeLibIcon = QIcon(":/icons/database-delete.png")
-        self.closeLibAction = QAction(closeLibIcon, "Close Lib...", self)
-        self.libraryMenu.addAction(self.closeLibAction)
-
-        self.libraryMenu.addSeparator()
-        newCellIcon = QIcon(":/icons/document--plus.png")
-        self.newCellAction = QAction(newCellIcon, "New Cell...", self)
-        self.libraryMenu.addAction(self.newCellAction)
-
-        openCellIcon = QIcon(":/icons/document--pencil.png")
-        self.openCellAction = QAction(openCellIcon, "Open Cell...", self)
-        self.libraryMenu.addAction(self.openCellAction)
-
-        saveCellIcon = QIcon(":/icons/document-import.png")
-        self.saveCellAction = QAction(saveCellIcon, "Save Cell", self)
-        self.libraryMenu.addAction(self.saveCellAction)
-
-        closeCellIcon = QIcon(":/icons/document--minus.png")
-        closeCellAction = QAction(closeCellIcon, "Close Cell", self)
-        self.libraryMenu.addAction(closeCellAction)
-
-        deleteIcon = QIcon(":/icons/node-delete.png")
-        self.deleteCellAction = QAction(deleteIcon, "Delete", self)
-        self.libraryMenu.addAction(self.deleteCellAction)
-
-    def _createToolBars(self):
-        # Create tools bar called "main toolbar"
-        toolbar = QToolBar("Main Toolbar", self)
-        # place toolbar at top
-        self.addToolBar(toolbar)
-        toolbar.addAction(self.newLibAction)
-        toolbar.addAction(self.openLibAction)
-        toolbar.addAction(self.saveLibAction)
-        toolbar.addSeparator()
-        toolbar.addAction(self.newCellAction)
-        toolbar.addAction(self.openCellAction)
-        toolbar.addAction(self.saveCellAction)
-
-    def openLibDialog(self):
-        home_dir = str(pathlib.Path.cwd())
-        libDialog = QFileDialog(self, "Create/Open Library", home_dir)
-        libDialog.setFileMode(QFileDialog.Directory)
-        # libDialog.Option(QFileDialog.ShowDirsOnly)
-        if libDialog.exec() == QDialog.Accepted:
-            self.libraryDict[libDialog.selectedFiles()[0]] = pathlib.Path(
-                libDialog.selectedFiles()[0])
-            self.libBrowserCont.designView.reworkDesignLibrariesView()
-
-    def libraryEditorClick(self, s):
-        dlg = libraryPathEditorDialog(self)
-        dlg.exec()
-
-    def newLibClick(self, s):
-        print('not implemented yet.')
-
-
-class libraryBrowserContainer(QWidget):
-    def __init__(self, parent, libraryDict) -> None:
-        super().__init__(parent)
-        self.parent = parent
-        self.libraryDict = libraryDict
-        self.initUI()
-
-    def initUI(self):
-        self.layout = QVBoxLayout()
-        self.designView = designLibrariesView(self, self.libraryDict,
-                                              self.parent.cellViews)
-        self.layout.addWidget(self.designView)
-        self.setLayout(self.layout)
-
-
 class createCellDialog(QDialog):
     def __init__(self, parent, libraryModel, selectedItem):
         super().__init__(parent)
@@ -2691,6 +2719,7 @@ class libraryPathEditorDialog(QDialog):
         self.libraryDict = self.parent.libraryDict
         self.init_UI()
 
+
     def init_UI(self):
         self.setWindowTitle("Library Path Editor")
         mainLayout = QVBoxLayout()
@@ -2715,49 +2744,16 @@ class libraryPathEditorDialog(QDialog):
         self.libraryEditRowList[-1].libraryPathEdit.textChanged.connect(
             self.addRow)
         mainLayout.addLayout(self.entriesLayout)
-        applyButton = QPushButton("Apply")
-        applyButton.clicked.connect(self.apply)
-        applyButton.setDefault(False)
-        cancelButton = QPushButton("Cancel")
-        cancelButton.clicked.connect(self.cancel)
-        buttonBox = QDialogButtonBox(Qt.Horizontal)
-        buttonBox.addButton(applyButton, QDialogButtonBox.ActionRole)
-        buttonBox.addButton(cancelButton, QDialogButtonBox.ActionRole)
-        mainLayout.addWidget(buttonBox)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        mainLayout.addWidget(self.buttonBox)
         self.setLayout(mainLayout)
-
-    def apply(self):
-        self.reworkLibraryModel()
-        self.close()
-
-    def reworkLibraryModel(self):
-        libPath = pathlib.Path.cwd().joinpath("library.yaml")
-        tempLibDict = {}
-        for item in self.libraryEditRowList:
-            if item.libraryNameEdit.text() != "":  # check if the key is empty
-                tempLibDict[
-                    item.libraryNameEdit.text()] = item.libraryPathEdit.text()
-        try:
-            with libPath.open(mode="w") as f:
-                scb.writeLibDefFile(tempLibDict, libPath)
-        except IOError:
-            print(f"Cannot save library definitions in {libPath}")
-        # self.parent.centralWidget.treeView.addLibrary()
-        self.libraryDict = {}  # now empty the library dict
-        for key, value in tempLibDict.items():
-            self.libraryDict[key] = pathlib.Path(
-                value)  # redefine  libraryDict with pathlib paths.
-        self.parent.libraryDict = self.libraryDict  # propogate changes up to mainWindow
-        self.parent.libBrowserCont.designView.libraryModel.clear()
-        self.parent.libBrowserCont.designView.initModel()
-        self.parent.libBrowserCont.designView.setModel(
-            self.parent.libBrowserCont.designView.libraryModel)
-        for designPath in self.libraryDict.values():  # type: Path
-            self.parent.libBrowserCont.designView.populateLibrary(designPath,
-                                                                  self.parent.libBrowserCont.designView.rootItem)
-
-    def cancel(self):
-        self.close()
+        self.show()
+    #
+    # def cancel(self):
+    #     self.close()
 
     def addRow(self):
         if self.libraryEditRowList[-1].libraryPathEdit.text() != "":
@@ -2821,8 +2817,8 @@ class libraryNameEditC(QLineEdit):
 
 class libraryPathEditC(QLineEdit):
     def __init__(self, parent):
-        super().__init__(parent)
         self.parent = parent
+        super().__init__(parent)
         self.init_UI()
 
     def init_UI(self):
@@ -2832,36 +2828,34 @@ class libraryPathEditC(QLineEdit):
 
 
 class symbolChooser(libraryBrowser):
-    def __init__(self, libraryDict: dict, cellViews, scene):
+    def __init__(self, parent, scene):
+        self.parent = parent
+        self.libraryDict = self.parent.libraryDict
         self.scene = scene
-        super().__init__(libraryDict, cellViews)
+        super().__init__(parent)
         self.setWindowTitle("Symbol Chooser")
 
     def initUI(self):
-        self.symBrowserCont = symbolBrowserContainer(parent=self,
-                                                     libraryDict=self.libraryDict)
+        self.symBrowserCont = symbolBrowserContainer(parent=self)
         self.setCentralWidget(self.symBrowserCont)
 
-
 class symbolBrowserContainer(libraryBrowserContainer):
-    def __init__(self, parent, libraryDict) -> None:
+    def __init__(self, parent) -> None:
         self.parent = parent
-        super().__init__(parent, libraryDict)
+        super().__init__(parent)
 
     def initUI(self):
         self.layout = QVBoxLayout()
-        self.designView = symLibrariesView(self, self.libraryDict,
-                                           self.parent.cellViews)
+        self.designView = symLibrariesView(self)
         self.layout.addWidget(self.designView)
         self.setLayout(self.layout)
 
 
 class symLibrariesView(designLibrariesView):
-    def __init__(self, parent, libraryDict: dict = {},
-                 cellViews: list = ['symbol']):
+    def __init__(self, parent):
         self.parent = parent
         self.scene = self.parent.parent.scene
-        super().__init__(parent, libraryDict, cellViews)
+        super().__init__(parent)
 
     def contextMenuEvent(self, event):
         menu = QMenu(self)
@@ -2910,10 +2904,6 @@ class symLibrariesView(designLibrariesView):
     def addSymbol(self):
         assert type(self.scene) is schematic_scene, 'not a schematic scene'
         symbolFile = self.selectedItem.data(Qt.UserRole + 2)
-        # cellName = self.selectedItem.parent().cellName
-        # libraryName = self.selectedItem.parent().parent().libraryName
         self.scene.instanceSymbolFile = symbolFile
-        # self.scene.instanceCell = cellName
-        # self.scene.instanceLib = libraryName
         self.scene.addInstance = True
         self.scene.itemCounter += 1
