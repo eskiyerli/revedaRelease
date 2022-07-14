@@ -134,12 +134,15 @@ class mainWindow(QMainWindow):
     # open library browser window
     def libraryBrowserClick(self):
         if self.libraryBrowser is None:
-            self.libraryBrowser = edw.libraryBrowser(
-                self.libraryDict, self.cellViews
-            )  # create the library browser
+            self.libraryBrowser = edw.libraryBrowser(self)  # create the library browser
             self.libraryBrowser.show()
+            # update the main library dictionary if library path dialogue
+            # is OK'd.
         else:
-            self.libraryBrowser.show()
+            self.libraryBrowser.raise_()
+
+    def libDictUpdate(self):
+        self.libraryDict = self.libraryBrowser.libraryDict
 
     def exitApp(self):
         self.app.closeAllWindows()

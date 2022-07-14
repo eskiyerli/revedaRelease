@@ -3,10 +3,14 @@
 * Library: designs
 * Top Cell Name: lowPassFilter
 * View Name: schematic
-* Date: 2022-07-07 17:28:38.884588
+* Date: 2022-07-11 18:14:53.812828
 ********************************************************************************
 .GLOBAL gnd!
 
-XI2 INP net0 lowPassRC
-XI3 net0 OUT lowPassRC
+CI4  OUT gnd! C = 1p
+XI2 INP OUT lowPassRC
+.SUBCKT lowPassRC  INP OUT  
+CI4  OUT INP C = 20p
+RI2  OUT gnd! R = 100
+.ENDS lowPassRC 
 .END
