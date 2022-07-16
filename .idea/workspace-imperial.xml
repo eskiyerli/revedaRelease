@@ -7,14 +7,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="schematic items can rotate.">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
+    <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="Working on symbol generation.">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/loadJSON.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lowPassRC.cir" beforeDir="false" afterPath="$PROJECT_DIR$/lowPassRC.cir" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/shape.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,21 +187,7 @@
       <option name="project" value="LOCAL" />
       <updated>1656435830778</updated>
     </task>
-    <task id="LOCAL-00012" summary="symbol items can rotate.">
-      <created>1656712217667</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1656712217667</updated>
-    </task>
-    <task id="LOCAL-00013" summary="schematic items can rotate.">
-      <created>1656838876466</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1656838876466</updated>
-    </task>
-    <option name="localTasksCounter" value="14" />
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -231,9 +214,7 @@
     <MESSAGE value="Start of schematic pin work.&#10;Move of symbols are fixed." />
     <MESSAGE value="Schematic pins are in good shape." />
     <MESSAGE value="LibraryView rework." />
-    <MESSAGE value="symbol items can rotate." />
-    <MESSAGE value="schematic items can rotate." />
-    <option name="LAST_COMMIT_MESSAGE" value="schematic items can rotate." />
+    <option name="LAST_COMMIT_MESSAGE" value="LibraryView rework." />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>

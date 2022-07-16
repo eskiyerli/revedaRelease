@@ -1,7 +1,7 @@
 import json
 from PySide6.QtGui import (QUndoCommand)
-import loadJSON as lj
-import symbolEncoder as se
+import fileio.loadJSON as lj
+import fileio.symbolEncoder as se
 
 
 class addShapeUndo(QUndoCommand):

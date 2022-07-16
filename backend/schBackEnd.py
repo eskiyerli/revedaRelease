@@ -8,7 +8,7 @@ from PySide6.QtGui import (QStandardItem, )
 from PySide6.QtWidgets import (QMessageBox, )
 from ruamel.yaml import YAML
 
-import shape as shp
+import common.shape as shp
 
 
 class libraryItem(QStandardItem):
@@ -242,7 +242,7 @@ def createNetlistLine(symbolItem: shp.symbolShape):
     """
     Create a netlist line from a nlp device format line.
     """
-    nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"][1].strip()
+    nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"].strip()
     # nlpDeviceFormatLine.replace("[@instName]", f'{symbolItem.instanceName}')
     for labelItem in symbolItem.labels:
         if labelItem.labelDefinition in nlpDeviceFormatLine:

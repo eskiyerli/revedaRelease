@@ -26,9 +26,9 @@ import json
 from PySide6.QtCore import (QPoint, Qt, )  # QtCore
 from PySide6.QtGui import (QColor, QPen, )
 
-import shape as shp
-import symbolEncoder as se
-import net as net
+import common.shape as shp
+import fileio.symbolEncoder as se
+import common.net as net
 
 
 def createSymbolItems(item, gridTuple):
@@ -138,10 +138,7 @@ def createLabelItem(item, gridTuple):
 
 def createSymbolAttribute(item):
     if item["type"] == "attribute":
-        return se.symbolAttribute(
-            item["name"], item["attributeType"], item["definition"]
-            )
-
+        return se.symbolAttribute(item["name"],item["definition"])
 
 def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
     """
@@ -149,7 +146,11 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
     """
     if item["type"] == "symbolShape":
         position = QPoint(item["location"][0], item["location"][1])
-        libraryPath = libraryDict[item["library"]]
+        # libraryPath = libraryDict[item["library"]]
+        libraryPath = libraryDict.get(item["library"])
+        if libraryPath is None:
+            print(f'{item["library"]} cannot be found.')
+            return None
         cell = item["cell"]
         instCounter = item["instCounter"]
         # instAttributes = item[
@@ -177,8 +178,7 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
                         itemShapes.append(createLabelItem(shape, gridTuple))
                     # just recreate attributes dictionary
                     elif shape["type"] == "attribute":
-                        symbolAttributes[shape["name"]] = [
-                            shape["attributeType"], shape["definition"], ]
+                        symbolAttributes[shape["name"]] = shape["definition"]
             except json.decoder.JSONDecodeError:
                 print("Error: Invalid Symbol file")
         # now go over attributes and assign the values from JSON file

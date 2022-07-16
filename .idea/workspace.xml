@@ -7,15 +7,50 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="symbol generation works for simple circuits. No subcircuit parameters yet.">
-      <change afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace-imperial.xml" afterDir="false" />
+    <list default="true" id="047f67af-10c2-4902-aa9b-5546059c5f79" name="Changes" comment="Hieararchical netlisting works for subcircuits without parameters.">
+      <change afterPath="$PROJECT_DIR$/.idea/copyright/RevEDA.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/schBackEnd.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/undoStack.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/Point.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/Vector.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/cellview.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/circuitElements.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/net.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/pens.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/shape.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fileio/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fileio/loadJSON.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fileio/symbolEncoder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pdk/callbacks.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/qrc_resources.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/resources.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revinit.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace-imperial.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace-imperial.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/editorWindows.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lowPassFilter.cir" beforeDir="false" afterPath="$PROJECT_DIR$/lowPassFilter.cir" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lowPassRC.cir" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/schBackEnd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Vector.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cellview.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/circuitElements.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/editorWindows.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/loadJSON.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lowPassFilter.cir" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/net.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pens.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/propertyDialogues.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pythonConsole.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/qrc_resources.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/revedaMainW.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/schBackEnd.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shape.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/symbolEncoder.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/undoStack.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,6 +61,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Setup Script" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -51,18 +87,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/eskiy/OneDrive/Documents/Glade/revEDAdist/xyceGUI&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;,
-    &quot;two.files.diff.last.used.file&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/schematicEditor/editorWindows.py&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "last_opened_file_path": "/home/eskiyerli/Documents/Projects/RevEDA/src/main.py",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
+    "two.files.diff.last.used.file": "/home/eskiyerli/Documents/Projects/RevEDA/schematicEditor/editorWindows.py"
   }
-}</component>
-  <component name="RunManager" selected="Python.revedaMainW">
+}]]></component>
+  <component name="RunManager" selected="Python.reveda">
     <configuration name="muratEskiyerliCV" type="LATEX_RUN_CONFIGURATION" factoryName="LaTeX configuration factory" temporary="true">
       <texify>
         <compiler>LUALATEX</compiler>
@@ -72,7 +108,7 @@
         <viewer-command />
         <compiler-arguments />
         <envs />
-        <main-file>$PROJECT_DIR$/../../../Professional/Resumes/muratEskiyerliCV.tex</main-file>
+        <main-file />
         <output-path>$PROJECT_DIR$/../../../Professional/Resumes</output-path>
         <auxil-path>$PROJECT_DIR$/../../../Professional/Resumes</auxil-path>
         <compile-twice>false</compile-twice>
@@ -84,19 +120,19 @@
       </texify>
       <method v="2" />
     </configuration>
-    <configuration name="revedaMainW" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+    <configuration name="reveda" type="PythonConfigurationType" factoryName="Python">
       <module name="schematicEditor" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="SDK_HOME" value="/usr/bin/python3.10" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.." />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/revedaMainW.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -107,7 +143,7 @@
     </configuration>
     <list>
       <item itemvalue="LaTeX.muratEskiyerliCV" />
-      <item itemvalue="Python.revedaMainW" />
+      <item itemvalue="Python.reveda" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -217,7 +253,14 @@
       <option name="project" value="LOCAL" />
       <updated>1657208682783</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Hieararchical netlisting works for subcircuits without parameters.">
+      <created>1657556224986</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1657556224986</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -247,9 +290,19 @@
     <MESSAGE value="symbol items can rotate." />
     <MESSAGE value="schematic items can rotate." />
     <MESSAGE value="symbol generation works for simple circuits. No subcircuit parameters yet." />
-    <option name="LAST_COMMIT_MESSAGE" value="symbol generation works for simple circuits. No subcircuit parameters yet." />
+    <MESSAGE value="Hieararchical netlisting works for subcircuits without parameters." />
+    <option name="LAST_COMMIT_MESSAGE" value="Hieararchical netlisting works for subcircuits without parameters." />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/gui/propertyDialogues.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="self.topLeft" />
