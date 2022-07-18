@@ -1,7 +1,7 @@
 import json
 
-import common.shape as shp
-import common.net as net
+import revedaeditor.common.shape as shp
+import revedaeditor.common.net as net
 
 from PySide6.QtCore import (QDir, QLine, QRect, QRectF, QPoint, QPointF,
                             QSize, )

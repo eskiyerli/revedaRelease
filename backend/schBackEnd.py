@@ -8,7 +8,7 @@ from PySide6.QtGui import (QStandardItem, )
 from PySide6.QtWidgets import (QMessageBox, )
 from ruamel.yaml import YAML
 
-import common.shape as shp
+import revedaeditor.common.shape as shp
 
 
 class libraryItem(QStandardItem):

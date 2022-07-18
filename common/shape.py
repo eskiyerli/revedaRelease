@@ -25,7 +25,7 @@ from PySide6.QtGui import (QPen, QFont, QFontMetrics, QColor, QPainterPath, )
 from PySide6.QtWidgets import (QGraphicsItem, QGraphicsSceneMouseEvent,
                                QGraphicsPathItem, QGraphicsItemGroup, )
 import math
-import pdk.callbacks as cb
+import revedaeditor.pdk.callbacks as cb
 
 
 class shape(QGraphicsItem):

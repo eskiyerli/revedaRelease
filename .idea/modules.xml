@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/schematicEditor.iml" filepath="$PROJECT_DIR$/.idea/schematicEditor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/revedaeditor.iml" filepath="$PROJECT_DIR$/.idea/revedaeditor.iml" />
     </modules>
   </component>
 </project>
