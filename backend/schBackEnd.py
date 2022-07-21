@@ -69,10 +69,9 @@ def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     return newLibraryItem
 
 
-def createCellView(parent, viewName, cellItem) -> viewItem:
+def createCellView(parent, viewName, cellPath) -> viewItem:
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
-    cellPath = cellItem.data(Qt.UserRole + 2)
     viewPath = cellPath.joinpath(viewName + ".json")
     viewPath.touch()  # create the view file
     newViewItem = viewItem(viewPath)

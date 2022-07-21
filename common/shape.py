@@ -171,7 +171,7 @@ class rectangle(shape):
 
     def centre(self):
         return QPoint(int(self.rect.x() + self.rect.width() / 2),
-            int(self.rect.y() + self.rect.height() / 2), )
+                      int(self.rect.y() + self.rect.height() / 2), )
 
     def height(self):
         return self.rect.height()
@@ -334,7 +334,7 @@ class circle(shape):
             eventPos = self.snap2grid(event.pos(), self.gridTuple)
             distance = self.snapToGrid(math.sqrt(
                 (eventPos.x() - self.centre.x()) ** 2 + (
-                            eventPos.y() - self.centre.y()) ** 2),
+                        eventPos.y() - self.centre.y()) ** 2),
                 self.gridTuple[0])
             if distance == self.radius:
                 self.startStretch = True
@@ -345,7 +345,7 @@ class circle(shape):
             eventPos = self.snap2grid(event.pos(), self.gridTuple)
             distance = self.snapToGrid(math.sqrt(
                 (eventPos.x() - self.centre.x()) ** 2 + (
-                            eventPos.y() - self.centre.y()) ** 2),
+                        eventPos.y() - self.centre.y()) ** 2),
                 self.gridTuple[0])
             self.prepareGeometryChange()
             self.radius = distance
@@ -413,7 +413,7 @@ class line(shape):
 
     def length(self):
         return math.sqrt((self.start.x() - self.end.x()) ** 2 + (
-                    self.start.y() - self.end.y()) ** 2)
+                self.start.y() - self.end.y()) ** 2)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         if self.isSelected() and self.stretch:
@@ -457,8 +457,8 @@ class pin(shape):
     pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
 
     def __init__(self, start: QPoint, pen: QPen, pinName: str = "",
-            pinDir: str = pinDirs[0], pinType: str = pinTypes[0],
-            grid: tuple = (10, 10), ):
+                 pinDir: str = pinDirs[0], pinType: str = pinTypes[0],
+                 grid: tuple = (10, 10), ):
         super().__init__(pen, grid)
         self.start = start  # centre of pin
         self.pen = pen
@@ -512,12 +512,12 @@ class label(shape):
     labelUses = ["Normal", "Instance", "Pin", "Device", "Annotation"]
     labelTypes = ["Normal", "NLPLabel", "PyLabel"]
     predefinedLabels = ["[@cellName]", "[@modelName]", "[@instName]",
-        "[@libName]", "[@viewName]", "[@elementNum]", ]
+                        "[@libName]", "[@viewName]", "[@elementNum]", ]
 
     def __init__(self, start: QPoint, pen: QPen, labelDefinition: str = "",
-            grid: tuple = (10, 10), labelType: str = "Normal",
-            labelHeight: str = "12", labelAlign: str = "Left",
-            labelOrient: str = "R0", labelUse: str = "Normal", ):
+                 grid: tuple = (10, 10), labelType: str = "Normal",
+                 labelHeight: str = "12", labelAlign: str = "Left",
+                 labelOrient: str = "R0", labelUse: str = "Normal", ):
         super().__init__(pen, grid)
         self.start = start  # top left corner
         self.pen = pen
@@ -538,7 +538,7 @@ class label(shape):
 
     def boundingRect(self):
         return QRect(self.start.x(), self.start.y(), self.rect.width(),
-            self.rect.height())  #
+                     self.rect.height())  #
 
     def paint(self, painter, option, widget):
         # self.rect = self.fm.boundingRect(self.labelName)
@@ -636,20 +636,20 @@ class label(shape):
                 elif self.labelDefinition == "[@elementNum]":
                     self.labelName = "elementNum"
                 else:
-                    if ":" in self.labelDefinition:  #  at least one colon
+                    if ":" in self.labelDefinition:  # at least one colon
                         fieldsLength = len(self.labelDefinition.split(":"))
                         if fieldsLength == 1:
                             self.labelName = self.labelDefinition[1:-1]
                         elif 2 <= fieldsLength <= 3:  # two or more fields
-                            self.labelName = self.labelDefinition.split(
-                                ":")[0].split("@")[1]
+                            self.labelName = \
+                            self.labelDefinition.split(":")[0].split("@")[1]
                         else:
                             print("label format error.")
             except Exception as e:
                 print(e)
         elif self.labelType == "PyLabel":
-            self.labelName = [string.strip()
-                              for string in self.labelDefinition.split("=")][0]
+            self.labelName = \
+            [string.strip() for string in self.labelDefinition.split("=")][0]
 
     def labelDefs(self):
         """
@@ -686,7 +686,7 @@ class label(shape):
                             self.labelText = f"{self.labelDefinition[1:-1]}=?"
                         elif (fieldsLength == 2):  # there is only one colon
                             self.labelName = \
-                            self.labelDefinition.split(":")[0].split("@")[1]
+                                self.labelDefinition.split(":")[0].split("@")[1]
                             self.labelText = f"{self.labelName}=?"
                         elif (fieldsLength == 3):  # there are two colons
                             self.labelName = \
@@ -698,10 +698,11 @@ class label(shape):
             except Exception as e:
                 print(e)
         elif self.labelType == label.labelTypes[2]:
-                self.labelName = [string.strip() for string in
-                                  self.labelDefinition.split("=")][0]
-                self.labelText = f'{self.labelName} = {str(eval([string.strip() for string in self.labelDefinition.split("=")][1]))}'
-                print(f' {self.labelText}')
+            self.labelName = \
+            [string.strip() for string in self.labelDefinition.split("=")][0]
+            self.labelText = f'{self.labelName} = {str(eval([string.strip() for string in self.labelDefinition.split("=")][1]))}'
+            print(f' {self.labelText}')
+
 
 class symbolShape(shape):
     def __init__(self, pen: QPen, gridTuple: tuple, shapes: list, attr: dict):
