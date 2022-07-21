@@ -17,24 +17,19 @@
   Primary Author: Murat Eskiyerli
 
 """
-
 import sys
 from contextlib import redirect_stderr, redirect_stdout
 
-
-
-# from hashlib import new
-from pathlib import Path
+import pathlib
 
 # import numpy as np
-from PySide6.QtCore import (
-    QDir,
-)
+
 from PySide6.QtGui import (
     QAction,
     QFont,
     QIcon,
 )
+
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -43,13 +38,10 @@ from PySide6.QtWidgets import (
     QMenuBar,
 )
 
-import pythonConsole as pcon
-import schBackEnd as scb  # import the backend
-import editorWindows as edw
-import resources
-
-
-# from threading import Thread
+import revedaeditor.gui.pythonConsole as pcon
+import revedaeditor.backend.schBackEnd as scb  # import the backend
+import revedaeditor.gui.editorWindows as edw
+import revedaeditor.resources.resources
 
 
 class mainwContainer(QWidget):
@@ -81,11 +73,10 @@ class mainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
         self.app = app
-        revEDAPathObj = Path(__file__)
-        revEDADirObj = revEDAPathObj.parent
+        # revEDAPathObj = Path(__file__)
+        revEDADirObj = pathlib.Path.cwd().parent
         self.cellViews = ["schematic", "symbol"]
         # library definition file path
-        # libraryPathObj = Path.cwd().joinpath("library.yaml")
         libraryPathObj = revEDADirObj.joinpath("library.yaml")
         try:
             with libraryPathObj.open(mode="r") as f:
@@ -139,6 +130,7 @@ class mainWindow(QMainWindow):
             # update the main library dictionary if library path dialogue
             # is OK'd.
         else:
+            self.libraryBrowser.show()
             self.libraryBrowser.raise_()
 
     def libDictUpdate(self):

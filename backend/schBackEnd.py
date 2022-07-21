@@ -8,7 +8,7 @@ from PySide6.QtGui import (QStandardItem, )
 from PySide6.QtWidgets import (QMessageBox, )
 from ruamel.yaml import YAML
 
-import shape as shp
+import revedaeditor.common.shape as shp
 
 
 class libraryItem(QStandardItem):
@@ -69,10 +69,9 @@ def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     return newLibraryItem
 
 
-def createCellView(parent, viewName, cellItem) -> viewItem:
+def createCellView(parent, viewName, cellPath) -> viewItem:
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
-    cellPath = cellItem.data(Qt.UserRole + 2)
     viewPath = cellPath.joinpath(viewName + ".json")
     viewPath.touch()  # create the view file
     newViewItem = viewItem(viewPath)
@@ -242,7 +241,7 @@ def createNetlistLine(symbolItem: shp.symbolShape):
     """
     Create a netlist line from a nlp device format line.
     """
-    nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"][1].strip()
+    nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"].strip()
     # nlpDeviceFormatLine.replace("[@instName]", f'{symbolItem.instanceName}')
     for labelItem in symbolItem.labels:
         if labelItem.labelDefinition in nlpDeviceFormatLine:

@@ -1,7 +1,8 @@
 import json
+
+import revedaeditor.fileio.loadJSON as lj
+import revedaeditor.fileio.symbolEncoder as se
 from PySide6.QtGui import (QUndoCommand)
-import loadJSON as lj
-import symbolEncoder as se
 
 
 class addShapeUndo(QUndoCommand):
@@ -51,3 +52,19 @@ class changeOriginalShape(QUndoCommand):
 
     def redo(self):
         self.scene.addItem(self.shape)
+
+
+class undoRotateShape(QUndoCommand):
+    def __init__(self,scene,shape, angle, parent=None):
+        super().__init__()
+        self.scene = scene
+        self.shape = shape
+        self.angle = angle
+        self.setText("Undo Shape rotation")
+
+    def undo(self) -> None:
+        self.shape.setRotation(self.angle-90)
+
+    def redo(self) -> None:
+        # self.angle += 90
+        self.shape.setRotation(self.angle)
