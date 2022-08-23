@@ -78,15 +78,15 @@ class symbolEncoder(json.JSONEncoder):
                 "width": item.__dict__["pen"].width(),
                 "lineStyle": str(item.__dict__["pen"].style()),
                 "cosmetic": item.__dict__["pen"].isCosmetic(),
-                "labelName": item.__dict__["labelName"],  # property name
-                "labelDefinition": item.__dict__["labelDefinition"],
+                "labelName": item.__dict__["_labelName"],
+                "labelDefinition": item.__dict__["_labelDefinition"],
                 # label as entered
-                "labelText": item.__dict__["labelText"],  # shown label
-                "labelType": item.__dict__["labelType"],
-                "labelHeight": item.__dict__["labelHeight"],
-                "labelAlign": item.__dict__["labelAlign"],
-                "labelOrient": item.__dict__["labelOrient"],
-                "labelUse": item.__dict__["labelUse"],
+                "labelText": item.__dict__["_labelText"],  # shown label
+                "labelType": item.__dict__["_labelType"],
+                "labelHeight": item.__dict__["_labelHeight"],
+                "labelAlign": item.__dict__["_labelAlign"],
+                "labelOrient": item.__dict__["_labelOrient"],
+                "labelUse": item.__dict__["_labelUse"],
                 "location": (item.scenePos() - item.scene().origin).toTuple(),
                 "angle": item.__dict__["angle"], }
             return itemDict

@@ -145,7 +145,6 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
     Create schematic items from json file.
     """
     if item["type"] == "symbolShape":
-        position = QPoint(item["location"][0], item["location"][1])
         # libraryPath = libraryDict[item["library"]]
         libraryPath = libraryDict.get(item["library"])
         if libraryPath is None:
@@ -181,16 +180,9 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
                         symbolAttributes[shape["name"]] = shape["definition"]
             except json.decoder.JSONDecodeError:
                 print("Error: Invalid Symbol file")
-        # now go over attributes and assign the values from JSON file
-        # for key, value in symbolAttributes.items():
-        #     if key in instAttributes:
-        #         symbolAttributes[key] = instAttributes[key]
         symbolInstance = shp.symbolShape(
             draftPen, gridTuple, itemShapes, symbolAttributes
             )
-        # symbolInstance.pinLocations = {
-        #     item.pinName: (item.start + item.scenePos().toPoint()).toTuple() for
-        #     item in symbolInstance.pins}
         symbolInstance.libraryName = item["library"]
         symbolInstance.cellName = item["cell"]
         symbolInstance.counter = instCounter
@@ -201,7 +193,7 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
         for label in symbolInstance.labels:
             if label.labelName in labelDict.keys():
                 label.labelText = labelDict[label.labelName][1]
-        symbolInstance.setPos(position)
+        symbolInstance.setPos(item["location"][0], item["location"][1])
         symbolInstance.setRotation(symbolInstance.angle)
         return symbolInstance
 

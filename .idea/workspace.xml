@@ -6,16 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="e0690168-d2e2-46d9-ad7a-c07a0f7c1100" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace-imperial.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/schBackEnd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/undoStack.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/undoStack.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/shape.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/AUTHORS" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/CMakeLists.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/index.theme" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fileio/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/fileio/loadJSON.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +18,11 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="reset" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -80,7 +80,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="reset" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
