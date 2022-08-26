@@ -1,8 +1,8 @@
 # net class definition.
 from PySide6.QtCore import (QPoint, Qt)
 from PySide6.QtGui import (QPen, QStaticText, )
-from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsEllipseItem)
-
+from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsSceneMouseEvent,
+                               QGraphicsEllipseItem)
 
 
 class schematicNet(QGraphicsLineItem):
@@ -10,29 +10,29 @@ class schematicNet(QGraphicsLineItem):
 
     def __init__(self, start: QPoint, end: QPoint, pen: QPen):
         assert isinstance(pen, QPen)
-        self.pen = pen
-        self.name = None
-        self.horizontal = True
-        self.start = start
-        self.end = end
-        self.nameSet = False  # if a name has been set
-        self.nameConflict = False  # if a name conflict has been detected
+        self._pen = pen
+        self._name = None
+        self._horizontal = True
+        self._start = start
+        self._end = end
+        self._nameSet = False  # if a name has been set
+        self._nameConflict = False  # if a name conflict has been detected
 
-        x1, y1 = self.start.x(), self.start.y()
-        x2, y2 = self.end.x(), self.end.y()
+        x1, y1 = self._start.x(), self._start.y()
+        x2, y2 = self._end.x(), self._end.y()
 
         if abs(x1 - x2) >= abs(y1 - y2):  # horizontal
-            self.horizontal = True
-            self.start = QPoint(min(x1, x2), y1)
-            self.end = QPoint(max(x1, x2), y1)
-            super().__init__(self.start.x(), y1, self.end.x(), y1)
+            self._horizontal = True
+            self._start = QPoint(min(x1, x2), y1)
+            self._end = QPoint(max(x1, x2), y1)
+            super().__init__(self._start.x(), y1, self._end.x(), y1)
         else:
-            self.horizontal = False
-            self.start = QPoint(x1, min(y1, y2))
-            self.end = QPoint(x1, max(y1, y2))
-            super().__init__(x1, self.start.y(), x1, self.end.y())
+            self._horizontal = False
+            self._start = QPoint(x1, min(y1, y2))
+            self._end = QPoint(x1, max(y1, y2))
+            super().__init__(x1, self._start.y(), x1, self._end.y())
 
-        self.setPen(self.pen)
+        self.setPen(self._pen)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
@@ -42,19 +42,92 @@ class schematicNet(QGraphicsLineItem):
         if self.isSelected():
             painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
         else:
-            painter.setPen(self.pen)
-        painter.drawLine(self.start, self.end)
+            painter.setPen(self._pen)
+        painter.drawLine(self._start, self._end)
         if self.name is not None:
-            painter.drawStaticText(self.start, QStaticText(self.name))
+            painter.drawStaticText(self._start, QStaticText(self.name))
             # if there is name conflict, draw the line and name in red.
-            if self.nameConflict:
+            if self._nameConflict:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-                painter.drawStaticText(self.start, QStaticText(self.name))
-                painter.drawLine(self.start, self.end)
+                painter.drawStaticText(self._start, QStaticText(self.name))
+                painter.drawLine(self._start, self._end)
 
-    def setName(self, name):
-        self.name = name
-        self.nameSet = True
+    def sceneEvent(self, event):
+        try:
+            if self.scene().drawWire:
+                return False
+            else:
+                super().sceneEvent(event)
+                return True
+        except AttributeError:
+            return False
+
+    @property
+    def start(self):
+        return self._start
+
+    @start.setter
+    def start(self, start: QPoint):
+        self._start = start
+
+    @property
+    def end(self):
+        return self._end
+
+    @end.setter
+    def end(self, end: QPoint):
+        self._end = end
+
+    @property
+    def pen(self):
+        return self._pen
+
+    @pen.setter
+    def pen(self, pen):
+        self._pen = pen
+
+    @property
+    def pen(self):
+        return self._pen
+
+    @pen.setter
+    def pen(self, pen: QPen):
+        self._pen = pen
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name
+        self._nameSet = True
+
+    @property
+    def horizontal(self):
+        return self._horizontal
+
+    @horizontal.setter
+    def horizontal(self, value: bool):
+        self._horizontal = value
+
+    @property
+    def nameSet(self) -> bool:
+        return self._nameSet
+
+    @nameSet.setter
+    def nameSet(self, value: bool):
+        if type(value) == bool:
+            self._nameSet = value
+
+    @property
+    def nameConflict(self) -> bool:
+        return self._nameConflict
+
+    @nameConflict.setter
+    def nameConflict(self, value: bool):
+        if type(value) == bool:
+            self._nameConflict = value
 
     def itemChange(self, change, value):
 
@@ -83,12 +156,16 @@ class schematicNet(QGraphicsLineItem):
             return newPos
         return super().itemChange(change, value)
 
+    def contextMenuEvent(self, event):
+        self.scene().itemContextMenu.exec_(event.screenPos())
+
+
 class crossingDot(QGraphicsEllipseItem):
     def __init__(self, point: QPoint, radius: int, pen: QPen):
         self.radius = radius
-        self.pen = pen
+        self._pen = pen
         self.point = point
-        super().__init__(point.x()-radius, point.y()-radius, 2*radius, 2*radius)
+        super().__init__(point.x() - radius, point.y() - radius, 2 * radius, 2 * radius)
         self.setPen(pen)
         self.setBrush(pen.color())
 
@@ -97,6 +174,6 @@ class crossingDot(QGraphicsEllipseItem):
             painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
             painter.setBrush(Qt.white)
         else:
-            painter.setPen(self.pen)
-            painter.setBrush(self.pen.color())
+            painter.setPen(self._pen)
+            painter.setBrush(self._pen.color())
         painter.drawEllipse(self.point, self.radius, self.radius)

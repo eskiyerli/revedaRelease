@@ -5,12 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e0690168-d2e2-46d9-ad7a-c07a0f7c1100" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/net.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/net.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/shape.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fileio/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/fileio/loadJSON.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fileio/symbolEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/fileio/symbolEncoder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/propertyDialogues.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +37,8 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/src/main.py&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/eskiye50/OneDrive/Documents/Projects/RevEDA/src/main.py&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.sourceCode&quot;
   }
 }</component>
   <component name="RunManager">
@@ -49,7 +49,7 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="/usr/bin/python3.10" />
+      <option name="SDK_HOME" value="C:\Users\eskiye50\WPy64-31050\python-3.10.5.amd64\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.." />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
