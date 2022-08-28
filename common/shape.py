@@ -379,12 +379,67 @@ class circle(shape):
     def radius(self):
         return self._radius
 
+    @radius.setter
     def radius(self, radius: int):
         self.prepareGeometryChange()
         self._radius = self.snapToGrid(radius, self._gridTuple[0])
         # self.topLeft = self._centre - QPoint(self._radius, self._radius)
         # self.rightBottom = self._centre + QPoint(self._radius, self._radius)
         self._end = self._centre + QPoint(self._radius, 0)
+
+    @property
+    def centre(self):
+        return self._centre
+
+    @centre.setter
+    def centre(self,value: QPoint):
+        if isinstance(value,QPoint):
+            self._centre = value
+
+    @property
+    def end(self):
+        return self._end
+
+    @end.setter
+    def end(self,value: QPoint):
+        if isinstance(value, QPoint):
+            self._end = value
+
+    @property
+    def rightBottom(self):
+        return self._rightBottom
+
+    @rightBottom.setter
+    def rightBottom(self,value:QPoint):
+        if isinstance(value, QPoint):
+            self._rightBottom = value
+
+    @property
+    def topLeft(self):
+        return self._topLeft
+
+    @topLeft.setter
+    def topLeft(self,value:QPoint):
+        if isinstance(value, QPoint):
+            self._topLeft = value
+
+    @property
+    def startStretch(self):
+        return self._startStretch
+
+    @startStretch.setter
+    def startStretch(self,value: bool):
+        if isinstance(value, bool):
+            self._startStretch = value
+
+    @property
+    def stretch(self):
+        return self._startStretch
+
+    @startStretch.setter
+    def stretch(self, value: bool):
+        if isinstance(value, bool):
+            self._stretch = value
 
     def objName(self):
         return "CIRCLE"
@@ -393,7 +448,7 @@ class circle(shape):
         return QRect(self.topLeft, self.rightBottom)
 
     def boundingRect(self):
-        return QRect(self.topLeft, self.rightBottom).normalized().adjusted(-2, -2, 2, 2)
+        return QRect(self._topLeft, self._rightBottom).normalized().adjusted(-2, -2, 2, 2)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         if self.isSelected() and self._stretch:
@@ -423,8 +478,8 @@ class circle(shape):
             self._startStretch = False
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
             self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-            self.topLeft = self._centre - QPoint(self._radius, self._radius)
-            self.rightBottom = self._centre + QPoint(self._radius, self._radius)
+            self._topLeft = self._centre - QPoint(self._radius, self._radius)
+            self._rightBottom = self._centre + QPoint(self._radius, self._radius)
             self._end = self._centre + QPoint(self._radius, 0)
         super().mouseReleaseEvent(event)
 
