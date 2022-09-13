@@ -1,5 +1,5 @@
 import json
-
+from collections import namedtuple
 import revedaeditor.common.shape as shp
 import revedaeditor.common.net as net
 
@@ -30,7 +30,7 @@ class symbolEncoder(json.JSONEncoder):
                         "rect": item.rect.getCoords(),
                         "color": item.pen.color().toTuple(),
                         "width": item.pen.width(),
-                        "lineStyle": str(item.pen.style()),
+                        "lineStyle": str(item.pen.style()).split('.')[-1],
                         "cosmetic": item.pen.isCosmetic(),
                         "location": (item.scenePos() - item.scene().origin).toTuple(),
                         "angle": item.angle, }
@@ -41,7 +41,7 @@ class symbolEncoder(json.JSONEncoder):
                         "end": item.end.toTuple(),
                         "color": item.pen.color().toTuple(),
                         "width": item.pen.width(),
-                        "lineStyle": str(item.pen.style()),
+                        "lineStyle": str(item.pen.style()).split('.')[-1],
                         "cosmetic": item.pen.isCosmetic(),
                         "location": (item.scenePos() - item.scene().origin).toTuple(),
                         "angle": item.angle, }
@@ -52,7 +52,7 @@ class symbolEncoder(json.JSONEncoder):
                         "end": item.end.toTuple(),
                         "color": item.pen.color().toTuple(),
                         "width": item.pen.width(),
-                        "lineStyle": str(item.pen.style()),
+                        "lineStyle": str(item.pen.style()).split('.')[-1],
                         "cosmetic": item.pen.isCosmetic(),
                         "location": (item.scenePos() - item.scene().origin).toTuple(),
                         "angle": item.angle, }
@@ -62,10 +62,10 @@ class symbolEncoder(json.JSONEncoder):
                         "start": item.start.toTuple(),
                         "color": item.pen.color().toTuple(),
                         "width": item.pen.width(),
-                        "lineStyle": str(item.pen.style()),
+                        "lineStyle": str(item.pen.style()).split('.')[-1],
                         "cosmetic": item.pen.isCosmetic(),
-                        "pinName": item.pinName,
-                        "pinDir": item.pinDir,
+                        "name": item.pinName,
+                        "dir": item.pinDir,
                         "pinType": item.pinType,
                         "location": (item.scenePos() - item.scene().origin).toTuple(),
                         "angle": item.angle, }
@@ -75,19 +75,21 @@ class symbolEncoder(json.JSONEncoder):
                         "start": item.start.toTuple(),
                         "color": item.pen.color().toTuple(),
                         "width": item.pen.width(),
-                        "lineStyle": str(item.pen.style()),
+                        "lineStyle": str(item.pen.style()).split('.')[-1],
                         "cosmetic": item.pen.isCosmetic(),
-                        "labelName": item.labelName,
-                        "labelDefinition": item.labelDefinition,
+                        "name": item.labelName,
+                        "definition": item.labelDefinition,
                         # label as entered
-                        "labelText": item.labelText,  # shown label
+                        "text": item.labelText,  # shown label
+                        "value": item.labelValue,     # label value
+                        "visible": item.labelVisible,     # label visibility
                         "labelType": item.labelType,
-                        "labelHeight": item.labelHeight,
-                        "labelAlign": item.labelAlign,
-                        "labelOrient": item.labelOrient,
-                        "labelUse": item.labelUse,
+                        "height": item.labelHeight,
+                        "align": item.labelAlign,
+                        "orient": item.labelOrient,
+                        "use": item.labelUse,
                         "location": (item.scenePos() - item.scene().origin).toTuple(),
-                        "angle": item.angle, }
+                        "angle": item.angle,}
             return itemDict
         elif isinstance(item, symbolAttribute):
             itemDict = {"type": "attribute", "name": item.name,
@@ -98,10 +100,11 @@ class symbolEncoder(json.JSONEncoder):
 class schematicEncoder(json.JSONEncoder):
     def default(self, item):
         if isinstance(item, shp.symbolShape):
-            # only label name, definition, and text can be changed in the symbol instance.
+            # only value and visibility be changed in the symbol instance.
+
             itemLabelDict = {
-                item.labelName: [item.labelDefinition, item.labelText] for item
-                in item.labels}
+                item.labelName: [item.labelValue, item.labelVisible] for item
+                in item.labels.values()}
             itemDict = {"type": "symbolShape",
                         "library": item.libraryName,
                         "cell": item.cellName,
@@ -118,7 +121,7 @@ class schematicEncoder(json.JSONEncoder):
                         "end": item.end.toTuple(),
                         "color": item.pen.color().toTuple(),
                         "width": item.pen.width(),
-                        "lineStyle": str(item.pen.style()),
+                        "lineStyle": str(item.pen.style()).split('.')[-1],
                         "cosmetic": item.pen.isCosmetic(),
                         "location": (item.scenePos() - item.scene().origin).toTuple(),
                         "name": item.name,
@@ -129,7 +132,7 @@ class schematicEncoder(json.JSONEncoder):
                         "start": item.start.toTuple(),
                         "color": item.pen.color().toTuple(),
                         "width": item.pen.width(),
-                        "lineStyle": str(item.pen.style()),
+                        "lineStyle": str(item.pen.style()).split('.')[-1],
                         "cosmetic": item.pen.isCosmetic(),
                         "pinName": item.pinName,
                         "pinDir": item.pinDir,

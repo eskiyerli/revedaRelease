@@ -75,7 +75,6 @@ class mainWindow(QMainWindow):
         self.app = app
         # revEDAPathObj = Path(__file__)
         revEDADirObj = pathlib.Path.cwd().parent
-        self.cellViews = ["schematic", "symbol"]
         # library definition file path
         libraryPathObj = revEDADirObj.joinpath("library.yaml")
         try:

@@ -189,6 +189,9 @@ class createSymbolLabelDialog(QDialog):
         self.labelUseCombo = QComboBox()
         self.labelUseCombo.addItems(shp.label.labelUses)
         self.fLayout.addRow(QLabel("Label Use"), self.labelUseCombo)
+        self.labelVisiCombo = QComboBox()
+        self.labelVisiCombo.addItems(["Yes", "No"])
+        self.fLayout.addRow(QLabel("Label Visible"),self.labelVisiCombo)
         self.mainLayout.addLayout(self.fLayout)
         self.labelTypeGroup = QGroupBox("Label Type")
         self.labelTypeLayout = QHBoxLayout()
@@ -223,6 +226,10 @@ class labelPropertyDialog(createSymbolLabelDialog):
         self.labelAlignCombo.setCurrentText(labelItem.labelAlign)
         self.labelOrientCombo.setCurrentText(labelItem.labelOrient)
         self.labelUseCombo.setCurrentText(labelItem.labelUse)
+        if labelItem.labelVisible:
+            self.labelVisiCombo.setCurrentText("Yes")
+        else:
+            self.labelVisiCombo.setCurrentText("No")
         if self.labelItem.labelType == "Normal":
             self.normalType.setChecked(True)
         elif self.labelItem.labelType == "NLPLabel":
@@ -395,40 +402,48 @@ class instanceProperties(QDialog):
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         formLayout = QFormLayout()
-        self.libName = longLineEdit()
-        self.libName.setText(self.instance.libraryName)
-        formLayout.addRow(boldLabel("Library Name", self), self.libName)
-        self.cellName = longLineEdit()
-        self.cellName.setText(self.instance.cellName)
-        formLayout.addRow(boldLabel("Cell Name", self), self.cellName)
-        self.instName = longLineEdit()
-        self.instName.setText(self.instance.instanceName)
-        for shape in self.instance.shapes:
-            if type(shape) == shp.label and shape.labelName == "[@instName]":
-                self.instName.setText(shape.labelText)
-        formLayout.addRow(boldLabel("Instance Name", self), self.instName)
+        self.libNameEdit = longLineEdit()
+        self.libNameEdit.setText(self.instance.libraryName)
+        formLayout.addRow(boldLabel("Library Name", self), self.libNameEdit)
+        self.cellNameEdit = longLineEdit()
+        self.cellNameEdit.setText(self.instance.cellName)
+        formLayout.addRow(boldLabel("Cell Name", self), self.cellNameEdit)
+        self.viewNameEdit = longLineEdit()
+        self.viewNameEdit.setText(self.instance.viewName)
+        formLayout.addRow(boldLabel("View Name", self), self.viewNameEdit)
+        self.instNameEdit = longLineEdit()
+        self.instNameEdit.setText(self.instance.instanceName)
+        formLayout.addRow(boldLabel("Instance Name", self), self.instNameEdit)
         location = (
                 self.instance.scenePos() - self.instance.scene().origin).toTuple()
-        self.xLocation = shortLineEdit()
-        self.xLocation.setText(str(location[0]))
-        formLayout.addRow(boldLabel("x location", self), self.xLocation)
-        self.yLocation = shortLineEdit()
-        self.yLocation.setText(str(location[1]))
-        formLayout.addRow(boldLabel("y location", self), self.yLocation)
+        self.xLocationEdit = shortLineEdit()
+        self.xLocationEdit.setText(str(location[0]))
+        formLayout.addRow(boldLabel("x location", self), self.xLocationEdit)
+        self.yLocationEdit = shortLineEdit()
+        self.yLocationEdit.setText(str(location[1]))
+        formLayout.addRow(boldLabel("y location", self), self.yLocationEdit)
+        self.angleEdit = longLineEdit()
+        self.angleEdit.setText(str(self.instance.angle))
+        formLayout.addRow(boldLabel("Angle", self), self.angleEdit)
         formLayout.setVerticalSpacing(10)
         self.instanceLabelsLayout = QGridLayout()
         row_index = 0
-        for shape in self.instance.shapes:
-            if type(shape) == shp.label and (
-                    shape.labelDefinition not in shp.label.predefinedLabels):
+        for label in self.instance.labels.values():
+            if label.labelDefinition not in shp.label.predefinedLabels:
                 self.instanceLabelsLayout.addWidget(
-                    boldLabel(shape.labelName, self), row_index, 0)
-                instanceLabelDef = longLineEdit()
-                self.instanceLabelsLayout.addWidget(instanceLabelDef, row_index,
+                    boldLabel(label.labelName, self), row_index, 0)
+                labelValueEdit = longLineEdit()
+                labelValueEdit.setText(label.labelValue)
+                self.instanceLabelsLayout.addWidget(labelValueEdit, row_index,
                     1)
-                if len(shape.labelText.split("=")) > 1:
-                    instanceLabelDef.setText(
-                        shape.labelText.split("=")[1].strip())
+                visibleCombo = QComboBox(self)
+                visibleCombo.setInsertPolicy(QComboBox.NoInsert)
+                visibleCombo.addItems(["True", "False"])
+                if label.labelVisible:
+                    visibleCombo.setCurrentIndex(0)
+                else:
+                    visibleCombo.setCurrentIndex(1)
+                self.instanceLabelsLayout.addWidget(visibleCombo,row_index,2)
                 row_index += 1
 
         instanceAttributesLayout = QGridLayout()
