@@ -500,6 +500,14 @@ class createSchematicPinDialog(createPinDialog):
         self.setWindowTitle("Create Schematic Pin")
 
 
+class schematicPinPropertiesDialog(createPinDialog):
+    def __init__(self, parent, item):
+        super().__init__(parent)
+        self.setWindowTitle(f"{item.pinName} - Pin Properties")
+        self.pinName.setText(item.pinName)
+        self.pinDir.setCurrentText(item.pinDir)
+        self.pinType.setCurrentText(item.pinType)
+
 class symbolCreateDialog(QDialog):
     def __init__(self, parent, inputPins: list, outputPins: list,
                  inoutPins: list):

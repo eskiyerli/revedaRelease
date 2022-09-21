@@ -101,7 +101,7 @@ class schematicNet(QGraphicsLineItem):
     @name.setter
     def name(self, name):
         self._name = name
-        self._nameSet = True
+        # self._nameSet = True
 
     @property
     def horizontal(self):
@@ -117,8 +117,8 @@ class schematicNet(QGraphicsLineItem):
 
     @nameSet.setter
     def nameSet(self, value: bool):
-        if type(value) == bool:
-            self._nameSet = value
+        assert isinstance(value,bool)
+        self._nameSet = value
 
     @property
     def nameConflict(self) -> bool:
@@ -126,8 +126,8 @@ class schematicNet(QGraphicsLineItem):
 
     @nameConflict.setter
     def nameConflict(self, value: bool):
-        if type(value) == bool:
-            self._nameConflict = value
+        assert isinstance(value,bool)
+        self._nameConflict = value
 
     def itemChange(self, change, value):
 

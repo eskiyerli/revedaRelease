@@ -61,7 +61,6 @@ def createRectItem(item, gridTuple):
     rect = shp.rectangle(start, end, pen,
         gridTuple)  # note that we are using grid values for scene
     rect.setPos(QPoint(item["location"][0], item["location"][1]), )
-    rect.setRotation(item["angle"])
     rect.angle = item["angle"]
     return rect
 
@@ -77,7 +76,6 @@ def createCircleItem(item, gridTuple):
     circle = shp.circle(centre, end, pen,
         gridTuple)  # note that we are using grid values for scene
     circle.setPos(QPoint(item["location"][0], item["location"][1]), )
-    circle.setRotation(item["angle"])
     circle.angle = item["angle"]
     return circle
 
@@ -92,7 +90,6 @@ def createLineItem(item, gridTuple):
     pen.setCosmetic(item["cosmetic"])
     line = shp.line(start, end, pen, gridTuple)
     line.setPos(QPoint(item["location"][0], item["location"][1]))
-    line.setRotation(item["angle"])
     line.angle = item["angle"]
     return line
 
@@ -107,7 +104,6 @@ def createPinItem(item, gridTuple):
     pin = shp.pin(start, pen, item["name"], item["dir"], item["pinType"],
         gridTuple, )
     pin.setPos(QPoint(item["location"][0], item["location"][1]))
-    pin.setRotation(item["angle"])
     pin.angle = item["angle"]
     return pin
 
@@ -122,7 +118,6 @@ def createLabelItem(item, gridTuple):
     label = shp.label(start, pen, item["definition"], gridTuple, item["labelType"],
         item["height"], item["align"], item["orient"], item["use"], )
     label.setPos(QPoint(item["location"][0], item["location"][1]))
-    label.setRotation(item["angle"])
     label.angle = item["angle"]
     label.labelName = item["name"]
     label.labelText = item["text"]
@@ -188,7 +183,6 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
                 label.labelVisible = labelDict[label.labelName][1]
                 label.labelDefs()
         symbolInstance.setPos(item["location"][0], item["location"][1])
-        symbolInstance.setRotation(symbolInstance.angle)
         return symbolInstance
 
 def createSchematicNets(item):

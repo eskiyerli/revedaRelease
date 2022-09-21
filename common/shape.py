@@ -672,6 +672,88 @@ class pin(shape):
                             gridTuple)
 
 
+class text(shape):
+    """
+    This class is for text annotations on symbol or schematics.
+    """
+    textAlignments = ["Left", "Center", "Right"]
+    textOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
+
+    def __init__(self, start: QPoint, pen: QPen, textContent: str = "",
+                 grid: tuple = (10, 10), textHeight: str = "12", textAlign: str = "Left",
+                 textOrient: str = "R0"):
+        super().__init__(pen, grid)
+        self._start = start
+        self._pen = pen
+        self._textContent = textContent
+        self._textHeight = textHeight
+        self._textAlign = textAlign
+        self._textOrient = textOrient
+        self._textFont = QFont("Helvetica")
+        self._textFont.setPointSize(int(float(self._textHeight)))
+        self._textFont.setKerning(True)
+        self.setOpacity(1)
+        self._fm = QFontMetrics(self._textFont)
+        self._rect = self._fm.boundingRect(QRect(0, 0, 400, 400),
+                                           Qt.AlignLeft | Qt.AlignHCenter,
+                                           self._textContent)
+
+    def boundingRect(self):
+        return QRect(self._start.x(), self._start.y(), self._rect.width(),
+                     self._rect.height())
+
+    def paint(self, painter, option, widget):
+        # self._rect = self.fm.boundingRect(self.labelName)
+        self._textFont.setPointSize(int(self._textHeight))
+        painter.setFont(self._textFont)
+        if self.isSelected():
+            painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
+            painter.drawRect(self.boundingRect())
+        else:
+            painter.setPen(self._pen)
+
+        painter.drawText(QPoint(self._start.x(), self._start.y() + self._rect.height()),
+            Qt.AlignLeft | Qt.AlignHCenter, self._textContent, )
+
+        self._rect = self._fm.boundingRect(QRect(0, 0, 400, 400),
+                                           Qt.AlignLeft | Qt.AlignHCenter,
+                                           self._textContent)
+
+    @property
+    def start(self):
+        return self._start
+
+    @start.setter
+    def start(self, value: QPoint):
+        self._start = value
+
+    @property
+    def textContent(self):
+        return self._textContent
+
+    @textContent.setter
+    def textContent(self, text: str):
+        self._textContent = text
+
+    @property
+    def textHeight(self) -> int:
+        return self._textHeight
+
+    @textHeight.setter
+    def textHeight(self, value: int):
+        assert isinstance(int(value), int)
+        self._textHeight = value
+
+    @property
+    def textFont(self) -> QFont:
+        return self._textFont
+
+    @textFont.setter
+    def textFont(self, value: QFont):
+        assert isinstance(value, QFont)
+        self._textFont = value
+
+
 class label(shape):
     """
     label: text class definition for symbol drawing.
@@ -703,6 +785,7 @@ class label(shape):
         self._labelType = labelType
         self._labelFont = QFont("Arial")
         self._labelFont.setPointSize(int(float(self._labelHeight)))
+        self._labelFont.setKerning(False)
         self._labelVisible: bool = False
         self._labelValueSet: bool = False
         # labels are visible by default
@@ -795,7 +878,7 @@ class label(shape):
         return self._labelValueSet
 
     @labelValueSet.setter
-    def labelValueSet(self, value:bool):
+    def labelValueSet(self, value: bool):
         if isinstance(value, bool):
             self._labelValueSet = value
 
@@ -868,7 +951,7 @@ class label(shape):
         return self._labelFont
 
     @labelFont.setter
-    def labelFont(self, labelFont):
+    def labelFont(self, labelFont: QFont):
         self._labelFont = labelFont
 
     @property
@@ -917,8 +1000,8 @@ class label(shape):
                     if self._labelDefinition[:2] == '[@' and self._labelDefinition[
                         -1] == "]":  # check if it is a correct start and end
                         self._labelName = \
-                        self._labelDefinition.lstrip('[@').rstrip(']').rstrip(':').split(
-                            ':')[0].strip()
+                            self._labelDefinition.lstrip('[@').rstrip(']').rstrip(
+                                ':').split(':')[0].strip()
                     else:
                         print('Error in label definition.')
             except Exception as e:
@@ -953,7 +1036,7 @@ class label(shape):
                         self._labelValue = self.parentItem().attr["modelName"]
                         self._labelText = self._labelValue
                     case "[@elementNum]":
-                        self._labelValue = self.parentItem().counter
+                        self._labelValue = f'{self.parentItem().counter}'
                         self._labelText = self._labelValue
                     case other:
                         labelFields = self._labelDefinition.lstrip('[@').rstrip(
@@ -966,7 +1049,7 @@ class label(shape):
                                                                                  self._labelValue)
                             case 3:
                                 tempLabelValue = \
-                                labelFields[2].strip().split('=')[-1].split()[-1]
+                                    labelFields[2].strip().split('=')[-1].split()[-1]
                                 if self._labelValueSet:
                                     self._labelText = labelFields[2].replace(
                                         tempLabelValue, self._labelValue)
@@ -976,10 +1059,18 @@ class label(shape):
             except Exception as e:
                 print(e)
         elif self._labelType == label.labelTypes[2]:  # pyLabel
-            self._labelName = \
-                [string.strip() for string in self.labelDefinition.split("=")][0]
-            self._labelText = f'{self._labelName} = ' \
-                              f'{self._labelDefinition.split("=")[0]} ='  # self.labelText = f'{self.labelName} = {str(eval([string.strip() for string in self.labelDefinition.split("=")][1]))}'  # print(f' {self.labelText}')
+            try:
+                labelFields = self._labelDefinition.strip().split('=')
+                self._labelName = labelFields[0].strip()
+                labelFunction = labelFields[1].strip()
+                # pass the PDK callback class named with "cellName" the labels
+                # dictionary of instance.
+                expression = f'cb.{self.parentItem().cellName}(self.parentItem(' \
+                             f').labels).{labelFunction}'
+                self._labelValue = eval(expression)
+                self._labelText = f'{self._labelName}={self._labelValue}'
+            except Exception as e:
+                print(e)
 
 
 class symbolShape(shape):
@@ -998,9 +1089,9 @@ class symbolShape(shape):
         self._angle = 0.0
         self._drawings = list()
         self._labels = dict()  # dict of labels
-        self._pins = dict()  # list of pins
-        self.pinLocations = {}  # pinName: pinRect
-        self.pinNetMap = {}  # pinName: netName
+        self._pins = dict()  # dict of pins
+        self.pinLocations = dict()  # pinName: pinRect
+        self.pinNetMap = dict()  # pinName: netName
         for item in self.shapes:
             item.setFlag(QGraphicsItem.ItemIsSelectable, False)
             item.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
@@ -1094,8 +1185,10 @@ class symbolShape(shape):
     def labels(self):
         return self._labels
 
+    # labels setter works a bit differently
     @labels.setter
     def labels(self, item: label):
+        assert isinstance(item,label)
         self._labels[item.labelName] = item
 
     @property
@@ -1104,8 +1197,26 @@ class symbolShape(shape):
 
     @pins.setter
     def pins(self, item: pin):
+        assert isinstance(item,pin)
         self._pins[item.pinName] = item
 
+    def createNetlistLine(self):
+        """
+        Create a netlist line from a nlp device format line.
+        """
+        nlpDeviceFormatLine = self.attr["NLPDeviceFormat"].strip()
+        # nlpDeviceFormatLine.replace("[@instName]", f'{symbolItem.instanceName}')
+        for labelItem in self.labels.values():
+            if labelItem.labelDefinition in nlpDeviceFormatLine:
+                nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
+                    labelItem.labelDefinition, labelItem.labelText
+                    )
+        for pinName, netName in self.pinNetMap.items():
+            if pinName in nlpDeviceFormatLine:
+                nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
+                    f'[|{pinName}:%]', netName
+                    )
+        return nlpDeviceFormatLine
 
 class schematicPin(shape):
     pinDirs = ["Input", "Output", "Inout"]
@@ -1154,7 +1265,7 @@ class schematicPin(shape):
 
     def boundingRect(self):
         return QRect(self._start.x() - 10, self._start.y() - 10, 30, 20).adjusted(-5, -10,
-            5, 5)
+                                                                                  5, 5)
 
     def sceneEvent(self, event):
         if self.scene().drawWire:
@@ -1192,7 +1303,7 @@ class schematicPin(shape):
 
     @pinDir.setter
     def pinDir(self, direction: str):
-        if direction in self.pinDirections:
+        if direction in self.pinDirs:
             self._pinDir = direction
 
     @property
