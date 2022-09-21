@@ -4,18 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0690168-d2e2-46d9-ad7a-c07a0f7c1100" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace-imperial.xml" beforeDir="false" />
+    <list default="true" id="e0690168-d2e2-46d9-ad7a-c07a0f7c1100" name="Changes" comment="NLPLabels can now be hidden and NLP syntax is working better.">
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/revedaeditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/revedaeditor.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/schBackEnd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/undoStack.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/undoStack.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/net.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/net.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/shape.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/AUTHORS" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/CMakeLists.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icons/index.theme" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fileio/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/fileio/loadJSON.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/editorWindows.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/propertyDialogues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdk/callbacks.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdk/callbacks.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +23,11 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="reset" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -38,7 +43,10 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/src/main.py&quot;
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/src/revedaeditor/gui/editorWindows.py&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.rainbow.brackets&quot;,
+    &quot;two.files.diff.last.used.file&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/src/revedaeditor/gui/editorWindows.py&quot;
   }
 }</component>
   <component name="RunManager">
@@ -49,9 +57,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="/usr/bin/python3.10" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.." />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../main.py" />
@@ -73,6 +81,35 @@
       <option name="presentableId" value="Default" />
       <updated>1657999973713</updated>
     </task>
+    <task id="LOCAL-00001" summary="Moved all shape classes to use @property">
+      <created>1661543367545</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1661543367545</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Commit before some major label work.">
+      <created>1661721663475</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1661721663475</updated>
+    </task>
+    <task id="LOCAL-00003" summary="NLPLabels can now be hidden and NLP syntax is working better.">
+      <created>1663103463650</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1663103463650</updated>
+    </task>
+    <task id="LOCAL-00004" summary="NLPLabels can now be hidden and NLP syntax is working better.">
+      <created>1663103493543</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1663103493543</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -80,10 +117,36 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="reset" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Moved all shape classes to use @property" />
+    <MESSAGE value="Commit before some major label work." />
+    <MESSAGE value="NLPLabels can now be hidden and NLP syntax is working better." />
+    <option name="LAST_COMMIT_MESSAGE" value="NLPLabels can now be hidden and NLP syntax is working better." />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="scenePinsSet" />
+        <watch expression="pinConNetsSet" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

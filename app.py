@@ -75,7 +75,6 @@ class mainWindow(QMainWindow):
         self.app = app
         # revEDAPathObj = Path(__file__)
         revEDADirObj = pathlib.Path.cwd().parent
-        self.cellViews = ["schematic", "symbol"]
         # library definition file path
         libraryPathObj = revEDADirObj.joinpath("library.yaml")
         try:
@@ -114,7 +113,7 @@ class mainWindow(QMainWindow):
         exitIcon = QIcon(":/icons/external.png")
         self.exitAction = QAction(exitIcon, "Exit", self)
         self.exitAction.setShortcut("Ctrl+Q")
-        self.exitAction.triggered.connect(self.exitApp)
+        self.exitAction.triggered.connect(self.exitApp)  # type: ignore
         self.menuFile.addAction(self.exitAction)
 
         openLibIcon = QIcon(":/icons/database--pencil.png")
@@ -154,3 +153,5 @@ redirect = pcon.Redirect(mainW.centralW.console.errorwrite)
 with redirect_stdout(mainW.centralW.console), redirect_stderr(redirect):
     mainW.show()
     sys.exit(app.exec())
+
+
