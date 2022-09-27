@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="e0690168-d2e2-46d9-ad7a-c07a0f7c1100" name="Changes" comment="NLPLabels can now be hidden and NLP syntax is working better.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/editorWindows.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +35,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/src/revedaeditor/gui/editorWindows.py&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.rainbow.brackets&quot;,
     &quot;two.files.diff.last.used.file&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/src/revedaeditor/gui/editorWindows.py&quot;
   }
 }</component>
@@ -114,7 +113,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="experimental" />
+                        <option value="reset" />
                       </list>
                     </value>
                   </entry>

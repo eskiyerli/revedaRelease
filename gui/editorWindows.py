@@ -1551,7 +1551,10 @@ class schematic_scene(editor_scene):
             cirFile.write('.END\n')
 
     def recursiveNetlisting(self, cirFile, writeNetlist):
-        symbolSceneSet = self.generateNetMapping(writeNetlist)
+        '''
+        Recursively traverse all subcircuits and netlist them.
+        '''
+        symbolSceneSet = self.generateNetMapping()
         for symbolItem in symbolSceneSet:
             if symbolItem.attr["NLPDeviceFormat"] != "":
                 line = scb.createNetlistLine(symbolItem)
@@ -1569,8 +1572,8 @@ class schematic_scene(editor_scene):
                     "schematic.json" in [p.name for p in cellPath.iterdir()]):
 
                 nlpDeviceLine = nlpDeviceString.split()
-                pinline = ' '  # strring
-                symbolPinList = [pin.pinName for pin in symbolItem.pins]
+                pinline = ' '  # string
+                symbolPinList = [pin.pinName for pin in symbolItem.pins.values()]
                 for item in nlpDeviceLine:
                     strippedItem = item.lstrip('[|').rstrip(':%]')
                     if strippedItem in symbolPinList:
@@ -1580,6 +1583,58 @@ class schematic_scene(editor_scene):
                 new_scene.loadSchematicCell(cellPath.joinpath("schematic.json"))
                 new_scene.recursiveNetlisting(cirFile, True)
                 cirFile.write(f'.ENDS {cellName} \n')
+
+    def generateNetMapping(self) -> set[shp.symbolShape]:
+        # all the nets in the schematic in a set to remove duplicates
+        netsSceneSet = self.findSceneNetsSet()
+        # create a separate set of named nets.
+        # namedNetsSet = set()
+        # nets connected to pins. Netlisting will start from those nets
+        pinConNetsSet = set()
+        # first start from schematic pins
+        scenePinsSet = self.findScenePinsSet()
+
+        for scenePin in scenePinsSet:
+            for sceneNet in netsSceneSet:
+                if scenePin.sceneBoundingRect().intersects(sceneNet.sceneBoundingRect()):
+                    if sceneNet.nameSet:
+                        if sceneNet.name == scenePin.pinName:
+                            pinConNetsSet.add(sceneNet)
+                        else:
+                            sceneNet.nameConflict = True
+                    else:
+                        pinConNetsSet.add(sceneNet)
+                        sceneNet.name = scenePin.pinName  # sceneNet.nameSet = True
+                    sceneNet.update()
+
+        # first propagate the net names to the nets connected to pins.
+        # first net set is left over nets.
+        notPinConnNets = self.groupNamedNets(pinConNetsSet, netsSceneSet - pinConNetsSet)
+        print(len(notPinConnNets))
+        # find all nets with nets set through net dialogue.
+        namedNetsSet = set(
+            [netItem for netItem in netsSceneSet - pinConNetsSet if netItem.nameSet])
+        # now remove already named net set from firstNetSet
+        unnamedNets = self.groupNamedNets(namedNetsSet, notPinConnNets - namedNetsSet)
+        # for netItem in unnamedNets:
+        #     if not netItem.nameSet:
+        #         netItem.name = None  # empty all net names not set by the user
+        # now start netlisting from the unnamed nets
+        self.groupUnnamedNets(unnamedNets, self.netCounter)
+        # [print(netItem.name) for netItem in netsSceneSet]
+        # find symbols in the scene
+        symbolSceneSet = self.findSceneSymbolSet()
+        # we just need netlist each subcircuit once
+        for symbolItem in symbolSceneSet:
+            for pinName, pinItem in symbolItem.pins.items():
+                symbolItem.pinLocations[pinName] = pinItem.sceneBoundingRect()
+                for netName, netItemSet in self.schematicNets.items():
+                    for netItem in netItemSet:
+                        if pinItem.sceneBoundingRect().intersects(
+                                netItem.sceneBoundingRect()):
+                            symbolItem.pinNetMap[pinName] = netName
+
+        return symbolSceneSet
 
     def findSceneCells(self, symbolSet):
         """
@@ -1593,94 +1648,44 @@ class schematic_scene(editor_scene):
                 symbolGroupDict[symbolItem.cellName] = symbolItem
         return symbolGroupDict
 
-    def generateNetMapping(self, writeNetlist: bool) -> set:
-        # all the nets in the schematic in a set to remove duplicates
-        netsSceneSet = self.findSceneNetsSet()
-        # create a separate set of named nets.
-        namedNetsSet = set()
-        # nets connected to pins. Netlisting will start from those nets
-        pinConNetsSet = set()
-        # first start from schematic pins
-        scenePinsSet = self.findScenePinsSet()
-        for scenePin in scenePinsSet:
-            for sceneNet in netsSceneSet:
-                if scenePin.sceneBoundingRect().intersects(sceneNet.sceneBoundingRect()):
-                    if sceneNet.nameSet and sceneNet.name != scenePin.pinName:
-                        sceneNet.nameConflict = True
-                        sceneNet.update()
-                    else:
-                        pinConNetsSet.add(sceneNet)
-                        sceneNet.name = scenePin.pinName
-                        sceneNet.nameSet = True
-
-        # first propagate the net names to the nets connected to pins.
-        # first net set is left over nets.
-        notPinConnNets = self.groupNamedNets(pinConNetsSet, netsSceneSet - pinConNetsSet)
-        # find all nets with nets set through net dialogue.
-        namedNetsSet = set(
-            [netItem for netItem in netsSceneSet - pinConNetsSet if netItem.nameSet])
-        # now remove already named net set from firstNetSet
-        unnamedNets = self.groupNamedNets(namedNetsSet, notPinConnNets - namedNetsSet)
-        for netItem in unnamedNets:
-            if not netItem.nameSet:
-                netItem.name = None  # empty all net names not set by the user
-        # now start netlisting from the unnamed nets
-        self.groupUnnamedNets(unnamedNets, self.netCounter)
-        # find symbols in the scene
-        symbolSceneSet = self.findSceneSymbolSet()
-        # we just need netlist each subcircuit once
-
-        for symbolItem in symbolSceneSet:
-            self.findSymbolPinLocs(symbolItem)
-            for pinItem in symbolItem.pins:
-                for netName, netItemSet in self.schematicNets.items():
-                    for netItem in netItemSet:
-                        if pinItem.sceneBoundingRect().intersects(
-                                netItem.sceneBoundingRect()):
-                            symbolItem.pinNetMap[pinItem.pinName] = netName
-                            break  # no need to check other nets in the set
-        return symbolSceneSet
-
-    def findSceneSymbolSet(self):
+    def findSceneSymbolSet(self) -> set[shp.symbolShape]:
+        '''
+        Find all the symbols on the scene as a set.
+        '''
         symbolSceneSet = {item for item in self.items(self.sceneRect()) if
                           isinstance(item, shp.symbolShape)}
         return symbolSceneSet
 
-    def findSceneNetsSet(self):
+    def findSceneNetsSet(self) -> set[net.schematicNet]:
         netsSceneSet = {item for item in self.items(self.sceneRect()) if
                         isinstance(item, net.schematicNet)}
         return netsSceneSet
 
-    def findScenePinsSet(self):
+    def findScenePinsSet(self) -> set[shp.schematicPin]:
         pinsSceneSet = {item for item in self.items(self.sceneRect()) if
                         isinstance(item, shp.schematicPin)}
         return pinsSceneSet
-
-    def findSymbolPinLocs(self, symbol):
-        """
-        Finds bounding rectangles for the pins of a symbol and stores them in the symbol.
-        """
-        for pin in symbol.pins:
-            symbol.pinLocations[pin.pinName] = pin.sceneBoundingRect()
 
     def groupNamedNets(self, namedNetsSet, unnamedNetsSet):
         """
         Groups nets with the same name.
         """
-        # select a net from the set and remove it from the set
         for netItem in namedNetsSet:
-            unnamedNetsSet, self.schematicNets[netItem.name] = self.traverseNets(
-                {netItem, }, unnamedNetsSet, )
+            if self.schematicNets.get(netItem.name) is None:
+                self.schematicNets[netItem.name] = set()
+            connectedNets, unnamedNetsSet = self.traverseNets({netItem,}, unnamedNetsSet)
+            self.schematicNets[netItem.name] |= connectedNets
+        # These are the nets not connected to any named net
         return unnamedNetsSet
 
-    def groupUnnamedNets(self, netsSceneSet, nameCounter):
+    def groupUnnamedNets(self, unnamedNetsSet, nameCounter):
         """
         Groups nets together if they are connected and assign them default names
         if they don't have a name assigned.
         """
         # select a net from the set and remove it from the set
         try:
-            initialNet = netsSceneSet.pop()  # assign it a name, net0, net1, net2, etc.
+            initialNet = unnamedNetsSet.pop()  # assign it a name, net0, net1, net2, etc.
         except KeyError:  # initialNet set is empty
             pass
         else:
@@ -1688,13 +1693,12 @@ class schematic_scene(editor_scene):
             # now go through the set and see if any of the
             # nets are connected to the initial net
             # remove them from the set and add them to the initial net's set
-            otherNets, self.schematicNets[initialNet.name] = self.traverseNets(
-                {initialNet, }, netsSceneSet, )
-            nameCounter += 1
-            if len(otherNets) > 1:
-                self.groupUnnamedNets(otherNets, nameCounter)
-            elif len(otherNets) == 1:
-                lastNet = otherNets.pop()
+            self.schematicNets[initialNet.name], unnamedNetsSet = self.traverseNets(
+                {initialNet, }, unnamedNetsSet)
+            if len(unnamedNetsSet) > 1:
+                self.groupUnnamedNets(unnamedNetsSet, nameCounter + 1)
+            elif len(unnamedNetsSet) == 1:
+                lastNet = unnamedNetsSet.pop()
                 lastNet.name = "net" + str(nameCounter)
                 self.schematicNets[lastNet.name] = {lastNet}
 
@@ -1708,7 +1712,7 @@ class schematic_scene(editor_scene):
         for netItem in connectedSet:
             for netItem2 in otherNetsSet:
                 if self.checkConnect(netItem, netItem2):
-                    if netItem2.nameSet and netItem.nameSet:
+                    if netItem2.nameSet and netItem.nameSet and netItem.name != netItem2.name:
                         self.parent.parent.messageLine.setText(
                             "Error: multiple names assigned to same net")
                         netItem2.nameConflict = True
@@ -1717,14 +1721,14 @@ class schematic_scene(editor_scene):
                     else:
                         netItem2.name = netItem.name
                         netItem.nameConflict = False
-                        netItem.nameConflict = False
+                        netItem2.nameConflict = False
                     newFoundConnectedSet.add(netItem2)
         # keep searching if you already found a net connected to the initial net
         if len(newFoundConnectedSet) > 0:
             connectedSet.update(newFoundConnectedSet)
             otherNetsSet -= newFoundConnectedSet
             self.traverseNets(connectedSet, otherNetsSet)
-        return otherNetsSet, connectedSet
+        return connectedSet, otherNetsSet
 
     def checkConnect(self, netItem, otherNetItem):
         """
@@ -1741,6 +1745,8 @@ class schematic_scene(editor_scene):
                     otherNetItem.mapToScene(otherNetItem.start)) or netBRect.contains(
                 otherNetItem.mapToScene(otherNetItem.end)):
                 return True
+            else:
+                return False
 
     def createCrossDot(self, center: QPoint, radius: int):
         crossDot = net.crossingDot(center, radius, self.wirePen)
@@ -1936,12 +1942,11 @@ class schematic_scene(editor_scene):
                             # check if label name is in label dictionary of item.
                             if tempLabelName in item.labels.keys():
                                 item.labels[
-                                    tempLabelName].labelValue = \
-                                    dlg.instanceLabelsLayout.itemAtPosition(
+                                    tempLabelName].labelValue = dlg.instanceLabelsLayout.itemAtPosition(
                                     i, 1).widget().text()
                                 item.labels[tempLabelName].labelValueSet = True
                                 visible = dlg.instanceLabelsLayout.itemAtPosition(i,
-                                    2).widget().currentText()
+                                                                                  2).widget().currentText()
                                 if visible == "True":
                                     item.labels[tempLabelName].labelVisible = True
                                 else:
