@@ -21,6 +21,7 @@ import sys
 from contextlib import redirect_stderr, redirect_stdout
 
 import pathlib
+import logging
 
 # import numpy as np
 
@@ -86,6 +87,15 @@ class mainWindow(QMainWindow):
             self.libraryDict = {}
         self.cellViews = ["schematic", "symbol", "layout"]
         self.init_UI()
+        # Create a custom logger
+        self.logger = logging.getLogger(__name__)
+        c_handler = logging.StreamHandler(stream=self.centralW.console)
+        c_handler.setLevel(logging.WARNING)
+        c_format = logging.Formatter('%(levelname)s - %(message)s')
+        c_handler.setFormatter(c_format)
+        self.logger.addHandler(c_handler)
+        self.logger.warning('This is a warning')
+        self.logger.error('This is an error')
 
     def init_UI(self):
         self.resize(900, 300)

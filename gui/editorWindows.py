@@ -43,7 +43,7 @@ import revedasimgui.app as revedasim
 from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, QSize, QPointF, )
 from PySide6.QtGui import (QAction, QKeySequence, QColor, QIcon, QPainter, QPen,
                            QStandardItemModel, QCursor, QUndoStack, QTextDocument,
-                           QGuiApplication)
+                           QGuiApplication, QCloseEvent)
 from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog,
                                QFormLayout, QGraphicsScene, QHBoxLayout, QLabel,
                                QLineEdit, QMainWindow, QMenu, QMessageBox, QToolBar,
@@ -67,6 +67,10 @@ class editorWindow(QMainWindow):
         self._createTriggers()
         self._createShortcuts()
         self.init_UI()
+        self.appMainW = self.libraryView.parent.parent.parent
+        self.logger = self.appMainW.logger
+        self.switchViewList = ['schematic' , 'veriloga', 'symbol']
+        self.stopViewList = ['symbol']
 
     def init_UI(self):
         """
@@ -773,8 +777,9 @@ class symbolContainer(QWidget):
 
 
 class schematicContainer(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent: schematicEditor):
         super().__init__(parent=parent)
+        assert isinstance(parent, schematicEditor)
         self.parent = parent
         self.scene = schematic_scene(self)
         self.view = schematic_view(self.scene, self)
@@ -807,6 +812,8 @@ class editor_scene(QGraphicsScene):
         self.libraryDict = self.parent.parent.libraryDict
         self.rotateItem = False
         self.itemContextMenu = QMenu()
+        self.appMainW = self.parent.parent.libraryView.parent.parent.parent
+        self.logger = self.appMainW.logger
 
     def setPens(self):
         self.wirePen = QPen(self.wireLayer.color, 2)
@@ -1260,11 +1267,14 @@ class symbol_scene(editor_scene):
                 print("Invalid JSON file")
 
     def saveSymbolCell(self, fileName):
-        # items = self.items(self.sceneRect())  # get items in scene rect
+        items = self.items(self.sceneRect())  # get items in scene rect
         if hasattr(self, 'attributeList'):
             items.extend(self.attributeList)  # add attribute list to list
         with open(fileName, "w") as f:
-            json.dump(items, f, cls=se.symbolEncoder, indent=4)
+            try:
+                json.dump(items, f, cls=se.symbolEncoder, indent=4)
+            except Exception as e:
+                print(e)
 
     def stretchSelectedItem(self):
         if self.selectedItems is not None:
@@ -1421,8 +1431,6 @@ class schematic_scene(editor_scene):
                 del self.draftItem
                 del self.start
 
-        #     elif self.itemSelect and self.items(self.start):  #         if (isinstance(self.selectedItem,  #                        net.schematicNet) and self.selectedItem.ItemPositionHasChanged):  #             # find the cross dots locations in the viewport  #             self.removeDotsInView(self.viewRect)  #             self.mergeNets(self.selectedItem, self.viewRect)  #             self.splitNets(self.viewRect)  #             self.findDotPoints(self.viewRect)  #  #             self.parent.parent.messageLine.setText("Net moved")
-
     def removeDotsInView(self, viewRect):
         dotsInView = {item for item in self.items(viewRect) if
                       isinstance(item, net.crossingDot)}
@@ -1553,15 +1561,17 @@ class schematic_scene(editor_scene):
 
     def recursiveNetlisting(self, cirFile, writeNetlist):
         '''
-        Recursively traverse all subcircuits and netlist them.
+        Recursively traverse all sub-circuits and netlist them.
         '''
-        symbolSceneSet = self.generateNetMapping()
-        for symbolItem in symbolSceneSet:
+        self.groupAllNets()
+        sceneSymbolSet = self.findSceneSymbolSet()
+        self.generatePinNetMap(sceneSymbolSet)
+        for symbolItem in sceneSymbolSet:
             if symbolItem.attr["NLPDeviceFormat"] != "":
                 line = symbolItem.createNetlistLine()
                 cirFile.write(f"{line}\n")
         # create a dictionary of all symbol types in the scene.
-        symbolGroupDict = self.findSceneCells(symbolSceneSet)
+        symbolGroupDict = self.findSceneCells(sceneSymbolSet)
         for cellName, symbolItem in symbolGroupDict.items():
             cellPath = pathlib.Path(
                 self.parent.parent.libraryDict[symbolItem.libraryName].joinpath(
@@ -1569,23 +1579,29 @@ class schematic_scene(editor_scene):
             # there could be a more intelligent way finding schematic
             # cells but this should suffice for the moment.
             nlpDeviceString = symbolItem.attr["NLPDeviceFormat"]
-            if nlpDeviceString != "" and (
-                    "schematic.json" in [p.name for p in cellPath.iterdir()]):
+            for circuitView in self.parent.parent.switchViewList:
+                # if circuit view exists, then netlist it.
+                if f"{circuitView}.json" in [p.name for p in cellPath.iterdir()]:
+                    nlpDeviceLine = nlpDeviceString.split()
+                    pinline = ' '  # string
+                    symbolPinList = [pin.pinName for pin in symbolItem.pins.values()]
+                    for item in nlpDeviceLine:
+                        strippedItem = item.lstrip('[|').rstrip(':%]')
+                        if strippedItem in symbolPinList:
+                            pinline += f'{strippedItem} '
+                    # if circuit view is not in stopView list, descend to it:
+                    if not circuitView in self.parent.parent.stopViewList:
+                        cirFile.write(f'.SUBCKT {cellName} {pinline} \n')
+                        new_scene = schematic_scene(self.parent)
+                        new_scene.loadSchematicCell(cellPath.joinpath("schematic.json"))
+                        new_scene.recursiveNetlisting(cirFile, True)
+                        cirFile.write(f'.ENDS {cellName} \n')
 
-                nlpDeviceLine = nlpDeviceString.split()
-                pinline = ' '  # string
-                symbolPinList = [pin.pinName for pin in symbolItem.pins.values()]
-                for item in nlpDeviceLine:
-                    strippedItem = item.lstrip('[|').rstrip(':%]')
-                    if strippedItem in symbolPinList:
-                        pinline += f'{strippedItem} '
-                cirFile.write(f'.SUBCKT {cellName} {pinline} \n')
-                new_scene = schematic_scene(self.parent)
-                new_scene.loadSchematicCell(cellPath.joinpath("schematic.json"))
-                new_scene.recursiveNetlisting(cirFile, True)
-                cirFile.write(f'.ENDS {cellName} \n')
-
-    def generateNetMapping(self) -> set[shp.symbolShape]:
+    def groupAllNets(self) -> None:
+        '''
+        This method starting from nets connected to pins, then named nets and unnamed
+        nets, groups all the nets in the schematic.
+        '''
         # all the nets in the schematic in a set to remove duplicates
         netsSceneSet = self.findSceneNetsSet()
         # create a separate set of named nets.
@@ -1597,21 +1613,24 @@ class schematic_scene(editor_scene):
 
         for scenePin in scenePinsSet:
             for sceneNet in netsSceneSet:
-                if scenePin.sceneBoundingRect().intersects(sceneNet.sceneBoundingRect()):
+                if self.checkPinNetConnect(scenePin,sceneNet):
                     if sceneNet.nameSet:
                         if sceneNet.name == scenePin.pinName:
                             pinConNetsSet.add(sceneNet)
                         else:
                             sceneNet.nameConflict = True
+                            self.parent.parent.logger.error(
+                                f'Net name conflict at {scenePin.pinName} of '
+                                f'{scenePin.parent.instanceName}.')
                     else:
                         pinConNetsSet.add(sceneNet)
-                        sceneNet.name = scenePin.pinName  # sceneNet.nameSet = True
+                        sceneNet.name = scenePin.pinName
                     sceneNet.update()
 
         # first propagate the net names to the nets connected to pins.
         # first net set is left over nets.
         notPinConnNets = self.groupNamedNets(pinConNetsSet, netsSceneSet - pinConNetsSet)
-        print(len(notPinConnNets))
+
         # find all nets with nets set through net dialogue.
         namedNetsSet = set(
             [netItem for netItem in netsSceneSet - pinConNetsSet if netItem.nameSet])
@@ -1622,20 +1641,31 @@ class schematic_scene(editor_scene):
         #         netItem.name = None  # empty all net names not set by the user
         # now start netlisting from the unnamed nets
         self.groupUnnamedNets(unnamedNets, self.netCounter)
-        # [print(netItem.name) for netItem in netsSceneSet]
-        # find symbols in the scene
-        symbolSceneSet = self.findSceneSymbolSet()
-        # we just need netlist each subcircuit once
-        for symbolItem in symbolSceneSet:
+
+    def generatePinNetMap(self,sceneSymbolSet):
+        '''
+        For symbols in sceneSymbolSet, find which pin is connected to which net
+        '''
+        netCounter =0
+        for symbolItem in sceneSymbolSet:
             for pinName, pinItem in symbolItem.pins.items():
-                symbolItem.pinLocations[pinName] = pinItem.sceneBoundingRect()
+                pinItem.connected = False # clear connections
+                # find each symbol its pin locations and save it in pinLocations
+                # directory.
+                # symbolItem.pinLocations[pinName] = pinItem.sceneBoundingRect()
                 for netName, netItemSet in self.schematicNets.items():
                     for netItem in netItemSet:
-                        if pinItem.sceneBoundingRect().intersects(
-                                netItem.sceneBoundingRect()):
+                        if self.checkPinNetConnect(pinItem,netItem):
                             symbolItem.pinNetMap[pinName] = netName
+                            pinItem.connected = True
+                            print(f'{symbolItem.instanceName}, {pinItem.pinName}')
+                if not pinItem.connected:
+                    # # assign a default net name prefixed with d(efault).
+                    # symbolItem.pinNetMap[pinName] = f'dnet{netCounter}'
+                    # print(f'left unconnected:{symbolItem.pinNetMap[pinName]}')
+                    # netCounter += 1
+                    pass
 
-        return symbolSceneSet
 
     def findSceneCells(self, symbolSet):
         """
@@ -1674,12 +1704,12 @@ class schematic_scene(editor_scene):
         for netItem in namedNetsSet:
             if self.schematicNets.get(netItem.name) is None:
                 self.schematicNets[netItem.name] = set()
-            connectedNets, unnamedNetsSet = self.traverseNets({netItem,}, unnamedNetsSet)
+            connectedNets, unnamedNetsSet = self.traverseNets({netItem, }, unnamedNetsSet)
             self.schematicNets[netItem.name] |= connectedNets
         # These are the nets not connected to any named net
         return unnamedNetsSet
 
-    def groupUnnamedNets(self, unnamedNetsSet, nameCounter):
+    def groupUnnamedNets(self, unnamedNetsSet:set[net.schematicNet], nameCounter:int):
         """
         Groups nets together if they are connected and assign them default names
         if they don't have a name assigned.
@@ -1696,8 +1726,9 @@ class schematic_scene(editor_scene):
             # remove them from the set and add them to the initial net's set
             self.schematicNets[initialNet.name], unnamedNetsSet = self.traverseNets(
                 {initialNet, }, unnamedNetsSet)
+            nameCounter += 1
             if len(unnamedNetsSet) > 1:
-                self.groupUnnamedNets(unnamedNetsSet, nameCounter + 1)
+                self.groupUnnamedNets(unnamedNetsSet, nameCounter)
             elif len(unnamedNetsSet) == 1:
                 lastNet = unnamedNetsSet.pop()
                 lastNet.name = "net" + str(nameCounter)
@@ -1731,6 +1762,11 @@ class schematic_scene(editor_scene):
             self.traverseNets(connectedSet, otherNetsSet)
         return connectedSet, otherNetsSet
 
+    def checkPinNetConnect(self,pinItem:shp.pin,netItem:net.schematicNet):
+        if pinItem.sceneBoundingRect().intersects(netItem.sceneBoundingRect()):
+            return True
+        else:
+            return False
     def checkConnect(self, netItem, otherNetItem):
         """
         Determine if a net is connected to netItem.
@@ -1826,7 +1862,8 @@ class schematic_scene(editor_scene):
                     item.labelDefs()
                 return symbolInstance
             except json.decoder.JSONDecodeError:
-                print("Invalid JSON file")
+                # print("Invalid JSON file")
+                self.logger.warning('Invalid JSON File')
 
     def deleteSelectedItems(self):
         try:
@@ -2142,39 +2179,7 @@ class editor_view(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setRenderHint(QPainter.TextAntialiasing)
         self.setMouseTracking(
-            True)  # self.setDragMode(QGraphicsView.RubberBandDrag)  # self.rubberBand = QRubberBand(QRubberBand.Rectangle, self)
-
-    #     self.changeRubberBand = False
-    #     self.selectedItems = list()
-    #
-    # def mousePressEvent(self,mouse_event: QGraphicsSceneMouseEvent):
-    #     if mouse_event.button() == Qt.LeftButton:
-    #         self.start = mouse_event.pos()
-    #         self.rubberBand.setGeometry(QRect(self.start, QSize()))
-    #         self.rubberBand.show()
-    #         self.changeRubberBand = True
-    #         self.selectionPath = QPainterPath(self.start)
-    #         super().mousePressEvent(mouse_event)
-    #
-    # def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent):
-    #     if self.changeRubberBand:
-    #         self.rubberBand.setGeometry(QRect(self.start,mouse_event.pos()
-    #                                           ).normalized())
-    #     super().mouseMoveEvent(mouse_event)
-    #
-    # def mouseReleaseEvent(self,mouse_event:QGraphicsSceneMouseEvent):
-    #     if mouse_event.button() == Qt.LeftButton:
-    #         self.changeRubberBand = False
-    #         if self.rubberBand.isVisible():
-    #             self.rubberBand.hide()
-    #             self.selectionRect = self.rubberBand.geometry()
-    #             selected = self.items(self.selectionRect)
-    #             print(selected)
-    #             for item in selected:
-    #                 item.setSelected(True)
-    #             # self.selectionPath.addRect(self.rubberBand.geometry())
-    #             # self.scene.setSelectionArea(self.selectionPath)
-    #     super().mouseReleaseEvent(mouse_event)
+            True)
 
     def wheelEvent(self, mouse_event):
         factor = 1.1
@@ -2258,6 +2263,7 @@ class libraryBrowser(QMainWindow):
         self._createMenuBar()
         self._createActions()
         self._createToolBars()
+        self.logger = self.parent.logger
         self.initUI()
 
     def initUI(self):
@@ -2346,7 +2352,8 @@ class libraryBrowser(QMainWindow):
             self.parent.libraryDict = self.libraryDict
 
     def newLibClick(self, s):
-        print('not implemented yet.')
+        # print('not implemented yet.')
+        self.logger.error('Not implemented yet.')
 
     def reworkLibraryModel(self, dialog: QDialog):
         libFilePath = pathlib.Path.cwd().parent.joinpath("library.yaml")
@@ -2358,7 +2365,8 @@ class libraryBrowser(QMainWindow):
             with libFilePath.open(mode="w") as f:
                 scb.writeLibDefFile(tempLibDict, libFilePath)
         except IOError:
-            print(f"Cannot save library definitions in {libFilePath}")
+            # print(f"Cannot save library definitions in {libFilePath}")
+            self.logger.error(f"Cannot save library definitions in {libFilePath}")
         # self.parent.centralWidget.treeView.addLibrary()
         self.libraryDict = {}  # now empty the library dict
         for key, value in tempLibDict.items():
@@ -2372,6 +2380,10 @@ class libraryBrowser(QMainWindow):
             self.libBrowserCont.designView.populateLibrary(designPath,
                                                            self.libBrowserCont.designView.rootItem)
         self.libBrowserCont.designView.libraryDict = self.libraryDict
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        self.parent.libraryBrowser = None
+        event.accept()
 
 
 class libraryBrowserContainer(QWidget):
@@ -2395,6 +2407,8 @@ class designLibrariesView(QTreeView):
         self.cellViews = self.parent.parent.cellViews  # type: list
         self.openViews = {}  # type: dict
         self.viewCounter = 0
+        self.mainW = self.parent.parent.parent
+        self.logger = self.mainW.logger
         self.init_UI()
 
     def init_UI(self):
@@ -2474,7 +2488,8 @@ class designLibrariesView(QTreeView):
             shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
             self.selectedItem.parent().removeRow(self.selectedItem.row())
         except OSError as e:
-            print(f"Error:{e.strerror}")
+            # print(f"Error:{e.strerror}")
+            self.logger.warning(f"Error:{e.strerror}")
 
     # cellview related methods
 
@@ -2530,6 +2545,7 @@ class designLibrariesView(QTreeView):
                     shutil.copy(viewPath, newViewPath)
                 else:
                     QMessageBox.warning(self, "Error", "View already exits.")
+                    self.logger.warning("View already exists.")
                     self.copyView()  # try again
 
     def renameView(self):
@@ -2540,7 +2556,8 @@ class designLibrariesView(QTreeView):
             self.selectedItem.data(Qt.UserRole + 2).unlink()
             self.selectedItem.parent().removeRow(self.selectedItem.row())
         except OSError as e:
-            print(f"Error:{e.strerror}")
+            # print(f"Error:{e.strerror}")
+            self.logger.warning(f"Error:{e.strerror}")
 
     def reworkDesignLibrariesView(self):
         self.libraryModel.clear()
@@ -2762,6 +2779,7 @@ class libraryPathEditorDialog(QDialog):
         self.parent = parent
         self.libraryEditRowList = []
         self.libraryDict = self.parent.libraryDict
+        self.logger = self.parent.parent.logger
         self.init_UI()
 
     def init_UI(self):
@@ -2827,6 +2845,7 @@ class libraryNameEditC(QLineEdit):
         self.parent = parent
         self.fileDialog = QFileDialog()
         self.fileDialog.setFileMode(QFileDialog.Directory)
+        self.logger=self.parent.parent.parent.logger
         self.init_UI()
 
     def init_UI(self):
@@ -2853,7 +2872,7 @@ class libraryNameEditC(QLineEdit):
         self.parent.parent.libraryEditRowList.remove(self.parent)
 
     def libInfo(self):
-        print('Not yet implemented')
+        self.logger.warning('Not yet implemented.')
 
 
 class libraryPathEditC(QLineEdit):
@@ -2875,10 +2894,15 @@ class symbolChooser(libraryBrowser):
         self.scene = scene
         super().__init__(parent)
         self.setWindowTitle("Symbol Chooser")
+        self.logger = self.scene.logger
 
     def initUI(self):
         self.symBrowserCont = symbolBrowserContainer(parent=self)
         self.setCentralWidget(self.symBrowserCont)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        self.parent.symbolChooser = None
+        event.accept()
 
 
 class symbolBrowserContainer(libraryBrowserContainer):

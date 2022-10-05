@@ -18,9 +18,12 @@ class res(baseInst):
 class nmos(baseInst):
     def __init__(self,dict:dict):
         super().__init__(dict)
-        w = Quantity(self._labelsDict['w'].labelValue)
-        l = Quantity(self._labelsDict['l'].labelValue)
-        nf= Quantity(self._labelsDict['nf'].labelValue)
-        sd1p8v = 0.28
-        sa1p8v = sb1p8v = 0.265
-        sourceDiffs = lambda nf: int(int(nf) / 2 + 1)
+        self.w = Quantity(self._labelsDict['w'].labelValue)
+        self.l = Quantity(self._labelsDict['l'].labelValue)
+        self.nf= Quantity(self._labelsDict['nf'].labelValue)
+        self.sd1p8v = 0.28
+        self.sa1p8v = sb1p8v = 0.265
+        self.sourceDiffs = lambda nf: int(int(nf) / 2 + 1)
+
+    def asparm(self):
+        return self.sourceDiffs(self.nf)*(self.w/self.nf)*self.sd1p8v

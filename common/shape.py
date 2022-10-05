@@ -25,6 +25,7 @@ from PySide6.QtGui import (QPen, QFont, QFontMetrics, QColor, QPainterPath, )
 from PySide6.QtWidgets import (QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsPathItem,
                                QGraphicsItemGroup, )
 import math
+from quantiphy import Quantity
 import revedaeditor.pdk.callbacks as cb
 
 
@@ -613,6 +614,7 @@ class pin(shape):
         self._pinName = pinName
         self._pinDir = pinDir
         self._pinType = pinType
+        self._connected = False # True if the pin is connected to a net.
         self._rect = QRect(self._start.x() - 5, self._start.y() - 5, 10, 10)
 
     def boundingRect(self):
@@ -666,6 +668,15 @@ class pin(shape):
     def pinType(self, pintype: str):
         if pintype in self.pinTypes:
             self._pinType = pintype
+
+    @property
+    def connected(self):
+        return self._connected
+
+    @connected.setter
+    def connected(self, value:bool):
+        if isinstance(value,bool):
+            self._connected = value
 
     def toSchematicPin(self, start: QPoint, pen: QPen, gridTuple):
         return schematicPin(start, pen, self.pinName, self.pinDir, self.pinType,
@@ -1067,7 +1078,7 @@ class label(shape):
                 # dictionary of instance.
                 expression = f'cb.{self.parentItem().cellName}(self.parentItem(' \
                              f').labels).{labelFunction}'
-                self._labelValue = eval(expression)
+                self._labelValue = Quantity(eval(expression)).render(prec=3)
                 self._labelText = f'{self._labelName}={self._labelValue}'
             except Exception as e:
                 print(e)

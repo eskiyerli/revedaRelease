@@ -433,7 +433,7 @@ class instanceProperties(QDialog):
                 self.instanceLabelsLayout.addWidget(
                     boldLabel(label.labelName, self), row_index, 0)
                 labelValueEdit = longLineEdit()
-                labelValueEdit.setText(label.labelValue)
+                labelValueEdit.setText(str(label.labelValue))
                 self.instanceLabelsLayout.addWidget(labelValueEdit, row_index,
                     1)
                 visibleCombo = QComboBox(self)
