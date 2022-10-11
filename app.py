@@ -112,8 +112,10 @@ class mainWindow(QMainWindow):
         # Returns QMenu object.
         self.menuFile = self.mainW_menubar.addMenu("&File")
         self.menuTools = self.mainW_menubar.addMenu("&Tools")
+        self.importTools = self.menuTools.addMenu("&Import")
         self.menuOptions = self.mainW_menubar.addMenu("&Options")
         self.menuHelp = self.mainW_menubar.addMenu("&Help")
+
         self.mainW_statusbar = self.statusBar()
         self.mainW_statusbar.showMessage("Ready")
 
@@ -130,6 +132,17 @@ class mainWindow(QMainWindow):
         self.libraryBrowserAction = QAction(openLibIcon, "Library Browser", self)
         self.menuTools.addAction(self.libraryBrowserAction)
         self.libraryBrowserAction.triggered.connect(self.libraryBrowserClick)
+
+
+        importVerilogaIcon = QIcon(":/icons/document--plus.png")
+        self.importVerilogaAction = QAction(importVerilogaIcon, 'Import Verilog-a '
+                                                                'file...')
+        self.importTools.addAction(self.importVerilogaAction)
+
+
+        newCellIcon = QIcon(":/icons/document--plus.png")
+        self.importVerilogaAction = QAction(newCellIcon, "Import Verilog-A",self)
+
 
     # open library browser window
     def libraryBrowserClick(self):

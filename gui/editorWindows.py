@@ -69,7 +69,7 @@ class editorWindow(QMainWindow):
         self.init_UI()
         self.appMainW = self.libraryView.parent.parent.parent
         self.logger = self.appMainW.logger
-        self.switchViewList = ['schematic' , 'veriloga', 'symbol']
+        self.switchViewList = ['schematic', 'veriloga', 'symbol']
         self.stopViewList = ['symbol']
 
     def init_UI(self):
@@ -1582,20 +1582,24 @@ class schematic_scene(editor_scene):
             for circuitView in self.parent.parent.switchViewList:
                 # if circuit view exists, then netlist it.
                 if f"{circuitView}.json" in [p.name for p in cellPath.iterdir()]:
-                    nlpDeviceLine = nlpDeviceString.split()
-                    pinline = ' '  # string
-                    symbolPinList = [pin.pinName for pin in symbolItem.pins.values()]
-                    for item in nlpDeviceLine:
-                        strippedItem = item.lstrip('[|').rstrip(':%]')
-                        if strippedItem in symbolPinList:
-                            pinline += f'{strippedItem} '
-                    # if circuit view is not in stopView list, descend to it:
-                    if not circuitView in self.parent.parent.stopViewList:
-                        cirFile.write(f'.SUBCKT {cellName} {pinline} \n')
-                        new_scene = schematic_scene(self.parent)
-                        new_scene.loadSchematicCell(cellPath.joinpath("schematic.json"))
-                        new_scene.recursiveNetlisting(cirFile, True)
-                        cirFile.write(f'.ENDS {cellName} \n')
+                    match circuitView:
+                        case 'schematic':
+                            nlpDeviceLine = nlpDeviceString.split()
+                            pinline = ' '  # string
+                            symbolPinList = [pin.pinName for pin in
+                                             symbolItem.pins.values()]
+                            for item in nlpDeviceLine:
+                                strippedItem = item.lstrip('[|').rstrip(':%]')
+                                if strippedItem in symbolPinList:
+                                    pinline += f'{strippedItem} '
+                            # if circuit view is not in stopView list, descend to it:
+                            if not circuitView in self.parent.parent.stopViewList:
+                                cirFile.write(f'.SUBCKT {cellName} {pinline} \n')
+                                new_scene = schematic_scene(self.parent)
+                                new_scene.loadSchematicCell(
+                                    cellPath.joinpath("schematic.json"))
+                                new_scene.recursiveNetlisting(cirFile, True)
+                                cirFile.write(f'.ENDS {cellName} \n')
 
     def groupAllNets(self) -> None:
         '''
@@ -1613,7 +1617,7 @@ class schematic_scene(editor_scene):
 
         for scenePin in scenePinsSet:
             for sceneNet in netsSceneSet:
-                if self.checkPinNetConnect(scenePin,sceneNet):
+                if self.checkPinNetConnect(scenePin, sceneNet):
                     if sceneNet.nameSet:
                         if sceneNet.name == scenePin.pinName:
                             pinConNetsSet.add(sceneNet)
@@ -1642,30 +1646,28 @@ class schematic_scene(editor_scene):
         # now start netlisting from the unnamed nets
         self.groupUnnamedNets(unnamedNets, self.netCounter)
 
-    def generatePinNetMap(self,sceneSymbolSet):
+    def generatePinNetMap(self, sceneSymbolSet):
         '''
         For symbols in sceneSymbolSet, find which pin is connected to which net
         '''
-        netCounter =0
+        netCounter = 0
         for symbolItem in sceneSymbolSet:
             for pinName, pinItem in symbolItem.pins.items():
-                pinItem.connected = False # clear connections
+                pinItem.connected = False  # clear connections
                 # find each symbol its pin locations and save it in pinLocations
                 # directory.
                 # symbolItem.pinLocations[pinName] = pinItem.sceneBoundingRect()
                 for netName, netItemSet in self.schematicNets.items():
                     for netItem in netItemSet:
-                        if self.checkPinNetConnect(pinItem,netItem):
+                        if self.checkPinNetConnect(pinItem, netItem):
                             symbolItem.pinNetMap[pinName] = netName
                             pinItem.connected = True
                             print(f'{symbolItem.instanceName}, {pinItem.pinName}')
                 if not pinItem.connected:
-                    # # assign a default net name prefixed with d(efault).
-                    # symbolItem.pinNetMap[pinName] = f'dnet{netCounter}'
-                    # print(f'left unconnected:{symbolItem.pinNetMap[pinName]}')
-                    # netCounter += 1
-                    pass
-
+                    # assign a default net name prefixed with d(efault).
+                    symbolItem.pinNetMap[pinName] = f'dnet{netCounter}'
+                    print(f'left unconnected:{symbolItem.pinNetMap[pinName]}')
+                    netCounter += 1
 
     def findSceneCells(self, symbolSet):
         """
@@ -1709,7 +1711,7 @@ class schematic_scene(editor_scene):
         # These are the nets not connected to any named net
         return unnamedNetsSet
 
-    def groupUnnamedNets(self, unnamedNetsSet:set[net.schematicNet], nameCounter:int):
+    def groupUnnamedNets(self, unnamedNetsSet: set[net.schematicNet], nameCounter: int):
         """
         Groups nets together if they are connected and assign them default names
         if they don't have a name assigned.
@@ -1762,11 +1764,12 @@ class schematic_scene(editor_scene):
             self.traverseNets(connectedSet, otherNetsSet)
         return connectedSet, otherNetsSet
 
-    def checkPinNetConnect(self,pinItem:shp.pin,netItem:net.schematicNet):
+    def checkPinNetConnect(self, pinItem: shp.pin, netItem: net.schematicNet):
         if pinItem.sceneBoundingRect().intersects(netItem.sceneBoundingRect()):
             return True
         else:
             return False
+
     def checkConnect(self, netItem, otherNetItem):
         """
         Determine if a net is connected to netItem.
@@ -2178,8 +2181,7 @@ class editor_view(QGraphicsView):
         self.setCursor(self.standardCursor)  # set cursor to standard arrow
         self.setRenderHint(QPainter.Antialiasing)
         self.setRenderHint(QPainter.TextAntialiasing)
-        self.setMouseTracking(
-            True)
+        self.setMouseTracking(True)
 
     def wheelEvent(self, mouse_event):
         factor = 1.1
@@ -2285,52 +2287,58 @@ class libraryBrowser(QMainWindow):
         self.libraryMenu.addAction(self.libraryEditorAction)
         self.libraryEditorAction.triggered.connect(self.libraryEditorClick)
 
-        newLibIcon = QIcon(":/icons/database--plus.png")
-        self.newLibAction = QAction(newLibIcon, "New Lib...", self)
-        self.libraryMenu.addAction(self.newLibAction)
-        self.newLibAction.triggered.connect(self.newLibClick)
-
-        saveLibIcon = QIcon(":/icons/database-import.png")
-        self.saveLibAction = QAction(saveLibIcon, "Save Lib...", self)
-        self.libraryMenu.addAction(self.saveLibAction)
-
         closeLibIcon = QIcon(":/icons/database-delete.png")
         self.closeLibAction = QAction(closeLibIcon, "Close Lib...", self)
         self.libraryMenu.addAction(self.closeLibAction)
+        self.closeLibAction.triggered.connect(self.closeLibClick)
 
         self.libraryMenu.addSeparator()
         newCellIcon = QIcon(":/icons/document--plus.png")
         self.newCellAction = QAction(newCellIcon, "New Cell...", self)
+        self.newCellAction.setToolTip('Create New Cell')
         self.libraryMenu.addAction(self.newCellAction)
+        self.newCellAction.triggered.connect(self.newCellClick)
 
-        openCellIcon = QIcon(":/icons/document--pencil.png")
-        self.openCellAction = QAction(openCellIcon, "Open Cell...", self)
-        self.libraryMenu.addAction(self.openCellAction)
-
-        saveCellIcon = QIcon(":/icons/document-import.png")
-        self.saveCellAction = QAction(saveCellIcon, "Save Cell", self)
-        self.libraryMenu.addAction(self.saveCellAction)
-
-        closeCellIcon = QIcon(":/icons/document--minus.png")
-        closeCellAction = QAction(closeCellIcon, "Close Cell", self)
-        self.libraryMenu.addAction(closeCellAction)
-
-        deleteIcon = QIcon(":/icons/node-delete.png")
-        self.deleteCellAction = QAction(deleteIcon, "Delete", self)
+        deleteCellIcon = QIcon(":/icons/node-delete.png")
+        self.deleteCellAction = QAction(deleteCellIcon, "Delete Cell...", self)
+        self.deleteCellAction.setToolTip('Delete Selected Cell')
         self.libraryMenu.addAction(self.deleteCellAction)
+        self.deleteCellAction.triggered.connect(self.deleteCellClick)
+
+        self.libraryMenu.addSeparator()
+
+        newCellViewIcon = QIcon(":/icons/document--pencil.png")
+        self.newCellViewAction = QAction(newCellViewIcon, "Create New CellView...", self)
+        self.newCellViewAction.setToolTip('Create New Cellview')
+        self.libraryMenu.addAction(self.newCellViewAction)
+        self.newCellAction.triggered.connect(self.newCellViewClick)
+
+        openCellViewIcon = QIcon(":/icons/document--pencil.png")
+        self.openCellViewAction = QAction(openCellViewIcon, "Open CellView...", self)
+        self.openCellViewAction.setToolTip('Open Selected CellView')
+        self.libraryMenu.addAction(self.openCellViewAction)
+        self.openCellViewAction.triggered.connect(self.openCellViewClick)
+
+        deleteCellViewIcon = QIcon(":/icons/node-delete.png")
+        self.deleteCellViewAction = QAction(deleteCellViewIcon, "Delete", self)
+        self.deleteCellViewAction.setToolTip('Delete Selected Cellview')
+        self.libraryMenu.addAction(self.deleteCellViewAction)
+        self.deleteCellViewAction.triggered.connect(self.deleteCellViewClick)
 
     def _createToolBars(self):
         # Create tools bar called "main toolbar"
         toolbar = QToolBar("Main Toolbar", self)
         # place toolbar at top
         self.addToolBar(toolbar)
-        toolbar.addAction(self.newLibAction)
         toolbar.addAction(self.openLibAction)
-        toolbar.addAction(self.saveLibAction)
+        toolbar.addAction(self.closeLibAction)
         toolbar.addSeparator()
         toolbar.addAction(self.newCellAction)
-        toolbar.addAction(self.openCellAction)
-        toolbar.addAction(self.saveCellAction)
+        toolbar.addAction(self.deleteCellAction)
+        toolbar.addSeparator()
+        toolbar.addAction(self.newCellViewAction)
+        toolbar.addAction(self.openCellViewAction)
+        toolbar.addAction(self.deleteCellViewAction)
 
     def openLibDialog(self):
         home_dir = str(pathlib.Path.cwd())
@@ -2341,6 +2349,11 @@ class libraryBrowser(QMainWindow):
             self.libraryDict[libDialog.selectedFiles()[0]] = pathlib.Path(
                 libDialog.selectedFiles()[0])
             self.libBrowserCont.designView.reworkDesignLibrariesView()
+    def closeLibClick(self):
+        libCloseDialog = pdlg.closeLibDialog(self.libraryDict,self)
+        if libCloseDialog.exec() == QDialog.Accepted:
+            print(libCloseDialog.libNamesCB.currentText())
+
 
     def libraryEditorClick(self, s):
         pathEditDlg = libraryPathEditorDialog(self)
@@ -2353,7 +2366,22 @@ class libraryBrowser(QMainWindow):
 
     def newLibClick(self, s):
         # print('not implemented yet.')
-        self.logger.error('Not implemented yet.')
+        self.logger.warning('Not implemented yet.')
+
+    def newCellClick(self, s):
+        self.libBrowserCont.designView.createCell()
+
+    def deleteCellClick(self, s):
+        self.libBrowserCont.designView.deleteCell()
+
+    def newCellViewClick(self, s):
+        self.libBrowserCont.designView.createCellView()
+
+    def openCellViewClick(self, s):
+        self.libBrowserCont.designView.openView()
+
+    def deleteCellViewClick(self, s):
+        self.libBrowserCont.designView.deleteView()
 
     def reworkLibraryModel(self, dialog: QDialog):
         libFilePath = pathlib.Path.cwd().parent.joinpath("library.yaml")
@@ -2449,14 +2477,20 @@ class designLibrariesView(QTreeView):
         return libraryEntry
 
     def removeLibrary(self):
-        shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
-        self.libraryModel.removeRow(self.selectedItem.row())
+        button = QMessageBox.question(self, 'Library Deletion', 'Are you sure to delete '
+                                'this library? This action cannot be undone.')
+        if button == QMessageBox.Yes:
+            shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
+            self.libraryModel.removeRow(self.selectedItem.row())
 
     def saveLibAs(self):
         pass
 
     def renameLib(self):
-        pass
+        oldLibraryName =self.selectedItem.libraryName
+        dlg = pdlg.renameLibDialog(self,oldLibraryName)
+        if dlg.exec() == QDialog.Accepted:
+            print('OK')
 
     # cell related methods
     def addCellToModel(self, cellPath, parentItem):
@@ -2845,7 +2879,7 @@ class libraryNameEditC(QLineEdit):
         self.parent = parent
         self.fileDialog = QFileDialog()
         self.fileDialog.setFileMode(QFileDialog.Directory)
-        self.logger=self.parent.parent.parent.logger
+        self.logger = self.parent.parent.parent.logger
         self.init_UI()
 
     def init_UI(self):

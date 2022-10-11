@@ -3,6 +3,8 @@ import pathlib
 
 import revedaeditor.common.net as net
 import revedaeditor.common.shape as shp
+import revedaeditor.backend.schBackEnd as scb
+
 from PySide6.QtCore import (Qt, )
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QDialogButtonBox, QLineEdit, QLabel, QComboBox,
@@ -561,6 +563,46 @@ class symbolCreateDialog(QDialog):
         self.setLayout(self.mainLayout)
         self.show()
 
+class closeLibDialog(QDialog):
+    def __init__(self,libraryDict,parent,*args):
+        super().__init__(parent,*args)
+        self.libraryDict = libraryDict
+        self.setWindowTitle('Select Library to close')
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout = QVBoxLayout()
+        formLayout = QFormLayout()
+        self.libNamesCB = QComboBox()
+        self.libNamesCB.addItems(self.libraryDict.keys())
+        formLayout.addRow(QLabel('Select Library',self), self.libNamesCB)
+        layout.addLayout(formLayout)
+        layout.addSpacing(40)
+        layout.addWidget(self.buttonBox)
+        self.setLayout(layout)
+
+class renameLibDialog(QDialog):
+    def __init__(self, parent, oldLibraryName, *args):
+        super().__init__(parent,*args)
+        self.oldLibraryName = oldLibraryName
+        self.setWindowTitle(f'Change {oldLibraryName} to:')
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout = QVBoxLayout()
+        formLayout = QFormLayout()
+        self.newLibraryName = longLineEdit()
+        formLayout.addRow(boldLabel('New Library Name:',self),self.newLibraryName)
+        layout.addLayout(formLayout)
+        layout.addSpacing(40)
+        layout.addWidget(self.buttonBox)
+        self.setLayout(layout)
 
 class deleteCellViewDialog(QDialog):
     def __init__(self, cellName, viewName, *args):
@@ -607,7 +649,6 @@ class netlistExportDialogue(QDialog):
         self.dirName = QFileDialog.getExistingDirectory()
         if self.dirName:
             self.netlistDirEdit.setText(self.dirName)
-
 
 class goDownHierDialogue(QDialog):
     def __init__(self, symbolShape: shp.symbolShape, libraryDict: dict, *args):

@@ -14,8 +14,8 @@ import revedaeditor.common.shape as shp
 class libraryItem(QStandardItem):
     def __init__(self, libraryPath: pathlib.Path
                  ):  # path is a pathlib.Path object
-        self.libraryPath = libraryPath
-        self.libraryName = libraryPath.name
+        self._libraryPath = libraryPath
+        self._libraryName = libraryPath.name
         super().__init__(self.libraryName)
         self.setEditable(False)
         self.setData(libraryPath, Qt.UserRole + 2)
@@ -24,6 +24,18 @@ class libraryItem(QStandardItem):
     def type(self):
         return Qt.StandardItem.UserType
 
+    @property
+    def libraryPath(self):
+        return self._libraryPath
+
+    @libraryPath.setter
+    def libraryPath(self,value):
+        if isinstance(value, pathlib.Path):
+            self._libraryPath = value
+
+    @property
+    def libraryName(self):
+        return self._libraryName
 
 class cellItem(QStandardItem):
     def __init__(self, cellPath: pathlib.Path) -> None:
@@ -193,22 +205,22 @@ def readLibDefFile(libPath):
 #     assert isinstance(label, shp.label)
 #     label.labelDefs()
 
-def createNetlistLine(symbolItem: shp.symbolShape):
-    """
-    Create a netlist line from a nlp device format line.
-    """
-    nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"].strip()
-    # nlpDeviceFormatLine.replace("[@instName]", f'{symbolItem.instanceName}')
-    for labelItem in symbolItem.labels.values():
-        if labelItem.labelDefinition in nlpDeviceFormatLine:
-            nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
-                labelItem.labelDefinition, labelItem.labelText
-                )
-    for pinName, netName in symbolItem.pinNetMap.items():
-        if pinName in nlpDeviceFormatLine:
-            nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
-                f'[|{pinName}:%]', netName
-                )
+# def createNetlistLine(symbolItem: shp.symbolShape):
+#     """
+#     Create a netlist line from a nlp device format line.
+#     """
+#     nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"].strip()
+#     # nlpDeviceFormatLine.replace("[@instName]", f'{symbolItem.instanceName}')
+#     for labelItem in symbolItem.labels.values():
+#         if labelItem.labelDefinition in nlpDeviceFormatLine:
+#             nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
+#                 labelItem.labelDefinition, labelItem.labelText
+#                 )
+#     for pinName, netName in symbolItem.pinNetMap.items():
+#         if pinName in nlpDeviceFormatLine:
+#             nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
+#                 f'[|{pinName}:%]', netName
+#                 )
     return nlpDeviceFormatLine  # #     return ""
 
 # def createSubcktHeaderLine(symbolItem: shp.symbolShape):
