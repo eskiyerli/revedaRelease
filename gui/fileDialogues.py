@@ -1,0 +1,376 @@
+from PySide6.QtCore import (Qt, QSize)
+
+from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog,
+                               QFormLayout, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout,
+                               QPushButton)
+from PySide6.QtGui import (QStandardItemModel)
+import common.shape as shp
+import gui.editFunctions as edf
+import pathlib
+
+
+class createCellDialog(QDialog):
+    def __init__(self, parent, libraryDict: [str, pathlib.Path]):
+        super().__init__(parent)
+        self.parent = parent
+        self.libraryDict = libraryDict
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Create Cell")
+        layout = QFormLayout()
+        self.libNamesCB = QComboBox()
+        self.libNamesCB.addItems(self.libraryDict.keys())
+        layout.addRow('Library Name:', self.libNamesCB)
+        self.nameEdit = edf.longLineEdit()
+        self.nameEdit.setPlaceholderText("Enter Cell Name")
+        layout.addRow("Cell Name:", self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+
+class deleteCellDialog(QDialog):
+    def __init__(self, parent, libModel: QStandardItemModel):
+        super().__init__(parent)
+        self.parent = parent
+        self.libModel = libModel
+        self.setWindowTitle("Select Cell")
+        self.setMinimumSize(QSize(320, 180))
+        mainlayout = QVBoxLayout()
+        self.layout = QFormLayout()
+        self.layout.setVerticalSpacing(10)
+        self.libNamesCB = QComboBox()
+        self.libNamesCB.setModel(self.libModel)
+        self.libNamesCB.currentTextChanged.connect(self.libNameChanged)
+        self.layout.addRow('Library Name:', self.libNamesCB)
+        self.cellNamesCB = QComboBox()
+        self.initLibItem = self.libModel.item(0)
+        self.cellNames = [self.initLibItem.child(i).cellName for i in
+                          range(self.initLibItem.rowCount())]
+        self.cellNamesCB.addItems(self.cellNames)
+        self.layout.addRow('Cell Name:', self.cellNamesCB)
+        mainlayout.addLayout(self.layout)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        mainlayout.setSpacing(20)
+        mainlayout.addWidget(self.buttonBox)
+        self.setLayout(mainlayout)
+
+    def libNameChanged(self, libName):
+        self.cellNamesCB.clear()
+        libItem = self.libModel.findItems(libName)[0]
+        cellNames = [libItem.child(i).cellName for i in range(libItem.rowCount())]
+        self.cellNamesCB.addItems(cellNames)
+
+
+class selectCellViewDialog(deleteCellDialog):
+    def __init__(self, parent, libModel):
+        super().__init__(parent=parent, libModel=libModel)
+        self.setWindowTitle("Select CellView")
+        self.setMinimumSize(QSize(320, 200))
+        self.viewNamesCB = QComboBox()
+        initCellItem = self.initLibItem.child(0)
+        initViewNames = [initCellItem.child(i).viewName for i in
+                         range(initCellItem.rowCount())]
+        self.viewNamesCB.addItems(initViewNames)
+        self.layout.addRow('View Name:', self.viewNamesCB)
+        self.cellNamesCB.currentTextChanged.connect(self.cellNameChanged)
+
+    def cellNameChanged(self, cellItemName):
+        self.viewNamesCB.clear()
+        libItem = self.libModel.findItems(self.libNamesCB.currentText())[0]
+        try:
+            cellItem = [libItem.child(i) for i in range(libItem.rowCount()) if
+                        libItem.child(i).cellName == cellItemName][0]
+        except IndexError:
+            cellItem = libItem.child(0)
+        finally:
+            viewNames = [cellItem.child(i).viewName for i in range(cellItem.rowCount()) if
+                         cellItem.child(i).viewName in self.parent.cellViews]
+            self.viewNamesCB.addItems(viewNames)
+
+
+class createCellViewDialog(QDialog):
+    def __init__(self, parent, model, cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.model = model
+        self.cellItem = cellItem
+        self.cellPath = self.cellItem.data(Qt.UserRole + 2)
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Create CellView")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.viewComboBox = QComboBox()
+        self.viewComboBox.addItems(self.parent.cellViews)
+        layout.addRow("Select View:", self.viewComboBox)
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText("CellView Name")
+        self.nameEdit.setFixedWidth(200)
+        layout.addRow(QLabel("View Name:"), self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+
+class renameCellDialog(QDialog):
+    def __init__(self, parent, cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.cellItem = cellItem
+
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Rename Cell")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText("Cell Name")
+        self.nameEdit.setFixedWidth(200)
+        layout.addRow(QLabel("Cell Name:"), self.nameEdit)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+
+class copyCellDialog(QDialog):
+    def __init__(self, parent, model, cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.model = model
+        self.cellItem = cellItem
+
+        # self.index = 0
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Copy Cell")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.libraryComboBox = QComboBox()
+        self.libraryComboBox.setModel(self.model)
+        self.libraryComboBox.setModelColumn(0)
+        self.libraryComboBox.setCurrentIndex(0)
+        self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
+        self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
+        layout.addRow(QLabel("Library:"), self.libraryComboBox)
+        self.copyName = QLineEdit()
+        self.copyName.setPlaceholderText("Enter Cell Name")
+        self.copyName.setFixedWidth(130)
+        layout.addRow(QLabel("Cell Name:"), self.copyName)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+    def selectLibrary(self):
+        self.selectedLibPath = self.libraryComboBox.itemData(
+            self.libraryComboBox.currentIndex(), Qt.UserRole + 2)
+
+
+class copyViewDialog(QDialog):
+    def __init__(self, parent, model, cellItem):
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.model = model
+        self.cellItem = cellItem
+        self.init_UI()
+
+    def init_UI(self):
+        self.setWindowTitle("Copy CellView")
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.libraryComboBox = QComboBox()
+        self.libraryComboBox.setModel(self.model)
+        self.libraryComboBox.setModelColumn(0)
+        self.libraryComboBox.setCurrentIndex(0)
+        self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
+        self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
+        layout.addRow(QLabel("Library:"), self.libraryComboBox)
+        self.cellComboBox = QComboBox()
+        cellList = [str(cell.cellName) for cell in self.selectedLibPath.iterdir() if
+                    cell.is_dir()]
+        self.cellComboBox.addItems(cellList)
+        self.cellComboBox.setEditable(True)
+        self.cellComboBox.InsertPolicy = QComboBox.InsertAfterCurrent
+        layout.addRow(QLabel("Cell Name:"), self.cellComboBox)
+        self.selectedCell = self.cellComboBox.currentText()
+        self.cellComboBox.currentTextChanged.connect(self.selectCell)
+        self.viewComboBox = QComboBox()
+        self.viewComboBox.setEditable(True)
+        self.viewComboBox.InsertPolicy = QComboBox.InsertAfterCurrent
+        self.viewComboBox.addItems(self.viewList())
+        self.selectedView = self.viewComboBox.currentText()
+        self.viewComboBox.currentTextChanged.connect(self.selectView)
+        layout.addRow(QLabel("View Name:"), self.viewComboBox)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addRow(self.buttonBox)
+        self.setLayout(layout)
+
+    def viewList(self):
+        viewList = [str(view.stem) for view in
+                    self.selectedLibPath.joinpath(self.selectedCell).iterdir() if
+                    view.suffix == ".json"]
+        return viewList
+
+    def selectLibrary(self):
+        self.selectedLibPath = self.libraryComboBox.itemData(
+            self.libraryComboBox.currentIndex(), Qt.UserRole + 2)
+        cellList = [str(cell.cellName) for cell in self.selectedLibPath.iterdir() if
+                    cell.is_dir()]
+        self.cellComboBox.clear()
+        self.cellComboBox.addItems(cellList)
+
+    def selectCell(self):
+        self.selectedCell = self.cellComboBox.currentText()
+        self.viewComboBox.clear()
+        self.viewComboBox.addItems(self.viewList())
+
+    def selectView(self):
+        self.selectedView = self.viewComboBox.currentText()
+
+
+class closeLibDialog(QDialog):
+    def __init__(self, libraryDict, parent, *args):
+        super().__init__(parent, *args)
+        self.libraryDict = libraryDict
+        self.setWindowTitle('Select Library to close')
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout = QVBoxLayout()
+        formLayout = QFormLayout()
+        self.libNamesCB = QComboBox()
+        self.libNamesCB.addItems(self.libraryDict.keys())
+        formLayout.addRow(QLabel('Select Library', self), self.libNamesCB)
+        layout.addLayout(formLayout)
+        layout.addSpacing(40)
+        layout.addWidget(self.buttonBox)
+        self.setLayout(layout)
+
+
+class renameLibDialog(QDialog):
+    def __init__(self, parent, oldLibraryName, *args):
+        super().__init__(parent, *args)
+        self.oldLibraryName = oldLibraryName
+        self.setWindowTitle(f'Change {oldLibraryName} to:')
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout = QVBoxLayout()
+        formLayout = QFormLayout()
+        self.newLibraryName = edf.longLineEdit()
+        formLayout.addRow(edf.boldLabel('New Library Name:', self), self.newLibraryName)
+        layout.addLayout(formLayout)
+        layout.addSpacing(40)
+        layout.addWidget(self.buttonBox)
+        self.setLayout(layout)
+
+
+class deleteSymbolDialog(QDialog):
+    def __init__(self, cellName, viewName, *args):
+        super().__init__(*args)
+        self.setWindowTitle(f'Delete {cellName}-{viewName} CellView?')
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.layout = QVBoxLayout()
+        message = QLabel(f"{cellName}-{viewName} will be recreated!")
+        self.layout.addWidget(message)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
+
+
+class netlistExportDialogue(QDialog):
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.setWindowTitle(f'Export Netlist?')
+        self.setMinimumSize(500, 100)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.mainLayout = QVBoxLayout()
+        fileDialogLayout = QHBoxLayout()
+        fileDialogLayout.addWidget(edf.boldLabel('Export Directory:'))
+        self.netlistDirEdit = edf.longLineEdit()
+        fileDialogLayout.addWidget(self.netlistDirEdit)
+        self.netListDirButton = QPushButton('...')
+        self.netListDirButton.clicked.connect(self.onDirButtonClicked)
+        fileDialogLayout.addWidget(self.netListDirButton)
+
+        self.mainLayout.addLayout(fileDialogLayout)
+        self.mainLayout.addStretch(2)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+
+    def onDirButtonClicked(self):
+        self.dirName = QFileDialog.getExistingDirectory()
+        if self.dirName:
+            self.netlistDirEdit.setText(self.dirName)
+
+
+class goDownHierDialogue(QDialog):
+    def __init__(self, symbolShape: shp.symbolShape, libraryDict: dict[str, pathlib.Path],
+                 *args):
+        self.symbolShape = symbolShape
+        self.libraryDict = libraryDict
+        super().__init__(*args)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        mainLayout = QVBoxLayout()
+        cellPropLayout = QFormLayout()
+        libraryNameEdit = edf.shortLineEdit()
+        libraryNameEdit.setText(self.symbolShape.libraryName)
+        libraryNameEdit.setReadOnly(True)
+        cellPropLayout.addRow(edf.boldLabel("Library Name:", self), libraryNameEdit)
+        cellNameEdit = edf.shortLineEdit()
+        cellNameEdit.setText(self.symbolShape.cellName)
+        cellNameEdit.setReadOnly(True)
+        cellPropLayout.addRow(edf.boldLabel("Cell Name:", self), cellNameEdit)
+        cellPath = pathlib.Path(
+            self.libraryDict.get(self.symbolShape.libraryName).joinpath(
+                self.symbolShape.cellName))
+        viewList = [str(view.stem) for view in cellPath.iterdir() if
+                    view.suffix == ".json"]
+        self.viewNameCB = QComboBox()
+        self.viewNameCB.addItems(viewList)
+        cellPropLayout.addRow(edf.boldLabel("Select View:", self), self.viewNameCB)
+        mainLayout.addLayout(cellPropLayout)
+        mainLayout.addStretch(2)
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
+        self.show()

@@ -26,7 +26,7 @@ from PySide6.QtWidgets import (QGraphicsItem, QGraphicsSceneMouseEvent, QGraphic
                                QGraphicsItemGroup, )
 import math
 from quantiphy import Quantity
-import revedaeditor.pdk.callbacks as cb
+import pdk.callbacks as cb
 
 
 class shape(QGraphicsItem):

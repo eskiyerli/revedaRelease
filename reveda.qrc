@@ -7,54 +7,55 @@
     <file>icons/document--plus.png</file>
     <file>icons/document--pencil.png</file>
     <file>icons/document-import.png</file>
-    <file>icons/document-copy.png</file>          
+    <file>icons/document-copy.png</file>
     <file>icons/document--minus.png</file>
     <file>icons/document-task.png</file>
     <file>icons/lock.png</file>
     <file>icons/printer--arrow.png</file>
     <file>icons/image-export.png</file>
     <file>icons/external.png</file>
-    <file>icons/zone.png</file>      
-    <file>icons/zone-resize.png</file>    
-    <file>icons/zone-resize-actual.png</file>      
-    <file>icons/zone--arrow.png</file>      
-    <file>icons/arrow-circle.png</file>        
-    <file>icons/resource-monitor.png</file>           
-    <file>icons/ruler.png</file>          
-    <file>icons/zone-select.png</file>   
-    <file>icons/selection-resize.png</file> 
-    <file>icons/arrow-circle-315-left.png</file>     
-    <file>icons/arrow-circle-225.png</file>     
-    <file>icons/node-insert.png</file>      
-    <file>icons/clipboard-paste.png</file>     
-    <file>icons/node-delete.png</file>       
-    <file>icons/arrow-skip.png</file>  
-    <file>icons/arrow-move.png</file>  
-    <file>icons/arrow-transition.png</file>  
-    <file>icons/fill.png</file>     
-    <file>icons/arrow-step-out.png</file>    
-    <file>icons/arrow-step.png</file>         
-    <file>icons/node-design.png</file>      
-    <file>icons/node-select-all.png</file>       
-    <file>icons/node.png</file>        
-    <file>icons/property-blue.png</file>            
-    <file>icons/property.png</file>    
-    <file>icons/block--plus.png</file>       
-    <file>icons/tag-label-yellow.png</file>                   
-    <file>icons/pin--plus.png</file>    
-    <file>icons/application-block.png</file>          
-    <file>icons/ui-check-box.png</file>       
-    <file>icons/report--exclamation.png</file>   
-    <file>icons/report--minus.png</file>  
-    <file>icons/script-text.png</file>       
-    <file>icons/application-wave.png</file>          
+    <file>icons/zone.png</file>
+    <file>icons/zone-resize.png</file>
+    <file>icons/zone-resize-actual.png</file>
+    <file>icons/zone--arrow.png</file>
+    <file>icons/arrow-circle.png</file>
+    <file>icons/resource-monitor.png</file>
+    <file>icons/ruler.png</file>
+    <file>icons/zone-select.png</file>
+    <file>icons/selection-resize.png</file>
+    <file>icons/arrow-circle-315-left.png</file>
+    <file>icons/arrow-circle-225.png</file>
+    <file>icons/node-insert.png</file>
+    <file>icons/clipboard-paste.png</file>
+    <file>icons/node-delete.png</file>
+    <file>icons/arrow-skip.png</file>
+    <file>icons/arrow-move.png</file>
+    <file>icons/arrow-transition.png</file>
+    <file>icons/fill.png</file>
+    <file>icons/arrow-step-out.png</file>
+    <file>icons/arrow-step.png</file>
+    <file>icons/node-design.png</file>
+    <file>icons/node-select-all.png</file>
+    <file>icons/node.png</file>
+    <file>icons/property-blue.png</file>
+    <file>icons/property.png</file>
+    <file>icons/block--plus.png</file>
+    <file>icons/tag-label-yellow.png</file>
+    <file>icons/pin--plus.png</file>
+    <file>icons/application-block.png</file>
+    <file>icons/ui-check-box.png</file>
+    <file>icons/report--exclamation.png</file>
+    <file>icons/report--minus.png</file>
+    <file>icons/script-text.png</file>
+    <file>icons/application-wave.png</file>
     <file>icons/layer-shape-line.png</file>
     <file>icons/layer-shape.png</file>
     <file>icons/layer-shape-polygon.png</file>
     <file>icons/layer-shape-ellipse.png</file>
     <file>icons/layer-shape-polyline.png</file>
-    <file>icons/layer-shape-text.png</file>          
-    <file>icons/home.png</file>    
-    <file>icons/question.png</file>                            
+    <file>icons/layer-shape-text.png</file>
+    <file>icons/application-dialog.png</file>
+    <file>icons/home.png</file>
+    <file>icons/question.png</file>
 </qresource>
 </RCC>

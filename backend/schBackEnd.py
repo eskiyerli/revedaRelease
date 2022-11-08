@@ -8,12 +8,12 @@ from PySide6.QtGui import (QStandardItem, )
 from PySide6.QtWidgets import (QMessageBox, )
 from ruamel.yaml import YAML
 
-import revedaeditor.common.shape as shp
+import json
+import fileio.symbolEncoder as se
 
 
 class libraryItem(QStandardItem):
-    def __init__(self, libraryPath: pathlib.Path
-                 ):  # path is a pathlib.Path object
+    def __init__(self, libraryPath: pathlib.Path):  # path is a pathlib.Path object
         self._libraryPath = libraryPath
         self._libraryName = libraryPath.name
         super().__init__(self.libraryName)
@@ -29,7 +29,7 @@ class libraryItem(QStandardItem):
         return self._libraryPath
 
     @libraryPath.setter
-    def libraryPath(self,value):
+    def libraryPath(self, value):
         if isinstance(value, pathlib.Path):
             self._libraryPath = value
 
@@ -37,9 +37,10 @@ class libraryItem(QStandardItem):
     def libraryName(self):
         return self._libraryName
 
+
 class cellItem(QStandardItem):
     def __init__(self, cellPath: pathlib.Path) -> None:
-        self.cellName = cellPath.stem
+        self._cellName = cellPath.stem
         super().__init__(self.cellName)
         self.setEditable(False)
         self.setData("cell", Qt.UserRole + 1)
@@ -48,21 +49,26 @@ class cellItem(QStandardItem):
     def type(self):
         return QStandardItem.UserType + 1
 
+    @property
+    def cellName(self):
+        return self._cellName
 
 class viewItem(QStandardItem):
     def __init__(self, viewPath: pathlib.Path) -> None:
-        self.viewName = viewPath.stem
+        self._viewName = viewPath.stem
         super().__init__(self.viewName)
         self.setEditable(False)
         self.setData("view", Qt.UserRole + 1)
         # set the data to the item to be the path to the view.
-        self.setData(
-            viewPath, Qt.UserRole + 2, )
+        self.setData(viewPath, Qt.UserRole + 2, )
         self.setData(self.viewName, Qt.UserRole + 3)
 
     def type(self):
         return QStandardItem.UserType + 2
 
+    @property
+    def viewName(self):
+        return self._viewName
 
 def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     if libraryName.strip() == "":
@@ -81,6 +87,24 @@ def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     return newLibraryItem
 
 
+def createCell(parent, model, selectedLib, cellName) -> bool:
+    # assert isinstance(selectedLib, libraryItem)
+    if selectedLib.data(Qt.UserRole + 1) == "library":
+        selectedLibPath = selectedLib.data(Qt.UserRole + 2)
+        cellPath = selectedLibPath.joinpath(cellName)
+        if cellPath.exists():
+            QMessageBox.warning(parent, "Error", "Cell already exits.")
+        else:
+            cellPath.mkdir()
+            parentLibrary = \
+            model.findItems(selectedLibPath.stem, flags=Qt.MatchExactly)[0]
+    newCellItem = cellItem(cellPath)
+    selectedLib.appendRow(newCellItem)
+    parent.logger.warning(f"Created {cellName} cell at {str(cellPath)}")
+    return True
+
+
+
 def createCellView(parent, viewName, cellPath) -> viewItem:
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
@@ -89,7 +113,18 @@ def createCellView(parent, viewName, cellPath) -> viewItem:
     newViewItem = viewItem(viewPath)
     newViewItem.setData("view", Qt.UserRole + 1)
     newViewItem.setData(viewPath, Qt.UserRole + 2)
-    newViewItem.setData(viewName, Qt.UserRole + 3)
+    items = []
+    if 'schematic' in viewName:
+        items.insert(0, {'cellView': 'schematic'})
+        with open(viewPath, "w") as f:
+            json.dump(items, f, cls=se.schematicEncoder, indent=4)
+        newViewItem.setData('schematic', Qt.UserRole + 3)
+    elif 'symbol' in viewName:
+        items.insert(0, {'cellView': 'symbol'})
+        with open(viewPath, "w") as f:
+            json.dump(items, f, cls=se.symbolEncoder, indent=4)
+        newViewItem.setData('symbol', Qt.UserRole + 3)
+
     # cellItem.appendRow(newViewItem)
     # needs to decide on how to handle the view type
     print(f"Created {viewName} at {str(viewPath)}")
@@ -101,8 +136,7 @@ def createCellView(parent, viewName, cellPath) -> viewItem:
 
 
 # function for copying a cell
-def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath
-             ) -> bool:
+def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -> bool:
     """
     parent: the parent widget
     model: the model
@@ -110,20 +144,18 @@ def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath
     copyName: the name of the new cell
     selectedLibPath: the path of the selected library
     """
-    cellPath = origCellItem.data(
-        Qt.UserRole + 2
-        )  # get the cell path from item user data
+    cellPath = origCellItem.data(Qt.UserRole + 2)  # get the cell path from item user data
     if copyName == "":  # assign a default name for the cell
         copyName = "newCell"
     copyPath = selectedLibPath.joinpath(copyName)
     if copyPath.exists():
         QMessageBox.warning(parent, "Error", "Cell already exits.")
+        return False
     else:
         assert cellPath.exists()
         shutil.copytree(cellPath, copyPath)  # copied the cell
-        libraryItem = \
-            model.findItems(selectedLibPath.cellName, flags=Qt.MatchExactly)[
-                0]  # find the library item
+        libraryItem = model.findItems(selectedLibPath.cellName, flags=Qt.MatchExactly)[
+            0]  # find the library item
         # create new cell item
         newCellItem = cellItem(copyPath.cellName)
         newCellItem.setEditable(False)
@@ -137,11 +169,12 @@ def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath
             addedView = viewItem(copyPath.joinpath(view).with_suffix(".json"))
             addedView.setData("view", Qt.UserRole + 1)
             # set the data to the item to be the path to the view.
-            addedView.setData(
-                copyPath.joinpath(view).with_suffix(".json"), Qt.UserRole + 2, )
+            addedView.setData(copyPath.joinpath(view).with_suffix(".json"),
+                Qt.UserRole + 2, )
             addedView.setEditable(False)
             cellItem.appendRow(addedView)
         libraryItem.appendRow(cellItem)
+        return True
 
 
 def renameCell(parent, oldCell, newName) -> bool:
@@ -155,36 +188,19 @@ def renameCell(parent, oldCell, newName) -> bool:
         return True
 
 
-def createCell(parent, model, selectedLib, cellName) -> bool:
-    assert isinstance(selectedLib, libraryItem)
-    if cellName.strip() == "":
-        QMessageBox.warning(parent, "Error", "Please enter a cell name")
-        return False
-    else:
-        if selectedLib.data(Qt.UserRole + 1) == "library":
-            selectedLibPath = selectedLib.data(Qt.UserRole + 2)
-            cellPath = selectedLibPath.joinpath(cellName)
-            if cellPath.exists():
-                QMessageBox.warning(parent, "Error", "Cell already exits.")
-            else:
-                cellPath.mkdir()
-                parentLibrary = model.findItems(
-                    selectedLibPath.stem, flags=Qt.MatchExactly
-                    )[0]
-        newCellItem = cellItem(cellPath)
-        selectedLib.appendRow(newCellItem)
-        print(f"Created {cellName} cell at {str(cellPath)}")
-        return True
-
-
-def writeLibDefFile(libPathDict, libPath):
+def writeLibDefFile(libPathDict, libFilePath: pathlib.Path, logger) -> None:
     yaml = YAML()
     yaml.explicit_start = True
     yaml.default_flow_style = False
     libDefDict = {}
     for key, value in libPathDict.items():
         libDefDict[key] = str(value)
-    yaml.dump(libDefDict, libPath)
+    try:
+        with libFilePath.open(mode="w") as f:
+            yaml.dump(libDefDict, libFilePath)
+        logger.warning('writing library definition file.')
+    except IOError:
+        logger.error(f"Cannot save library definitions in {libFilePath}")
 
 
 def readLibDefFile(libPath):
@@ -197,31 +213,14 @@ def readLibDefFile(libPath):
         libraryDict[key] = Path(value)
     return libraryDict
 
-# def decodeSymbol(item):
-#     print(type(item))
-#
-#
-# def decodeLabel(label: shp.label):
-#     assert isinstance(label, shp.label)
-#     label.labelDefs()
+    # def decodeSymbol(item):
+    #     print(type(item))
+    #
+    #
+    # def decodeLabel(label: shp.label):
+    #     assert isinstance(label, shp.label)
+    #     label.labelDefs()
 
-# def createNetlistLine(symbolItem: shp.symbolShape):
-#     """
-#     Create a netlist line from a nlp device format line.
-#     """
-#     nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"].strip()
-#     # nlpDeviceFormatLine.replace("[@instName]", f'{symbolItem.instanceName}')
-#     for labelItem in symbolItem.labels.values():
-#         if labelItem.labelDefinition in nlpDeviceFormatLine:
-#             nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
-#                 labelItem.labelDefinition, labelItem.labelText
-#                 )
-#     for pinName, netName in symbolItem.pinNetMap.items():
-#         if pinName in nlpDeviceFormatLine:
-#             nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
-#                 f'[|{pinName}:%]', netName
-#                 )
-    return nlpDeviceFormatLine  # #     return ""
 
 # def createSubcktHeaderLine(symbolItem: shp.symbolShape):
 #     """

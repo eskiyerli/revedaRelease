@@ -26,9 +26,9 @@ import json
 from PySide6.QtCore import (QPoint, Qt, )  # QtCore
 from PySide6.QtGui import (QColor, QPen, )
 
-import revedaeditor.common.shape as shp
-import revedaeditor.fileio.symbolEncoder as se
-import revedaeditor.common.net as net
+import common.shape as shp
+import fileio.symbolEncoder as se
+import common.net as net
 
 
 def createSymbolItems(item, gridTuple):
@@ -152,7 +152,7 @@ def createSchematicItems(item, libraryDict, viewName, gridTuple: (int, int)):
         with open(file, "r") as temp:
             try:
                 shapes = json.load(temp)
-                for shape in shapes:
+                for shape in shapes[1:]:
                     if shape["type"] == "rect":
                         itemShapes.append(createRectItem(shape, gridTuple))
                     elif shape["type"] == "circle":

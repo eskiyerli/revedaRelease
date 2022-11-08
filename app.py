@@ -17,32 +17,21 @@
   Primary Author: Murat Eskiyerli
 
 """
+import logging
+import logging.config
+import pathlib
 import sys
 from contextlib import redirect_stderr, redirect_stdout
 
-import pathlib
-import logging
-
-# import numpy as np
-
-from PySide6.QtGui import (
-    QAction,
-    QFont,
-    QIcon,
-)
-
-from PySide6.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QVBoxLayout,
-    QWidget,
-    QMenuBar,
-)
-
-import revedaeditor.gui.pythonConsole as pcon
-import revedaeditor.backend.schBackEnd as scb  # import the backend
-import revedaeditor.gui.editorWindows as edw
-import revedaeditor.resources.resources
+import backend.schBackEnd as scb  # import the backend
+import gui.editorWindows as edw
+import gui.pythonConsole as pcon
+import api.ui as ui
+import resources.resources
+import yaml
+from PySide6.QtGui import (QAction, QFont, QIcon, )
+from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget,
+                               QMenuBar, )
 
 
 class mainwContainer(QWidget):
@@ -53,12 +42,12 @@ class mainwContainer(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.parent = parent
-
+        self.console = pcon.pythonConsole(globals())
         self.init_UI()
 
     def init_UI(self):
         # treeView = designLibrariesView(self)
-        self.console = pcon.pythonConsole(globals())
+
         self.console.writeoutput("Welcome to RevEDA")
         self.console.writeoutput("Revolution Semiconductor (C) 2022.")
         self.console.setfont(QFont("Fira Mono Regular", 12))
@@ -85,7 +74,8 @@ class mainWindow(QMainWindow):
         except IOError:
             print(f"Cannot find {str(libraryPathObj)} file.")
             self.libraryDict = {}
-        self.cellViews = ["schematic", "symbol", "layout"]
+        # this list is the list of usable cellviews.i
+        self.cellViews = ["schematic", "symbol", "layout", "veriloga"]
         self.init_UI()
         # Create a custom logger
         self.logger = logging.getLogger(__name__)
@@ -93,9 +83,13 @@ class mainWindow(QMainWindow):
         c_handler.setLevel(logging.WARNING)
         c_format = logging.Formatter('%(levelname)s - %(message)s')
         c_handler.setFormatter(c_format)
+        f_handler = logging.FileHandler('reveda.log')
+        f_handler.setLevel(logging.DEBUG)
+        f_format = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        f_handler.setFormatter(f_format)
         self.logger.addHandler(c_handler)
-        self.logger.warning('This is a warning')
-        self.logger.error('This is an error')
+        self.logger.addHandler(f_handler)
 
     def init_UI(self):
         self.resize(900, 300)
@@ -133,24 +127,19 @@ class mainWindow(QMainWindow):
         self.menuTools.addAction(self.libraryBrowserAction)
         self.libraryBrowserAction.triggered.connect(self.libraryBrowserClick)
 
-
         importVerilogaIcon = QIcon(":/icons/document--plus.png")
         self.importVerilogaAction = QAction(importVerilogaIcon, 'Import Verilog-a '
                                                                 'file...')
         self.importTools.addAction(self.importVerilogaAction)
 
-
         newCellIcon = QIcon(":/icons/document--plus.png")
-        self.importVerilogaAction = QAction(newCellIcon, "Import Verilog-A",self)
-
+        self.importVerilogaAction = QAction(newCellIcon, "Import Verilog-A", self)
 
     # open library browser window
     def libraryBrowserClick(self):
         if self.libraryBrowser is None:
             self.libraryBrowser = edw.libraryBrowser(self)  # create the library browser
-            self.libraryBrowser.show()
-            # update the main library dictionary if library path dialogue
-            # is OK'd.
+            self.libraryBrowser.show()  # update the main library dictionary if library path dialogue  # is OK'd.
         else:
             self.libraryBrowser.show()
             self.libraryBrowser.raise_()
@@ -176,5 +165,3 @@ redirect = pcon.Redirect(mainW.centralW.console.errorwrite)
 with redirect_stdout(mainW.centralW.console), redirect_stderr(redirect):
     mainW.show()
     sys.exit(app.exec())
-
-

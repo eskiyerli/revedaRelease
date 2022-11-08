@@ -1,11 +1,13 @@
 # net class definition.
 from PySide6.QtCore import (QPoint, Qt)
 from PySide6.QtGui import (QPen, QStaticText, )
-from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsSceneMouseEvent,
-                               QGraphicsEllipseItem)
+from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsEllipseItem)
 
 
 class schematicNet(QGraphicsLineItem):
+    '''
+    Base schematic net class.
+    '''
     uses = ["SIGNAL", "ANALOG", "CLOCK", "GROUND", "POWER", ]
 
     def __init__(self, start: QPoint, end: QPoint, pen: QPen):
@@ -77,14 +79,6 @@ class schematicNet(QGraphicsLineItem):
     @end.setter
     def end(self, end: QPoint):
         self._end = end
-
-    @property
-    def pen(self):
-        return self._pen
-
-    @pen.setter
-    def pen(self, pen):
-        self._pen = pen
 
     @property
     def pen(self):

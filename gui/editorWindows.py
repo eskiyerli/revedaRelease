@@ -28,33 +28,37 @@ import math
 import pathlib
 import shutil
 
-import revedaeditor.backend.schBackEnd as scb  # import the backend
-import revedaeditor.backend.undoStack as us
-import revedaeditor.common.circuitElements as cel
-import revedaeditor.common.net as net
-import revedaeditor.common.shape as shp  # import the shapes
-import revedaeditor.fileio.loadJSON as lj
-import revedaeditor.fileio.symbolEncoder as se
-import revedaeditor.gui.propertyDialogues as pdlg
-import revedaeditor.resources
-import revedasimgui.app as revedasim
+# import revedaeditor.backend.schBackEnd as scb  # import the backend
+import backend.schBackEnd as scb
+import backend.undoStack as us
+import common.circuitElements as cel
+import common.net as net
+import common.shape as shp  # import the shapes
+import fileio.loadJSON as lj
+import fileio.symbolEncoder as se
+import gui.fileDialogues as fd
+import gui.propertyDialogues as pdlg
 
 # import numpy as np
-from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, QSize, QPointF, )
+from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, )
 from PySide6.QtGui import (QAction, QKeySequence, QColor, QIcon, QPainter, QPen,
                            QStandardItemModel, QCursor, QUndoStack, QTextDocument,
                            QGuiApplication, QCloseEvent)
-from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog,
-                               QFormLayout, QGraphicsScene, QHBoxLayout, QLabel,
-                               QLineEdit, QMainWindow, QMenu, QMessageBox, QToolBar,
-                               QTreeView, QVBoxLayout, QWidget, QGraphicsItem,
-                               QGraphicsRectItem, QGraphicsEllipseItem, QGraphicsView,
-                               QGridLayout, QGraphicsSceneMouseEvent, QRubberBand)
+from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayout,
+                               QGraphicsScene, QHBoxLayout, QLabel, QLineEdit,
+                               QMainWindow, QMenu, QMessageBox, QToolBar, QTreeView,
+                               QVBoxLayout, QWidget, QGraphicsRectItem,
+                               QGraphicsEllipseItem, QGraphicsView, QGridLayout,
+                               QGraphicsSceneMouseEvent, QAbstractItemView)
 
 
 class editorWindow(QMainWindow):
-    def __init__(self, filePath: pathlib.Path, libraryDict: dict,
-                 libraryView, ):  # file is a pathlib.Path object
+    '''
+    Base class for editor windows.
+    '''
+
+    def __init__(self, filePath: pathlib.Path, libraryDict: dict, libraryView,
+                 itemsList:list):  # file is a pathlib.Path object
         super().__init__()
         self.file = filePath
         self.cellName = self.file.parent.stem
@@ -62,6 +66,7 @@ class editorWindow(QMainWindow):
         self.viewName = self.file.stem
         self.libraryDict = libraryDict
         self.libraryView = libraryView
+        self.itemsList = itemsList
         self.parentView = None
         self._createActions()
         self._createTriggers()
@@ -76,7 +81,7 @@ class editorWindow(QMainWindow):
         """
         Placeholder for child classes init_UI function.
         """
-        pass
+        ...
 
     def _createMenuBar(self):
         self.editorMenuBar = self.menuBar()
@@ -354,8 +359,9 @@ class editorWindow(QMainWindow):
 
 
 class schematicEditor(editorWindow):
-    def __init__(self, filePath: pathlib.Path, libraryDict: dict, libraryView) -> None:
-        super().__init__(filePath, libraryDict=libraryDict, libraryView=libraryView)
+    def __init__(self, filePath: pathlib.Path, libraryDict: dict, libraryView,
+                 itemsList) -> None:
+        super().__init__(filePath, libraryDict, libraryView, itemsList )
         self.setWindowTitle(f"Schematic Editor - {self.cellName}")
         self.setWindowIcon(QIcon(":/icons/layer-shape.png"))
         self.symbolChooser = None
@@ -516,7 +522,7 @@ class schematicEditor(editorWindow):
         self.centralW.scene.saveSchematicCell(self.file)
 
     def loadSchematic(self):
-        self.centralW.scene.loadSchematicCell(self.file)
+        self.centralW.scene.loadSchematicCell(self.itemsList)
 
     def closeEvent(self, event):
         self.centralW.scene.saveSchematicCell(self.file)
@@ -525,7 +531,7 @@ class schematicEditor(editorWindow):
         event.accept()
 
     def createNetlistClick(self, s):
-        netlistExportDialogue = pdlg.netlistExportDialogue()
+        netlistExportDialogue = fd.netlistExportDialogue()
         if hasattr(self, "netlistDir"):
             netlistExportDialogue.netlistDirEdit.setText(self.netlistDir)
         if netlistExportDialogue.exec() == QDialog.Accepted:
@@ -542,8 +548,9 @@ class schematicEditor(editorWindow):
 
 
 class symbolEditor(editorWindow):
-    def __init__(self, filePath: pathlib.Path, libraryDict: dict, libraryView):
-        super().__init__(filePath, libraryDict, libraryView)
+    def __init__(self, filePath: pathlib.Path, libraryDict: dict, libraryView,
+                 itemsList:list):
+        super().__init__(filePath, libraryDict, libraryView, itemsList)
         self.setWindowTitle(f"Symbol Editor - {self.cellName}")
         self._symbolActions()
 
@@ -695,7 +702,7 @@ class symbolEditor(editorWindow):
         """
         symbol is loaded to the scene.
         """
-        self.centralW.scene.loadSymbol(self.file)
+        self.centralW.scene.loadSymbol(self.itemsList)
 
     def createSymbolLabelDialogue(self):
         createLabelDlg = pdlg.createSymbolLabelDialog(self)
@@ -1037,7 +1044,8 @@ class symbol_scene(editor_scene):
         self.undoStack.push(undoCommand)
         self.drawRect = False
 
-    def circleDraw(self, start: QPoint, end: QPoint, pen: QPen, gridTuple: tuple):
+    def circleDraw(self, start: QPoint, end: QPoint, pen: QPen,
+                   gridTuple: tuple[int, int]):
         """
         Draws a circle on the scene
         """
@@ -1247,34 +1255,30 @@ class symbol_scene(editor_scene):
         print(item.labelName)
         item.update()
 
-    def loadSymbol(self, file):
+    def loadSymbol(self, itemsList: list):
         self.attributeList = []
-        with open(file, "r") as temp:
-            try:
-                items = json.load(temp)
-                for item in items:
-                    if item["type"] in self.symbolShapes:
-                        itemShape = lj.createSymbolItems(item, self.gridTuple)
-                        # items should be always visible in symbol view
-                        if isinstance(itemShape, shp.label):
-                            itemShape.setOpacity(1)
-                        self.addItem(itemShape)
-                    elif item["type"] == "attribute":
-                        attr = lj.createSymbolAttribute(item)
-                        self.attributeList.append(attr)
-
-            except json.decoder.JSONDecodeError:
-                print("Invalid JSON file")
+        for item in itemsList[1:]:
+            if item is not None:
+                if item["type"] in self.symbolShapes:
+                    itemShape = lj.createSymbolItems(item, self.gridTuple)
+                    # items should be always visible in symbol view
+                    if isinstance(itemShape, shp.label):
+                        itemShape.setOpacity(1)
+                    self.addItem(itemShape)
+                elif item["type"] == "attribute":
+                    attr = lj.createSymbolAttribute(item)
+                    self.attributeList.append(attr)
 
     def saveSymbolCell(self, fileName):
         items = self.items(self.sceneRect())  # get items in scene rect
+        items.insert(0, {'cellView': 'symbol'})
         if hasattr(self, 'attributeList'):
             items.extend(self.attributeList)  # add attribute list to list
         with open(fileName, "w") as f:
             try:
                 json.dump(items, f, cls=se.symbolEncoder, indent=4)
             except Exception as e:
-                print(e)
+                self.logger.error(e)
 
     def stretchSelectedItem(self):
         if self.selectedItems is not None:
@@ -1841,14 +1845,17 @@ class schematic_scene(editor_scene):
         with open(self.symbolFile, "r") as temp:
             try:
                 items = json.load(temp)
-                for item in items:
-                    if (item["type"] == "rect" or item["type"] == "line" or item[
-                        "type"] == "pin" or item["type"] == "label" or item[
-                        "type"] == "circle"):
-                        # append recreated shapes to shapes list
-                        itemShapes.append(lj.createSymbolItems(item, self.gridTuple))
-                    elif item["type"] == "attribute":
-                        itemAttributes[item["name"]] = item["definition"]
+                if items[0]['cellView']== 'symbol':
+                    for item in items[1:]:
+                        if (item["type"] == "rect" or item["type"] == "line" or item[
+                            "type"] == "pin" or item["type"] == "label" or item[
+                            "type"] == "circle"):
+                            # append recreated shapes to shapes list
+                            itemShapes.append(lj.createSymbolItems(item, self.gridTuple))
+                        elif item["type"] == "attribute":
+                            itemAttributes[item["name"]] = item["definition"]
+                else:
+                    self.logger.error('Not a symbol!')
 
                 # create a symbol instance passing item shapes and attributes as
                 # arguments
@@ -1905,40 +1912,40 @@ class schematic_scene(editor_scene):
 
     def saveSchematicCell(self, file: pathlib.Path):
         self.sceneR = self.sceneRect()  # get scene rect
-        items = self.items(self.sceneR)  # get items in scene rect
+        # items = self.items(self.sceneR)  # get items in scene rect
         # only save symbol shapes
         symbolItems = self.findSceneSymbolSet()
         netItems = self.findSceneNetsSet()
         pinItems = self.findScenePinsSet()
-        netlistedItems = list(symbolItems | netItems | pinItems)
+        items = list(symbolItems | netItems | pinItems)
+        items.insert(0, {'cellView': 'schematic'})
         with open(file, "w") as f:
-            json.dump(netlistedItems, f, cls=se.schematicEncoder, indent=4)
+            json.dump(items, f, cls=se.schematicEncoder, indent=4)
         if self.parent.parent.parentView is not None:
             if type(self.parentView) == schematicEditor:
                 self.parent.parent.parentView.loadSchematic()
             elif type(self.parentView) == symbolEditor:
                 self.parent.parent.parentView.loadSymbol()
 
-    def loadSchematicCell(self, file: pathlib.Path):
-        with open(file, "r") as temp:
-            try:
-                items = json.load(temp)
-                for item in items:
-                    if item is not None and item["type"] == "symbolShape":
-                        itemShape = lj.createSchematicItems(item, self.libraryDict,
-                                                            "symbol", self.gridTuple)
-                        self.addItem(itemShape)
-                        if itemShape.counter > self.itemCounter:
-                            self.itemCounter = itemShape.counter
-                    elif item is not None and item["type"] == "schematicNet":
-                        netShape = lj.createSchematicNets(item)
-                        self.addItem(netShape)
-                    elif item is not None and item["type"] == "schematicPin":
-                        pinShape = lj.createSchematicPins(item, self.gridTuple)
-                        self.addItem(pinShape)
+    def loadSchematicCell(self, itemsList: list):
+        '''
+        load schematic from item list
+        '''
+        for item in itemsList[1:]:
+            if item is not None:
+                if item["type"] == "symbolShape":
+                    itemShape = lj.createSchematicItems(item, self.libraryDict, "symbol",
+                                                        self.gridTuple)
+                    self.addItem(itemShape)
+                    if itemShape.counter > self.itemCounter:
+                        self.itemCounter = itemShape.counter
+                elif item["type"] == "schematicNet":
+                    netShape = lj.createSchematicNets(item)
+                    self.addItem(netShape)
+                elif item["type"] == "schematicPin":
+                    pinShape = lj.createSchematicPins(item, self.gridTuple)
+                    self.addItem(pinShape)
 
-            except json.decoder.JSONDecodeError:
-                print("Invalid JSON file")
         # increment item counter for next symbol
         self.itemCounter += 1
         self.findDotPoints(self.sceneRect())
@@ -2008,18 +2015,18 @@ class schematic_scene(editor_scene):
         '''
         Create a symbol view for a schematic.
         '''
-        # cellItem = self.parent.parent.viewItem.parent()
-        libraryView = self.parent.parent.libraryView
-        cellPath = self.parent.parent.file.parent
-        cellName = self.parent.parent.cellName
+
         oldSymbolItem = False
 
-        for view in cellPath.iterdir():
-            if view.stem == "symbol":
+        dlg = pdlg.symbolCreateDialog(self.parent.parent.file.parent,
+                                      self.parent.parent.cellName, self.parent.parent)
+        if dlg.exec() == QDialog.Accepted:
+            if dlg.symbolViewsCB.currentText() in dlg.symbolViewNames:
                 oldSymbolItem = True
-                break
+
         if oldSymbolItem:
-            dlg = pdlg.deleteCellViewDialog(cellName, "symbol", self.parent.parent)
+            dlg = fd.deleteSymbolDialog(self.parent.parent.cellName,
+                                    dlg.symbolViewsCB.currentText(), self.parent.parent)
             if dlg.exec() == QDialog.Accepted:
                 self.generateSymbol()
         else:
@@ -2266,6 +2273,7 @@ class libraryBrowser(QMainWindow):
         self._createActions()
         self._createToolBars()
         self.logger = self.parent.logger
+        self.libFilePath = pathlib.Path.cwd().parent.joinpath("library.yaml")
         self.initUI()
 
     def initUI(self):
@@ -2280,19 +2288,24 @@ class libraryBrowser(QMainWindow):
     def _createActions(self):
         openLibIcon = QIcon(":/icons/database--plus.png")
         self.openLibAction = QAction(openLibIcon, "Create/Open Lib...", self)
+        self.openLibAction.setToolTip('Create/Open Lib...')
         self.libraryMenu.addAction(self.openLibAction)
-        self.openLibAction.triggered.connect(self.openLibDialog)
+        self.openLibAction.triggered.connect(self.openLibClick)
 
-        self.libraryEditorAction = QAction(openLibIcon, "Library Editor", self)
+        libraryEditIcon = QIcon(":/icons/application-dialog.png")
+        self.libraryEditorAction = QAction(libraryEditIcon, "Library Editor", self)
         self.libraryMenu.addAction(self.libraryEditorAction)
+        self.libraryEditorAction.setToolTip('Open Library Editor...')
         self.libraryEditorAction.triggered.connect(self.libraryEditorClick)
 
         closeLibIcon = QIcon(":/icons/database-delete.png")
         self.closeLibAction = QAction(closeLibIcon, "Close Lib...", self)
+        self.closeLibAction.setToolTip('Close Lib')
         self.libraryMenu.addAction(self.closeLibAction)
         self.closeLibAction.triggered.connect(self.closeLibClick)
 
         self.libraryMenu.addSeparator()
+
         newCellIcon = QIcon(":/icons/document--plus.png")
         self.newCellAction = QAction(newCellIcon, "New Cell...", self)
         self.newCellAction.setToolTip('Create New Cell')
@@ -2301,7 +2314,7 @@ class libraryBrowser(QMainWindow):
 
         deleteCellIcon = QIcon(":/icons/node-delete.png")
         self.deleteCellAction = QAction(deleteCellIcon, "Delete Cell...", self)
-        self.deleteCellAction.setToolTip('Delete Selected Cell')
+        self.deleteCellAction.setToolTip('Delete Cell')
         self.libraryMenu.addAction(self.deleteCellAction)
         self.deleteCellAction.triggered.connect(self.deleteCellClick)
 
@@ -2315,13 +2328,14 @@ class libraryBrowser(QMainWindow):
 
         openCellViewIcon = QIcon(":/icons/document--pencil.png")
         self.openCellViewAction = QAction(openCellViewIcon, "Open CellView...", self)
-        self.openCellViewAction.setToolTip('Open Selected CellView')
+        self.openCellViewAction.setToolTip('Open CellView')
         self.libraryMenu.addAction(self.openCellViewAction)
         self.openCellViewAction.triggered.connect(self.openCellViewClick)
 
         deleteCellViewIcon = QIcon(":/icons/node-delete.png")
-        self.deleteCellViewAction = QAction(deleteCellViewIcon, "Delete", self)
-        self.deleteCellViewAction.setToolTip('Delete Selected Cellview')
+        self.deleteCellViewAction = QAction(deleteCellViewIcon, "Delete CellView...",
+                                            self)
+        self.deleteCellViewAction.setToolTip('Delete Cellview')
         self.libraryMenu.addAction(self.deleteCellViewAction)
         self.deleteCellViewAction.triggered.connect(self.deleteCellViewClick)
 
@@ -2340,61 +2354,109 @@ class libraryBrowser(QMainWindow):
         toolbar.addAction(self.openCellViewAction)
         toolbar.addAction(self.deleteCellViewAction)
 
-    def openLibDialog(self):
+    def openLibClick(self):
         home_dir = str(pathlib.Path.cwd())
         libDialog = QFileDialog(self, "Create/Open Library", home_dir)
         libDialog.setFileMode(QFileDialog.Directory)
         # libDialog.Option(QFileDialog.ShowDirsOnly)
         if libDialog.exec() == QDialog.Accepted:
-            self.libraryDict[libDialog.selectedFiles()[0]] = pathlib.Path(
-                libDialog.selectedFiles()[0])
+            libPathObj = pathlib.Path(libDialog.selectedFiles()[0])
+            self.libraryDict[libPathObj.stem] = libPathObj
+            # create an empty file to denote it is a design library.
+            # TODO: add some library information to this file.
+            libPathObj.joinpath('reveda.lib').touch(exist_ok=True)
             self.libBrowserCont.designView.reworkDesignLibrariesView()
-    def closeLibClick(self):
-        libCloseDialog = pdlg.closeLibDialog(self.libraryDict,self)
-        if libCloseDialog.exec() == QDialog.Accepted:
-            print(libCloseDialog.libNamesCB.currentText())
+            scb.writeLibDefFile(self.libraryDict, self.libFilePath, self.logger)
 
+    def closeLibClick(self):
+        libCloseDialog = fd.closeLibDialog(self.libraryDict, self)
+        if libCloseDialog.exec() == QDialog.Accepted:
+            libName = libCloseDialog.libNamesCB.currentText()
+            try:
+                self.libraryDict.pop(libName)
+            except KeyError:
+                self.logger.error(f'{libName} not found.')
+            finally:
+                self.libBrowserCont.designView.reworkDesignLibrariesView()
 
     def libraryEditorClick(self, s):
         pathEditDlg = libraryPathEditorDialog(self)
         # dlg.buttonBox.clicked(dlg.buttonBox.)
 
         if pathEditDlg.exec() == QDialog.Accepted:
-            self.reworkLibraryModel(pathEditDlg)
+            tempLibDict = {}
+            for item in pathEditDlg.libraryEditRowList:
+                if item.libraryNameEdit.text().strip() != "":  # check if the key is empty
+                    tempLibDict[item.libraryNameEdit.text()] = item.libraryPathEdit.text()
+            self.reworkLibraryModel(tempLibDict)
             #  now update root libraryDict
             self.parent.libraryDict = self.libraryDict
 
-    def newLibClick(self, s):
-        # print('not implemented yet.')
-        self.logger.warning('Not implemented yet.')
-
     def newCellClick(self, s):
-        self.libBrowserCont.designView.createCell()
+        dlg = fd.createCellDialog(self, self.libraryDict)
+        if dlg.exec() == QDialog.Accepted:
+            libItem = [item for item in
+                       self.libBrowserCont.designView.libraryModel.findItems(
+                           dlg.libNamesCB.currentText()) if
+                       item.data(Qt.UserRole + 1) == 'library'][0]
+            if dlg.nameEdit.text().strip() == '':
+                self.logger.error('Please enter a cell name.')
+            else:
+                scb.createCell(self, self.libBrowserCont.designView.libraryModel, libItem,
+                               dlg.nameEdit.text())  # self.libBrowserCont.designView.reworkDesignLibrariesView()
 
     def deleteCellClick(self, s):
-        self.libBrowserCont.designView.deleteCell()
+        dlg = fd.deleteCellDialog(self, self.libBrowserCont.designView.libraryModel)
+        if dlg.exec() == QDialog.Accepted:
+            libItem = [item for item in
+                       self.libBrowserCont.designView.libraryModel.findItems(
+                           dlg.libNamesCB.currentText()) if
+                       item.data(Qt.UserRole + 1) == 'library'][0]
+
+            cellItemsLib = {libItem.child(i).cellName: libItem.child(i) for i in
+                            range(libItem.rowCount())}
+            cellItem = cellItemsLib.get(dlg.cellNamesCB.currentText())
+            # remove the directory
+            shutil.rmtree(cellItem.data(Qt.UserRole + 2))
+            cellItem.parent().removeRow(cellItem.row())
 
     def newCellViewClick(self, s):
-        self.libBrowserCont.designView.createCellView()
+        pass
+
+    def selectCellView(self, libModel) -> scb.viewItem:
+        dlg = fd.selectCellViewDialog(self, libModel)
+        if dlg.exec() == QDialog.Accepted:
+            libItem = dlg.libModel.findItems(dlg.libNamesCB.currentText())[0]
+            try:
+                cellItem = [libItem.child(i) for i in range(libItem.rowCount()) if
+                            libItem.child(i).cellName == dlg.cellNamesCB.currentText()][0]
+            except IndexError:
+                cellItem = libItem.child(0)
+            try:
+                viewItem = [cellItem.child(i) for i in range(cellItem.rowCount()) if
+                            cellItem.child(i).viewName == dlg.viewNamesCB.currentText()][
+                    0]
+            except IndexError:
+                viewItem = cellItem.child(0)
+            finally:
+                return viewItem
 
     def openCellViewClick(self, s):
-        self.libBrowserCont.designView.openView()
+        viewItem = self.selectCellView(self.libBrowserCont.designView.libraryModel)
 
     def deleteCellViewClick(self, s):
-        self.libBrowserCont.designView.deleteView()
-
-    def reworkLibraryModel(self, dialog: QDialog):
-        libFilePath = pathlib.Path.cwd().parent.joinpath("library.yaml")
-        tempLibDict = {}
-        for item in dialog.libraryEditRowList:
-            if item.libraryNameEdit.text().strip() != "":  # check if the key is empty
-                tempLibDict[item.libraryNameEdit.text()] = item.libraryPathEdit.text()
+        viewItem = self.selectCellView(self.libBrowserCont.designView.libraryModel)
         try:
-            with libFilePath.open(mode="w") as f:
-                scb.writeLibDefFile(tempLibDict, libFilePath)
-        except IOError:
-            # print(f"Cannot save library definitions in {libFilePath}")
-            self.logger.error(f"Cannot save library definitions in {libFilePath}")
+            viewItem.data(Qt.UserRole + 2).unlink()  # delete the file.
+            viewItem.parent().removeRow(viewItem.row())
+        except OSError as e:
+            # print(f"Error:{e.strerror}")
+            self.logger.warning(f"Error:{e.strerror}")
+
+    def reworkLibraryModel(self, tempLibDict: dict):
+        '''
+        Recreate library.yaml file from library editor dialog
+        '''
         # self.parent.centralWidget.treeView.addLibrary()
         self.libraryDict = {}  # now empty the library dict
         for key, value in tempLibDict.items():
@@ -2404,10 +2466,11 @@ class libraryBrowser(QMainWindow):
         self.libBrowserCont.designView.initModel()
         self.libBrowserCont.designView.setModel(
             self.libBrowserCont.designView.libraryModel)
-        for designPath in self.libraryDict.values():  # type: Path
+        for designPath in self.libraryDict.values():  # type: pathlib.Path
             self.libBrowserCont.designView.populateLibrary(designPath,
                                                            self.libBrowserCont.designView.rootItem)
         self.libBrowserCont.designView.libraryDict = self.libraryDict
+        scb.writeLibDefFile(self.libraryDict, self.libFilePath, self.logger)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.parent.libraryBrowser = None
@@ -2431,12 +2494,14 @@ class designLibrariesView(QTreeView):
     def __init__(self, parent):
         super().__init__(parent=parent)  # QTreeView
         self.parent = parent  # type: QMainWindow
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.libraryDict = self.parent.parent.libraryDict  # type: dict
         self.cellViews = self.parent.parent.cellViews  # type: list
         self.openViews = {}  # type: dict
         self.viewCounter = 0
         self.mainW = self.parent.parent.parent
         self.logger = self.mainW.logger
+        self.selectedItem = None
         self.init_UI()
 
     def init_UI(self):
@@ -2456,8 +2521,10 @@ class designLibrariesView(QTreeView):
         self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
         self.rootItem = self.libraryModel.invisibleRootItem()
 
-    # populate the library model
     def populateLibrary(self, designPath, parentItem):  # designPath: Path
+        '''
+        Populate library view.
+        '''
         if designPath.is_dir():
             libraryItem = self.addLibraryToModel(designPath, parentItem)
             cellList = [str(cell.name) for cell in designPath.iterdir() if cell.is_dir()]
@@ -2478,7 +2545,7 @@ class designLibrariesView(QTreeView):
 
     def removeLibrary(self):
         button = QMessageBox.question(self, 'Library Deletion', 'Are you sure to delete '
-                                'this library? This action cannot be undone.')
+                                                                'this library? This action cannot be undone.')
         if button == QMessageBox.Yes:
             shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
             self.libraryModel.removeRow(self.selectedItem.row())
@@ -2487,8 +2554,8 @@ class designLibrariesView(QTreeView):
         pass
 
     def renameLib(self):
-        oldLibraryName =self.selectedItem.libraryName
-        dlg = pdlg.renameLibDialog(self,oldLibraryName)
+        oldLibraryName = self.selectedItem.libraryName
+        dlg = pdlg.renameLibDialog(self, oldLibraryName)
         if dlg.exec() == QDialog.Accepted:
             print('OK')
 
@@ -2499,21 +2566,24 @@ class designLibrariesView(QTreeView):
         return cellEntry
 
     def createCell(self):
-        dlg = createCellDialog(self, self.libraryModel, self.selectedItem)
+        dlg = fd.createCellDialog(self, self.libraryDict)
+        dlg.libNamesCB.setCurrentText()
         if dlg.exec() == QDialog.Accepted:
             scb.createCell(self, self.libraryModel, self.selectedItem,
                            dlg.nameEdit.text())
             self.reworkDesignLibrariesView()
+        else:
+            self.logger.error('Please enter a cell name.')
 
     def copyCell(self):
-        dlg = copyCellDialog(self, self.libraryModel, self.selectedItem)
+        dlg = fd.copyCellDialog(self, self.libraryModel, self.selectedItem)
 
         if dlg.exec() == QDialog.Accepted:
             scb.copyCell(self, dlg.model, dlg.cellItem, dlg.copyName.text(),
                          dlg.selectedLibPath)
 
     def renameCell(self):
-        dlg = renameCellDialog(self, self.selectedItem)
+        dlg = fd.renameCellDialog(self, self.selectedItem)
         if dlg.exec() == QDialog.Accepted:
             scb.renameCell(self, dlg.cellItem, dlg.nameEdit.text())
 
@@ -2523,19 +2593,18 @@ class designLibrariesView(QTreeView):
             self.selectedItem.parent().removeRow(self.selectedItem.row())
         except OSError as e:
             # print(f"Error:{e.strerror}")
-            self.logger.warning(f"Error:{e.strerror}")
+            self.logger.warning(f"Error:{e}")
 
     # cellview related methods
-
     def addViewToModel(self, viewPath, parentItem):
         viewEntry = scb.viewItem(viewPath)
         parentItem.appendRow(viewEntry)
         return viewEntry
 
     def createCellView(self):
-        assert isinstance(self.selectedItem, scb.cellItem)
-        dlg = createCellViewDialog(self, self.libraryModel,
-                                   self.selectedItem)  # type: createCellViewDialog
+        # assert isinstance(self.selectedItem, scb.cellItem)
+        dlg = fd.createCellViewDialog(self, self.libraryModel,
+                                      self.selectedItem)  # type: createCellViewDialog
         if dlg.exec() == QDialog.Accepted:
             cellPath = self.selectedItem.data(Qt.UserRole + 2)
             newViewEntry = scb.createCellView(self, dlg.nameEdit.text(), cellPath)
@@ -2546,26 +2615,35 @@ class designLibrariesView(QTreeView):
         openPath = pathlib.Path(self.selectedItem.data(Qt.UserRole + 2))
         libName = openPath.parent.parent.stem
         cellName = openPath.parent.stem
-        if (
-                self.selectedItem.text() == "schematic" and not f'{libName}_{cellName}_schematic' in self.openViews):
-            schematicWindow = schematicEditor(openPath, self.libraryDict, self, )
-            schematicWindow.loadSchematic()
-            schematicWindow.show()
-            self.openViews[f'{libName}_{cellName}_schematic'] = schematicWindow
-        elif (
-                self.selectedItem.text() == "symbol" and not f'{libName}_{cellName}_symbol' in self.openViews):
-            # create a symbol editor window and load the symbol JSON file.
-            symbolWindow = symbolEditor(openPath, self.libraryDict, self)
-            symbolWindow.loadSymbol()
-            symbolWindow.show()
-            self.openViews[f'{libName}_{cellName}_symbol'] = symbolWindow
-        elif f'{libName}_{cellName}_symbol' in self.openViews:
-            self.openViews[f'{libName}_{cellName}_symbol'].raise_()
-        elif f'{libName}_{cellName}_schematic' in self.openViews:
-            self.openViews[f'{libName}_{cellName}_schematic'].raise_()
+        viewName = openPath.stem
+        with open(openPath, "r") as temp:
+            try:
+                itemsList = json.load(temp)
+            except json.decoder.JSONDecodeError:
+                print("Invalid JSON file")
+        if f'{libName}_{cellName}_{viewName}' in self.openViews:
+            self.openViews[f'{libName}_{cellName}_{viewName}'].raise_()
+        else:
+            try:
+                cellView = itemsList[0]['cellView']
+            except UnboundLocalError:
+                self.logger.error('Not a valid cellview file.')
+                cellView = None
+            if cellView == "schematic":
+                schematicWindow = schematicEditor(openPath, self.libraryDict, self,
+                                                  itemsList)
+                schematicWindow.loadSchematic()
+                schematicWindow.show()
+                self.openViews[f'{libName}_{cellName}_{viewName}'] = schematicWindow
+            elif cellView == "symbol":
+                # create a symbol editor window and load the symbol JSON file.
+                symbolWindow = symbolEditor(openPath, self.libraryDict, self, itemsList)
+                symbolWindow.loadSymbol()
+                symbolWindow.show()
+                self.openViews[f'{libName}_{cellName}_symbol'] = symbolWindow
 
     def copyView(self):
-        dlg = copyViewDialog(self, self.libraryModel, self.selectedItem)
+        dlg = fd.copyViewDialog(self, self.libraryModel, self.selectedItem)
         if dlg.exec() == QDialog.Accepted:
             if self.selectedItem.data(Qt.UserRole + 1) == "view":
                 viewPath = self.selectedItem.data(Qt.UserRole + 2)
@@ -2594,6 +2672,9 @@ class designLibrariesView(QTreeView):
             self.logger.warning(f"Error:{e.strerror}")
 
     def reworkDesignLibrariesView(self):
+        '''
+        Recreate library model from libraryDict.
+        '''
         self.libraryModel.clear()
         self.initModel()
         self.setModel(self.libraryModel)
@@ -2610,7 +2691,6 @@ class designLibrariesView(QTreeView):
         try:
             self.selectedItem = self.libraryModel.itemFromIndex(index)
             if self.selectedItem.data(Qt.UserRole + 1) == "library":
-                menu.addAction("Save Library As...", self.saveLibAs)
                 menu.addAction("Rename Library", self.renameLib)
                 menu.addAction("Remove Library", self.removeLibrary)
                 menu.addAction("Create Cell", self.createCell)
@@ -2628,182 +2708,6 @@ class designLibrariesView(QTreeView):
             menu.exec(event.globalPos())
         except UnboundLocalError:
             pass
-
-
-class createCellDialog(QDialog):
-    def __init__(self, parent, libraryModel, selectedItem):
-        super().__init__(parent)
-        self.parent = parent
-        self.libraryModel = libraryModel
-        self.selectedItem = selectedItem
-        self.init_UI()
-
-    def init_UI(self):
-        self.setWindowTitle("Create Cell")
-        layout = QFormLayout()
-        self.nameEdit = QLineEdit()
-        self.nameEdit.setPlaceholderText("Enter Cell Name")
-        layout.addRow("Cell Name:", self.nameEdit)
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        layout.addRow(self.buttonBox)
-        self.setLayout(layout)
-
-
-class createCellViewDialog(QDialog):
-    def __init__(self, parent, model, cellItem):
-        super().__init__(parent=parent)
-        self.parent = parent
-        self.model = model
-        self.cellItem = cellItem
-        self.cellPath = self.cellItem.data(Qt.UserRole + 2)
-        self.init_UI()
-
-    def init_UI(self):
-        self.setWindowTitle("Create CellView")
-        layout = QFormLayout()
-        layout.setSpacing(10)
-        self.viewComboBox = QComboBox()
-        self.viewComboBox.addItems(self.parent.cellViews)
-        layout.addRow("Select View:", self.viewComboBox)
-        self.nameEdit = QLineEdit()
-        self.nameEdit.setPlaceholderText("CellView Name")
-        self.nameEdit.setFixedWidth(200)
-        layout.addRow(QLabel("View Name:"), self.nameEdit)
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        layout.addRow(self.buttonBox)
-        self.setLayout(layout)
-
-
-class renameCellDialog(QDialog):
-    def __init__(self, parent, cellItem):
-        super().__init__(parent=parent)
-        self.parent = parent
-        self.cellItem = cellItem
-
-        self.init_UI()
-
-    def init_UI(self):
-        self.setWindowTitle("Rename Cell")
-        layout = QFormLayout()
-        layout.setSpacing(10)
-        self.nameEdit = QLineEdit()
-        self.nameEdit.setPlaceholderText("Cell Name")
-        self.nameEdit.setFixedWidth(200)
-        layout.addRow(QLabel("Cell Name:"), self.nameEdit)
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        layout.addRow(self.buttonBox)
-        self.setLayout(layout)
-
-
-class copyCellDialog(QDialog):
-    def __init__(self, parent, model, cellItem):
-        super().__init__(parent=parent)
-        self.parent = parent
-        self.model = model
-        self.cellItem = cellItem
-
-        # self.index = 0
-        self.init_UI()
-
-    def init_UI(self):
-        self.setWindowTitle("Copy Cell")
-        layout = QFormLayout()
-        layout.setSpacing(10)
-        self.libraryComboBox = QComboBox()
-        self.libraryComboBox.setModel(self.model)
-        self.libraryComboBox.setModelColumn(0)
-        self.libraryComboBox.setCurrentIndex(0)
-        self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
-        self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
-        layout.addRow(QLabel("Library:"), self.libraryComboBox)
-        self.copyName = QLineEdit()
-        self.copyName.setPlaceholderText("Enter Cell Name")
-        self.copyName.setFixedWidth(130)
-        layout.addRow(QLabel("Cell Name:"), self.copyName)
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        layout.addRow(self.buttonBox)
-        self.setLayout(layout)
-
-    def selectLibrary(self):
-        self.selectedLibPath = self.libraryComboBox.itemData(
-            self.libraryComboBox.currentIndex(), Qt.UserRole + 2)
-
-
-class copyViewDialog(QDialog):
-    def __init__(self, parent, model, cellItem):
-        super().__init__(parent=parent)
-        self.parent = parent
-        self.model = model
-        self.cellItem = cellItem
-        self.init_UI()
-
-    def init_UI(self):
-        self.setWindowTitle("Copy CellView")
-        layout = QFormLayout()
-        layout.setSpacing(10)
-        self.libraryComboBox = QComboBox()
-        self.libraryComboBox.setModel(self.model)
-        self.libraryComboBox.setModelColumn(0)
-        self.libraryComboBox.setCurrentIndex(0)
-        self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
-        self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
-        layout.addRow(QLabel("Library:"), self.libraryComboBox)
-        self.cellComboBox = QComboBox()
-        cellList = [str(cell.cellName) for cell in self.selectedLibPath.iterdir() if
-                    cell.is_dir()]
-        self.cellComboBox.addItems(cellList)
-        self.cellComboBox.setEditable(True)
-        self.cellComboBox.InsertPolicy = QComboBox.InsertAfterCurrent
-        layout.addRow(QLabel("Cell Name:"), self.cellComboBox)
-        self.selectedCell = self.cellComboBox.currentText()
-        self.cellComboBox.currentTextChanged.connect(self.selectCell)
-        self.viewComboBox = QComboBox()
-        self.viewComboBox.setEditable(True)
-        self.viewComboBox.InsertPolicy = QComboBox.InsertAfterCurrent
-        self.viewComboBox.addItems(self.viewList())
-        self.selectedView = self.viewComboBox.currentText()
-        self.viewComboBox.currentTextChanged.connect(self.selectView)
-        layout.addRow(QLabel("View Name:"), self.viewComboBox)
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        layout.addRow(self.buttonBox)
-        self.setLayout(layout)
-
-    def viewList(self):
-        viewList = [str(view.stem) for view in
-                    self.selectedLibPath.joinpath(self.selectedCell).iterdir() if
-                    view.suffix == ".json"]
-        return viewList
-
-    def selectLibrary(self):
-        self.selectedLibPath = self.libraryComboBox.itemData(
-            self.libraryComboBox.currentIndex(), Qt.UserRole + 2)
-        cellList = [str(cell.cellName) for cell in self.selectedLibPath.iterdir() if
-                    cell.is_dir()]
-        self.cellComboBox.clear()
-        self.cellComboBox.addItems(cellList)
-
-    def selectCell(self):
-        self.selectedCell = self.cellComboBox.currentText()
-        self.viewComboBox.clear()
-        self.viewComboBox.addItems(self.viewList())
-
-    def selectView(self):
-        self.selectedView = self.viewComboBox.currentText()
 
 
 # library path editor dialogue

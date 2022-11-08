@@ -1,10 +1,11 @@
-import revedaeditor.gui.editorWindows as edw
-import revedaeditor.app as app
+import gui.editorWindows as edw
 from PySide6.QtWidgets import (QWidget)
 import pathlib
 
 
 def getLibraryDict():
+    global app
+    print(type(app))
     return app.mainW.libraryDict
 
 
@@ -40,5 +41,6 @@ def createSymbol(libraryName:str, cellName:str, viewName:str):
         schematicEditor = edw.schematicEditor(viewPath, libraryDict,
                                               libraryView)
         schematicScene = schematicEditor.centralW.scene
+
         schematicScene.loadSchematicCell(viewPath)
         schematicScene.createSymbol()
