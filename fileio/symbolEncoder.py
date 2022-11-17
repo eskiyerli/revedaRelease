@@ -70,6 +70,11 @@ class symbolEncoder(json.JSONEncoder):
                         "location": (item.scenePos() - item.scene().origin).toTuple(),
                         "angle": item.angle, }
             return itemDict
+        elif isinstance(item,shp.text):
+            itemDict = {"type": "text",
+                        "start": item.start.toTuple(),
+                        "color": item.pen.color().toTuple(),
+                        }
         elif isinstance(item, shp.label):
             itemDict = {"type": "label",
                         "start": item.start.toTuple(),

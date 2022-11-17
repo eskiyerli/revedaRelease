@@ -21,9 +21,9 @@
 # shape class definition for symbol editor.
 # base class for all shapes: rectangle, circle, line
 from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLine, )
-from PySide6.QtGui import (QPen, QFont, QFontMetrics, QColor, QPainterPath, )
-from PySide6.QtWidgets import (QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsPathItem,
-                               QGraphicsItemGroup, )
+from PySide6.QtGui import (QPen, QFont, QFontMetrics, QColor, QPainterPath, QTextOption,
+                           QFontDatabase)
+from PySide6.QtWidgets import (QGraphicsItem, QGraphicsSceneMouseEvent, )
 import math
 from quantiphy import Quantity
 import pdk.callbacks as cb
@@ -602,7 +602,6 @@ class pin(shape):
     """
     symbol pin class definition for symbol drawing.
     """
-
     pinDirs = ["Input", "Output", "Inout"]
     pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
 
@@ -610,11 +609,12 @@ class pin(shape):
                  pinDir: str = pinDirs[0], pinType: str = pinTypes[0],
                  grid: tuple = (10, 10), ):
         super().__init__(pen, grid)
+
         self._start = start  # centre of pin
         self._pinName = pinName
         self._pinDir = pinDir
         self._pinType = pinType
-        self._connected = False # True if the pin is connected to a net.
+        self._connected = False  # True if the pin is connected to a net.
         self._rect = QRect(self._start.x() - 5, self._start.y() - 5, 10, 10)
 
     def boundingRect(self):
@@ -674,8 +674,8 @@ class pin(shape):
         return self._connected
 
     @connected.setter
-    def connected(self, value:bool):
-        if isinstance(value,bool):
+    def connected(self, value: bool):
+        if isinstance(value, bool):
             self._connected = value
 
     def toSchematicPin(self, start: QPoint, pen: QPen, gridTuple):
@@ -688,47 +688,59 @@ class text(shape):
     This class is for text annotations on symbol or schematics.
     """
     textAlignments = ["Left", "Center", "Right"]
-    textOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
+    textOrients = ["R0", "R90", "R180", "R270"]
 
     def __init__(self, start: QPoint, pen: QPen, textContent: str = "",
-                 grid: tuple = (10, 10), textHeight: str = "12", textAlign: str = "Left",
-                 textOrient: str = "R0"):
+                 grid: tuple = (10, 10), fontFamily='Helvetica', fontStyle =
+                 'Regular', textHeight:str ="12",
+                 textAlign: str = "Left", textOrient: str = "R0"):
         super().__init__(pen, grid)
+
         self._start = start
         self._pen = pen
         self._textContent = textContent
         self._textHeight = textHeight
         self._textAlign = textAlign
         self._textOrient = textOrient
-        self._textFont = QFont("Helvetica")
+        self._textFont = QFont(fontFamily)
+        self._textFont.setStyleName(fontStyle)
         self._textFont.setPointSize(int(float(self._textHeight)))
         self._textFont.setKerning(True)
         self.setOpacity(1)
         self._fm = QFontMetrics(self._textFont)
-        self._rect = self._fm.boundingRect(QRect(0, 0, 400, 400),
-                                           Qt.AlignLeft | Qt.AlignHCenter,
-                                           self._textContent)
+        self._textOptions = QTextOption()
+        if self._textAlign == text.textAlignments[0]:
+            self._textOptions.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        elif self._textAlign == text.textAlignments[1]:
+            self._textOptions.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        elif self._textAlign == text.textAlignments[2]:
+            self._textOptions.setAlignment(Qt.AlignmentFlag.AlignRight)
+
 
     def boundingRect(self):
-        return QRect(self._start.x(), self._start.y(), self._rect.width(),
-                     self._rect.height())
+        if self._textAlign == text.textAlignments[0]:
+            self._rect = self._fm.boundingRect(QRect(0, 0, 400, 400),
+                                               Qt.AlignmentFlag.AlignLeft,
+                                               self._textContent)
+        elif self._textAlign == text.textAlignments[1]:
+            self._rect = self._fm.boundingRect(QRect(0, 0, 400, 400),
+                                               Qt.AlignmentFlag.AlignCenter,
+                                               self._textContent)
+        elif self._textAlign == text.textAlignments[2]:
+            self._rect = self._fm.boundingRect(QRect(0, 0, 400, 400),
+                                               Qt.AlignmentFlag.AlignRight,
+                                               self._textContent)
+        return QRect(self._start.x(), self._start.y() - self._rect.height(),
+                     self._rect.width(), self._rect.height())
 
     def paint(self, painter, option, widget):
-        # self._rect = self.fm.boundingRect(self.labelName)
-        self._textFont.setPointSize(int(self._textHeight))
         painter.setFont(self._textFont)
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
             painter.drawRect(self.boundingRect())
         else:
             painter.setPen(self._pen)
-
-        painter.drawText(QPoint(self._start.x(), self._start.y() + self._rect.height()),
-            Qt.AlignLeft | Qt.AlignHCenter, self._textContent, )
-
-        self._rect = self._fm.boundingRect(QRect(0, 0, 400, 400),
-                                           Qt.AlignLeft | Qt.AlignHCenter,
-                                           self._textContent)
+        painter.drawText(self.boundingRect(), self._textContent, o=self._textOptions)
 
     @property
     def start(self):
@@ -743,8 +755,36 @@ class text(shape):
         return self._textContent
 
     @textContent.setter
-    def textContent(self, text: str):
-        self._textContent = text
+    def textContent(self, inputText: str):
+        if isinstance(inputText, str):
+            self._textContent = inputText
+        else:
+            self.scene().logger.error(f'Not a string: {inputText}')
+
+    @property
+    def fontFamily(self) -> str:
+        return self._textFont.family()
+
+    @fontFamily.setter
+    def fontFamily(self, familyName):
+        fontFamilies = QFontDatabase.families(QFontDatabase.Latin)
+        fixedFamilies = [family for family in fontFamilies if
+                         QFontDatabase.isFixedPitch(family)]
+        if familyName in fixedFamilies:
+            self._textFont.setFamily(familyName)
+        else:
+            self.scene().logger.error(f'Not a valid font name: {familyName}')
+
+    @property
+    def fontStyle(self) -> str:
+        return self._textFont.styleName()
+
+    @fontStyle.setter
+    def fontStyle(self, value: str):
+        if value in QFontDatabase.styles(self._textFont.family()):
+            self._textFont.setStyleName(value)
+        else:
+            self.scene().logger.error(f'Not a valid font style: {value}')
 
     @property
     def textHeight(self) -> int:
@@ -752,8 +792,14 @@ class text(shape):
 
     @textHeight.setter
     def textHeight(self, value: int):
-        assert isinstance(int(value), int)
-        self._textHeight = value
+        fontSizes = [str(size) for size in
+                     QFontDatabase.pointSizes(self._textFont.family(),
+                         self._textFont.styleName())]
+        if value in fontSizes:
+            self._textHeight = value
+        else:
+            self.scene().logger.error(f'Not a valid font height: {value}')
+            self.scene().logger.warning(f'Valid font heights are: {fontSizes}')
 
     @property
     def textFont(self) -> QFont:
@@ -763,6 +809,28 @@ class text(shape):
     def textFont(self, value: QFont):
         assert isinstance(value, QFont)
         self._textFont = value
+
+    @property
+    def textAlignment(self):
+        return self._textAlign
+
+    @textAlignment.setter
+    def textAlignment(self, value):
+        if value in text.textAlignments:
+            self._textAlign = value
+        else:
+            self.scene().logger.error(f'Not a valid text alignment value: {value}')
+
+    @property
+    def textOrient(self):
+        return self._textOrient
+
+    @textOrient.setter
+    def textOrient(self, value):
+        if value in text.textOrients:
+            self._textOrient = value
+        else:
+            self.scene().logger.error(f'Not a valid text orientation: {value}')
 
 
 class label(shape):
@@ -1085,7 +1153,6 @@ class label(shape):
 
 
 class symbolShape(shape):
-    shapeViews = ["schematic", "symbol", "layout"]
 
     def __init__(self, pen: QPen, gridTuple: tuple, shapes: list, attr: dict):
         super().__init__(pen, gridTuple)
@@ -1161,10 +1228,7 @@ class symbolShape(shape):
 
     @viewName.setter
     def viewName(self, value: str):
-        if value in symbolShape.shapeViews:
-            self._viewName = value
-        else:
-            print('Not a valid instance view name.')
+        self._viewName = value
 
     @property
     def instanceName(self):
@@ -1199,7 +1263,7 @@ class symbolShape(shape):
     # labels setter works a bit differently
     @labels.setter
     def labels(self, item: label):
-        assert isinstance(item,label)
+        assert isinstance(item, label)
         self._labels[item.labelName] = item
 
     @property
@@ -1208,7 +1272,7 @@ class symbolShape(shape):
 
     @pins.setter
     def pins(self, item: pin):
-        assert isinstance(item,pin)
+        assert isinstance(item, pin)
         self._pins[item.pinName] = item
 
     def createNetlistLine(self):
@@ -1220,22 +1284,24 @@ class symbolShape(shape):
         for labelItem in self.labels.values():
             if labelItem.labelDefinition in nlpDeviceFormatLine:
                 nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
-                    labelItem.labelDefinition, labelItem.labelText
-                    )
+                    labelItem.labelDefinition, labelItem.labelText)
         for pinName, netName in self.pinNetMap.items():
             if pinName in nlpDeviceFormatLine:
-                nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
-                    f'[|{pinName}:%]', netName
-                    )
+                nlpDeviceFormatLine = nlpDeviceFormatLine.replace(f'[|{pinName}:%]',
+                                                                  netName)
         return nlpDeviceFormatLine
 
+
 class schematicPin(shape):
-    pinDirs = ["Input", "Output", "Inout"]
-    pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
+    '''
+    schematic pin class.
+    '''
 
     def __init__(self, start: QPoint, pen: QPen, pinName, pinDir, pinType,
                  gridTuple: tuple):
         super().__init__(pen, gridTuple)
+        pinDirs = ["Input", "Output", "Inout"]
+        pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
         self._start = start
         self._pinName = pinName
         self._pinDir = pinDir

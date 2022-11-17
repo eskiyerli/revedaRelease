@@ -2,7 +2,9 @@
 
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QDialogButtonBox, QLineEdit, QLabel, QComboBox,
-                               QGroupBox, QRadioButton, QGridLayout)
+                               QGroupBox, QRadioButton, QGridLayout, QTextEdit)
+
+from PySide6.QtGui import (QFontDatabase,)
 
 import common.net as net
 import common.shape as shp
@@ -350,12 +352,12 @@ class symbolLabelsDialogue(QDialog):
         self.labelTypeList = []
         self.labelItemList = []
         i = 0
-        self.symbolLabelsLayout.addWidget(QLabel("Definition"), 0, 0)
-        self.symbolLabelsLayout.addWidget(QLabel("Height"), 0, 1)
-        self.symbolLabelsLayout.addWidget(QLabel("Alignment"), 0, 2)
-        self.symbolLabelsLayout.addWidget(QLabel("Orientation"), 0, 3)
-        self.symbolLabelsLayout.addWidget(QLabel("Use"), 0, 4)
-        self.symbolLabelsLayout.addWidget(QLabel("Type"), 0, 5)
+        self.symbolLabelsLayout.addWidget(edf.boldLabel("Definition"), 0, 0)
+        self.symbolLabelsLayout.addWidget(edf.boldLabel("Height"), 0, 1)
+        self.symbolLabelsLayout.addWidget(edf.boldLabel("Alignment"), 0, 2)
+        self.symbolLabelsLayout.addWidget(edf.boldLabel("Orientation"), 0, 3)
+        self.symbolLabelsLayout.addWidget(edf.boldLabel("Use"), 0, 4)
+        self.symbolLabelsLayout.addWidget(edf.boldLabel("Type"), 0, 5)
         for item in self.items:
             if type(item) == shp.label:
                 i += 1
@@ -517,23 +519,20 @@ class symbolNameDialog(QDialog):
         super().__init__(parent)
         self.cellPath = cellPath
         self.cellName = cellName
+        self.symbolViewNames = [view.stem for view in cellPath.iterdir() if 'symbol' in
+                                view.stem]
         self.initUI()
-        self.symbolViewNames = []
-        for view in cellPath.iterdir():
-            # TODO: make this more intelligent by recognizing symbol files
-            if "symbol" in view.stem: # symbol viewnames should start  with symbol
-                self.symbolViewNames.append(view.stem)
-
     def initUI(self):
         self.setWindowTitle('Create a symbol?')
         self.mainLayout = QVBoxLayout()
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         formLayout = QFormLayout()
-        formLayout.addRow(edf.boldLabel('Library Name'),self.cellPath.parent.stem )
-        formLayout.addRow(edf.boldLabel('Cell Name'), self.cellPath.stem)
+        formLayout.addRow(edf.boldLabel('Library Name'), QLabel(
+            self.cellPath.parent.stem) )
+        formLayout.addRow(edf.boldLabel('Cell Name'), QLabel(self.cellPath.stem))
         self.symbolViewsCB = QComboBox()
-        self.symbolViewsCB.addItems(self.symbolViewsCB)
+        self.symbolViewsCB.addItems(self.symbolViewNames)
         self.symbolViewsCB.setEditable(True)
         formLayout.addRow(edf.boldLabel('Symbol View Name:'), self.symbolViewsCB)
         self.mainLayout.addLayout(formLayout)
@@ -564,29 +563,29 @@ class symbolCreateDialog(QDialog):
         self.topPinsEdit = edf.longLineEdit()
         self.topPinsEdit.setText(', '.join(self.inoutPinNames))
         self.topPinsEdit.setToolTip("Enter top pins")
-        self.fLayout.addRow(QLabel("Top Pins:"), self.topPinsEdit)
+        self.fLayout.addRow(edf.boldLabel("Top Pins:"), self.topPinsEdit)
         self.leftPinsEdit = edf.longLineEdit()
         self.leftPinsEdit.setText(', '.join(self.inputPinNames))
         self.leftPinsEdit.setToolTip("Enter left pins")
-        self.fLayout.addRow(QLabel("Left Pins:"), self.leftPinsEdit)
+        self.fLayout.addRow(edf.boldLabel("Left Pins:"), self.leftPinsEdit)
         self.bottomPinsEdit = edf.longLineEdit()
         self.bottomPinsEdit.setToolTip("Enter bottom pins")
-        self.fLayout.addRow(QLabel("Bottom Pins:"), self.bottomPinsEdit)
+        self.fLayout.addRow(edf.boldLabel("Bottom Pins:"), self.bottomPinsEdit)
         self.rightPinsEdit = edf.longLineEdit()
         self.rightPinsEdit.setText(', '.join(self.outputPinNames))
         self.rightPinsEdit.setToolTip("Enter right pins")
-        self.fLayout.addRow(QLabel("Right Pins:"), self.rightPinsEdit)
+        self.fLayout.addRow(edf.boldLabel("Right Pins:"), self.rightPinsEdit)
         self.mainLayout.addLayout(self.fLayout)
         self.mainLayout.addSpacing(20)
         self.geomLayout = QFormLayout()
         self.stubLengthEdit = QLineEdit()
         self.stubLengthEdit.setText('20')
         self.stubLengthEdit.setToolTip('Enter stub lengths')
-        self.geomLayout.addRow(QLabel("Stub Length:"), self.stubLengthEdit)
+        self.geomLayout.addRow(edf.boldLabel("Stub Length:"), self.stubLengthEdit)
         self.pinDistanceEdit = QLineEdit()
         self.pinDistanceEdit.setText('40')
         self.pinDistanceEdit.setToolTip('Enter pin spacing')
-        self.geomLayout.addRow(QLabel("Pin spacing:"), self.pinDistanceEdit)
+        self.geomLayout.addRow(edf.boldLabel("Pin spacing:"), self.pinDistanceEdit)
         self.mainLayout.addLayout(self.geomLayout)
         self.mainLayout.addSpacing(40)
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -595,3 +594,74 @@ class symbolCreateDialog(QDialog):
         self.mainLayout.addWidget(self.buttonBox)
         self.setLayout(self.mainLayout)
         self.show()
+
+class noteTextEdit(QDialog):
+    '''
+    Set text properties.
+    '''
+    def __init__(self,parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.setWindowTitle("Edit Text")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        mainLayout = QVBoxLayout()
+        self.plainTextEdit = QTextEdit()
+        mainLayout.addWidget(self.plainTextEdit)
+        fontFamilies = QFontDatabase.families(QFontDatabase.Latin)
+        fixedFamilies = [family for family in fontFamilies if
+                         QFontDatabase.isFixedPitch(family)]
+        formLayout = QFormLayout()
+        self.familyCB = QComboBox()
+        self.familyCB.addItems(fixedFamilies)
+        self.familyCB.currentTextChanged.connect(self.familyFontStyles)
+        formLayout.addRow(edf.boldLabel('Font Name'),self.familyCB)
+        self.fontStyleCB = QComboBox()
+        self.fontStyles = QFontDatabase.styles(fixedFamilies[0])
+        self.fontStyleCB.addItems(self.fontStyles)
+        self.fontStyleCB.currentTextChanged.connect(self.styleFontSizes)
+        formLayout.addRow(edf.boldLabel('Font Style'), self.fontStyleCB)
+        self.fontsizeCB = QComboBox()
+        self.fontSizes = [str(size) for size in QFontDatabase.pointSizes(fixedFamilies[0],
+                                                          self.fontStyles[0])]
+        self.fontsizeCB.addItems(self.fontSizes)
+        formLayout.addRow(edf.boldLabel('Font Size'),self.fontsizeCB)
+        self.textAlignmCB = QComboBox()
+        self.textAlignmCB.addItems(shp.text.textAlignments)
+        formLayout.addRow(edf.boldLabel('Text Alignment'),self.textAlignmCB)
+        self.textOrientCB = QComboBox()
+        self.textOrientCB.addItems(shp.text.textOrients)
+        formLayout.addRow(edf.boldLabel('Text Orientation'), self.textOrientCB)
+        mainLayout.addLayout(formLayout)
+        mainLayout.addSpacing(40)
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
+        self.show()
+
+    def familyFontStyles(self,s):
+        self.fontStyleCB.clear()
+        self.fontStyles = QFontDatabase.styles(self.familyCB.currentText())
+        self.fontStyleCB.addItems(self.fontStyles)
+
+    def styleFontSizes(self,s):
+        self.fontsizeCB.clear()
+        selectedFamily = self.familyCB.currentText()
+        selectedStyle = self.fontStyleCB.currentText()
+        self.fontSizes = [str(size) for size in QFontDatabase.pointSizes(
+            selectedFamily, selectedStyle)]
+        self.fontsizeCB.addItems(self.fontSizes)
+
+class noteTextEditProperties(noteTextEdit):
+    def __init__(self,parent, note:shp.text):
+        super().__init__(parent)
+        self.note = note
+        self.plainTextEdit.setText(self.note.textContent)
+        self.familyCB.setCurrentText(self.note.fontFamily)
+        self.fontStyleCB.setCurrentText(self.note.fontStyle)
+        self.fontsizeCB.setCurrentText(self.note.textHeight)
+        self.textAlignmCB.setCurrentText(self.note.textAlignment)
+        self.textOrientCB.setCurrentText(self.note.textOrient)
+

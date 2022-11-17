@@ -57,5 +57,6 @@
     <file>icons/application-dialog.png</file>
     <file>icons/home.png</file>
     <file>icons/question.png</file>
+    <file>icons/sticky-note-text.png</file>
 </qresource>
 </RCC>
