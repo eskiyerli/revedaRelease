@@ -31,9 +31,10 @@ import shutil
 # import revedaeditor.backend.schBackEnd as scb  # import the backend
 import backend.schBackEnd as scb
 import backend.undoStack as us
-import common.circuitElements as cel
+import common.layers as cel
 import common.net as net
 import common.shape as shp  # import the shapes
+import common.pens as pens # import pens
 import fileio.loadJSON as lj
 import fileio.symbolEncoder as se
 import gui.fileDialogues as fd
@@ -838,29 +839,21 @@ class editor_scene(QGraphicsScene):
         self.logger = self.appMainW.logger
 
     def setPens(self):
-        self.wirePen = QPen(self.wireLayer.color, 2)
-        self.wirePen.setCosmetic(True)
-        self.symbolPen = QPen(self.symbolLayer.color, 3)
-        self.symbolPen.setCosmetic(True)
-        self.selectedWirePen = QPen(self.selectedWireLayer.color, 2)
-        self.pinPen = QPen(self.pinLayer.color, 2)
-        self.labelPen = QPen(self.labelLayer.color, 1)
-        self.textPen = QPen(self.textLayer.color, 1)
+        self.wirePen = pens.pen.returnPen('wirePen')
+        self.symbolPen = pens.pen.returnPen('symbolPen')
+        self.selectedWirePen = pens.pen.returnPen('selectedWirePen')
+        self.pinPen = pens.pen.returnPen('pinPen')
+        self.labelPen = pens.pen.returnPen('labelPen')
+        self.textPen = pens.pen.returnPen('textPen')
 
     def defineSceneLayers(self):
-        self.wireLayer = cel.layer(name="wireLayer", color=QColor("cyan"), z=1,
-                                   visible=True)
-        self.symbolLayer = cel.layer(name="symbolLayer", color=QColor("green"), z=1,
-                                     visible=True)
-        self.guideLineLayer = cel.layer(name="guideLineLayer", color=QColor("white"), z=1,
-                                        visible=True)
-        self.selectedWireLayer = cel.layer(name="selectedWireLayer", color=QColor("red"),
-                                           z=1, visible=True)
-        self.pinLayer = cel.layer(name="pinLayer", color=QColor("red"), z=2, visible=True)
-        self.labelLayer = cel.layer(name="labelLayer", color=QColor("yellow"), z=3,
-                                    visible=True)
-        self.textLayer = cel.layer(name="textLayer", color=QColor("white"), z=4,
-                                   visible=True)
+        self.wireLayer = cel.wireLayer
+        self.symbolLayer = cel.symbolLayer
+        self.guideLineLayer = cel.guideLineLayer
+        self.selectedWireLayer = cel.selectedWireLayer
+        self.pinLayer = cel.pinLayer
+        self.labelLayer = cel.labelLayer
+        self.textLayer = cel.textLayer
 
     def snapGrid(self, number, base):
         return base * int(round(number / base))
@@ -1287,7 +1280,7 @@ class symbol_scene(editor_scene):
                     if isinstance(itemShape, shp.label):
                         itemShape.setOpacity(1)
                     self.addItem(itemShape)
-                elif item["type"] == "attribute":
+                elif item["type"] == "attr":
                     attr = lj.createSymbolAttribute(item)
                     self.attributeList.append(attr)
 
@@ -1768,6 +1761,14 @@ class schematic_scene(editor_scene):
         else:
             return set()
 
+    def findSceneTextSet(self) -> set[shp.text]:
+        textSceneSet = {item for item in self.items() if
+                        isinstance(item, shp.text)}
+        if textSceneSet:  # check textSceneSet is empty
+            return textSceneSet
+        else:
+            return set()
+
     def groupNamedNets(self, namedNetsSet, unnamedNetsSet):
         """
         Groups nets with the same name.
@@ -1927,7 +1928,7 @@ class schematic_scene(editor_scene):
                             "type"] == "circle"):
                             # append recreated shapes to shapes list
                             itemShapes.append(lj.createSymbolItems(item, self.gridTuple))
-                        elif item["type"] == "attribute":
+                        elif item["type"] == "attr":
                             itemAttributes[item["name"]] = item["definition"]
                 else:
                     self.logger.error('Not a symbol!')
@@ -1992,7 +1993,8 @@ class schematic_scene(editor_scene):
         symbolItems = self.findSceneSymbolSet()
         netItems = self.findSceneNetsSet()
         pinItems = self.findScenePinsSet()
-        items = list(symbolItems | netItems | pinItems)
+        textItems = self.findSceneTextSet()
+        items = list(symbolItems | netItems | pinItems | textItems)
         items.insert(0, {'cellView': 'schematic'})
         with open(file, "w") as f:
             json.dump(items, f, cls=se.schematicEncoder, indent=4)
@@ -2020,11 +2022,14 @@ class schematic_scene(editor_scene):
                 elif item["type"] == "schematicPin":
                     pinShape = lj.createSchematicPins(item, self.gridTuple)
                     self.addItem(pinShape)
+                elif item['type'] == 'text':
+                    text = lj.createTextItem(item,self.gridTuple)
+                    self.addItem(text)
 
         # increment item counter for next symbol
         self.itemCounter += 1
         self.findDotPoints(self.sceneRect())
-        self.addItem(shp.text(QPoint(0, 200), self.textPen, 'Revolution EDA'))
+        # self.addItem(shp.text(QPoint(0, 200), self.textPen, 'Revolution EDA'))
         self.update()
 
     def viewObjProperties(self):
