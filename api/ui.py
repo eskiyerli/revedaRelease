@@ -5,7 +5,6 @@ import pathlib
 
 def getLibraryDict():
     global app
-    print(type(app))
     return app.mainW.libraryDict
 
 

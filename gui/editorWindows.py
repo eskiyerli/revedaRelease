@@ -42,15 +42,17 @@ import gui.propertyDialogues as pdlg
 
 # import numpy as np
 from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, )
-from PySide6.QtGui import (QAction, QKeySequence, QColor, QIcon, QPainter, QPen,
+from PySide6.QtGui import (QAction, QKeySequence, QColor, QIcon, QPainter, QPen, QImage,
                            QStandardItemModel, QCursor, QUndoStack, QTextDocument,
-                           QGuiApplication, QCloseEvent)
+                           QGuiApplication, QCloseEvent, QFont)
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayout,
                                QGraphicsScene, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QMenu, QMessageBox, QToolBar, QTreeView,
                                QVBoxLayout, QWidget, QGraphicsRectItem,
                                QGraphicsEllipseItem, QGraphicsView, QGridLayout,
                                QGraphicsSceneMouseEvent, QAbstractItemView)
+
+from PySide6.QtPrintSupport import (QPrintDialog,QPrintPreviewDialog, QPrinter)
 
 
 class editorWindow(QMainWindow):
@@ -106,6 +108,9 @@ class editorWindow(QMainWindow):
 
         printIcon = QIcon(":/icons/printer--arrow.png")
         self.printAction = QAction(printIcon, "Print...", self)
+
+        printPreviewIcon = QIcon(":/icons/printer--arrow.png")
+        self.printPreviewAction = QAction(printPreviewIcon, "Print Preview...", self)
 
         exportImageIcon = QIcon(":/icons/image-export.png")
         self.exportImageAction = QAction(exportImageIcon, "Export...", self)
@@ -267,6 +272,7 @@ class editorWindow(QMainWindow):
         # place toolbar at top
         self.addToolBar(self.toolbar)
         self.toolbar.addAction(self.printAction)
+        self.toolbar.addAction(self.exportImageAction)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.undoAction)
         self.toolbar.addAction(self.redoAction)
@@ -288,6 +294,7 @@ class editorWindow(QMainWindow):
         self.menuFile.addAction(self.checkCellAction)
         self.menuFile.addAction(self.readOnlyCellAction)
         self.menuFile.addAction(self.printAction)
+        self.menuFile.addAction(self.printPreviewAction)
         self.menuFile.addAction(self.exportImageAction)
         self.menuFile.addAction(self.exitAction)
         # view menu
@@ -315,6 +322,9 @@ class editorWindow(QMainWindow):
         self.menuCheck.addAction(self.viewCheckAction)
 
     def _createTriggers(self):
+        self.printAction.triggered.connect(self.printClick)
+        # self.printPreviewAction.triggered.connect(self.printPreviewClick)
+        self.exportImageAction.triggered.connect(self.imageExportClick)
         self.exitAction.triggered.connect(self.closeWindow)
         self.fitAction.triggered.connect(self.fitToWindow)
         self.zoomInAction.triggered.connect(self.zoomIn)
@@ -341,9 +351,33 @@ class editorWindow(QMainWindow):
             self.centralW.scene.update()
             self.centralW.view.update()
 
-    # def deleteItemMethod(self, s):
-    #     self.centralW.scene.itemDelete = True
+    def printClick(self):
+        dlg = QPrintDialog(self)
+        if dlg.exec() == QDialog.Accepted:
+            printer = dlg.printer()
+            self.centralW.view.printView(printer)
 
+    # def printPreviewClick(self):
+    #     # dlg = QPrintDialog(self)
+    #     # if dlg.exec() == QDialog.Accepted:
+    #     #     printer = dlg.printer()
+    #     printer = QPrinter(QPrinter.ScreenResolution)
+    #
+    #     ppdlg = QPrintPreviewDialog(self)
+    #     ppdlg.paintRequested.connect(self.centralW.scene.render(QPainter(printer)))
+    #     ppdlg.exec()
+    def imageExportClick(self):
+        image = QImage(self.centralW.view.viewport().size(),
+                       QImage.Format_ARGB32_Premultiplied)
+        self.centralW.view.printView(image)
+        fdlg = QFileDialog(self,caption='Select or create an image file')
+        fdlg.setDefaultSuffix('png')
+        fdlg.setFileMode(QFileDialog.AnyFile)
+        fdlg.setViewMode(QFileDialog.Detail)
+        fdlg.setNameFilter("Image Files (*.png *.jpg *.bmp *.gif *.jpeg")
+        if fdlg.exec() == QDialog.Accepted:
+            imageFile = fdlg.selectedFiles()[0]
+        image.save(imageFile)
     def fitToWindow(self):
         self.centralW.view.fitToView()
 
@@ -875,6 +909,7 @@ class editor_scene(QGraphicsScene):
         self.itemSelect = True
 
     def rotateAnItem(self, point: QPoint, item, angle):
+        print('i am rotating')
         rotationOriginPoint = item.mapFromScene(point)
         item.setTransformOriginPoint(rotationOriginPoint)
         item.angle += angle
@@ -1655,8 +1690,12 @@ class schematic_scene(editor_scene):
                             if not circuitView in self.parent.parent.stopViewList:
                                 cirFile.write(f'.SUBCKT {cellName} {pinline} \n')
                                 new_scene = schematic_scene(self.parent)
-                                new_scene.loadSchematicCell(
-                                    cellPath.joinpath("schematic.json"))
+                                with open(cellPath.joinpath(f'{circuitView}.json')) as temp:
+                                    try:
+                                        itemsList = json.load(temp)
+                                    except json.decoder.JSONDecodeError:
+                                        print("Invalid JSON file")
+                                new_scene.loadSchematicCell(itemsList)
                                 new_scene.recursiveNetlisting(cirFile, True)
                                 cirFile.write(f'.ENDS {cellName} \n')
 
@@ -1929,7 +1968,7 @@ class schematic_scene(editor_scene):
                             # append recreated shapes to shapes list
                             itemShapes.append(lj.createSymbolItems(item, self.gridTuple))
                         elif item["type"] == "attr":
-                            itemAttributes[item["name"]] = item["definition"]
+                            itemAttributes[item["nam"]] = item["def"]
                 else:
                     self.logger.error('Not a symbol!')
 
@@ -2276,6 +2315,7 @@ class editor_view(QGraphicsView):
         self.parent = parent
         self.scene = scene
         self.gridMajor = self.scene.gridMajor
+        self.gridbackg = True
         self.init_UI()
 
     def init_UI(self):
@@ -2305,18 +2345,21 @@ class editor_view(QGraphicsView):
         return base * int(math.floor(number / base))
 
     def drawBackground(self, painter, rect):
-        rectCoord = rect.getRect()
-        painter.fillRect(rect, QColor("black"))
-        painter.setPen(QColor("white"))
-        grid_x_start = math.ceil(rectCoord[0] / self.gridMajor) * self.gridMajor
-        grid_y_start = math.ceil(rectCoord[1] / self.gridMajor) * self.gridMajor
-        num_x_points = math.floor(rectCoord[2] / self.gridMajor)
-        num_y_points = math.floor(rectCoord[3] / self.gridMajor)
-        for i in range(int(num_x_points)):  # rect width
-            for j in range(int(num_y_points)):  # rect length
-                painter.drawPoint(grid_x_start + i * self.gridMajor,
-                                  grid_y_start + j * self.gridMajor)
-        super().drawBackground(painter, rect)
+
+        if self.gridbackg:
+            rectCoord = rect.getRect()
+            painter.fillRect(rect, QColor("black"))
+            painter.setPen(QColor("gray"))
+            grid_x_start = math.ceil(rectCoord[0] / self.gridMajor) * self.gridMajor
+            grid_y_start = math.ceil(rectCoord[1] / self.gridMajor) * self.gridMajor
+            num_x_points = math.floor(rectCoord[2] / self.gridMajor)
+            num_y_points = math.floor(rectCoord[3] / self.gridMajor)
+            for i in range(int(num_x_points)):  # rect width
+                for j in range(int(num_y_points)):  # rect length
+                    painter.drawPoint(grid_x_start + i * self.gridMajor,
+                                      grid_y_start + j * self.gridMajor)
+        else:
+            super().drawBackground(painter, rect)
 
     def keyPressEvent(self, key_event):
         if key_event.key() == Qt.Key_F:
@@ -2328,6 +2371,18 @@ class editor_view(QGraphicsView):
         self.fitInView(viewRect, Qt.AspectRatioMode.KeepAspectRatio)
         self.show()
 
+    def printView(self,printer):
+        '''
+        Print view using selected Printer.
+        '''
+        painter = QPainter(printer)
+        painter.setFont(QFont('Helvetica'))
+        self.gridbackg = False
+        self.drawBackground(painter,self.viewport().geometry())
+        painter.drawText(self.viewport().geometry(),'Revolution EDA')
+        self.render(painter)
+        self.gridbackg = True
+        painter.end()
 
 class symbol_view(editor_view):
     def __init__(self, scene, parent):
@@ -2570,8 +2625,7 @@ class libraryBrowser(QMainWindow):
         self.libBrowserCont.designView.setModel(
             self.libBrowserCont.designView.libraryModel)
         for designPath in self.libraryDict.values():  # type: pathlib.Path
-            self.libBrowserCont.designView.populateLibrary(designPath,
-                                                           self.libBrowserCont.designView.rootItem)
+            self.libBrowserCont.designView.populateLibrary(designPath)
         self.libBrowserCont.designView.libraryDict = self.libraryDict
         scb.writeLibDefFile(self.libraryDict, self.libFilePath, self.logger)
 
@@ -2605,45 +2659,40 @@ class designLibrariesView(QTreeView):
         self.mainW = self.parent.parent.parent
         self.logger = self.mainW.logger
         self.selectedItem = None
-        self.init_UI()
-
-    def init_UI(self):
+        # library model is based on qstandarditemmodel
+        self.initModel()
         self.setSortingEnabled(True)
         self.setUniformRowHeights(True)
         self.expandAll()
-        self.initModel()
         # iterate design library directories. Designpath is the path of library
         # obtained from libraryDict
         for designPath in self.libraryDict.values():  # type: Path
-            self.populateLibrary(designPath, self.rootItem)
+            self.populateLibrary(designPath)
         self.setModel(self.libraryModel)
 
     def initModel(self):
-        # library model is based on qstandarditemmodel
         self.libraryModel = QStandardItemModel()
         self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
         self.rootItem = self.libraryModel.invisibleRootItem()
 
-    def populateLibrary(self, designPath, parentItem):  # designPath: Path
+    def populateLibrary(self, designPath):  # designPath: Path
         '''
         Populate library view.
         '''
-        if designPath.is_dir():
-            libraryItem = self.addLibraryToModel(designPath, parentItem)
-            cellList = [str(cell.name) for cell in designPath.iterdir() if cell.is_dir()]
+        if designPath.joinpath('reveda.lib').exists():
+            libraryItem = self.addLibraryToModel(designPath)
+            cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
             for cell in cellList:  # type: str
                 cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
-                viewList = [str(view) for view in designPath.joinpath(cell).iterdir() if
+                viewList = [view.name for view in designPath.joinpath(cell).iterdir() if
                             view.suffix == ".json"]
-                if len(viewList) >= 0:
-                    for view in viewList:
-                        self.addViewToModel(designPath.joinpath(cell, view), cellItem)
+                for view in viewList:
+                    self.addViewToModel(designPath.joinpath(cell, view), cellItem)
 
     # library related methods
-
-    def addLibraryToModel(self, designPath, parentItem):
+    def addLibraryToModel(self, designPath):
         libraryEntry = scb.libraryItem(designPath)
-        parentItem.appendRow(libraryEntry)
+        self.rootItem.appendRow(libraryEntry)
         return libraryEntry
 
     def removeLibrary(self):
@@ -2668,9 +2717,14 @@ class designLibrariesView(QTreeView):
         parentItem.appendRow(cellEntry)
         return cellEntry
 
+    # cellview related methods
+    def addViewToModel(self, viewPath, parentItem):
+        viewEntry = scb.viewItem(viewPath)
+        parentItem.appendRow(viewEntry)
+        return viewEntry
+
     def createCell(self):
         dlg = fd.createCellDialog(self, self.libraryDict)
-        dlg.libNamesCB.setCurrentText()
         if dlg.exec() == QDialog.Accepted:
             scb.createCell(self, self.libraryModel, self.selectedItem,
                            dlg.nameEdit.text())
@@ -2697,12 +2751,6 @@ class designLibrariesView(QTreeView):
         except OSError as e:
             # print(f"Error:{e.strerror}")
             self.logger.warning(f"Error:{e}")
-
-    # cellview related methods
-    def addViewToModel(self, viewPath, parentItem):
-        viewEntry = scb.viewItem(viewPath)
-        parentItem.appendRow(viewEntry)
-        return viewEntry
 
     def createCellView(self):
         # assert isinstance(self.selectedItem, scb.cellItem)
@@ -2782,7 +2830,7 @@ class designLibrariesView(QTreeView):
         self.initModel()
         self.setModel(self.libraryModel)
         for designPath in self.libraryDict.values():  # type: Path
-            self.populateLibrary(designPath, self.rootItem)
+            self.populateLibrary(designPath)
 
     # context menu
     def contextMenuEvent(self, event):

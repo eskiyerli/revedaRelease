@@ -1296,12 +1296,11 @@ class schematicPin(shape):
     '''
     schematic pin class.
     '''
-
+    pinDirs = ["Input", "Output", "Inout"]
+    pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
     def __init__(self, start: QPoint, pen: QPen, pinName, pinDir, pinType,
                  gridTuple: tuple):
         super().__init__(pen, gridTuple)
-        pinDirs = ["Input", "Output", "Inout"]
-        pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
         self._start = start
         self._pinName = pinName
         self._pinDir = pinDir

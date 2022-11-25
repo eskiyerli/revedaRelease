@@ -4,13 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0690168-d2e2-46d9-ad7a-c07a0f7c1100" name="Changes" comment="Somewhat working state.">
+    <list default="true" id="afce36f1-1a22-4819-9b65-122f9068eeba" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hdlBackEnd.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/fonts.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/revedaeditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/revedaeditor.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace-imperial.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/circuitElements.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/layers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/pens.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/pens.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fileio/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/fileio/loadJSON.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/schBackEnd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/shape.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fileio/symbolEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/fileio/symbolEncoder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/editorWindows.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/fileDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/fileDialogues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,38 +39,27 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="master" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectId" id="2C2U38jH2yTfYJBlwrgYT68UeuQ" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
-    <ConfirmationsSetting value="2" id="Add" />
-  </component>
+  <component name="ProjectId" id="2Hqy5bjLHxSQcwFWafMMxxCEjnv" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/src/main.py&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PythonContentEntriesConfigurable&quot;,
-    &quot;two.files.diff.last.used.file&quot;: &quot;/home/eskiyerli/Documents/Projects/RevEDA/src/revedaeditor/gui/editorWindows.py&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/eskiy/OneDrive/Documents/Projects/RevEDA/src/revedaeditor&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
 }</component>
   <component name="RunManager">
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="revedaeditor" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -81,69 +84,12 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="e0690168-d2e2-46d9-ad7a-c07a0f7c1100" name="Changes" comment="" />
-      <created>1657999973713</created>
+      <changelist id="afce36f1-1a22-4819-9b65-122f9068eeba" name="Changes" comment="" />
+      <created>1669026725892</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1657999973713</updated>
+      <updated>1669026725892</updated>
     </task>
-    <task id="LOCAL-00001" summary="Moved all shape classes to use @property">
-      <created>1661543367545</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1661543367545</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Commit before some major label work.">
-      <created>1661721663475</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1661721663475</updated>
-    </task>
-    <task id="LOCAL-00003" summary="NLPLabels can now be hidden and NLP syntax is working better.">
-      <created>1663103463650</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1663103463650</updated>
-    </task>
-    <task id="LOCAL-00004" summary="NLPLabels can now be hidden and NLP syntax is working better.">
-      <created>1663103493543</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1663103493543</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Netlisting improvements&#10;&#10;Bug in named nets traversing is fixed.">
-      <created>1664351696775</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1664351696775</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Further netlisting improvements. Switch and stop&#10;list work started.">
-      <created>1664971892858</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1664971892858</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Library Browser improvements.">
-      <created>1665481779630</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1665481779630</updated>
-    </task>
-    <task id="LOCAL-00008" summary="Somewhat working state.">
-      <created>1667910975203</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1667910975203</updated>
-    </task>
-    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -151,41 +97,10 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="experimental" />
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Moved all shape classes to use @property" />
-    <MESSAGE value="Commit before some major label work." />
-    <MESSAGE value="NLPLabels can now be hidden and NLP syntax is working better." />
-    <MESSAGE value="Netlisting improvements&#10;&#10;Bug in named nets traversing is fixed." />
-    <MESSAGE value="Further netlisting improvements. Switch and stop&#10;list work started." />
-    <MESSAGE value="Library Browser improvements." />
-    <MESSAGE value="Somewhat working state." />
-    <option name="LAST_COMMIT_MESSAGE" value="Somewhat working state." />
-  </component>
-  <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="PythonConfigurationType">
-        <watch expression="scenePinsSet" />
-        <watch expression="pinConNetsSet" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>

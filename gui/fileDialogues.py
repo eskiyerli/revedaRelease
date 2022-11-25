@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog
                                QPushButton)
 from PySide6.QtGui import (QStandardItemModel)
 import common.shape as shp
+import gui.editorWindows as ed
 import gui.editFunctions as edf
 import pathlib
 
@@ -374,3 +375,57 @@ class goDownHierDialogue(QDialog):
         mainLayout.addWidget(self.buttonBox)
         self.setLayout(mainLayout)
         self.show()
+
+class importCellDialogue(QDialog):
+    def __init__(self,model,parent):
+        super().__init__(parent)
+        self._parent = parent
+        self.setWindowTitle('Import a Verilog-a File')
+        self._model = model
+        self.setMinimumSize(500, 200)
+        mainLayout = QVBoxLayout()
+        fileDialogLayout = QHBoxLayout()
+        fileDialogLayout.addWidget(edf.boldLabel('Select Verilog-A file:'),1)
+        self.vaFileEdit = edf.longLineEdit()
+        fileDialogLayout.addWidget(self.vaFileEdit,4)
+        self.vaFileButton = QPushButton('...')
+        self.vaFileButton.clicked.connect(self.onFileButtonClicked)
+        fileDialogLayout.addWidget(self.vaFileButton,1)
+        mainLayout.addLayout(fileDialogLayout)
+        mainLayout.addSpacing(20)
+        layout = QFormLayout()
+        layout.setSpacing(10)
+        self.libNamesCB = QComboBox()
+        self.libNamesCB.setModel(self._model)
+        self.libNamesCB.currentTextChanged.connect(self.changeCells)
+        layout.addRow(edf.boldLabel('Library:'),self.libNamesCB)
+        self.cellNamesCB = QComboBox()
+        self.cellNamesCB.setEditable(True)
+        initialCellNames = [self._model.item(0).child(i).cellName for i in range(
+            self._model.item(0).rowCount())]
+        self.cellNamesCB.addItems(initialCellNames)
+        layout.addRow(edf.boldLabel('Cell:'),  self.cellNamesCB)
+        self.vaViewName = edf.longLineEdit()
+        layout.addRow(edf.boldLabel('Verilog-A view:'),self.vaViewName)
+        mainLayout.addLayout(layout)
+        mainLayout.addSpacing(20)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
+        self.show()
+
+    def changeCells(self):
+        selectedLibItemRow = self._model.findItems(self.libNamesCB.currentText())[0].row()
+        libCellNames = [self._model.item(selectedLibItemRow).child(i).cellName for i in range(
+            self._model.item(selectedLibItemRow).rowCount())]
+        self.cellNamesCB.clear()
+        self.cellNamesCB.addItems(libCellNames)
+
+    def onFileButtonClicked(self):
+        self.vaFileName = QFileDialog.getOpenFileName(self, caption='Select Verilog-A '
+                                                                    'file.')[0]
+        if self.vaFileName:
+            self.vaFileEdit.setText(self.vaFileName)

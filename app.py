@@ -26,12 +26,14 @@ from contextlib import redirect_stderr, redirect_stdout
 import backend.schBackEnd as scb  # import the backend
 import gui.editorWindows as edw
 import gui.pythonConsole as pcon
+import gui.fileDialogues as fd
+import backend.hdlBackEnd as hdl
 import api.ui as ui
 import resources.resources
-import yaml
-from PySide6.QtGui import (QAction, QFont, QIcon, )
-from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget,
-                               QMenuBar, )
+from PySide6.QtCore import (Qt, )
+from PySide6.QtGui import (QAction, QFont, QIcon)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, QMenuBar,
+                               QDialog)
 
 
 class mainwContainer(QWidget):
@@ -95,6 +97,7 @@ class mainWindow(QMainWindow):
         self.resize(900, 300)
         self._createMenuBar()
         self._createActions()
+        self._createTriggers()
         # create container to position all widgets
         self.centralW = mainwContainer(self)
         self.setCentralWidget(self.centralW)
@@ -119,22 +122,25 @@ class mainWindow(QMainWindow):
         exitIcon = QIcon(":/icons/external.png")
         self.exitAction = QAction(exitIcon, "Exit", self)
         self.exitAction.setShortcut("Ctrl+Q")
-        self.exitAction.triggered.connect(self.exitApp)  # type: ignore
+
         self.menuFile.addAction(self.exitAction)
 
         openLibIcon = QIcon(":/icons/database--pencil.png")
         self.libraryBrowserAction = QAction(openLibIcon, "Library Browser", self)
         self.menuTools.addAction(self.libraryBrowserAction)
-        self.libraryBrowserAction.triggered.connect(self.libraryBrowserClick)
-
         importVerilogaIcon = QIcon(":/icons/document--plus.png")
-        self.importVerilogaAction = QAction(importVerilogaIcon, 'Import Verilog-a '
-                                                                'file...')
+        self.importVerilogaAction = QAction(importVerilogaIcon,
+                                            'Import Verilog-a file...')
         self.importTools.addAction(self.importVerilogaAction)
+        optionsIcon = QIcon(":/icons/resource-monitor.png")
+        self.optionsAction = QAction(optionsIcon, "Options...", self)
+        self.menuOptions.addAction(self.optionsAction)
 
-        newCellIcon = QIcon(":/icons/document--plus.png")
-        self.importVerilogaAction = QAction(newCellIcon, "Import Verilog-A", self)
-
+    def _createTriggers(self):
+        self.exitAction.triggered.connect(self.exitApp)  # type: ignore
+        self.libraryBrowserAction.triggered.connect(self.libraryBrowserClick)
+        self.importVerilogaAction.triggered.connect(self.importVerilogaClick)
+        self.optionsAction.triggered.connect(self.optionsClick)
     # open library browser window
     def libraryBrowserClick(self):
         if self.libraryBrowser is None:
@@ -143,6 +149,43 @@ class mainWindow(QMainWindow):
         else:
             self.libraryBrowser.show()
             self.libraryBrowser.raise_()
+
+    def importVerilogaClick(self):
+        '''
+        Import a verilog-a view and add it to a design library
+        '''
+        if self.libraryBrowser is None:
+            # create libBrowser if it does not exist, but do not show it
+            self.libraryBrowser = edw.libraryBrowser(self)
+        libraryModel = self.libraryBrowser.libBrowserCont.designView.libraryModel
+        dlg = fd.importCellDialogue(libraryModel, self)
+        if dlg.exec() == QDialog.Accepted:
+            self.importedFileObj = pathlib.Path(dlg.vaFileEdit.text())
+            importedVaObj = hdl.verilogaC(self.importedFileObj)
+            selectedLibName = dlg.libNamesCB.currentText()
+            selectedLibItem = libraryModel.findItems(selectedLibName)[0]
+            selectedLibItemRow = selectedLibItem.row()
+            libCellNames = [libraryModel.item(selectedLibItemRow).child(i).cellName for i
+                            in range(libraryModel.item(selectedLibItemRow).rowCount())]
+            if dlg.cellNamesCB.currentText() not in libCellNames and \
+                    dlg.cellNamesCB.currentText() !='':  # a new
+                # cell
+                scb.createCell(self,libraryModel, selectedLibItem,
+                               dlg.cellNamesCB.currentText())
+            i=0
+            while i <= selectedLibItem.rowCount():
+                if selectedLibItem.child(i).cellName == dlg.cellNamesCB.currentText():
+                    cellItem = selectedLibItem.child(i)
+                    break
+                i += 1
+            else:
+                cellItem = None
+            if cellItem is not None:
+                viewItem = scb.createCellView(self,dlg.vaViewName.text(),cellItem.data(
+                    Qt.UserRole+2))
+
+    def optionsClick(self):
+        pass
 
     def libDictUpdate(self):
         self.libraryDict = self.libraryBrowser.libraryDict
@@ -160,7 +203,7 @@ app = QApplication(sys.argv)
 app.setStyle("Fusion")
 # empty argument as there is no parent window.
 mainW = mainWindow(app)
-mainW.setWindowTitle("Revolution EDA Main Window")
+mainW.setWindowTitle("Revolution EDA")
 redirect = pcon.Redirect(mainW.centralW.console.errorwrite)
 with redirect_stdout(mainW.centralW.console), redirect_stderr(redirect):
     mainW.show()

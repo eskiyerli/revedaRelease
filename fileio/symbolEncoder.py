@@ -30,7 +30,7 @@ class symbolEncoder(json.JSONEncoder):
                         "rect": item.rect.getCoords(),
                         "pen" : item.pen.pname,
                         "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                        "angle": item.angle, }
+                        "ang": item.angle, }
             return itemDict
         elif isinstance(item, shp.line):
             itemDict = {"type": "line",

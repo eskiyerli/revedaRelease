@@ -87,52 +87,65 @@ def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     return newLibraryItem
 
 
-def createCell(parent, model, selectedLib, cellName) -> bool:
+def createCell(parent, model, selectedLib, cellName) -> cellItem:
     # assert isinstance(selectedLib, libraryItem)
     if selectedLib.data(Qt.UserRole + 1) == "library":
         selectedLibPath = selectedLib.data(Qt.UserRole + 2)
         cellPath = selectedLibPath.joinpath(cellName)
-        if cellPath.exists():
-            QMessageBox.warning(parent, "Error", "Cell already exits.")
+        if cellName.strip() == "":
+            QMessageBox.warning(parent, "Error", "Please enter a cell name")
+            return None
+        elif cellPath.exists():
+            QMessageBox.warning(parent, "Error", "Cell already exits. Delete cell first.")
+            return None
         else:
             cellPath.mkdir()
-            parentLibrary = \
-            model.findItems(selectedLibPath.stem, flags=Qt.MatchExactly)[0]
-    newCellItem = cellItem(cellPath)
-    selectedLib.appendRow(newCellItem)
-    parent.logger.warning(f"Created {cellName} cell at {str(cellPath)}")
-    return True
-
-
+            parentLibrary = model.findItems(selectedLibPath.stem,
+                                            flags=Qt.MatchExactly)[0]
+            newCellItem = cellItem(cellPath)
+            selectedLib.appendRow(newCellItem)
+            parent.logger.warning(f"Created {cellName} cell at {str(cellPath)}")
+            return newCellItem
 
 def createCellView(parent, viewName, cellPath) -> viewItem:
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
-    viewPath = cellPath.joinpath(viewName + ".json")
-    viewPath.touch()  # create the view file
-    newViewItem = viewItem(viewPath)
-    newViewItem.setData("view", Qt.UserRole + 1)
-    newViewItem.setData(viewPath, Qt.UserRole + 2)
-    items = []
-    if 'schematic' in viewName:
-        items.insert(0, {'cellView': 'schematic'})
-        with open(viewPath, "w") as f:
-            json.dump(items, f, cls=se.schematicEncoder, indent=4)
-        newViewItem.setData('schematic', Qt.UserRole + 3)
-    elif 'symbol' in viewName:
-        items.insert(0, {'cellView': 'symbol'})
-        with open(viewPath, "w") as f:
-            json.dump(items, f, cls=se.symbolEncoder, indent=4)
-        newViewItem.setData('symbol', Qt.UserRole + 3)
+        return None
+    # elif cellPath.joinpath(f'{viewName}.json').exists():
+    #     QMessageBox.warning(parent, "Error", "View exists. Delete cellview first.")
+    #     return None
+    else:
+        viewPath = cellPath.joinpath(f'{viewName}.json')
+        viewPath.touch()  # create the view file
+        newViewItem = viewItem(viewPath)
+        newViewItem.setData("view", Qt.UserRole + 1)
+        newViewItem.setData(viewPath, Qt.UserRole + 2)
+        items = []
+        if 'schematic' in viewName:
+            items.insert(0, {'cellView': 'schematic'})
+            with open(viewPath, "w") as f:
+                json.dump(items, f, cls=se.schematicEncoder, indent=4)
+            newViewItem.setData('schematic', Qt.UserRole + 3)
+        elif 'symbol' in viewName:
+            items.insert(0, {'cellView': 'symbol'})
+            with open(viewPath, "w") as f:
+                json.dump(items, f, cls=se.symbolEncoder, indent=4)
+            newViewItem.setData('symbol', Qt.UserRole + 3)
+        elif 'veriloga' in viewName:
+            items.insert(0, {'cellView': 'veriloga'})
+            items.insert(1, {'filePath': str(parent.importedFileObj)})
+            with open(viewPath, "w") as f:
+                json.dump(items, f, cls=se.schematicEncoder, indent=4)
+            newViewItem.setData('veriloga', Qt.UserRole + 3)
 
-    # cellItem.appendRow(newViewItem)
-    # needs to decide on how to handle the view type
-    print(f"Created {viewName} at {str(viewPath)}")
-    # with open(viewPath, "w") as f: # write an empty json file
-    #     f.writelines('[')
-    #     f.writelines({'type': 'view', 'name': viewName})
-    #     f.writelines(']')
-    return newViewItem
+        # cellItem.appendRow(newViewItem)
+        # needs to decide on how to handle the view type
+        print(f"Created {viewName} at {str(viewPath)}")
+        # with open(viewPath, "w") as f: # write an empty json file
+        #     f.writelines('[')
+        #     f.writelines({'type': 'view', 'name': viewName})
+        #     f.writelines(']')
+        return newViewItem
 
 
 # function for copying a cell
