@@ -107,6 +107,7 @@ def createCell(parent, model, selectedLib, cellName) -> cellItem:
             parent.logger.warning(f"Created {cellName} cell at {str(cellPath)}")
             return newCellItem
 
+
 def createCellView(parent, viewName, cellPath) -> viewItem:
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
@@ -125,22 +126,18 @@ def createCellView(parent, viewName, cellPath) -> viewItem:
             items.insert(0, {'cellView': 'schematic'})
             with open(viewPath, "w") as f:
                 json.dump(items, f, cls=se.schematicEncoder, indent=4)
-            newViewItem.setData('schematic', Qt.UserRole + 3)
         elif 'symbol' in viewName:
             items.insert(0, {'cellView': 'symbol'})
             with open(viewPath, "w") as f:
                 json.dump(items, f, cls=se.symbolEncoder, indent=4)
-            newViewItem.setData('symbol', Qt.UserRole + 3)
         elif 'veriloga' in viewName:
             items.insert(0, {'cellView': 'veriloga'})
             items.insert(1, {'filePath': str(parent.importedFileObj)})
             with open(viewPath, "w") as f:
                 json.dump(items, f, cls=se.schematicEncoder, indent=4)
-            newViewItem.setData('veriloga', Qt.UserRole + 3)
 
-        # cellItem.appendRow(newViewItem)
+        parent.appendRow(newViewItem)
         # needs to decide on how to handle the view type
-        print(f"Created {viewName} at {str(viewPath)}")
         # with open(viewPath, "w") as f: # write an empty json file
         #     f.writelines('[')
         #     f.writelines({'type': 'view', 'name': viewName})

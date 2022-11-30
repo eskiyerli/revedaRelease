@@ -141,6 +141,7 @@ class mainWindow(QMainWindow):
         self.libraryBrowserAction.triggered.connect(self.libraryBrowserClick)
         self.importVerilogaAction.triggered.connect(self.importVerilogaClick)
         self.optionsAction.triggered.connect(self.optionsClick)
+
     # open library browser window
     def libraryBrowserClick(self):
         if self.libraryBrowser is None:
@@ -167,12 +168,11 @@ class mainWindow(QMainWindow):
             selectedLibItemRow = selectedLibItem.row()
             libCellNames = [libraryModel.item(selectedLibItemRow).child(i).cellName for i
                             in range(libraryModel.item(selectedLibItemRow).rowCount())]
-            if dlg.cellNamesCB.currentText() not in libCellNames and \
-                    dlg.cellNamesCB.currentText() !='':  # a new
+            if dlg.cellNamesCB.currentText() not in libCellNames and dlg.cellNamesCB.currentText() != '':  # a new
                 # cell
-                scb.createCell(self,libraryModel, selectedLibItem,
+                scb.createCell(self, libraryModel, selectedLibItem,
                                dlg.cellNamesCB.currentText())
-            i=0
+            i = 0
             while i <= selectedLibItem.rowCount():
                 if selectedLibItem.child(i).cellName == dlg.cellNamesCB.currentText():
                     cellItem = selectedLibItem.child(i)
@@ -181,8 +181,8 @@ class mainWindow(QMainWindow):
             else:
                 cellItem = None
             if cellItem is not None:
-                viewItem = scb.createCellView(self,dlg.vaViewName.text(),cellItem.data(
-                    Qt.UserRole+2))
+                viewItem = scb.createCellView(self, dlg.vaViewName.text(),
+                                              cellItem.data(Qt.UserRole + 2))
 
     def optionsClick(self):
         pass
