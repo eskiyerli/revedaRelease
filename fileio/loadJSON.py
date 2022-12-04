@@ -107,7 +107,7 @@ def createLabelItem(item, gridTuple):
 
 
 def createTextItem(item, gridTuple: (int, int)):
-    start = QPoint(item["start"][0], item["start"][1])
+    start = QPoint(item["st"][0], item["st"][1])
     pen = pens.pen.returnPen(item['pen'])
     text = shp.text(start, pen, item['tc'], gridTuple, item['ff'], item['fs'], item['th'],
                     item['ta'], item['to'])

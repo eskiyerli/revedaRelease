@@ -55,20 +55,27 @@ class cellItem(QStandardItem):
 
 class viewItem(QStandardItem):
     def __init__(self, viewPath: pathlib.Path) -> None:
-        self._viewName = viewPath.stem
-        super().__init__(self.viewName)
+        self.viewPath = viewPath
+        super().__init__(self.viewPath.stem)
         self.setEditable(False)
-        self.setData("view", Qt.UserRole + 1)
+        self.setData('view', Qt.UserRole + 1)
         # set the data to the item to be the path to the view.
-        self.setData(viewPath, Qt.UserRole + 2, )
-        self.setData(self.viewName, Qt.UserRole + 3)
+        self.setData(viewPath, Qt.UserRole + 2 )
 
     def type(self):
-        return QStandardItem.UserType + 2
+        return QStandardItem.UserType + 1
 
     @property
-    def viewName(self):
-        return self._viewName
+    def viewType(self):
+        if 'schematic' in self.viewPath.stem:
+            return 'schematic'
+        elif 'symbol' in self.viewPath.stem:
+            return 'symbol'
+        elif 'veriloga' in self.viewPath.stem:
+            return 'veriloga'
+        else:
+            return None
+
 
 def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     if libraryName.strip() == "":
@@ -108,40 +115,33 @@ def createCell(parent, model, selectedLib, cellName) -> cellItem:
             return newCellItem
 
 
-def createCellView(parent, viewName, cellPath) -> viewItem:
+def createCellView(parent, viewName, cellItem:cellItem) -> viewItem:
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
         return None
-    # elif cellPath.joinpath(f'{viewName}.json').exists():
-    #     QMessageBox.warning(parent, "Error", "View exists. Delete cellview first.")
-    #     return None
+    elif cellItem.data(Qt.UserRole+2).joinpath(f'{viewName}.json').exists():
+        QMessageBox.warning(parent, "Error", "View exists. Delete cellview first.")
+        return None
     else:
-        viewPath = cellPath.joinpath(f'{viewName}.json')
+        viewPath = cellItem.data(Qt.UserRole+2).joinpath(f'{viewName}.json')
         viewPath.touch()  # create the view file
         newViewItem = viewItem(viewPath)
-        newViewItem.setData("view", Qt.UserRole + 1)
-        newViewItem.setData(viewPath, Qt.UserRole + 2)
         items = []
-        if 'schematic' in viewName:
+        if newViewItem.viewType == 'schematic':
             items.insert(0, {'cellView': 'schematic'})
             with open(viewPath, "w") as f:
                 json.dump(items, f, cls=se.schematicEncoder, indent=4)
-        elif 'symbol' in viewName:
+        elif newViewItem.viewType == 'symbol':
             items.insert(0, {'cellView': 'symbol'})
             with open(viewPath, "w") as f:
                 json.dump(items, f, cls=se.symbolEncoder, indent=4)
-        elif 'veriloga' in viewName:
+        elif newViewItem.viewType == 'veriloga':
             items.insert(0, {'cellView': 'veriloga'})
             items.insert(1, {'filePath': str(parent.importedFileObj)})
             with open(viewPath, "w") as f:
                 json.dump(items, f, cls=se.schematicEncoder, indent=4)
-
-        parent.appendRow(newViewItem)
-        # needs to decide on how to handle the view type
-        # with open(viewPath, "w") as f: # write an empty json file
-        #     f.writelines('[')
-        #     f.writelines({'type': 'view', 'name': viewName})
-        #     f.writelines(']')
+        parent.logger.warning(f'Created {viewName} at {str(viewPath)}')
+        cellItem.appendRow(newViewItem)
         return newViewItem
 
 

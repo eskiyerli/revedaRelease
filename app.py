@@ -185,7 +185,9 @@ class mainWindow(QMainWindow):
                                               cellItem.data(Qt.UserRole + 2))
 
     def optionsClick(self):
-        pass
+        dlg = fd.appProperties(self)
+        if dlg.exec() == QDialog.Accepted:
+            self.textEditor = pathlib.Path(dlg.editorPathEdit.text())
 
     def libDictUpdate(self):
         self.libraryDict = self.libraryBrowser.libraryDict

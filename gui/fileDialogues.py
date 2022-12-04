@@ -1,14 +1,14 @@
-from PySide6.QtCore import (Qt, QSize)
+import pathlib
 
+from PySide6.QtCore import (Qt)
+from PySide6.QtGui import (QStandardItemModel)
 from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog,
                                QFormLayout, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout,
                                QPushButton)
-from PySide6.QtGui import (QStandardItemModel)
-import common.shape as shp
-import gui.editorWindows as ed
-import gui.editFunctions as edf
+
 import backend.schBackEnd as scb
-import pathlib
+import common.shape as shp
+import gui.editFunctions as edf
 
 
 class createCellDialog(QDialog):
@@ -30,7 +30,7 @@ class createCellDialog(QDialog):
         self.libNamesCB.currentTextChanged.connect(self.selectLibrary)
         self.layout.addRow(edf.boldLabel("Library:"), self.libNamesCB)
         self.cellCB = QComboBox()
-        libItem = self.getLibItem(self.model,self.libNamesCB.currentText())
+        libItem = self.getLibItem(self.model, self.libNamesCB.currentText())
         self.cellList = [libItem.child(i).cellName for i in range(libItem.rowCount())]
         self.cellCB.addItems(self.cellList)
         self.cellCB.setEditable(True)
@@ -50,8 +50,8 @@ class createCellDialog(QDialog):
 
     @staticmethod
     def getLibItem(libraryModel: QStandardItemModel, libName: str) -> scb.libraryItem:
-        libItem =  [item for item in libraryModel.findItems(libName) if
-                             item.data(Qt.UserRole + 1) == 'library'][0]
+        libItem = [item for item in libraryModel.findItems(libName) if
+                   item.data(Qt.UserRole + 1) == 'library'][0]
         return libItem
 
     @staticmethod
@@ -61,31 +61,33 @@ class createCellDialog(QDialog):
         return cellItem
 
     @staticmethod
-    def getViewItem(cellItem:scb.cellItem, viewNameInp: str) -> scb.viewItem:
+    def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
         viewItem = [cellItem.child(i) for i in range(cellItem.rowCount()) if
                     cellItem.child(i).viewName == viewNameInp][0]
         return viewItem
 
+
 class deleteCellDialog(createCellDialog):
-    def __init__(self,parent,model):
-        super().__init__(parent,model)
+    def __init__(self, parent, model):
+        super().__init__(parent, model)
         self.cellCB.setEditable(False)
         self.setWindowTitle('Delete Cell')
 
 
 class newCellViewDialog(createCellDialog):
     def __init__(self, parent, model):
-        super().__init__(parent,model)
+        super().__init__(parent, model)
         self.cellCB.setEditable(False)
         self.setWindowTitle('Create Cell View')
-        self.viewType = edf.longLineEdit()
+        self.viewType = QComboBox()
         self.viewType.addItems(self.parent.cellViews)
         self.layout.addRow(edf.boldLabel("View Type:"), self.viewType)
         self.viewName = edf.longLineEdit()
-        self.layout.addRow(edf.boldLabel('View Name:'),self.viewName)
+        self.layout.addRow(edf.boldLabel('View Name:'), self.viewName)
         self.layout.setSpacing(10)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
+
 
 class selectCellViewDialog(deleteCellDialog):
     def __init__(self, parent, model):
@@ -95,8 +97,8 @@ class selectCellViewDialog(deleteCellDialog):
         self.cellCB.currentTextChanged.connect(self.cellNameChanged)
         self.viewCB = QComboBox()
         cellItem = self.getCellItem(libItem, self.cellCB.currentText())
-        self.viewCB.addItems([cellItem.child(i).viewName for i in range(
-            cellItem.rowCount())] )
+        self.viewCB.addItems([cellItem.child(i).text() for i in range(
+            cellItem.rowCount())])
         self.viewCB.setCurrentIndex(0)
         self.layout.addRow(edf.boldLabel('View Name:'), self.viewCB)
         self.layout.setSpacing(10)
@@ -105,10 +107,11 @@ class selectCellViewDialog(deleteCellDialog):
 
     def cellNameChanged(self):
         libItem = self.getLibItem(self.model, self.libNamesCB.currentText())
-        cellItem = self.getCellItem(libItem,self.cellCB.currentText())
-        viewList = [cellItem.child(i).viewName for i in range(cellItem.rowCount())]
+        cellItem = self.getCellItem(libItem, self.cellCB.currentText())
+        viewList = [cellItem.child(i).text() for i in range(cellItem.rowCount())]
         self.viewCB.clear()
         self.viewCB.addItems(viewList)
+
 
 class createCellViewDialog(QDialog):
     def __init__(self, parent, model, cellItem):
@@ -198,6 +201,7 @@ class copyCellDialog(QDialog):
         self.selectedLibPath = self.libraryComboBox.itemData(
             self.libraryComboBox.currentIndex(), Qt.UserRole + 2)
 
+
 class copyViewDialog(newCellViewDialog):
     def __init__(self, parent, model):
         super().__init__(parent=parent, model=model)
@@ -205,7 +209,6 @@ class copyViewDialog(newCellViewDialog):
         self.cellComboBox.InsertPolicy = QComboBox.InsertAfterCurrent
         self.viewComboBox.setEditable(True)
         self.viewComboBox.InsertPolicy = QComboBox.InsertAfterCurrent
-
 
 
 class closeLibDialog(QDialog):
@@ -333,8 +336,9 @@ class goDownHierDialogue(QDialog):
         self.setLayout(mainLayout)
         self.show()
 
+
 class importCellDialogue(QDialog):
-    def __init__(self,model,parent):
+    def __init__(self, model, parent):
         super().__init__(parent)
         self._parent = parent
         self.setWindowTitle('Import a Verilog-a File')
@@ -342,12 +346,12 @@ class importCellDialogue(QDialog):
         self.setMinimumSize(500, 200)
         mainLayout = QVBoxLayout()
         fileDialogLayout = QHBoxLayout()
-        fileDialogLayout.addWidget(edf.boldLabel('Select Verilog-A file:'),1)
+        fileDialogLayout.addWidget(edf.boldLabel('Select Verilog-A file:'), 1)
         self.vaFileEdit = edf.longLineEdit()
-        fileDialogLayout.addWidget(self.vaFileEdit,4)
+        fileDialogLayout.addWidget(self.vaFileEdit, 4)
         self.vaFileButton = QPushButton('...')
         self.vaFileButton.clicked.connect(self.onFileButtonClicked)
-        fileDialogLayout.addWidget(self.vaFileButton,1)
+        fileDialogLayout.addWidget(self.vaFileButton, 1)
         mainLayout.addLayout(fileDialogLayout)
         mainLayout.addSpacing(20)
         layout = QFormLayout()
@@ -355,15 +359,15 @@ class importCellDialogue(QDialog):
         self.libNamesCB = QComboBox()
         self.libNamesCB.setModel(self._model)
         self.libNamesCB.currentTextChanged.connect(self.changeCells)
-        layout.addRow(edf.boldLabel('Library:'),self.libNamesCB)
+        layout.addRow(edf.boldLabel('Library:'), self.libNamesCB)
         self.cellNamesCB = QComboBox()
         self.cellNamesCB.setEditable(True)
         initialCellNames = [self._model.item(0).child(i).cellName for i in range(
             self._model.item(0).rowCount())]
         self.cellNamesCB.addItems(initialCellNames)
-        layout.addRow(edf.boldLabel('Cell:'),  self.cellNamesCB)
+        layout.addRow(edf.boldLabel('Cell:'), self.cellNamesCB)
         self.vaViewName = edf.longLineEdit()
-        layout.addRow(edf.boldLabel('Verilog-A view:'),self.vaViewName)
+        layout.addRow(edf.boldLabel('Verilog-A view:'), self.vaViewName)
         mainLayout.addLayout(layout)
         mainLayout.addSpacing(20)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -376,8 +380,9 @@ class importCellDialogue(QDialog):
 
     def changeCells(self):
         selectedLibItemRow = self._model.findItems(self.libNamesCB.currentText())[0].row()
-        libCellNames = [self._model.item(selectedLibItemRow).child(i).cellName for i in range(
-            self._model.item(selectedLibItemRow).rowCount())]
+        libCellNames = [self._model.item(selectedLibItemRow).child(i).cellName for i in
+                        range(
+                            self._model.item(selectedLibItemRow).rowCount())]
         self.cellNamesCB.clear()
         self.cellNamesCB.addItems(libCellNames)
 
@@ -386,3 +391,36 @@ class importCellDialogue(QDialog):
                                                                     'file.')[0]
         if self.vaFileName:
             self.vaFileEdit.setText(self.vaFileName)
+
+
+class appProperties(QDialog):
+    def __init__(self, parent):
+        self.parent = parent
+        super().__init__(parent)
+        self.initUI()
+
+    def initUI(self):
+        self.setMinimumSize(500, 200)
+        self.setWindowTitle('Revolution EDA Options')
+        mainLayout = QVBoxLayout()
+        fileDialogLayout = QHBoxLayout()
+        fileDialogLayout.addWidget(edf.boldLabel('Select Editor Path:'), 1)
+        self.editorPathEdit = edf.longLineEdit()
+        fileDialogLayout.addWidget(self.editorPathEdit, 4)
+        self.editFileButton = QPushButton('...')
+        self.editFileButton.clicked.connect(self.onFileButtonClicked)
+        fileDialogLayout.addWidget(self.editFileButton, 1)
+        mainLayout.addLayout(fileDialogLayout)
+        mainLayout.addSpacing(20)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
+
+    def onFileButtonClicked(self):
+        self.editorPath = QFileDialog.getOpenFileName(self, caption='Select a text '
+                                                                    'editor.')[0]
+        if self.editorPath:
+            self.editorPathEdit.setText(self.editorPath)
