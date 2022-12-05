@@ -56,15 +56,24 @@ class createCellDialog(QDialog):
 
     @staticmethod
     def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> scb.cellItem:
-        cellItem = [libItem.child(i) for i in range(libItem.rowCount()) if
-                    libItem.child(i).cellName == cellNameInp][0]
-        return cellItem
+        cellItems = [libItem.child(i) for i in range(libItem.rowCount()) if
+                    libItem.child(i).cellName == cellNameInp]
+        if cellItems:
+            return cellItems[0]
+        else:
+            return None
 
     @staticmethod
     def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
-        viewItem = [cellItem.child(i) for i in range(cellItem.rowCount()) if
-                    cellItem.child(i).viewName == viewNameInp][0]
-        return viewItem
+        if cellItem is not None:
+            viewItems = [cellItem.child(i) for i in range(cellItem.rowCount()) if
+                        cellItem.child(i).text() == viewNameInp]
+        else:
+            return None
+        if viewItems:
+            return viewItems[0]
+        else:
+            return None
 
 
 class deleteCellDialog(createCellDialog):
@@ -98,8 +107,8 @@ class selectCellViewDialog(deleteCellDialog):
         self.viewCB = QComboBox()
         cellItem = self.getCellItem(libItem, self.cellCB.currentText())
         self.viewCB.addItems([cellItem.child(i).text() for i in range(
-            cellItem.rowCount())])
-        self.viewCB.setCurrentIndex(0)
+            cellItem.rowCount()) ])
+
         self.layout.addRow(edf.boldLabel('View Name:'), self.viewCB)
         self.layout.setSpacing(10)
         self.layout.addWidget(self.buttonBox)
@@ -108,9 +117,13 @@ class selectCellViewDialog(deleteCellDialog):
     def cellNameChanged(self):
         libItem = self.getLibItem(self.model, self.libNamesCB.currentText())
         cellItem = self.getCellItem(libItem, self.cellCB.currentText())
-        viewList = [cellItem.child(i).text() for i in range(cellItem.rowCount())]
+        if cellItem is not None:
+            viewList = [cellItem.child(i).text() for i in range(cellItem.rowCount())]
+        else:
+            viewList = []
         self.viewCB.clear()
         self.viewCB.addItems(viewList)
+
 
 
 class createCellViewDialog(QDialog):

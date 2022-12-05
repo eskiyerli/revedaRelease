@@ -517,14 +517,23 @@ class schematicEditor(editorWindow):
         self.centralW.scene.deleteSelectedItems()
 
     def createInstClick(self, s):
-        revEDAPathObj = pathlib.Path(__file__)
-        revEDADirObj = revEDAPathObj.parent
+
+        # create a designLibrariesView
+        libraryModel = symbolViewsModel(self.libraryDict)
         if self.symbolChooser is None:
-            self.symbolChooser = symbolChooser(self,
-                                               self.centralW.scene)  # create the library browser
+            self.symbolChooser = fd.selectCellViewDialog(self,libraryModel)
             self.symbolChooser.show()
         else:
             self.symbolChooser.raise_()
+        if self.symbolChooser.exec() == QDialog.Accepted:
+            self.centralW.scene.addInstance = True
+            libItem = self.symbolChooser.getLibItem(libraryModel,
+                                            self.symbolChooser.libNamesCB.currentText())
+            cellItem = self.symbolChooser.getCellItem(libItem,
+                                                self.symbolChooser.cellCB.currentText())
+            viewItem = self.symbolChooser.getViewItem(cellItem,
+                                                self.symbolChooser.viewCB.currentText())
+            self.centralW.scene.instanceSymbolFile = viewItem.data(Qt.UserRole +2 )
 
     def createPinClick(self, s):
         createPinDlg = pdlg.createSchematicPinDialog(self)
@@ -3015,6 +3024,61 @@ class libraryPathEditC(QLineEdit):
         self.setMaximumWidth(600)
         self.setFixedWidth(500)
 
+
+class designLibrariesModel(QStandardItemModel):
+    def __init__(self,libraryDict):
+        self.libraryDict = libraryDict
+        super().__init__()
+        self.rootItem = self.invisibleRootItem()
+        for designPath in self.libraryDict.values():
+            self.populateLibrary(designPath)
+
+    def populateLibrary(self, designPath):  # designPath: Path
+        '''
+        Populate library view.
+        '''
+        if designPath.joinpath('reveda.lib').exists():
+            libraryItem = self.addLibraryToModel(designPath)
+            cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
+            for cell in cellList:  # type: str
+                cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
+                viewList = [view.name for view in designPath.joinpath(cell).iterdir() if
+                            view.suffix == ".json"]
+                for view in viewList:
+                    self.addViewToModel(designPath.joinpath(cell, view), cellItem)
+
+    def addLibraryToModel(self, designPath):
+        libraryEntry = scb.libraryItem(designPath)
+        self.rootItem.appendRow(libraryEntry)
+        return libraryEntry
+
+    def addCellToModel(self, cellPath, parentItem):
+        cellEntry = scb.cellItem(cellPath)
+        parentItem.appendRow(cellEntry)
+        return cellEntry
+
+    def addViewToModel(self, viewPath, parentItem):
+        viewEntry = scb.viewItem(viewPath)
+        parentItem.appendRow(viewEntry)
+        return viewEntry
+
+class symbolViewsModel(designLibrariesModel):
+    def __init__(self,libraryDict):
+        super().__init__(libraryDict)
+
+    def populateLibrary(self, designPath):  # designPath: Path
+        '''
+        Populate library view.
+        '''
+        if designPath.joinpath('reveda.lib').exists():
+            libraryItem = self.addLibraryToModel(designPath)
+            cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
+            for cell in cellList:  # type: str
+                cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
+                viewList = [view.name for view in designPath.joinpath(cell).iterdir() if
+                            view.suffix == ".json" and 'symbol' in view.name]
+                for view in viewList:
+                    self.addViewToModel(designPath.joinpath(cell, view), cellItem)
 
 class symbolChooser(libraryBrowser):
     def __init__(self, parent, scene):
