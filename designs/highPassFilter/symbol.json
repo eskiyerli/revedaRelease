@@ -1,0 +1,170 @@
+[
+    {
+        "cellView": "symbol"
+    },
+    {
+        "type": "rect",
+        "rect": [
+            0,
+            0,
+            159,
+            159
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            40,
+            64
+        ],
+        "pen": "labelPen",
+        "nam": "cellName",
+        "def": "[@cellName]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Center",
+        "or": "R0",
+        "use": "Instance",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            160,
+            -32
+        ],
+        "pen": "labelPen",
+        "nam": "instName",
+        "def": "[@instName]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Center",
+        "or": "R0",
+        "use": "Instance",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -60,
+            80
+        ],
+        "end": [
+            0,
+            80
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            -60,
+            80
+        ],
+        "pen": "pinPen",
+        "nam": "INP",
+        "pd": "Input",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            220,
+            80
+        ],
+        "end": [
+            160,
+            80
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            220,
+            80
+        ],
+        "pen": "pinPen",
+        "nam": "OUT",
+        "pd": "Input",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            80,
+            220
+        ],
+        "end": [
+            80,
+            160
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            80,
+            220
+        ],
+        "pen": "pinPen",
+        "nam": "VSS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "attr",
+        "nam": "NLPDeviceFormat",
+        "def": "X[@instName]  [|INP:%] [|VSS:%] [|OUT:%] [@cellName]"
+    }
+]

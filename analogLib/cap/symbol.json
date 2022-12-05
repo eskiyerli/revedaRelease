@@ -1,0 +1,156 @@
+[
+    {
+        "cellView": "symbol"
+    },
+    {
+        "type": "label",
+        "st": [
+            40,
+            -70
+        ],
+        "pen": "labelPen",
+        "nam": "instName",
+        "def": "[@instName]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            0.0,
+            -40.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            0,
+            90
+        ],
+        "pen": "pinPen",
+        "nam": "MINUS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            -20.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            0,
+            -100
+        ],
+        "pen": "pinPen",
+        "nam": "PLUS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -40,
+            -20
+        ],
+        "end": [
+            40,
+            -20
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            20.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -40,
+            -20
+        ],
+        "end": [
+            40,
+            -20
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            0,
+            0
+        ],
+        "end": [
+            0,
+            70
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            0,
+            0
+        ],
+        "end": [
+            0,
+            70
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            -90.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            60,
+            -40
+        ],
+        "pen": "labelPen",
+        "nam": "C",
+        "def": "[@C:C=%:C=1p]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            -20.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "attr",
+        "nam": "NLPDeviceFormat",
+        "def": "C[@instName] [|PLUS:%] [|MINUS:%] [@C:C=%:C=1p]"
+    }
+]

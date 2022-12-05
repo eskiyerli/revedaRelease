@@ -1,0 +1,178 @@
+[
+    {
+        "cellView": "schematic"
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            490,
+            -260
+        ],
+        "end": [
+            490,
+            -240
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "OUT",
+        "ns": false
+    },
+    {
+        "type": "text",
+        "st": [
+            580,
+            -50
+        ],
+        "pen": "textPen",
+        "tc": "TEXTTTTTT\nTTT",
+        "ff": "Cascadia Mono SemiBold",
+        "fs": "Italic",
+        "th": "16",
+        "ta": "Right",
+        "to": "R0"
+    },
+    {
+        "type": "symbolShape",
+        "lib": "analogLib",
+        "cell": "cap",
+        "view": "symbol",
+        "nam": "I1",
+        "ic": 1,
+        "ld": {
+            "C": [
+                "1p",
+                true
+            ],
+            "instName": [
+                "I1",
+                true
+            ]
+        },
+        "loc": [
+            -60.0,
+            -290.0
+        ],
+        "ang": 0.0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -60,
+            -490
+        ],
+        "end": [
+            -60,
+            -380
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "net0",
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            490,
+            -260
+        ],
+        "end": [
+            610,
+            -260
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "OUT",
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -60,
+            -500
+        ],
+        "end": [
+            120,
+            -500
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            10.0
+        ],
+        "nam": "net0",
+        "ns": false
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            0,
+            0
+        ],
+        "pen": "pinPen",
+        "pn": "OUT",
+        "pd": "Output",
+        "pt": "Signal",
+        "loc": [
+            610.0,
+            -260.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "text",
+        "st": [
+            60,
+            0
+        ],
+        "pen": "textPen",
+        "tc": "TEXT123",
+        "ff": "Andale Mono",
+        "fs": "Regular",
+        "th": "14",
+        "ta": "Left",
+        "to": "R0"
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            40,
+            -50
+        ],
+        "pen": "pinPen",
+        "pn": "INP",
+        "pd": "Input",
+        "pt": "Signal",
+        "loc": [
+            350.0,
+            -190.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            400,
+            -240
+        ],
+        "end": [
+            490,
+            -240
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "INP",
+        "ns": false
+    }
+]

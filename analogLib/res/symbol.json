@@ -1,0 +1,137 @@
+[
+    {
+        "cellView": "symbol"
+    },
+    {
+        "type": "line",
+        "st": [
+            -20,
+            30
+        ],
+        "end": [
+            -20,
+            70
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            20.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -20,
+            -90
+        ],
+        "end": [
+            -20,
+            -50
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            20.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "rect",
+        "rect": [
+            -10,
+            -50,
+            9,
+            29
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            60,
+            -40
+        ],
+        "pen": "labelPen",
+        "nam": "R",
+        "def": "[@R:R=%:R=1k]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            -20.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            0,
+            -100
+        ],
+        "pen": "pinPen",
+        "nam": "PLUS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            0,
+            90
+        ],
+        "pen": "pinPen",
+        "nam": "MINUS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            -20.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            40,
+            -70
+        ],
+        "pen": "labelPen",
+        "nam": "instName",
+        "def": "[@instName]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            0.0,
+            -40.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "attr",
+        "nam": "NLPDeviceFormat",
+        "def": "R[@instName] [|PLUS:%] [|MINUS:%] [@R:R=%:R=1k]"
+    }
+]

@@ -1,0 +1,387 @@
+[
+    {
+        "cellView": "symbol"
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            140
+        ],
+        "end": [
+            50,
+            110
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            30
+        ],
+        "end": [
+            50,
+            0
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            40,
+            130
+        ],
+        "end": [
+            50,
+            120
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            40,
+            110
+        ],
+        "end": [
+            50,
+            120
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            120
+        ],
+        "end": [
+            0,
+            120
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            20
+        ],
+        "end": [
+            0,
+            20
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -60,
+            70
+        ],
+        "end": [
+            -20,
+            70
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -20,
+            20
+        ],
+        "end": [
+            -20,
+            120
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            0,
+            10
+        ],
+        "end": [
+            0,
+            130
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            100,
+            10
+        ],
+        "pen": "labelPen",
+        "nam": "instName",
+        "def": "[@instName]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            -40.0,
+            -30.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            70
+        ],
+        "end": [
+            0,
+            70
+        ],
+        "pen": "symbolPen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            -60,
+            70
+        ],
+        "pen": "pinPen",
+        "nam": "G",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            50,
+            0
+        ],
+        "pen": "pinPen",
+        "nam": "D",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            50,
+            140
+        ],
+        "pen": "pinPen",
+        "nam": "S",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            30
+        ],
+        "pen": "labelPen",
+        "nam": "l",
+        "def": "[@l:l=%:l=0.18u]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            -10.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            60
+        ],
+        "pen": "labelPen",
+        "nam": "w",
+        "def": "[@w:w=%:w=2u]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            -10.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            100
+        ],
+        "pen": "labelPen",
+        "nam": "nf",
+        "def": "[@nf:nf=%:nf=2]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            -10.0,
+            -20.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            120
+        ],
+        "pen": "labelPen",
+        "nam": "m",
+        "def": "[@m:m=%:m=1]",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            -10.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            180
+        ],
+        "pen": "labelPen",
+        "nam": "as",
+        "def": "as = asparm()",
+        "txt": null,
+        "val": "?",
+        "vis": true,
+        "lt": "PyLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            -10.0,
+            -40.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            50,
+            70
+        ],
+        "pen": "pinPen",
+        "nam": "B",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "attr",
+        "nam": "modelName",
+        "def": "nmos"
+    },
+    {
+        "type": "attr",
+        "nam": "NLPDeviceFormat",
+        "def": "M[@instName] [|D:%] [|G:%] [|S:%] [|B:%] nmos [@w:w=%:w=2u] [@l:l=%:l=0.18u] [@nf:nf=%:nf=2] as = asparm() [@m:m=%:m=1]"
+    }
+]

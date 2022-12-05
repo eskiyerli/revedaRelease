@@ -1,0 +1,189 @@
+[
+    {
+        "cellView": "schematic"
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            220,
+            -180
+        ],
+        "end": [
+            370,
+            -180
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "OUT",
+        "ns": false
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            0,
+            0
+        ],
+        "pen": "pinPen",
+        "pn": "INP",
+        "pd": "Input",
+        "pt": "Signal",
+        "loc": [
+            -150.0,
+            -180.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            370,
+            -180
+        ],
+        "end": [
+            370,
+            -130
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "OUT",
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -140,
+            -180
+        ],
+        "end": [
+            60,
+            -180
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "INP",
+        "ns": false
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            0,
+            0
+        ],
+        "pen": "pinPen",
+        "pn": "VSS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            -140.0,
+            30.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "symbolShape",
+        "lib": "analogLib",
+        "cell": "cap",
+        "view": "symbol",
+        "nam": "I4",
+        "ic": 4,
+        "ld": {
+            "instName": [
+                "I4",
+                true
+            ],
+            "C": [
+                "1p",
+                true
+            ]
+        },
+        "loc": [
+            370.0,
+            -40.0
+        ],
+        "ang": 0.0
+    },
+    {
+        "type": "symbolShape",
+        "lib": "analogLib",
+        "cell": "res",
+        "view": "symbol",
+        "nam": "I2",
+        "ic": 2,
+        "ld": {
+            "R": [
+                "1k",
+                true
+            ],
+            "instName": [
+                "I2",
+                true
+            ]
+        },
+        "loc": [
+            130.0,
+            -180.0
+        ],
+        "ang": 90.0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -140,
+            30
+        ],
+        "end": [
+            370,
+            30
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "VSS",
+        "ns": false
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            0,
+            0
+        ],
+        "pen": "pinPen",
+        "pn": "OUT",
+        "pd": "Input",
+        "pt": "Signal",
+        "loc": [
+            510.0,
+            -180.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            370,
+            -180
+        ],
+        "end": [
+            520,
+            -180
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": "OUT",
+        "ns": false
+    }
+]

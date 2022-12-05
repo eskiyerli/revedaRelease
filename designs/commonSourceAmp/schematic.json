@@ -1,0 +1,365 @@
+[
+    {
+        "cellView": "schematic"
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            -30,
+            50
+        ],
+        "pen": "pinPen",
+        "pn": "INP",
+        "pd": "Input",
+        "pt": "Signal",
+        "loc": [
+            -340.0,
+            20.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -70,
+            -90
+        ],
+        "end": [
+            -70,
+            -30
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -70,
+            -320
+        ],
+        "end": [
+            -70,
+            -250
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "symbolShape",
+        "lib": "analogLib",
+        "cell": "res",
+        "view": "symbol",
+        "nam": "I5",
+        "ic": 5,
+        "ld": {
+            "R": [
+                "1k",
+                true
+            ],
+            "instName": [
+                "I5",
+                true
+            ]
+        },
+        "loc": [
+            -70.0,
+            -160.0
+        ],
+        "ang": 0.0
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            0,
+            -10
+        ],
+        "pen": "pinPen",
+        "pn": "VDD",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            -380.0,
+            -310.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -10,
+            260
+        ],
+        "end": [
+            -10,
+            260
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -70,
+            260
+        ],
+        "end": [
+            -10,
+            260
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -10,
+            70
+        ],
+        "end": [
+            -10,
+            260
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -300,
+            260
+        ],
+        "end": [
+            -70,
+            260
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            0,
+            0
+        ],
+        "pen": "pinPen",
+        "pn": "OUT",
+        "pd": "Output",
+        "pt": "Signal",
+        "loc": [
+            60.0,
+            -30.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "schematicPin",
+        "st": [
+            0,
+            0
+        ],
+        "pen": "pinPen",
+        "pn": "VSS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            -300.0,
+            260.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -70,
+            140
+        ],
+        "end": [
+            -70,
+            260
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -70,
+            -30
+        ],
+        "end": [
+            -70,
+            0
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -360,
+            70
+        ],
+        "end": [
+            -180,
+            70
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "symbolShape",
+        "lib": "analogLib",
+        "cell": "nmos",
+        "view": "symbol",
+        "nam": "I4",
+        "ic": 4,
+        "ld": {
+            "instName": [
+                "I4",
+                true
+            ],
+            "l": [
+                "0.18u",
+                true
+            ],
+            "w": [
+                "2u",
+                true
+            ],
+            "nf": [
+                "2",
+                true
+            ],
+            "m": [
+                "1",
+                true
+            ],
+            "as": [
+                "560n",
+                true
+            ]
+        },
+        "loc": [
+            -120.0,
+            0.0
+        ],
+        "ang": 0.0
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -380,
+            -320
+        ],
+        "end": [
+            -70,
+            -320
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -70,
+            70
+        ],
+        "end": [
+            -10,
+            70
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -70,
+            -30
+        ],
+        "end": [
+            60,
+            -30
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    },
+    {
+        "type": "schematicNet",
+        "st": [
+            -10,
+            260
+        ],
+        "end": [
+            -10,
+            260
+        ],
+        "pen": "wirePen",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "nam": null,
+        "ns": false
+    }
+]
