@@ -1,4 +1,3 @@
-# revedaRelease
-This repository is for (pre-)release versions of the Revolution EDA.
+# Revolution EDA Schematic/Symbol Editors
+## Introduction
 
-More documentation will be added shortly. 
