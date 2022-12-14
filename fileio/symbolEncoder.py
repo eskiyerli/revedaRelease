@@ -13,8 +13,8 @@ from PySide6.QtGui import (QAction, QKeySequence, QColor, QFont, QIcon,
 
 class symbolAttribute(object):
     def __init__(self, name: str, definition: str):
-        self.name = name
-        self.definition = definition
+        self._name = name
+        self._definition = definition
 
     def __str__(self):
         return f'{self.name}: {self.definition}'
@@ -22,6 +22,23 @@ class symbolAttribute(object):
     def __repr__(self):
         return f'{self.name}:  {self.definition}'
 
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self,value):
+        assert isinstance(value,str)
+        self._name = value
+
+    @property
+    def definition(self):
+        return self._definition
+
+    @definition.setter
+    def definition(self,value):
+        assert isinstance(value,str)
+        self._definition = value
 
 class symbolEncoder(json.JSONEncoder):
     def default(self, item):
