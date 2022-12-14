@@ -1,3 +1,25 @@
+
+#   “Commons Clause” License Condition v1.0
+#  #
+#   The Software is provided to you by the Licensor under the License, as defined
+#   below, subject to the following condition.
+#  #
+#   Without limiting other conditions in the License, the grant of rights under the
+#   License will not include, and the License does not grant to you, the right to
+#   Sell the Software.
+#  #
+#   For purposes of the foregoing, “Sell” means practicing any or all of the rights
+#   granted to you under the License to provide to third parties, for a fee or other
+#   consideration (including without limitation fees for hosting or consulting/
+#   support services related to the Software), a product or service whose value
+#   derives, entirely or substantially, from the functionality of the Software. Any
+#   license notice or attribution required by the License must also include this
+#   Commons Clause License Condition notice.
+#  #
+#   Software: Revolution EDA
+#   License: Mozilla Public License 2.0
+#   Licensor: Revolution Semiconductor (Registered in the Netherlands)
+
 # properties dialogues for various symbol items
 
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
@@ -543,21 +565,17 @@ class symbolNameDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
 class symbolCreateDialog(QDialog):
-    def __init__(self, parent, inputPins: list, outputPins: list,
-                 inoutPins: list):
+    def __init__(self, parent, inputPinNames: list, outputPinNames: list,
+                 inoutPinNames: list):
         super().__init__(parent)
         self.parent = parent
-        self.inputPinNames = [pinItem.pinName for pinItem in inputPins]
-        self.outputPinNames = [pinItem.pinName for pinItem in outputPins]
-        self.inoutPinNames = [pinItem.pinName for pinItem in inoutPins]
+        self.inputPinNames = inputPinNames
+        self.outputPinNames = outputPinNames
+        self.inoutPinNames = inoutPinNames
         self.setWindowTitle("Create Symbol")
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.mainLayout = QVBoxLayout()
-        self.cellNameLayout = QHBoxLayout()
-        self.libNameView = QLineEdit()
-        self.libNameView.setPlaceholderText(self.parent.libName)
-        self.libNameView.setReadOnly(True)
 
         self.fLayout = QFormLayout()
         self.topPinsEdit = edf.longLineEdit()
@@ -579,11 +597,11 @@ class symbolCreateDialog(QDialog):
         self.mainLayout.addSpacing(20)
         self.geomLayout = QFormLayout()
         self.stubLengthEdit = QLineEdit()
-        self.stubLengthEdit.setText('20')
+        self.stubLengthEdit.setText('60')
         self.stubLengthEdit.setToolTip('Enter stub lengths')
         self.geomLayout.addRow(edf.boldLabel("Stub Length:"), self.stubLengthEdit)
         self.pinDistanceEdit = QLineEdit()
-        self.pinDistanceEdit.setText('40')
+        self.pinDistanceEdit.setText('80')
         self.pinDistanceEdit.setToolTip('Enter pin spacing')
         self.geomLayout.addRow(edf.boldLabel("Pin spacing:"), self.pinDistanceEdit)
         self.mainLayout.addLayout(self.geomLayout)
@@ -594,6 +612,7 @@ class symbolCreateDialog(QDialog):
         self.mainLayout.addWidget(self.buttonBox)
         self.setLayout(self.mainLayout)
         self.show()
+
 
 class noteTextEdit(QDialog):
     '''
