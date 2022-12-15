@@ -1,7 +1,8 @@
 *.png
 *.pyc*
 *.zip
-*.yaml
 *.json
+*.spec
+*.log
 icons/
 

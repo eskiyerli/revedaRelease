@@ -98,6 +98,10 @@ class viewItem(QStandardItem):
         else:
             return None
 
+    @property
+    def viewName(self):
+        return self.viewPath.stem
+
 
 def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     if libraryName.strip() == "":
