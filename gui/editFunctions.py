@@ -1,4 +1,5 @@
 
+
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -20,10 +21,23 @@
 #   License: Mozilla Public License 2.0
 #   Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
-# cellview class
+from PySide6.QtCore import (Qt, )
+from PySide6.QtWidgets import (QLineEdit, QLabel, QWidget)
 
-class cellview:
-    def __init__(self,library, cell, view):
-        self.library = library
-        self.cell = cell
-        self.view = view
+class shortLineEdit(QLineEdit):
+    def __init__(self):
+        super().__init__(None)
+        self.setMaximumWidth(80)
+
+
+class boldLabel(QLabel):
+    def __init__(self, text: str, parent: QWidget = None):
+        super().__init__(text, parent)
+        self.setTextFormat(Qt.RichText)
+        self.setText("<b>" + text + "</b>")
+
+
+class longLineEdit(QLineEdit):
+    def __init__(self):
+        super().__init__(None)
+        self.setMaximumWidth(500)

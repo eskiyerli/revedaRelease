@@ -20,10 +20,8 @@
 #   License: Mozilla Public License 2.0
 #   Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
-# cellview class
+from PySide6.QtGui import (QFont, QFontMetrics, QFontDatabase)
 
-class cellview:
-    def __init__(self,library, cell, view):
-        self.library = library
-        self.cell = cell
-        self.view = view
+class font(QFont):
+    def __init__(self,fontName):
+        self._fontName = fontName
