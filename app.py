@@ -1,4 +1,3 @@
-
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -164,31 +163,32 @@ class mainWindow(QMainWindow):
             # create libBrowser if it does not exist, but do not show it
             self.libraryBrowser = edw.libraryBrowser(self)
         libraryModel = self.libraryBrowser.libBrowserCont.designView.libraryModel
-        dlg = fd.importCellDialogue(libraryModel, self)
-        if dlg.exec() == QDialog.Accepted:
-            self.importedFileObj = pathlib.Path(dlg.vaFileEdit.text())
+        importDlg = fd.importCellDialogue(libraryModel, self)
+        importDlg.vaViewName.setText('veriloga')
+        if importDlg.exec() == QDialog.Accepted:
+            self.importedFileObj = pathlib.Path(importDlg.vaFileEdit.text())
             importedVaObj = hdl.verilogaC(self.importedFileObj)
             libItem = fd.createCellDialog.getLibItem(libraryModel,
-                                                     dlg.libNamesCB.currentText())
+                                                     importDlg.libNamesCB.currentText())
 
             # selectedLibName = dlg.libNamesCB.currentText()
             # selectedLibItem = libraryModel.findItems(selectedLibName)[0]
             libItemRow = libItem.row()
-            libCellNames = [libraryModel.item(libItemRow).child(i).cellName for i
-                            in range(libraryModel.item(libItemRow).rowCount())]
-            cellName = dlg.cellNamesCB.currentText().strip()
+            libCellNames = [libraryModel.item(libItemRow).child(i).cellName for i in
+                            range(libraryModel.item(libItemRow).rowCount())]
+            cellName = importDlg.cellNamesCB.currentText().strip()
             if cellName not in libCellNames and cellName != '':
                 scb.createCell(self, libraryModel, libItem, cellName)
             cellItem = fd.createCellDialog.getCellItem(libItem, cellName)
-            verilogaViewItem = scb.createCellView(self, 'veriloga', cellItem)
+            verilogaViewItem = scb.createCellView(self, importDlg.vaViewName.text(),
+                                                  cellItem)
             symbolViewItem = scb.createCellView(self, 'symbol', cellItem)
             symbolWindow = edw.symbolEditor(symbolViewItem.data(Qt.UserRole + 2),
                                             self.libraryDict,
                                             self.libraryBrowser.libBrowserCont.designView)
 
             dlg = pdlg.symbolCreateDialog(self, importedVaObj.inPins,
-                                          importedVaObj.outPins,
-                                          importedVaObj.inoutPins)
+                                          importedVaObj.outPins, importedVaObj.inoutPins)
             dlg.leftPinsEdit.setText(','.join(importedVaObj.inPins))
             dlg.rightPinsEdit.setText(','.join(importedVaObj.outPins))
             dlg.topPinsEdit.setText(','.join(importedVaObj.inoutPins))
@@ -222,49 +222,40 @@ class mainWindow(QMainWindow):
                                      symbolScene.gridTuple)
                 symbolScene.labelDraw(QPoint(int(0.25 * rectXDim), int(0.4 * rectYDim)),
                                       labelPen, '[@cellName]', symbolScene.gridTuple,
-                                      "NLPLabel",
-                                      "12", "Center", "R0", "Instance")
+                                      "NLPLabel", "12", "Center", "R0", "Instance")
                 symbolScene.labelDraw(QPoint(int(rectXDim), int(-0.2 * rectYDim)),
-                                      labelPen,
-                                      '[@instName]', symbolScene.gridTuple, "NLPLabel",
-                                      "12",
-                                      "Center",
-                                      "R0", "Instance")
-                vaFileLabel = symbolScene.labelDraw(QPoint(int(0.25 * rectXDim),
-                                        int(0.6 * rectYDim)), labelPen,
-                                        f'[@vaFile:%:{str(self.importedFileObj)}]',
-                                        symbolScene.gridTuple, "NLPLabel", "12", "Center",
-                                        "R0", "Instance")
+                                      labelPen, '[@instName]', symbolScene.gridTuple,
+                                      "NLPLabel", "12", "Center", "R0", "Instance")
+                vaFileLabel = symbolScene.labelDraw(
+                    QPoint(int(0.25 * rectXDim), int(0.6 * rectYDim)), labelPen,
+                    f'[@vaFile:%:{str(self.importedFileObj)}]', symbolScene.gridTuple,
+                    "NLPLabel", "12", "Center", "R0", "Instance")
                 vaFileLabel.labelVisible = False
-                vaModuleLabel = symbolScene.labelDraw(QPoint(int(0.25 * rectXDim),
-                                    int(0.8 * rectYDim)),labelPen,
-                                    f'[@vaModule:%:{importedVaObj.vaModule}]',
-                                    symbolScene.gridTuple, "NLPLabel", "12", "Center",
-                                    "R0", "Instance")
+                vaModuleLabel = symbolScene.labelDraw(
+                    QPoint(int(0.25 * rectXDim), int(0.8 * rectYDim)), labelPen,
+                    f'[@vaModule:%:{importedVaObj.vaModule}]', symbolScene.gridTuple,
+                    "NLPLabel", "12", "Center", "R0", "Instance")
                 vaModuleLabel.labelVisible = False
-                vaModelLabel = symbolScene.labelDraw(QPoint(int(0.25 * rectXDim),
-                                     int(1 * rectYDim)), labelPen,
-                                    f'[@vaModel:%:{importedVaObj.vaModule}Model]',
-                                    symbolScene.gridTuple, "NLPLabel","12", "Center",
-                                    "R0", "Instance")
+                vaModelLabel = symbolScene.labelDraw(
+                    QPoint(int(0.25 * rectXDim), int(1 * rectYDim)), labelPen,
+                    f'[@vaModel:%:{importedVaObj.vaModule}Model]', symbolScene.gridTuple,
+                    "NLPLabel", "12", "Center", "R0", "Instance")
                 vaModelLabel.labelVisible = False
                 i = 0
                 instParamNum = len(importedVaObj.instanceParams)
-                for key,value in importedVaObj.instanceParams.items():
-                    symbolScene.labelDraw(QPoint(int(rectXDim),
-                                     int(i*0.2*rectYDim/instParamNum)), labelPen,
-                                    f'[@{key}:%:{value}]',
-                                    symbolScene.gridTuple, "NLPLabel","12", "Center",
-                                    "R0", "Instance")
+                for key, value in importedVaObj.instanceParams.items():
+                    symbolScene.labelDraw(
+                        QPoint(int(rectXDim), int(i * 0.2 * rectYDim / instParamNum)),
+                        labelPen, f'[@{key}:{key}=%:{key}={value}]',
+                        symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0",
+                        "Instance")
 
                 leftPinLocs = [QPoint(-stubLength, (i + 1) * pinDistance) for i in
                                range(len(leftPinNames))]
                 rightPinLocs = [QPoint(rectXDim + stubLength, (i + 1) * pinDistance) for i
-                                in
-                                range(len(rightPinNames))]
+                                in range(len(rightPinNames))]
                 bottomPinLocs = [QPoint((i + 1) * pinDistance, rectYDim + stubLength) for
-                                 i in
-                                 range(len(bottomPinNames))]
+                                 i in range(len(bottomPinNames))]
                 topPinLocs = [QPoint((i + 1) * pinDistance, - stubLength) for i in
                               range(len(topPinNames))]
                 for i, pinName in enumerate(leftPinNames):
@@ -286,13 +277,20 @@ class mainWindow(QMainWindow):
                     symbolScene.lineDraw(bottomPinLocs[i],
                                          bottomPinLocs[i] + QPoint(0, -stubLength),
                                          symbolScene.symbolPen, symbolScene.gridTuple)
-                    symbolScene.addItem(shp.pin(topPinLocs[i], pinPen, pinName))
+                    symbolScene.addItem(shp.pin(bottomPinLocs[i], pinPen, pinName))
                 symbolScene.attributeList = list()  # empty attribute list
-                for key,value in importedVaObj.modelParams.items():
-                    symbolScene.attributeList.append(se.symbolAttribute(key,value))
-                print(importedVaObj.modelParams)
-                print(importedVaObj.instanceParams)
+                for key, value in importedVaObj.modelParams.items():
+                    symbolScene.attributeList.append(se.symbolAttribute(key, value))
+                pinsString = ' '.join([f'[|{pin}:%]' for pin in importedVaObj.pins])
+                instParamString = ' '.join(
+                    [f'[@{key}:{key}=%:{key}={item}]' for key, item in
+                     importedVaObj.instanceParams.items()])
+                symbolScene.attributeList.append(se.symbolAttribute('NLPDeviceFormat',
+                                                                    f'Y{importedVaObj.vaModule} [@instName] {pinsString} '
+                                                                    f'{vaModelLabel.labelDefinition} {instParamString}'))
                 symbolWindow.show()
+                symbolWindow.libraryView.openViews[f'{libItem.libraryName}_{cellName}_' \
+                                                   f'{symbolViewItem.viewName}'] = symbolWindow
 
     def optionsClick(self):
         dlg = fd.appProperties(self)
