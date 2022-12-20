@@ -1,4 +1,3 @@
-
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -24,10 +23,11 @@
 
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QDialogButtonBox, QLineEdit, QLabel, QComboBox,
-                               QGroupBox, QRadioButton, QGridLayout, QTextEdit)
+                               QGroupBox, QRadioButton, QGridLayout, QTextEdit,
+                               QPushButton, QWidget, QFileDialog, QMenu )
 
 from PySide6.QtGui import (QFontDatabase,)
-
+from PySide6.QtCore import (QDir,)
 import common.net as net
 import common.shape as shp
 import gui.editFunctions as edf
@@ -684,3 +684,138 @@ class noteTextEditProperties(noteTextEdit):
         self.textAlignmCB.setCurrentText(self.note.textAlignment)
         self.textOrientCB.setCurrentText(self.note.textOrient)
 
+
+# library path editor dialogue
+class libraryPathEditorDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.libraryEditNameList = list()
+        self.libraryEditPathList = list()
+        self.libraryDict = self.parent.libraryDict
+        self.logger = self.parent.parent.logger
+        self.setWindowTitle("Library Path Editor")
+        self.mainLayout = QVBoxLayout()
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setColumnStretch(0,1)
+        self.gridLayout.setColumnStretch(1,4)
+        self.gridLayout.setSpacing(5)
+        self.gridLayout.addWidget(QLabel("Library Name"),0,0)
+        self.gridLayout.addWidget(QLabel("Library Path"),0,1)
+        for i, key in enumerate(self.libraryDict.keys()):
+            self.libraryEditNameList.append(libraryNameEditC(self))
+            self.gridLayout.addWidget(self.libraryEditNameList[-1],i+1,0)
+            self.libraryEditNameList[-1].setText(key)
+            self.libraryEditPathList.append(libraryPathEditC(self))
+            self.libraryEditNameList[-1].pathEditField = self.libraryEditPathList[-1]
+            self.gridLayout.addWidget(self.libraryEditPathList[-1],i+1,1)
+            self.libraryEditPathList[-1].setText(str(self.libraryDict[key]))
+            self.libraryEditPathList[-1].textChanged.connect(self.addRow)
+        libraryCount = len(self.libraryDict)
+        self.libraryEditNameList.append(libraryNameEditC(self))
+        self.gridLayout.addWidget(self.libraryEditNameList[-1], libraryCount+1,0)
+        self.libraryEditPathList.append(libraryPathEditC(self))
+        self.libraryEditNameList[-1].pathEditField = self.libraryEditPathList[-1]
+        self.gridLayout.addWidget(self.libraryEditPathList[-1],libraryCount+1,1)
+        self.libraryEditPathList[-1].textChanged.connect(self.addRow)
+        self.mainLayout.addLayout(self.gridLayout)
+        # fileDialogLayout = QHBoxLayout()
+        # fileDialogLayout.addWidget(edf.boldLabel('Select Include File:'), 1)
+        # includeFiles = list()
+        # includeFiles.append(edf.longLineEdit())
+        # fileDialogLayout.addWidget(includeFiles[0], 4)
+        # mainLayout.addLayout(fileDialogLayout)
+        # includeFileButton= QPushButton('...')
+        # # includeFileButton.clicked.connect(self.onFileButtonClicked)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.show()
+
+    def addRow(self):
+        rowCount = len(self.libraryEditNameList)
+        if self.libraryEditPathList[-1].text() != "":
+            self.libraryEditNameList.append(libraryNameEditC(self))
+            self.gridLayout.addWidget(self.libraryEditNameList[-1],rowCount+1,0)
+            self.libraryEditPathList.append(libraryPathEditC(self))
+            self.gridLayout.addWidget(self.libraryEditPathList[-1],rowCount+1,1)
+            self.libraryEditNameList[-1].pathEditField = self.libraryEditPathList[-1]
+            self.libraryEditPathList[-1].textChanged.connect(self.addRow)
+
+#
+# class libraryEditRow(QWidget):
+#     def __init__(self, parent):
+#         super().__init__(parent)
+#         self.parent = parent
+#         self.init_UI()
+#
+#     def init_UI(self):
+#         self.layout = QHBoxLayout()
+#         self.layout.setSpacing(10)
+#         self.libraryNameEdit = libraryNameEditC(self)
+#         self.libraryPathEdit = libraryPathEditC(self)
+#         self.layout.addWidget(self.libraryNameEdit)
+#         self.layout.addWidget(self.libraryPathEdit)
+#         self.setLayout(self.layout)
+
+
+class libraryNameEditC(QLineEdit):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.fileDialog = QFileDialog()
+        self.fileDialog.setFileMode(QFileDialog.Directory)
+        self.logger = self.parent.parent.parent.logger
+        self._pathEditField = None
+        self.init_UI()
+
+    def init_UI(self):
+        self.setPlaceholderText("Library Name")
+        self.setMaximumWidth(250)
+        self.setFixedWidth(200)
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        menu.addAction("Remove", self.removeRow)
+        menu.addAction("Add Library...", self.addLibrary)
+        menu.addAction("Library Info...", self.libInfo)
+        menu.exec(event.globalPos())
+
+    def addLibrary(self):
+        self.fileDialog.exec()
+        if self.fileDialog.selectedFiles():
+            self.selectedDirectory = QDir(self.fileDialog.selectedFiles()[0])
+            self.setText(self.selectedDirectory.dirName())
+            self.pathEditField.setText(self.selectedDirectory.absolutePath())
+
+    def removeRow(self):
+        self.deleteLater()
+        self.pathEditField.deleteLater()
+        self.parent.libraryEditNameList.remove(self)
+        self.parent.libraryEditPathList.remove(self.pathEditField)
+
+    def libInfo(self):
+        self.logger.warning('Not yet implemented.')
+
+    @property 
+    def pathEditField(self):
+        return self._pathEditField
+
+    @pathEditField.setter
+    def pathEditField(self, value):
+        assert isinstance(value, libraryPathEditC)
+        self._pathEditField = value
+
+class libraryPathEditC(QLineEdit):
+    def __init__(self, parent):
+        self.parent = parent
+        super().__init__(parent)
+        self.init_UI()
+
+    def init_UI(self):
+        self.setPlaceholderText("Library Path                ")
+        self.setMaximumWidth(600)
+        self.setFixedWidth(500)

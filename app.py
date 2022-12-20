@@ -69,21 +69,19 @@ class mainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
         self.app = app
-        # revEDAPathObj = Path(__file__)
-        revEDADirObj = pathlib.Path.cwd().parent
-        # library definition file path
-        libraryPathObj = revEDADirObj.joinpath("library.yaml")
-        try:
-            with libraryPathObj.open(mode="r") as f:
-                # create a dictionary of library (directory) names and paths
-                self.libraryDict = scb.readLibDefFile(f)
-        except IOError:
-            print(f"Cannot find {str(libraryPathObj)} file.")
-            self.libraryDict = {}
+
+        self.textEditorPath = None
         # this list is the list of usable cellviews.i
-        self.cellViews = ["schematic", "symbol", "layout", "veriloga"]
+        self.cellViews = ["schematic", "symbol", "layout", "veriloga", "spice"]
         self.init_UI()
-        # Create a custom logger
+        # logger definition
+        self.logger_def()
+        # revEDAPathObj = Path(__file__)
+        # library definition file path
+        self.libraryPathObj = pathlib.Path.cwd().joinpath('library.json')
+        self.libraryDict = scb.readLibDefFile(self.libraryPathObj,self.logger)
+
+    def logger_def(self):
         self.logger = logging.getLogger(__name__)
         c_handler = logging.StreamHandler(stream=self.centralW.console)
         c_handler.setLevel(logging.WARNING)
@@ -228,18 +226,18 @@ class mainWindow(QMainWindow):
                                       "NLPLabel", "12", "Center", "R0", "Instance")
                 vaFileLabel = symbolScene.labelDraw(
                     QPoint(int(0.25 * rectXDim), int(0.6 * rectYDim)), labelPen,
-                    f'[@vaFile:%:{str(self.importedFileObj)}]', symbolScene.gridTuple,
-                    "NLPLabel", "12", "Center", "R0", "Instance")
+                    f'[@vaFile:vaFile=%:vaFile={str(self.importedFileObj)}]',
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance")
                 vaFileLabel.labelVisible = False
                 vaModuleLabel = symbolScene.labelDraw(
                     QPoint(int(0.25 * rectXDim), int(0.8 * rectYDim)), labelPen,
-                    f'[@vaModule:%:{importedVaObj.vaModule}]', symbolScene.gridTuple,
-                    "NLPLabel", "12", "Center", "R0", "Instance")
+                    f'[@vaModule:vaModule=%:vaModule={importedVaObj.vaModule}]',
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance")
                 vaModuleLabel.labelVisible = False
                 vaModelLabel = symbolScene.labelDraw(
                     QPoint(int(0.25 * rectXDim), int(1 * rectYDim)), labelPen,
-                    f'[@vaModel:%:{importedVaObj.vaModule}Model]', symbolScene.gridTuple,
-                    "NLPLabel", "12", "Center", "R0", "Instance")
+                    f'[@vaModel:vaModel=%:vaModel={importedVaObj.vaModule}Model]',
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance")
                 vaModelLabel.labelVisible = False
                 i = 0
                 instParamNum = len(importedVaObj.instanceParams)
@@ -281,6 +279,8 @@ class mainWindow(QMainWindow):
                 symbolScene.attributeList = list()  # empty attribute list
                 for key, value in importedVaObj.modelParams.items():
                     symbolScene.attributeList.append(se.symbolAttribute(key, value))
+                for key, value in importedVaObj.modelParams.items():
+                    symbolScene.attributeList.append(se.symbolAttribute(key, value))
                 pinsString = ' '.join([f'[|{pin}:%]' for pin in importedVaObj.pins])
                 instParamString = ' '.join(
                     [f'[@{key}:{key}=%:{key}={item}]' for key, item in
@@ -294,8 +294,10 @@ class mainWindow(QMainWindow):
 
     def optionsClick(self):
         dlg = fd.appProperties(self)
+        if self.textEditorPath:
+            dlg.editorPathEdit.setText(self.textEditorPath)
         if dlg.exec() == QDialog.Accepted:
-            self.textEditor = pathlib.Path(dlg.editorPathEdit.text())
+            self.textEditorPath = pathlib.Path(dlg.editorPathEdit.text())
 
     def libDictUpdate(self):
         self.libraryDict = self.libraryBrowser.libraryDict

@@ -28,8 +28,7 @@ from pathlib import Path
 from PySide6.QtCore import (Qt, )
 from PySide6.QtGui import (QStandardItem, )
 from PySide6.QtWidgets import (QMessageBox, )
-from ruamel.yaml import YAML
-
+# from ruamel.yaml import YAML
 import json
 import fileio.symbolEncoder as se
 
@@ -224,42 +223,34 @@ def renameCell(parent, oldCell, newName) -> bool:
         return True
 
 
-def writeLibDefFile(libPathDict, libFilePath: pathlib.Path, logger) -> None:
-    yaml = YAML()
-    yaml.explicit_start = True
-    yaml.default_flow_style = False
-    libDefDict = {}
-    for key, value in libPathDict.items():
-        libDefDict[key] = str(value)
+def writeLibDefFile(libPathDict:dict, libFilePath: pathlib.Path, logger) -> None:
+
+    # yaml = YAML()
+    # yaml.explicit_start = True
+    # yaml.default_flow_style = False
+    libTempDict = dict(zip(libPathDict.keys(),map(str,libPathDict.values())))
     try:
         with libFilePath.open(mode="w") as f:
-            yaml.dump(libDefDict, libFilePath)
-        logger.warning('writing library definition file.')
+            json.dump({'libdefs': libTempDict},f, indent=4)
+    #         yaml.dump(libDefDict, libFilePath)
+    #     logger.warning('writing library definition file.')
     except IOError:
         logger.error(f"Cannot save library definitions in {libFilePath}")
 
 
-def readLibDefFile(libPath):
-    yaml = YAML()
-    yaml.explicit_start = True
-    yaml.default_flow_style = False
-    data = list(yaml.load_all(libPath))
-    libraryDict = {}  # empty dictionary
-    for key, value in data[0].items():
-        libraryDict[key] = Path(value)
+def readLibDefFile(libPath:Path, logger):
+    libraryDict = dict()
+    try:
+        with libPath.open(mode='r') as f:
+            data = json.load(f)
+    except IOError:
+        logger.warning(f'No {str(libPath)} is found.')
+    if data.get('libdefs') is not None:
+        for key, value in data['libdefs'].items():
+            libraryDict[key] = Path(value)
+    elif data.get('include') is not None:
+        for item in data.get('include'):
+            libraryDict.update(readLibDefFile(Path(item),logger))
     return libraryDict
 
-    # def decodeSymbol(item):
-    #     print(type(item))
-    #
-    #
-    # def decodeLabel(label: shp.label):
-    #     assert isinstance(label, shp.label)
-    #     label.labelDefs()
 
-
-# def createSubcktHeaderLine(symbolItem: shp.symbolShape):
-#     """
-#     create the subckt definition line
-#     """
-#     nlpDeviceFormatLine = symbolItem.attr["NLPDeviceFormat"][1].strip()
