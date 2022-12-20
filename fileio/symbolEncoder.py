@@ -1,4 +1,3 @@
-
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -21,16 +20,9 @@
 #   Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
 import json
-from collections import namedtuple
-import common.shape as shp
-import common.net as net
 
-from PySide6.QtCore import (QDir, QLine, QRect, QRectF, QPoint, QPointF,
-                            QSize, )
-from PySide6.QtGui import (QAction, QKeySequence, QColor, QFont, QIcon,
-                           QPainter, QPen, QBrush, QFontMetrics,
-                           QStandardItemModel, QTransform, QCursor,
-                           QUndoCommand, QUndoStack, )
+import common.net as net
+import common.shape as shp
 
 
 class symbolAttribute(object):
@@ -49,8 +41,8 @@ class symbolAttribute(object):
         return self._name
 
     @name.setter
-    def name(self,value):
-        assert isinstance(value,str)
+    def name(self, value):
+        assert isinstance(value, str)
         self._name = value
 
     @property
@@ -58,16 +50,17 @@ class symbolAttribute(object):
         return self._definition
 
     @definition.setter
-    def definition(self,value):
-        assert isinstance(value,str)
+    def definition(self, value):
+        assert isinstance(value, str)
         self._definition = value
+
 
 class symbolEncoder(json.JSONEncoder):
     def default(self, item):
         if isinstance(item, shp.rectangle):
             itemDict = {"type": "rect",
                         "rect": item.rect.getCoords(),
-                        "pen" : item.pen.pname,
+                        "pen": item.pen.pname,
                         "loc": (item.scenePos() - item.scene().origin).toTuple(),
                         "ang": item.angle, }
             return itemDict
@@ -97,7 +90,7 @@ class symbolEncoder(json.JSONEncoder):
                         "loc": (item.scenePos() - item.scene().origin).toTuple(),
                         "ang": item.angle, }
             return itemDict
-        elif isinstance(item,shp.text):
+        elif isinstance(item, shp.text):
             itemDict = {"type": "text",
                         "st": item.start.toTuple(),
                         "pen": item.pen.pname,
@@ -117,15 +110,15 @@ class symbolEncoder(json.JSONEncoder):
                         "def": item.labelDefinition,
                         # label as entered
                         "txt": item.labelText,  # shown label
-                        "val": item.labelValue,     # label value
-                        "vis": item.labelVisible,     # label visibility
+                        "val": item.labelValue,  # label value
+                        "vis": item.labelVisible,  # label visibility
                         "lt": item.labelType,
                         "ht": item.labelHeight,
                         "al": item.labelAlign,
                         "or": item.labelOrient,
                         "use": item.labelUse,
                         "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                        "ang": item.angle,}
+                        "ang": item.angle, }
             return itemDict
         elif isinstance(item, symbolAttribute):
             itemDict = {"type": "attr",
@@ -171,7 +164,7 @@ class schematicEncoder(json.JSONEncoder):
                         "loc": (item.scenePos() - item.scene().origin).toTuple(),
                         "ang": item.angle, }
             return itemDict
-        elif isinstance(item,shp.text):
+        elif isinstance(item, shp.text):
             itemDict = {"type": "text",
                         "st": item.start.toTuple(),
                         "pen": item.pen.pname,

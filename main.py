@@ -48,5 +48,4 @@ Main file for RevEDA editors.
 if __name__ == "__main__":
     import sys
     import app
-    print(__name__)
     sys.exit(app.run())
