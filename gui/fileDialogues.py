@@ -261,7 +261,7 @@ class closeLibDialog(QDialog):
         formLayout = QFormLayout()
         self.libNamesCB = QComboBox()
         self.libNamesCB.addItems(self.libraryDict.keys())
-        formLayout.addRow(QLabel('Select Library', self), self.libNamesCB)
+        formLayout.addRow(edf.boldLabel('Select Library', self), self.libNamesCB)
         layout.addLayout(formLayout)
         layout.addSpacing(40)
         layout.addWidget(self.buttonBox)
@@ -307,8 +307,9 @@ class deleteSymbolDialog(QDialog):
 
 
 class netlistExportDialogue(QDialog):
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, parent,*args):
+        super().__init__(parent, *args)
+        self.parent = parent
         self.setWindowTitle(f'Export Netlist?')
         self.setMinimumSize(500, 100)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -317,6 +318,15 @@ class netlistExportDialogue(QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
         self.mainLayout = QVBoxLayout()
+        self.mainLayout.addStretch(2)
+        self.formLayout = QFormLayout()
+        self.switchViewEdit = edf.longLineEdit()
+        self.switchViewEdit.setText((', ').join(self.parent.switchViewList))
+        self.formLayout.addRow(edf.boldLabel('Switch View List:'),self.switchViewEdit)
+        self.stopViewEdit = edf.longLineEdit()
+        self.stopViewEdit.setText((', ').join(self.parent.stopViewList))
+        self.formLayout.addRow((edf.boldLabel('Stop View: ')), self.stopViewEdit)
+        self.mainLayout.addLayout(self.formLayout)
         fileDialogLayout = QHBoxLayout()
         fileDialogLayout.addWidget(edf.boldLabel('Export Directory:'))
         self.netlistDirEdit = edf.longLineEdit()

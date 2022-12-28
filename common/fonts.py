@@ -23,5 +23,45 @@
 from PySide6.QtGui import (QFont, QFontMetrics, QFontDatabase)
 
 class font(QFont):
-    def __init__(self,fontName):
-        self._fontName = fontName
+    def __init__(self,fontFamily:str, fontStyle:str, fontSize:int, kerning:bool,logger):
+        self._fontFamily = fontFamily
+        self._fontStyle = fontStyle
+        self._fontSize = fontSize
+        self._kerning = kerning
+        self._logger = logger
+        self.setFamily(self._fontFamily)
+        self.setStyle(self._fontStyle)
+        self.setPointSize(self._fontSize)
+        self.setKerning(self._kerning)
+        self.setStyleHint(QFont.TypeWriter)
+
+    @property
+    def fontFamily(self):
+        return self._fontFamily
+
+    @fontFamily.setter
+    def fontFamily(self, value:str):
+        fontFamilies = QFontDatabase.families(QFontDatabase.Latin)
+        fixedFamilies = [family for family in fontFamilies if
+                         QFontDatabase.isFixedPitch(family)]
+        if value not in fixedFamilies:
+            self._logger.warning('No such font family present in the system. Another '
+                                 'font '
+                           'will be substituted.')
+        self._fontFamily = value
+        self.setFamily(self._fontFamily)
+
+    @property
+    def fontStyle(self):
+        return self._fontStyle
+
+    @fontStyle.setter
+    def fontStyle(self,value:str):
+        fstyles = QFontDatabase.styles(self._fontFamily)
+        if value not in fstyles:
+            self._logger.warning(f'No matching style is available. Available styles '
+                                 f'are: {",".join(fstyles)}')
+        else:
+            self.setStyle(value)
+
+

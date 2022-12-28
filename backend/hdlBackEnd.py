@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec  9 09:41:45 2022
-
-@author: eskiyerli
-"""
-
 
 #   “Commons Clause” License Condition v1.0
 #  #
@@ -37,15 +29,18 @@ class verilogaC:
     """
 
     def __init__(self, pathObj: pathlib.Path):
+        self._pathObj = pathObj
         keyWords = ["analog", "electrical"]
-        self.vaModule = ''
+        self._vaModule = ''
         self.instanceParams = dict()
         self.modelParams = dict()
         self.inPins = list()
         self.inoutPins = list()
         self.outPins = list()
+        self._netlistLine = ''
         self.statementLines = list()
-        with open(pathObj) as f:
+
+        with open(self._pathObj) as f:
             self.fileLines = f.readlines()
         self.stripComments()
         self.oneLiners()
@@ -79,7 +74,7 @@ class verilogaC:
                 splitLine = tempLine.strip().split()
                 if splitLine:
                     if splitLine[0] == 'module':
-                        self.vaModule = splitLine[1].split('(')[0]
+                        self._vaModule = splitLine[1].split('(')[0]
                         indexLow = line.index("(")
                         indexHigh = line.index(")")
                         self.pins = [pin.strip() for pin in
@@ -110,3 +105,32 @@ class verilogaC:
                         else:  # no parameter attribute statement
                             self.modelParams[paramName] = paramValue
                 tempLine = ''
+
+    @property
+    def pathObj(self):
+        return self._pathObj
+
+    @pathObj.setter
+    def pathObj(self, value:pathlib.Path):
+        assert isinstance(value,pathlib.Path)
+        self._pathObj = value
+
+    @property
+    def netlistLine(self):
+        pinsString = ' '.join([f'[|{pin}:%]' for pin in self.pins])
+        instParamString = ' '.join(
+            [f'[@{key}:{key}=%:{key}={item}]' for key, item in
+             self.instanceParams.items()])
+        self._netlistLine = f'Y{self._vaModule} [@instName] {pinsString} ' \
+                f'[@vaModel:vaModel=%:vaModel={self._vaModule}Model] {instParamString}'
+        return self._netlistLine
+
+    @netlistLine.setter
+    def netListLine(self, value:str):
+        assert isinstance(value,str)
+        self._netlistLine = value
+
+    @property
+    def vaModule(self):
+        return self._vaModule
+
