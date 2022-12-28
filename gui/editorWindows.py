@@ -594,8 +594,14 @@ class schematicEditor(editorWindow):
         if hasattr(self, "netlistDir"):
             netlistExportDialogue.netlistDirEdit.setText(self.netlistDir)
         if netlistExportDialogue.exec() == QDialog.Accepted:
-            netlistDir = netlistExportDialogue.netlistDirEdit.text()
-            netlistFile = pathlib.Path(netlistDir).joinpath(
+            self.netlistDir = netlistExportDialogue.netlistDirEdit.text()
+            self.switchViewList = [item.strip() for
+                                   item in netlistExportDialogue.switchViewEdit.text(
+                                    ).split(',')]
+            print(self.switchViewList)
+            self.stopViewList = [netlistExportDialogue.stopViewEdit.text().strip()]
+            print(self.stopViewList)
+            netlistFile = pathlib.Path(self.netlistDir).joinpath(
                 f'{self.cellName}_schematic').with_suffix(".cir")
         self.centralW.scene.createNetlist(netlistFile, True)
 
@@ -3023,7 +3029,7 @@ class netlist():
                                          self.schematic.parent.parent.cellName)
         self.writeNetlist = writeNetlist
         self.switchViewList = schematic.parent.parent.switchViewList[
-                                    0:schematic.parent.parent.switchViewList.index(
+                              :self.schematic.parent.parent.switchViewList.index(
                                             schematic.parent.parent.stopViewList[0])+1]
         self.netlistedViews = dict()
         with self.filePathObj.open(mode='w') as cirFile:
@@ -3139,8 +3145,9 @@ class netlist():
         #                         cirFile.write(f'.ENDS {cellName} \n')
 
     def analyseSchematic(self, schematic:schematic_scene):
-        symbolSceneSet = schematic.findSceneSymbolSet()
-        for item in symbolSceneSet:
+        sceneSymbolSet = schematic.findSceneSymbolSet()
+        schematic.generatePinNetMap(sceneSymbolSet)
+        for item in sceneSymbolSet:
             libItem = libm.getLibItem(
                 schematic.parent.parent.libraryView.libraryModel, item.libraryName)
             cellItem = libm.getCellItem(libItem, item.cellName)
@@ -3150,13 +3157,43 @@ class netlist():
             for view in self.switchViewList:
                 if view in viewDict.keys():
                     if viewDict[view].viewType == 'schematic':
-                        print(cellItem.cellName)
                         schematicObj = schematicEditor(viewDict[view].data(
                             Qt.UserRole+2),self.libraryDict,self.libraryView)
                         schematicObj.loadSchematic()
-                        self.analyseSchematic(schematicObj.centralW.scene)
+                        pins = ' '.join(list(item.pinNetMap.keys()))
+                        nets = ' '.join(list(item.pinNetMap.values()))
+                        cirFile.write(f'X{item.instanceName} {nets} {item.cellName}\n')
+                        if item.cellName not in self.netlistedViews.keys():
+                            self.netlistedViews[item.cellName]=[
+                                libItem.libraryName, 'schematic']
+                            cirFile.write(f'.SUBCKT {item.cellName} {pins}\n')
+                            self.recursiveNetlisting(schematicObj.centralW.scene,cirFile)
+                            cirFile.write('.ENDS\n')
                     elif viewDict[view].viewType == 'veriloga':
-                        print(cellItem.cellName)
+                        with viewDict[view].data(Qt.UserRole +2).open(mode='r') as vaview:
+                            items = json.load(vaview)
+                        # vaModule = items[2]['vaModule']
+                        netlistLine = items[3]['netlistLine']
+                        netlistLine = netlistLine.replace('[@instName]',
+                                                        f'{item.instanceName}')
+                        for pinName, netName in item.pinNetMap.items():
+                            netlistLine = netlistLine.replace(f'[|{pinName}:%]',
+                                                                f'{netName}')
+                        for labelItem in item.labels.values():
+                            if labelItem.labelDefinition in netlistLine:
+                                netlistLine = netlistLine.replace(
+                                    labelItem.labelDefinition, labelItem.labelText)
+                        cirFile.write(f'{netlistLine}\n')
+                        self.netlistedViews[item.cellName]= [libItem.libraryName,
+                                                             'veriloga']
                     elif viewDict[view].viewType == 'symbol':
-                        print(cellItem.cellName)
+                        cirFile.write(f'{item.createNetlistLine()}\n')
+                        self.netlistedViews[item.cellName]= [libItem.libraryName,'symbol']
                     break
+        configFilePathObj =  self.schematic.parent.parent.file.with_stem('config')
+        with configFilePathObj.open(mode='w+') as \
+                configFile:
+            json.dump(self.netlistedViews, configFile, indent=4)
+
+            self.schematic.parent.parent.libraryView.addViewToModel(configFilePathObj,
+                                                                    self.cellItem)

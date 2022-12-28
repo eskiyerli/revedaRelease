@@ -1,5 +1,3 @@
-
-
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -1284,19 +1282,25 @@ class symbolShape(shape):
         """
         Create a netlist line from a nlp device format line.
         """
-        nlpDeviceFormatLine = self.attr["NLPDeviceFormat"].strip()
-        nlpDeviceFormatLine.replace("[@instName]", f'{self.instanceName}')
-        for labelItem in self.labels.values():
-            if labelItem.labelDefinition in nlpDeviceFormatLine:
-                nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
-                    labelItem.labelDefinition, labelItem.labelText)
-        for pinName, netName in self.pinNetMap.items():
-            if pinName in nlpDeviceFormatLine:
-                nlpDeviceFormatLine = nlpDeviceFormatLine.replace(f'[|{pinName}:%]',
-                                                                  netName)
-        return nlpDeviceFormatLine
+        try:
+            nlpDeviceFormatLine = self.attr["NLPDeviceFormat"].strip()
+            nlpDeviceFormatLine.replace("[@instName]", f'{self.instanceName}')
+            for labelItem in self.labels.values():
+                if labelItem.labelDefinition in nlpDeviceFormatLine:
+                    nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
+                        labelItem.labelDefinition, labelItem.labelText)
+            for pinName, netName in self.pinNetMap.items():
+                if pinName in nlpDeviceFormatLine:
+                    nlpDeviceFormatLine = nlpDeviceFormatLine.replace(f'[|{pinName}:%]',
+                                                                      netName)
+            return nlpDeviceFormatLine
+        except KeyError:
+            self.scene().parent.parent.logger.error(f'Netlist line is not defined for '
+                                                    f'{self.instanceName}')
+        # if there is no NLPDeviceFormat line, create a warning line
+            return "*Netlist line is not defined for the symbol" # return empty string
 
-        return 'line'
+
 class schematicPin(shape):
     '''
     schematic pin class.
