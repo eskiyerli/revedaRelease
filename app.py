@@ -1,23 +1,3 @@
-"""
-======================= START OF LICENSE NOTICE =======================
-  Copyright (C) 2022 Murat Eskiyerli. All Rights Reserved
-
-  NO WARRANTY. THE PRODUCT IS PROVIDED BY DEVELOPER "AS IS" AND ANY
-  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DEVELOPER BE LIABLE FOR
-  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-  GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE PRODUCT, EVEN
-  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-======================== END OF LICENSE NOTICE ========================
-  Primary Author: Murat Eskiyerli
-
-"""
-
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -89,21 +69,19 @@ class mainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
         self.app = app
-        # revEDAPathObj = Path(__file__)
-        revEDADirObj = pathlib.Path.cwd().parent
-        # library definition file path
-        libraryPathObj = revEDADirObj.joinpath("library.yaml")
-        try:
-            with libraryPathObj.open(mode="r") as f:
-                # create a dictionary of library (directory) names and paths
-                self.libraryDict = scb.readLibDefFile(f)
-        except IOError:
-            print(f"Cannot find {str(libraryPathObj)} file.")
-            self.libraryDict = {}
+
+        self.textEditorPath = None
         # this list is the list of usable cellviews.i
-        self.cellViews = ["schematic", "symbol", "layout", "veriloga"]
+        self.cellViews = ["schematic", "symbol", "layout", "veriloga", "spice"]
         self.init_UI()
-        # Create a custom logger
+        # logger definition
+        self.logger_def()
+        # revEDAPathObj = Path(__file__)
+        # library definition file path
+        self.libraryPathObj = pathlib.Path.cwd().joinpath('library.json')
+        self.libraryDict = scb.readLibDefFile(self.libraryPathObj,self.logger)
+
+    def logger_def(self):
         self.logger = logging.getLogger(__name__)
         c_handler = logging.StreamHandler(stream=self.centralW.console)
         c_handler.setLevel(logging.WARNING)
@@ -183,34 +161,33 @@ class mainWindow(QMainWindow):
             # create libBrowser if it does not exist, but do not show it
             self.libraryBrowser = edw.libraryBrowser(self)
         libraryModel = self.libraryBrowser.libBrowserCont.designView.libraryModel
-        dlg = fd.importCellDialogue(libraryModel, self)
-        if dlg.exec() == QDialog.Accepted:
-            self.importedFileObj = pathlib.Path(dlg.vaFileEdit.text())
-            importedVaObj = hdl.verilogaC(self.importedFileObj)
+        importDlg = fd.importCellDialogue(libraryModel, self)
+        importDlg.vaViewName.setText('veriloga')
+        if importDlg.exec() == QDialog.Accepted:
+            self.importedVaObj = hdl.verilogaC(pathlib.Path(importDlg.vaFileEdit.text()))
             libItem = fd.createCellDialog.getLibItem(libraryModel,
-                                                     dlg.libNamesCB.currentText())
+                                                     importDlg.libNamesCB.currentText())
 
             # selectedLibName = dlg.libNamesCB.currentText()
             # selectedLibItem = libraryModel.findItems(selectedLibName)[0]
             libItemRow = libItem.row()
-            libCellNames = [libraryModel.item(libItemRow).child(i).cellName for i
-                            in range(libraryModel.item(libItemRow).rowCount())]
-            cellName = dlg.cellNamesCB.currentText().strip()
+            libCellNames = [libraryModel.item(libItemRow).child(i).cellName for i in
+                            range(libraryModel.item(libItemRow).rowCount())]
+            cellName = importDlg.cellNamesCB.currentText().strip()
             if cellName not in libCellNames and cellName != '':
                 scb.createCell(self, libraryModel, libItem, cellName)
             cellItem = fd.createCellDialog.getCellItem(libItem, cellName)
-            verilogaViewItem = scb.createCellView(self, 'veriloga', cellItem)
+
             symbolViewItem = scb.createCellView(self, 'symbol', cellItem)
             symbolWindow = edw.symbolEditor(symbolViewItem.data(Qt.UserRole + 2),
                                             self.libraryDict,
                                             self.libraryBrowser.libBrowserCont.designView)
 
-            dlg = pdlg.symbolCreateDialog(self, importedVaObj.inPins,
-                                          importedVaObj.outPins,
-                                          importedVaObj.inoutPins)
-            dlg.leftPinsEdit.setText(','.join(importedVaObj.inPins))
-            dlg.rightPinsEdit.setText(','.join(importedVaObj.outPins))
-            dlg.topPinsEdit.setText(','.join(importedVaObj.inoutPins))
+            dlg = pdlg.symbolCreateDialog(self, self.importedVaObj.inPins,
+                                          self.importedVaObj.outPins, self.importedVaObj.inoutPins)
+            dlg.leftPinsEdit.setText(','.join(self.importedVaObj.inPins))
+            dlg.rightPinsEdit.setText(','.join(self.importedVaObj.outPins))
+            dlg.topPinsEdit.setText(','.join(self.importedVaObj.inoutPins))
             symbolPen = pens.pen.returnPen('symbolPen')
             labelPen = pens.pen.returnPen('labelPen')
             pinPen = pens.pen.returnPen(('pinPen'))
@@ -241,49 +218,40 @@ class mainWindow(QMainWindow):
                                      symbolScene.gridTuple)
                 symbolScene.labelDraw(QPoint(int(0.25 * rectXDim), int(0.4 * rectYDim)),
                                       labelPen, '[@cellName]', symbolScene.gridTuple,
-                                      "NLPLabel",
-                                      "12", "Center", "R0", "Instance")
+                                      "NLPLabel", "12", "Center", "R0", "Instance")
                 symbolScene.labelDraw(QPoint(int(rectXDim), int(-0.2 * rectYDim)),
-                                      labelPen,
-                                      '[@instName]', symbolScene.gridTuple, "NLPLabel",
-                                      "12",
-                                      "Center",
-                                      "R0", "Instance")
-                vaFileLabel = symbolScene.labelDraw(QPoint(int(0.25 * rectXDim),
-                                        int(0.6 * rectYDim)), labelPen,
-                                        f'[@vaFile:%:{str(self.importedFileObj)}]',
-                                        symbolScene.gridTuple, "NLPLabel", "12", "Center",
-                                        "R0", "Instance")
+                                      labelPen, '[@instName]', symbolScene.gridTuple,
+                                      "NLPLabel", "12", "Center", "R0", "Instance")
+                vaFileLabel = symbolScene.labelDraw(
+                    QPoint(int(0.25 * rectXDim), int(0.6 * rectYDim)), labelPen,
+                    f'[@vaFile:vaFile=%:vaFile={str(self.importedVaObj.pathObj)}]',
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance")
                 vaFileLabel.labelVisible = False
-                vaModuleLabel = symbolScene.labelDraw(QPoint(int(0.25 * rectXDim),
-                                    int(0.8 * rectYDim)),labelPen,
-                                    f'[@vaModule:%:{importedVaObj.vaModule}]',
-                                    symbolScene.gridTuple, "NLPLabel", "12", "Center",
-                                    "R0", "Instance")
+                vaModuleLabel = symbolScene.labelDraw(
+                    QPoint(int(0.25 * rectXDim), int(0.8 * rectYDim)), labelPen,
+                    f'[@vaModule:vaModule=%:vaModule={self.importedVaObj.vaModule}]',
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance")
                 vaModuleLabel.labelVisible = False
-                vaModelLabel = symbolScene.labelDraw(QPoint(int(0.25 * rectXDim),
-                                     int(1 * rectYDim)), labelPen,
-                                    f'[@vaModel:%:{importedVaObj.vaModule}Model]',
-                                    symbolScene.gridTuple, "NLPLabel","12", "Center",
-                                    "R0", "Instance")
+                vaModelLabel = symbolScene.labelDraw(
+                    QPoint(int(0.25 * rectXDim), int(1 * rectYDim)), labelPen,
+                    f'[@vaModel:vaModel=%:vaModel={self.importedVaObj.vaModule}Model]',
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance")
                 vaModelLabel.labelVisible = False
                 i = 0
-                instParamNum = len(importedVaObj.instanceParams)
-                for key,value in importedVaObj.instanceParams.items():
-                    symbolScene.labelDraw(QPoint(int(rectXDim),
-                                     int(i*0.2*rectYDim/instParamNum)), labelPen,
-                                    f'[@{key}:%:{value}]',
-                                    symbolScene.gridTuple, "NLPLabel","12", "Center",
-                                    "R0", "Instance")
+                instParamNum = len(self.importedVaObj.instanceParams)
+                for key, value in self.importedVaObj.instanceParams.items():
+                    symbolScene.labelDraw(
+                        QPoint(int(rectXDim), int(i * 0.2 * rectYDim / instParamNum)),
+                        labelPen, f'[@{key}:{key}=%:{key}={value}]',
+                        symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0",
+                        "Instance")
 
                 leftPinLocs = [QPoint(-stubLength, (i + 1) * pinDistance) for i in
                                range(len(leftPinNames))]
                 rightPinLocs = [QPoint(rectXDim + stubLength, (i + 1) * pinDistance) for i
-                                in
-                                range(len(rightPinNames))]
+                                in range(len(rightPinNames))]
                 bottomPinLocs = [QPoint((i + 1) * pinDistance, rectYDim + stubLength) for
-                                 i in
-                                 range(len(bottomPinNames))]
+                                 i in range(len(bottomPinNames))]
                 topPinLocs = [QPoint((i + 1) * pinDistance, - stubLength) for i in
                               range(len(topPinNames))]
                 for i, pinName in enumerate(leftPinNames):
@@ -305,18 +273,28 @@ class mainWindow(QMainWindow):
                     symbolScene.lineDraw(bottomPinLocs[i],
                                          bottomPinLocs[i] + QPoint(0, -stubLength),
                                          symbolScene.symbolPen, symbolScene.gridTuple)
-                    symbolScene.addItem(shp.pin(topPinLocs[i], pinPen, pinName))
+                    symbolScene.addItem(shp.pin(bottomPinLocs[i], pinPen, pinName))
                 symbolScene.attributeList = list()  # empty attribute list
-                for key,value in importedVaObj.modelParams.items():
-                    symbolScene.attributeList.append(se.symbolAttribute(key,value))
-                print(importedVaObj.modelParams)
-                print(importedVaObj.instanceParams)
+                for key, value in self.importedVaObj.modelParams.items():
+                    symbolScene.attributeList.append(se.symbolAttribute(key, value))
+                # pinsString = ' '.join([f'[|{pin}:%]' for pin in self.importedVaObj.pins])
+                # instParamString = ' '.join(
+                #     [f'[@{key}:{key}=%:{key}={item}]' for key, item in
+                #      self.importedVaObj.instanceParams.items()])
+                # symbolScene.attributeList.append(se.symbolAttribute('NLPDeviceFormat',
+                #                 f'Y{self.importedVaObj.vaModule} [@instName] {pinsString} '
+                #                 f'{vaModelLabel.labelDefinition} {instParamString}'))
                 symbolWindow.show()
+                symbolWindow.libraryView.openViews[f'{libItem.libraryName}_{cellName}_' \
+                                                   f'{symbolViewItem.viewName}'] = symbolWindow
 
+                scb.createCellView(self, importDlg.vaViewName.text(), cellItem)
     def optionsClick(self):
         dlg = fd.appProperties(self)
+        if self.textEditorPath:
+            dlg.editorPathEdit.setText(self.textEditorPath)
         if dlg.exec() == QDialog.Accepted:
-            self.textEditor = pathlib.Path(dlg.editorPathEdit.text())
+            self.textEditorPath = pathlib.Path(dlg.editorPathEdit.text())
 
     def libDictUpdate(self):
         self.libraryDict = self.libraryBrowser.libraryDict

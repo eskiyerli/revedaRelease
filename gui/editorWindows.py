@@ -1,5 +1,3 @@
-
-
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -30,7 +28,7 @@ import pathlib
 import shutil
 
 # import numpy as np
-from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, )
+from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, QProcess)
 from PySide6.QtGui import (QAction, QKeySequence, QColor, QIcon, QPainter, QPen, QImage,
                            QStandardItemModel, QCursor, QUndoStack, QTextDocument,
                            QGuiApplication, QCloseEvent, QFont)
@@ -42,9 +40,9 @@ from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayo
                                QGraphicsEllipseItem, QGraphicsView, QGridLayout,
                                QGraphicsSceneMouseEvent, QAbstractItemView)
 
-# import revedaeditor.backend.schBackEnd as scb  # import the backend
 import backend.schBackEnd as scb
 import backend.undoStack as us
+import backend.libraryMethods as libm
 import common.layers as cel
 import common.net as net
 import common.pens as pens  # import pens
@@ -76,7 +74,7 @@ class editorWindow(QMainWindow):
         self.init_UI()
         self.appMainW = self.libraryView.parent.parent.parent
         self.logger = self.appMainW.logger
-        self.switchViewList = ['schematic', 'veriloga', 'symbol']
+        self.switchViewList = ['schematic', 'veriloga', 'spice', 'symbol']
         self.stopViewList = ['symbol']
 
     def init_UI(self):
@@ -522,19 +520,19 @@ class schematicEditor(editorWindow):
         # create a designLibrariesView
         libraryModel = symbolViewsModel(self.libraryDict)
         if self.symbolChooser is None:
-            self.symbolChooser = fd.selectCellViewDialog(self,libraryModel)
+            self.symbolChooser = fd.selectCellViewDialog(self, libraryModel)
             self.symbolChooser.show()
         else:
             self.symbolChooser.raise_()
         if self.symbolChooser.exec() == QDialog.Accepted:
             self.centralW.scene.addInstance = True
-            libItem = self.symbolChooser.getLibItem(libraryModel,
-                                            self.symbolChooser.libNamesCB.currentText())
-            cellItem = self.symbolChooser.getCellItem(libItem,
-                                                self.symbolChooser.cellCB.currentText())
-            viewItem = self.symbolChooser.getViewItem(cellItem,
-                                                self.symbolChooser.viewCB.currentText())
-            self.centralW.scene.instanceSymbolFile = viewItem.data(Qt.UserRole +2 )
+            libItem = libm.getLibItem(libraryModel,
+                                                    self.symbolChooser.libNamesCB.currentText())
+            cellItem = libm.getCellItem(libItem,
+                                                      self.symbolChooser.cellCB.currentText())
+            viewItem = libm.getViewItem(cellItem,
+                                                      self.symbolChooser.viewCB.currentText())
+            self.centralW.scene.instanceSymbolFile = viewItem.data(Qt.UserRole + 2)
 
     def createPinClick(self, s):
         createPinDlg = pdlg.createSchematicPinDialog(self)
@@ -592,7 +590,7 @@ class schematicEditor(editorWindow):
         event.accept()
 
     def createNetlistClick(self, s):
-        netlistExportDialogue = fd.netlistExportDialogue()
+        netlistExportDialogue = fd.netlistExportDialogue(self)
         if hasattr(self, "netlistDir"):
             netlistExportDialogue.netlistDirEdit.setText(self.netlistDir)
         if netlistExportDialogue.exec() == QDialog.Accepted:
@@ -1094,7 +1092,7 @@ class symbol_scene(editor_scene):
         self.undoStack.push(undoCommand)
         self.drawLine = False
         return line
-    
+
     def rectDraw(self, start: QPoint, end: QPoint, pen: QPen, gridTuple: tuple):
         """
         Draws a rectangle on the scene
@@ -1504,8 +1502,7 @@ class schematic_scene(editor_scene):
                 self.addInstance = False
             elif self.drawText:
                 self.removeItem(self.draftText)
-                note = self.addNote(
-                    self.snap2Grid(self.mouseReleaseLoc,self.gridTuple))
+                note = self.addNote(self.snap2Grid(self.mouseReleaseLoc, self.gridTuple))
                 self.rotateAnItem(self.current, note, float(self.noteOrient[1:]))
                 self.addItem(note)
                 note.setSelected(True)
@@ -1513,9 +1510,7 @@ class schematic_scene(editor_scene):
                 self.drawText = False
             elif self.drawPin:
                 self.removeItem(self.draftPin)
-                pin = self.addPin(
-                    self.snap2Grid(self.mouseReleaseLoc,
-                                   self.gridTuple))
+                pin = self.addPin(self.snap2Grid(self.mouseReleaseLoc, self.gridTuple))
                 self.addItem(pin)
                 pin.setSelected(True)
                 self.parent.parent.messageLine.setText("Pin added")
@@ -1651,69 +1646,107 @@ class schematic_scene(editor_scene):
         for addedNet in addedNets:
             self.netDraw(addedNet[0], addedNet[1], self.wirePen)
 
+    # def analyzeSchematic(self):
+    #     symbolSceneSet = self.findSceneSymbolSet()
+    #     switchList = self.parent.parent.switchViewList[
+    #                                 0:self.parent.parent.switchViewList.index(
+    #                                         self.parent.parent.stopViewList[0])+1]
+    #     for item in symbolSceneSet:
+    #         libItem = libm.getLibItem(
+    #             self.parent.parent.libraryView.libraryModel, item.libraryName)
+    #         cellItem = libm.getCellItem(libItem, item.cellName)
+    #         viewItems = [cellItem.child(row) for row in range(cellItem.rowCount())]
+    #         viewNames = [view.viewName for view in viewItems]
+    #         viewDict = dict(zip(viewNames,viewItems))
+    #
+    #         for view in switchList:
+    #             if view in viewDict.keys():
+    #                 if viewDict[view].viewName == 'schematic':
+    #
+    #                     break
+
+                # if view.viewName in self.parent.parent.switchViewList[
+                #                     0:self.parent.parent.switchViewList.index(
+                #                             self.parent.parent.stopViewList[0])+1]:
+                #     print(view.viewName)
+                    # if view.viewType == 'schematic':
+                    #     print(f'X[@instName] ')
+                    # elif view.viewType == 'veriloga':
+                    #     with view.data(Qt.UserRole+2).open(mode='r') as f:
+                    #         jsonItems = json.load(f)
+                    #     print(jsonItems[3]['netlistLine'])
+                    # elif view.viewType == 'symbol':
+                    #     print('symbol')
+                    # break
+
+
+
     def createNetlist(self, netlistFile, writeNetlist: bool) -> None:
         """
         Creates a netlist from the schematic.
         """
-        with open(netlistFile, "w") as cirFile:
-            cirFile.write(f'{80 * "*"}\n')
-            cirFile.write('* Revolution EDA CDL Netlist\n')
-            cirFile.write(f'* Library: {self.parent.parent.libName}\n')
-            cirFile.write(f'* Top Cell Name: {self.parent.parent.cellName}\n')
-            cirFile.write(f'* View Name: {self.parent.parent.viewName}\n')
-            cirFile.write(f'* Date: {datetime.datetime.now()}\n')
-            cirFile.write(f'{80 * "*"}\n')
-            cirFile.write('.GLOBAL gnd!\n')
-            cirFile.write('\n')
-            self.recursiveNetlisting(cirFile, writeNetlist)
-            cirFile.write('.END\n')
+        netlistObj = netlist(self, netlistFile, writeNetlist)
 
-    def recursiveNetlisting(self, cirFile, writeNetlist):
-        '''
-        Recursively traverse all sub-circuits and netlist them.
-        '''
-        self.groupAllNets()
-        sceneSymbolSet = self.findSceneSymbolSet()
-        self.generatePinNetMap(sceneSymbolSet)
-        for symbolItem in sceneSymbolSet:
-            if symbolItem.attr["NLPDeviceFormat"] != "":
-                line = symbolItem.createNetlistLine()
-                cirFile.write(f"{line}\n")
-        # create a dictionary of all symbol types in the scene.
-        symbolGroupDict = self.findSceneCells(sceneSymbolSet)
-        for cellName, symbolItem in symbolGroupDict.items():
-            cellPath = pathlib.Path(
-                self.parent.parent.libraryDict[symbolItem.libraryName].joinpath(
-                    symbolItem.cellName))
-            # there could be a more intelligent way finding schematic
-            # cells but this should suffice for the moment.
-            nlpDeviceString = symbolItem.attr["NLPDeviceFormat"]
-            for circuitView in self.parent.parent.switchViewList:
-                # if circuit view exists, then netlist it.
-                if f"{circuitView}.json" in [p.name for p in cellPath.iterdir()]:
-                    match circuitView:
-                        case 'schematic':
-                            nlpDeviceLine = nlpDeviceString.split()
-                            pinline = ' '  # string
-                            symbolPinList = [pin.pinName for pin in
-                                             symbolItem.pins.values()]
-                            for item in nlpDeviceLine:
-                                strippedItem = item.lstrip('[|').rstrip(':%]')
-                                if strippedItem in symbolPinList:
-                                    pinline += f'{strippedItem} '
-                            # if circuit view is not in stopView list, descend to it:
-                            if not circuitView in self.parent.parent.stopViewList:
-                                cirFile.write(f'.SUBCKT {cellName} {pinline} \n')
-                                new_scene = schematic_scene(self.parent)
-                                with open(
-                                        cellPath.joinpath(f'{circuitView}.json')) as temp:
-                                    try:
-                                        itemsList = json.load(temp)
-                                    except json.decoder.JSONDecodeError:
-                                        print("Invalid JSON file")
-                                new_scene.loadSchematicCell(itemsList)
-                                new_scene.recursiveNetlisting(cirFile, True)
-                                cirFile.write(f'.ENDS {cellName} \n')
+    #     self.analyzeSchematic()
+    #     with open(netlistFile, "w") as cirFile:
+    #         cirFile.write(f'{80 * "*"}\n')
+    #         cirFile.write('* Revolution EDA CDL Netlist\n')
+    #         cirFile.write(f'* Library: {self.parent.parent.libName}\n')
+    #         cirFile.write(f'* Top Cell Name: {self.parent.parent.cellName}\n')
+    #         cirFile.write(f'* View Name: {self.parent.parent.viewName}\n')
+    #         cirFile.write(f'* Date: {datetime.datetime.now()}\n')
+    #         cirFile.write(f'{80 * "*"}\n')
+    #         cirFile.write('.GLOBAL gnd!\n')
+    #         cirFile.write('\n')
+    #         self.recursiveNetlisting(cirFile, writeNetlist)
+    #         cirFile.write('.END\n')
+    #
+    # def recursiveNetlisting(self, cirFile, writeNetlist):
+    #     '''
+    #     Recursively traverse all sub-circuits and netlist them.
+    #     '''
+    #     self.groupAllNets()
+    #     sceneSymbolSet = self.findSceneSymbolSet()
+    #     self.generatePinNetMap(sceneSymbolSet)
+    #     for symbolItem in sceneSymbolSet:
+    #         if symbolItem.attr["NLPDeviceFormat"] != "":
+    #             line = symbolItem.createNetlistLine()
+    #             cirFile.write(f"{line}\n")
+    #     # create a dictionary of all symbol types in the scene.
+    #     symbolGroupDict = self.findSceneCells(sceneSymbolSet)
+    #     for cellName, symbolItem in symbolGroupDict.items():
+    #         cellPath = pathlib.Path(
+    #             self.parent.parent.libraryDict[symbolItem.libraryName].joinpath(
+    #                 symbolItem.cellName))
+    #         # there could be a more intelligent way finding schematic
+    #         # cells but this should suffice for the moment.
+    #         nlpDeviceString = symbolItem.attr["NLPDeviceFormat"]
+    #         for circuitView in self.parent.parent.switchViewList:
+    #             # if circuit view exists, then netlist it.
+    #             if f"{circuitView}.json" in [p.name for p in cellPath.iterdir()]:
+    #                 match circuitView:
+    #                     case 'schematic':
+    #                         nlpDeviceLine = nlpDeviceString.split()
+    #                         pinline = ' '  # string
+    #                         symbolPinList = [pin.pinName for pin in
+    #                                          symbolItem.pins.values()]
+    #                         for item in nlpDeviceLine:
+    #                             strippedItem = item.lstrip('[|').rstrip(':%]')
+    #                             if strippedItem in symbolPinList:
+    #                                 pinline += f'{strippedItem} '
+    #                         # if circuit view is not in stopView list, descend to it:
+    #                         if not circuitView in self.parent.parent.stopViewList:
+    #                             cirFile.write(f'.SUBCKT {cellName} {pinline} \n')
+    #                             new_scene = schematic_scene(self.parent)
+    #                             with open(
+    #                                     cellPath.joinpath(f'{circuitView}.json')) as temp:
+    #                                 try:
+    #                                     itemsList = json.load(temp)
+    #                                 except json.decoder.JSONDecodeError:
+    #                                     print("Invalid JSON file")
+    #                             new_scene.loadSchematicCell(itemsList)
+    #                             new_scene.recursiveNetlisting(cirFile, True)
+    #                             cirFile.write(f'.ENDS {cellName} \n')
 
     def groupAllNets(self) -> None:
         '''
@@ -1762,7 +1795,8 @@ class schematic_scene(editor_scene):
 
     def generatePinNetMap(self, sceneSymbolSet):
         '''
-        For symbols in sceneSymbolSet, find which pin is connected to which net
+        For symbols in sceneSymbolSet, find which pin is connected to which net. If a
+        pin is not connected, assign to it a default net starting with d prefix.
         '''
         netCounter = 0
         for symbolItem in sceneSymbolSet:
@@ -1776,11 +1810,11 @@ class schematic_scene(editor_scene):
                         if self.checkPinNetConnect(pinItem, netItem):
                             symbolItem.pinNetMap[pinName] = netName
                             pinItem.connected = True
-                            print(f'{symbolItem.instanceName}, {pinItem.pinName}')
+                            # print(f'{symbolItem.instanceName}, {pinItem.pinName}')
                 if not pinItem.connected:
                     # assign a default net name prefixed with d(efault).
                     symbolItem.pinNetMap[pinName] = f'dnet{netCounter}'
-                    print(f'left unconnected:{symbolItem.pinNetMap[pinName]}')
+                    self.logger.error(f'left unconnected:{symbolItem.pinNetMap[pinName]}')
                     netCounter += 1
 
     def findSceneCells(self, symbolSet):
@@ -2203,7 +2237,7 @@ class schematic_scene(editor_scene):
                      pinItem.pinDir == shp.schematicPin.pinDirs[2]]
 
         dlg = pdlg.symbolCreateDialog(self.parent.parent, inputPins, outputPins,
-                                      inoutPins,self.parent.parent.libName)
+                                      inoutPins, self.parent.parent.libName)
         if dlg.exec() == QDialog.Accepted:
             symbolViewItem = scb.createCellView(libraryView, symbolViewName, cellPath)
             libraryDict = self.parent.parent.libraryDict
@@ -2271,8 +2305,8 @@ class schematic_scene(editor_scene):
                                  symbolScene.symbolPen, symbolScene.gridTuple)
             symbolScene.addItem(
                 schematicPins[schematicPinNames.index(bottomPinNames[i])].toSymbolPin(
-                    bottomPinLocs[i], symbolScene.pinPen, symbolScene.gridTuple))
-            # symbol attribute generation for netlisting.
+                    bottomPinLocs[i], symbolScene.pinPen,
+                    symbolScene.gridTuple))  # symbol attribute generation for netlisting.
         symbolScene.attributeList = list()  # empty attribute list
         nlpPinNames = ""
         for pinName in schematicPinNames:
@@ -2433,17 +2467,15 @@ class libraryBrowser(QMainWindow):
     def __init__(self, parent: QMainWindow) -> None:
         super().__init__()
         self.parent = parent
-        self.libraryDict = self.parent.libraryDict
-        self.cellViews = self.parent.cellViews
+        self.mainW = self.parent
+        self.libraryDict = self.mainW.libraryDict
+        self.cellViews = self.mainW.cellViews
         self.setWindowTitle("Library Browser")
         self._createMenuBar()
         self._createActions()
         self._createToolBars()
-        self.logger = self.parent.logger
-        self.libFilePath = pathlib.Path.cwd().parent.joinpath("library.yaml")
-        self.initUI()
-
-    def initUI(self):
+        self.logger = self.mainW.logger
+        self.libFilePath = self.mainW.libraryPathObj
         self.libBrowserCont = libraryBrowserContainer(self)
         self.setCentralWidget(self.libBrowserCont)
         self.libraryModel = self.libBrowserCont.designView.libraryModel
@@ -2554,26 +2586,27 @@ class libraryBrowser(QMainWindow):
         '''
         Open library editor dialogue.
         '''
-        pathEditDlg = libraryPathEditorDialog(self)
+        pathEditDlg = pdlg.libraryPathEditorDialog(self)
         # dlg.buttonBox.clicked(dlg.buttonBox.)
 
         if pathEditDlg.exec() == QDialog.Accepted:
             tempLibDict = {}
-            for item in pathEditDlg.libraryEditRowList:
-                if item.libraryNameEdit.text().strip() != "":  # check if the key is empty
-                    tempLibDict[item.libraryNameEdit.text()] = item.libraryPathEdit.text()
+            for item in pathEditDlg.libraryEditNameList:
+                if item.text().strip() != "":  # check if the key is empty
+                    tempLibDict[item.text()] = pathlib.Path(item.pathEditField.text())
             self.reworkLibraryModel(tempLibDict)
             #  now update root libraryDict
             # self.parent.libraryDict = self.libraryDict
-            self.parent.libraryDict = tempLibDict
+            self.mainW.libraryDict = tempLibDict
+            self.libBrowserCont.designView.setModel(
+                self.libBrowserCont.designView.libraryModel)
 
     def newCellClick(self, s):
         dlg = fd.createCellDialog(self, self.libraryModel)
         if dlg.exec() == QDialog.Accepted:
-            libItem = \
-                [item for item in
-                 self.libraryModel.findItems(dlg.libNamesCB.currentText()) if
-                 item.data(Qt.UserRole + 1) == 'library'][0]
+            libItem = [item for item in
+                       self.libraryModel.findItems(dlg.libNamesCB.currentText()) if
+                       item.data(Qt.UserRole + 1) == 'library'][0]
             if dlg.cellCB.currentText().strip() == '':
                 self.logger.error('Please enter a cell name.')
             else:
@@ -2582,14 +2615,14 @@ class libraryBrowser(QMainWindow):
     def deleteCellClick(self, s):
         dlg = fd.deleteCellDialog(self, self.libraryModel)
         if dlg.exec() == QDialog.Accepted:
-            libItem = self.getLibItem(self.libraryModel, dlg.libNamesCB.currentText())
+            libItem = libm.getLibItem(self.libraryModel, dlg.libNamesCB.currentText())
             if dlg.cellCB.currentText().strip() == '':
                 self.logger.error('Please enter a cell name.')
             else:
                 # cellItemsLib = {libItem.child(i).cellName: libItem.child(i) for i in
                 #                 range(libItem.rowCount())}
                 # cellItem = cellItemsLib.get(dlg.cellCB.currentText())
-                cellItem = self.getCellItem(libItem, dlg.cellCB.currentText())
+                cellItem = libm.getCellItem(libItem, dlg.cellCB.currentText())
                 # remove the directory
                 shutil.rmtree(cellItem.data(Qt.UserRole + 2))
                 cellItem.parent().removeRow(cellItem.row())
@@ -2598,16 +2631,16 @@ class libraryBrowser(QMainWindow):
         dlg = fd.newCellViewDialog(self, self.libraryModel)
         if dlg.exec() == QDialog.Accepted:
             cellPath = dlg.selectedLibPath.joinpath(dlg.cellCB.currentText())
-            libItem = self.getLibItem(self.libraryModel, dlg.libNamesCB.currentText())
-            cellItem = self.getCellItem(libItem, dlg.cellCB.currentText())
+            libItem = libm.getLibItem(self.libraryModel, dlg.libNamesCB.currentText())
+            cellItem = libm.getCellItem(libItem, dlg.cellCB.currentText())
             viewItem = scb.createCellView(self, dlg.viewName.text().strip(), cellItem)
 
     def selectCellView(self, libModel) -> scb.viewItem:
         dlg = fd.selectCellViewDialog(self, libModel)
         if dlg.exec() == QDialog.Accepted:
-            libItem = self.getLibItem(libModel, dlg.libNamesCB.currentText())
+            libItem = libm.getLibItem(libModel, dlg.libNamesCB.currentText())
             try:
-                cellItem = self.getCellItem(libItem, dlg.cellCB.currentText())
+                cellItem = libm.getCellItem(libItem, dlg.cellCB.currentText())
             except IndexError:
                 cellItem = libItem.child(0)
             try:
@@ -2617,16 +2650,14 @@ class libraryBrowser(QMainWindow):
                 viewItem = cellItem.child(0)
                 return None
 
-
-    def openCellViewClick(self, s):
+    def openCellViewClick(self):
         viewItem = self.selectCellView(self.libraryModel)
         viewPath = viewItem.data(Qt.UserRole + 2)
         viewName = viewPath.stem
         cellName = viewItem.parent().cellName
         libName = viewItem.parent().parent().libraryName
 
-        if f'{libName}_{cellName}_{viewName}' in \
-                self.libBrowserCont.designView.openViews.keys():
+        if f'{libName}_{cellName}_{viewName}' in self.libBrowserCont.designView.openViews.keys():
             self.libBrowserCont.designView.openViews[f'{libName}_{cellName}_' \
                                                      f'{viewName}'].raise_()
         else:
@@ -2645,7 +2676,10 @@ class libraryBrowser(QMainWindow):
                 self.libBrowserCont.designView.openViews[f'{libName}_{cellName}_' \
                                                          f'{viewName}'] = symbolWindow
             elif viewItem.viewType == 'veriloga':
-                pass
+                with open(viewItem.viewPath) as tempFile:
+                    items = json.load(tempFile)
+                p = QProcess(self.mainW)
+                p.start(str(self.mainW.textEditorPath), [items[1]["filePath"]])
 
     def deleteCellViewClick(self, s):
         viewItem = self.selectCellView(self.libraryModel)
@@ -2663,8 +2697,7 @@ class libraryBrowser(QMainWindow):
         # self.parent.centralWidget.treeView.addLibrary()
         self.libraryDict = {}  # now empty the library dict
         for key, value in tempLibDict.items():
-            self.libraryDict[key] = pathlib.Path(
-                value)  # redefine  libraryDict with pathlib paths.
+            self.libraryDict[key] = value
         self.libBrowserCont.designView.libraryModel.clear()
         self.libBrowserCont.designView.initModel()
         self.libBrowserCont.designView.setModel(self.libraryModel)
@@ -2676,24 +2709,24 @@ class libraryBrowser(QMainWindow):
     def closeEvent(self, event: QCloseEvent) -> None:
         self.parent.libraryBrowser = None
         event.accept()
-
-    @staticmethod
-    def getLibItem(libraryModel: QStandardItemModel, libName: str) -> scb.libraryItem:
-        libItem = [item for item in libraryModel.findItems(libName) if
-                   item.data(Qt.UserRole + 1) == 'library'][0]
-        return libItem
-
-    @staticmethod
-    def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> scb.cellItem:
-        cellItem = [libItem.child(i) for i in range(libItem.rowCount()) if
-                    libItem.child(i).text() == cellNameInp][0]
-        return cellItem
-
-    @staticmethod
-    def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
-        viewItem = [cellItem.child(i) for i in range(cellItem.rowCount()) if
-                    cellItem.child(i).text() == viewNameInp][0]
-        return viewItem
+    #
+    # @staticmethod
+    # def getLibItem(libraryModel: QStandardItemModel, libName: str) -> scb.libraryItem:
+    #     libItem = [item for item in libraryModel.findItems(libName) if
+    #                item.data(Qt.UserRole + 1) == 'library'][0]
+    #     return libItem
+    #
+    # @staticmethod
+    # def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> scb.cellItem:
+    #     cellItem = [libItem.child(i) for i in range(libItem.rowCount()) if
+    #                 libItem.child(i).text() == cellNameInp][0]
+    #     return cellItem
+    #
+    # @staticmethod
+    # def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
+    #     viewItem = [cellItem.child(i) for i in range(cellItem.rowCount()) if
+    #                 cellItem.child(i).text() == viewNameInp][0]
+    #     return viewItem
 
 
 class libraryBrowserContainer(QWidget):
@@ -2714,12 +2747,13 @@ class designLibrariesView(QTreeView):
         super().__init__(parent=parent)  # QTreeView
         self.parent = parent  # type: QMainWindow
         self.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.libraryDict = self.parent.parent.libraryDict  # type: dict
-        self.cellViews = self.parent.parent.cellViews  # type: list
         self.openViews = {}  # type: dict
         self.viewCounter = 0
-        self.mainW = self.parent.parent.parent
         self.libraryW = self.parent.parent
+        self.mainW = self.libraryW.mainW
+        self.libraryDict = self.mainW.libraryDict  # type: dict
+        self.cellViews = self.mainW.cellViews  # type: list
+
         self.logger = self.mainW.logger
         self.selectedItem = None
         # library model is based on qstandarditemmodel
@@ -2742,6 +2776,7 @@ class designLibrariesView(QTreeView):
         '''
         Populate library view.
         '''
+        # assert isinstance(designPath,pathlib.Path)
         if designPath.joinpath('reveda.lib').exists():
             libraryItem = self.addLibraryToModel(designPath)
             cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
@@ -2784,14 +2819,13 @@ class designLibrariesView(QTreeView):
     def addViewToModel(self, viewPath, parentItem):
         viewEntry = scb.viewItem(viewPath)
         parentItem.appendRow(viewEntry)
-        return viewEntry
+        # return viewEntry
 
     def createCell(self):
         dlg = fd.createCellDialog(self, self.libraryDict)
         if dlg.exec() == QDialog.Accepted:
             scb.createCell(self, self.libraryModel, self.selectedItem,
-                           dlg.nameEdit.text())
-            # self.reworkDesignLibrariesView()
+                           dlg.nameEdit.text())  # self.reworkDesignLibrariesView()
         else:
             self.logger.error('Please enter a cell name.')
 
@@ -2822,8 +2856,7 @@ class designLibrariesView(QTreeView):
         if dlg.exec() == QDialog.Accepted:
             newViewEntry = scb.createCellView(self, dlg.nameEdit.text(),
                                               self.selectedItem)
-            self.selectedItem.appendRow(newViewEntry)
-            # self.reworkDesignLibrariesView()
+            self.selectedItem.appendRow(newViewEntry)  # self.reworkDesignLibrariesView()
 
     def openView(self):
         viewItem = self.selectedItem
@@ -2832,8 +2865,7 @@ class designLibrariesView(QTreeView):
         cellName = viewItem.parent().cellName
         libName = viewItem.parent().parent().libraryName
 
-        if f'{libName}_{cellName}_{viewName}' in \
-                self.openViews.keys():
+        if f'{libName}_{cellName}_{viewName}' in self.openViews.keys():
             self.openViews[f'{libName}_{cellName}_' \
                            f'{viewName}'].raise_()
         else:
@@ -2847,6 +2879,11 @@ class designLibrariesView(QTreeView):
                 symbolWindow.loadSymbol()
                 symbolWindow.show()
                 self.openViews[f'{libName}_{cellName}_{viewName}'] = symbolWindow
+            elif viewItem.viewType == 'veriloga':
+                with open(viewItem.viewPath) as tempFile:
+                    items = json.load(tempFile)
+                p = QProcess(self.mainW)
+                p.start(str(self.mainW.textEditorPath), [items[1]["filePath"]])
 
     def copyView(self):
         dlg = fd.copyViewDialog(self, self.libraryModel, self.selectedItem)
@@ -2916,123 +2953,8 @@ class designLibrariesView(QTreeView):
             pass
 
 
-# library path editor dialogue
-class libraryPathEditorDialog(QDialog):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent = parent
-        self.libraryEditRowList = []
-        self.libraryDict = self.parent.libraryDict
-        self.logger = self.parent.parent.logger
-        self.init_UI()
-
-    def init_UI(self):
-        self.setWindowTitle("Library Path Editor")
-        mainLayout = QVBoxLayout()
-        mainLayout.setSpacing(10)
-        self.entriesLayout = QVBoxLayout()  # layout for all the entries
-        labelLayout = QHBoxLayout()
-        labelLayout.addWidget(QLabel("Library Name"))
-        labelLayout.addWidget(QLabel("Library Path"))
-        mainLayout.addLayout(labelLayout)  # add label layout to main layout
-        mainLayout.addLayout(labelLayout)  # add label layout to main layout
-        for key in self.libraryDict.keys():
-            self.libraryEditRowList.append(libraryEditRow(self))
-            self.entriesLayout.addWidget(self.libraryEditRowList[-1])
-            self.libraryEditRowList[-1].libraryNameEdit.setText(key)
-            self.libraryEditRowList[-1].libraryPathEdit.setText(
-                str(self.libraryDict[key]))
-            self.libraryEditRowList[-1].libraryPathEdit.textChanged.connect(self.addRow)
-        mainLayout.addLayout(self.entriesLayout)
-        self.libraryEditRowList.append(libraryEditRow(self))
-        self.entriesLayout.addWidget(self.libraryEditRowList[-1])
-        self.libraryEditRowList[-1].libraryPathEdit.textChanged.connect(self.addRow)
-        mainLayout.addLayout(self.entriesLayout)
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        mainLayout.addWidget(self.buttonBox)
-        self.setLayout(mainLayout)
-        self.show()
-
-    #
-    # def cancel(self):
-    #     self.close()
-
-    def addRow(self):
-        if self.libraryEditRowList[-1].libraryPathEdit.text() != "":
-            self.libraryEditRowList.append(libraryEditRow(self))
-            self.entriesLayout.addWidget(self.libraryEditRowList[-1])
-            self.libraryEditRowList[-1].libraryPathEdit.textChanged.connect(self.addRow)
-
-
-class libraryEditRow(QWidget):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent = parent
-        self.init_UI()
-
-    def init_UI(self):
-        self.layout = QHBoxLayout()
-        self.layout.setSpacing(10)
-        self.libraryNameEdit = libraryNameEditC(self)
-        self.libraryPathEdit = libraryPathEditC(self)
-        self.layout.addWidget(self.libraryNameEdit)
-        self.layout.addWidget(self.libraryPathEdit)
-        self.setLayout(self.layout)
-
-
-class libraryNameEditC(QLineEdit):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent = parent
-        self.fileDialog = QFileDialog()
-        self.fileDialog.setFileMode(QFileDialog.Directory)
-        self.logger = self.parent.parent.parent.logger
-        self.init_UI()
-
-    def init_UI(self):
-        self.setPlaceholderText("Library Name")
-        self.setMaximumWidth(250)
-        self.setFixedWidth(200)
-
-    def contextMenuEvent(self, event):
-        menu = QMenu(self)
-        menu.addAction("Remove", self.removeRow)
-        menu.addAction("Add Library...", self.addLibrary)
-        menu.addAction("Library Info...", self.libInfo)
-        menu.exec(event.globalPos())
-
-    def addLibrary(self):
-        self.fileDialog.exec()
-        if self.fileDialog.selectedFiles():
-            self.selectedDirectory = QDir(self.fileDialog.selectedFiles()[0])
-            self.setText(self.selectedDirectory.dirName())
-            self.parent.libraryPathEdit.setText(self.selectedDirectory.absolutePath())
-
-    def removeRow(self):
-        self.parent.deleteLater()
-        self.parent.parent.libraryEditRowList.remove(self.parent)
-
-    def libInfo(self):
-        self.logger.warning('Not yet implemented.')
-
-
-class libraryPathEditC(QLineEdit):
-    def __init__(self, parent):
-        self.parent = parent
-        super().__init__(parent)
-        self.init_UI()
-
-    def init_UI(self):
-        self.setPlaceholderText("Library Path                ")
-        self.setMaximumWidth(600)
-        self.setFixedWidth(500)
-
-
 class designLibrariesModel(QStandardItemModel):
-    def __init__(self,libraryDict):
+    def __init__(self, libraryDict):
         self.libraryDict = libraryDict
         super().__init__()
         self.rootItem = self.invisibleRootItem()
@@ -3066,10 +2988,11 @@ class designLibrariesModel(QStandardItemModel):
     def addViewToModel(self, viewPath, parentItem):
         viewEntry = scb.viewItem(viewPath)
         parentItem.appendRow(viewEntry)
-        return viewEntry
+        # return viewEntry
+
 
 class symbolViewsModel(designLibrariesModel):
-    def __init__(self,libraryDict):
+    def __init__(self, libraryDict):
         super().__init__(libraryDict)
 
     def populateLibrary(self, designPath):  # designPath: Path
@@ -3085,100 +3008,155 @@ class symbolViewsModel(designLibrariesModel):
                             view.suffix == ".json" and 'symbol' in view.name]
                 for view in viewList:
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
-#
-# class symbolChooser(libraryBrowser):
-#     def __init__(self, parent, scene):
-#         self.parent = parent
-#         self.libraryDict = self.parent.libraryDict
-#         self.scene = scene
-#         super().__init__(parent)
-#         self.setWindowTitle("Symbol Chooser")
-#         self.logger = self.scene.logger
-#
-#     def initUI(self):
-#         self.symBrowserCont = symbolBrowserContainer(parent=self)
-#         self.setCentralWidget(self.symBrowserCont)
-#
-#     def closeEvent(self, event: QCloseEvent) -> None:
-#         self.parent.symbolChooser = None
-#         event.accept()
-#
-#
-# class symbolBrowserContainer(libraryBrowserContainer):
-#     def __init__(self, parent) -> None:
-#         self.parent = parent
-#         super().__init__(parent)
-#
-#     def initUI(self):
-#         self.layout = QVBoxLayout()
-#         self.designView = symLibrariesView(self)
-#         self.layout.addWidget(self.designView)
-#         self.setLayout(self.layout)
-#
-#
-# class symLibrariesView(designLibrariesView):
-#     def __init__(self, parent):
-#         self.parent = parent
-#         self.scene = self.parent.parent.scene
-#         super().__init__(parent)
-#
-#     def populateLibrary(self, designPath):  # designPath: Path
-#         '''
-#         Populate library view.
-#         '''
-#         if designPath.joinpath('reveda.lib').exists():
-#             libraryItem = self.addLibraryToModel(designPath)
-#             cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
-#             for cell in cellList:  # type: str
-#                 cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
-#                 viewList = [view.name for view in designPath.joinpath(cell).iterdir() if
-#                             view.suffix == ".json" and 'symbol' in view.name]
-#                 for view in viewList:
-#                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
-#
-#     def contextMenuEvent(self, event):
-#         menu = QMenu(self)
-#         try:
-#             index = self.selectedIndexes()[0]
-#         except IndexError:
-#             pass
-#         self.selectedItem = self.libraryModel.itemFromIndex(index)
-#         if self.selectedItem.data(Qt.UserRole + 1) == "view":
-#             menu.addAction(QAction("Add Symbol", self, triggered=self.addSymbol))
-#             menu.addAction(QAction("Open View", self, triggered=self.openView))
-#             menu.addAction(QAction("Copy View...", self, triggered=self.copyView))
-#             menu.addAction(QAction("Rename View...", self, triggered=self.renameView))
-#             menu.addAction(QAction("Delete View...", self, triggered=self.deleteView))
-#         menu.exec(event.globalPos())
-#
-#     # library related methods
-#
-#     def removeLibrary(self):
-#         pass
-#
-#     def saveLibAs(self):
-#         pass
-#
-#     def renameLib(self):
-#         pass
-#
-#     # cell related methods
-#
-#     def createCell(self):
-#         pass
-#
-#     def copyCell(self):
-#         pass
-#
-#     def renameCell(self):
-#         pass
-#
-#     def deleteCell(self):
-#         pass
-#
-#     def addSymbol(self):
-#         assert type(self.scene) is schematic_scene, 'not a schematic scene'
-#         symbolFile = self.selectedItem.data(Qt.UserRole + 2)
-#         self.scene.instanceSymbolFile = symbolFile
-#         self.scene.addInstance = True
-#         self.scene.itemCounter += 1
+
+
+class netlist():
+    def __init__(self, schematic, filePathObj: pathlib.Path, writeNetlist:bool=False ):
+        self.filePathObj = filePathObj
+        self.schematic = schematic
+        self.libraryDict = self.schematic.parent.parent.libraryDict
+        self.libraryView = self.schematic.parent.parent.libraryView
+        self.libItem = libm.getLibItem(
+            self.schematic.parent.parent.libraryView.libraryModel,
+            self.schematic.parent.parent.libName)
+        self.cellItem = libm.getCellItem(self.libItem,
+                                         self.schematic.parent.parent.cellName)
+        self.writeNetlist = writeNetlist
+        self.switchViewList = schematic.parent.parent.switchViewList[
+                                    0:schematic.parent.parent.switchViewList.index(
+                                            schematic.parent.parent.stopViewList[0])+1]
+        self.netlistedViews = dict()
+        with self.filePathObj.open(mode='w') as cirFile:
+            cirFile.write(f'{80 * "*"}\n')
+            cirFile.write('* Revolution EDA CDL Netlist\n')
+            cirFile.write(f'* Library: {schematic.parent.parent.libName}\n')
+            cirFile.write(f'* Top Cell Name: {schematic.parent.parent.cellName}\n')
+            cirFile.write(f'* View Name: {schematic.parent.parent.viewName}\n')
+            cirFile.write(f'* Date: {datetime.datetime.now()}\n')
+            cirFile.write(f'{80 * "*"}\n')
+            cirFile.write('.GLOBAL gnd!\n')
+            cirFile.write('\n')
+            self.recursiveNetlisting(self.schematic, cirFile)
+            cirFile.write('.END\n')
+
+    def recursiveNetlisting(self, schematic:schematic_scene, cirFile):
+        '''
+        Recursively traverse all sub-circuits and netlist them.
+        '''
+        # self.analyseSchematic(self.schematic)
+        schematic.groupAllNets() # name all nets in the schematic
+        sceneSymbolSet = schematic.findSceneSymbolSet()
+        schematic.generatePinNetMap(sceneSymbolSet)
+        for item in sceneSymbolSet:
+            libItem = libm.getLibItem(
+                schematic.parent.parent.libraryView.libraryModel, item.libraryName)
+            cellItem = libm.getCellItem(libItem, item.cellName)
+            viewItems = [cellItem.child(row) for row in range(cellItem.rowCount())]
+            viewNames = [view.viewName for view in viewItems]
+            viewDict = dict(zip(viewNames,viewItems))
+            for view in self.switchViewList:
+                if view in viewDict.keys():
+                    if viewDict[view].viewType == 'schematic':
+                        schematicObj = schematicEditor(viewDict[view].data(
+                            Qt.UserRole+2),self.libraryDict,self.libraryView)
+                        schematicObj.loadSchematic()
+                        pins = ' '.join(list(item.pinNetMap.keys()))
+                        nets = ' '.join(list(item.pinNetMap.values()))
+                        cirFile.write(f'X{item.instanceName} {nets} {item.cellName}\n')
+                        if item.cellName not in self.netlistedViews.keys():
+                            self.netlistedViews[item.cellName]=[
+                                libItem.libraryName, 'schematic']
+                            cirFile.write(f'.SUBCKT {item.cellName} {pins}\n')
+                            self.recursiveNetlisting(schematicObj.centralW.scene,cirFile)
+                            cirFile.write('.ENDS\n')
+                    elif viewDict[view].viewType == 'veriloga':
+                        with viewDict[view].data(Qt.UserRole +2).open(mode='r') as vaview:
+                            items = json.load(vaview)
+                        # vaModule = items[2]['vaModule']
+                        netlistLine = items[3]['netlistLine']
+                        netlistLine = netlistLine.replace('[@instName]',
+                                                        f'{item.instanceName}')
+                        for pinName, netName in item.pinNetMap.items():
+                            netlistLine = netlistLine.replace(f'[|{pinName}:%]',
+                                                                f'{netName}')
+                        for labelItem in item.labels.values():
+                            if labelItem.labelDefinition in netlistLine:
+                                netlistLine = netlistLine.replace(
+                                    labelItem.labelDefinition, labelItem.labelText)
+                        cirFile.write(f'{netlistLine}\n')
+                        self.netlistedViews[item.cellName]= [libItem.libraryName,
+                                                             'veriloga']
+                    elif viewDict[view].viewType == 'symbol':
+                        cirFile.write(f'{item.createNetlistLine()}\n')
+                        self.netlistedViews[item.cellName]= [libItem.libraryName,'symbol']
+                    break
+        configFilePathObj =  self.schematic.parent.parent.file.with_stem('config')
+        with configFilePathObj.open(mode='w+') as \
+                configFile:
+            json.dump(self.netlistedViews, configFile, indent=4)
+
+            self.schematic.parent.parent.libraryView.addViewToModel(configFilePathObj,
+                                                                    self.cellItem)
+
+        # for symbolItem in sceneSymbolSet:
+        #     if symbolItem.attr["NLPDeviceFormat"] != "":
+        #         line = symbolItem.createNetlistLine()
+        #         cirFile.write(f"{line}\n")
+        # # create a dictionary of all symbol types in the scene.
+        # symbolGroupDict = self.schematic.findSceneCells(sceneSymbolSet)
+        # for cellName, symbolItem in symbolGroupDict.items():
+        #     cellPath = pathlib.Path(
+        #         self.schematic.parent.parent.libraryDict[symbolItem.libraryName].joinpath(
+        #             symbolItem.cellName))
+        #     # there could be a more intelligent way finding schematic
+        #     # cells but this should suffice for the moment.
+        #     nlpDeviceString = symbolItem.attr["NLPDeviceFormat"]
+        #     for circuitView in self.parent.parent.switchViewList:
+        #         # if circuit view exists, then netlist it.
+        #         if f"{circuitView}.json" in [p.name for p in cellPath.iterdir()]:
+        #             match circuitView:
+        #                 case 'schematic':
+        #                     nlpDeviceLine = nlpDeviceString.split()
+        #                     pinline = ' '  # string
+        #                     symbolPinList = [pin.pinName for pin in
+        #                                      symbolItem.pins.values()]
+        #                     for item in nlpDeviceLine:
+        #                         strippedItem = item.lstrip('[|').rstrip(':%]')
+        #                         if strippedItem in symbolPinList:
+        #                             pinline += f'{strippedItem} '
+        #                     # if circuit view is not in stopView list, descend to it:
+        #                     if not circuitView in self.parent.parent.stopViewList:
+        #                         cirFile.write(f'.SUBCKT {cellName} {pinline} \n')
+        #                         new_scene = schematic_scene(self.parent)
+        #                         with open(
+        #                                 cellPath.joinpath(f'{circuitView}.json')) as temp:
+        #                             try:
+        #                                 itemsList = json.load(temp)
+        #                             except json.decoder.JSONDecodeError:
+        #                                 print("Invalid JSON file")
+        #                         new_scene.loadSchematicCell(itemsList)
+        #                         new_scene.recursiveNetlisting(cirFile, True)
+        #                         cirFile.write(f'.ENDS {cellName} \n')
+
+    def analyseSchematic(self, schematic:schematic_scene):
+        symbolSceneSet = schematic.findSceneSymbolSet()
+        for item in symbolSceneSet:
+            libItem = libm.getLibItem(
+                schematic.parent.parent.libraryView.libraryModel, item.libraryName)
+            cellItem = libm.getCellItem(libItem, item.cellName)
+            viewItems = [cellItem.child(row) for row in range(cellItem.rowCount())]
+            viewNames = [view.viewName for view in viewItems]
+            viewDict = dict(zip(viewNames,viewItems))
+            for view in self.switchViewList:
+                if view in viewDict.keys():
+                    if viewDict[view].viewType == 'schematic':
+                        print(cellItem.cellName)
+                        schematicObj = schematicEditor(viewDict[view].data(
+                            Qt.UserRole+2),self.libraryDict,self.libraryView)
+                        schematicObj.loadSchematic()
+                        self.analyseSchematic(schematicObj.centralW.scene)
+                    elif viewDict[view].viewType == 'veriloga':
+                        print(cellItem.cellName)
+                    elif viewDict[view].viewType == 'symbol':
+                        print(cellItem.cellName)
+                    break
