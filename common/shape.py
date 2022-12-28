@@ -1167,6 +1167,8 @@ class symbolShape(shape):
         self._cellName = ""
         self._viewName = ""
         self._instanceName = ""
+        self._netlistLine = ""
+        # self._simViewName = None
         self._angle = 0.0
         self._drawings = list()
         self._labels = dict()  # dict of labels
@@ -1283,7 +1285,7 @@ class symbolShape(shape):
         Create a netlist line from a nlp device format line.
         """
         nlpDeviceFormatLine = self.attr["NLPDeviceFormat"].strip()
-        # nlpDeviceFormatLine.replace("[@instName]", f'{symbolItem.instanceName}')
+        nlpDeviceFormatLine.replace("[@instName]", f'{self.instanceName}')
         for labelItem in self.labels.values():
             if labelItem.labelDefinition in nlpDeviceFormatLine:
                 nlpDeviceFormatLine = nlpDeviceFormatLine.replace(
@@ -1294,7 +1296,7 @@ class symbolShape(shape):
                                                                   netName)
         return nlpDeviceFormatLine
 
-
+        return 'line'
 class schematicPin(shape):
     '''
     schematic pin class.

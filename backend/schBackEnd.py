@@ -97,6 +97,9 @@ class viewItem(QStandardItem):
         else:
             return None
 
+    @property
+    def viewName(self):
+        return self.viewPath.stem
 
 def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     if libraryName.strip() == "":
@@ -158,7 +161,9 @@ def createCellView(parent, viewName, cellItem:cellItem) -> viewItem:
                 json.dump(items, f, cls=se.symbolEncoder, indent=4)
         elif newViewItem.viewType == 'veriloga':
             items.insert(0, {'cellView': 'veriloga'})
-            items.insert(1, {'filePath': str(parent.importedFileObj)})
+            items.insert(1, {'filePath': str(parent.importedVaObj.pathObj)})
+            items.insert(2, {'vaModule': parent.importedVaObj.vaModule})
+            items.insert(3, {'netlistLine': parent.importedVaObj.netListLine})
             with open(viewPath, "w") as f:
                 json.dump(items, f, cls=se.schematicEncoder, indent=4)
         parent.logger.warning(f'Created {viewName} at {str(viewPath)}')
