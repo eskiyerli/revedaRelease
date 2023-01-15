@@ -1298,7 +1298,8 @@ class symbolShape(shape):
             self.scene().parent.parent.logger.error(f'Netlist line is not defined for '
                                                     f'{self.instanceName}')
         # if there is no NLPDeviceFormat line, create a warning line
-            return "*Netlist line is not defined for the symbol" # return empty string
+            return f"*Netlist line is not defined for symbol of {self.instanceName}"
+            # return empty string
 
 
 class schematicPin(shape):

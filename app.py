@@ -21,6 +21,7 @@
 
 import logging
 import logging.config
+import json
 import pathlib
 import sys
 from contextlib import redirect_stderr, redirect_stdout
@@ -28,9 +29,12 @@ from contextlib import redirect_stderr, redirect_stdout
 from PySide6.QtCore import (Qt, QPoint)
 from PySide6.QtGui import (QAction, QFont, QIcon)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, QDialog)
+
+import gui.editorWindows
 import resources.resources
 import backend.hdlBackEnd as hdl
 import backend.schBackEnd as scb  # import the backend
+import backend.libraryMethods as libm # library view functions
 import fileio.symbolEncoder as se
 import common.pens as pens
 import common.shape as shp
@@ -38,6 +42,7 @@ import gui.editorWindows as edw
 import gui.fileDialogues as fd
 import gui.propertyDialogues as pdlg
 import gui.pythonConsole as pcon
+
 
 
 class mainwContainer(QWidget):
@@ -69,31 +74,25 @@ class mainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
         self.app = app
-
         self.textEditorPath = None
         # this list is the list of usable cellviews.i
-        self.cellViews = ["schematic", "symbol", "layout", "veriloga", "spice"]
-        self.init_UI()
+        self.cellViews = ["schematic", "symbol", "layout", "veriloga", 'config', "spice"]
+        self.switchViewList = ['schematic', 'veriloga', 'spice', 'symbol']
+        self.stopViewList = ['symbol']
+        self.openViews = dict()
+
         # logger definition
+        self.init_UI()
         self.logger_def()
         # revEDAPathObj = Path(__file__)
         # library definition file path
-        self.libraryPathObj = pathlib.Path.cwd().joinpath('library.json')
-        self.libraryDict = scb.readLibDefFile(self.libraryPathObj,self.logger)
+        self.runPath = pathlib.Path.cwd()
+        # look for library.json file where the script is invoked
+        self.libraryPathObj = self.runPath.joinpath('library.json')
+        self.libraryDict = self.readLibDefFile(self.libraryPathObj,self.logger)
+        self.textEditorPath = self.runPath # placeholder path
+        self.loadState()
 
-    def logger_def(self):
-        self.logger = logging.getLogger(__name__)
-        c_handler = logging.StreamHandler(stream=self.centralW.console)
-        c_handler.setLevel(logging.WARNING)
-        c_format = logging.Formatter('%(levelname)s - %(message)s')
-        c_handler.setFormatter(c_format)
-        f_handler = logging.FileHandler('reveda.log')
-        f_handler.setLevel(logging.DEBUG)
-        f_format = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        f_handler.setFormatter(f_format)
-        self.logger.addHandler(c_handler)
-        self.logger.addHandler(f_handler)
 
     def init_UI(self):
         self.resize(900, 300)
@@ -117,6 +116,20 @@ class mainWindow(QMainWindow):
 
         self.mainW_statusbar = self.statusBar()
         self.mainW_statusbar.showMessage("Ready")
+
+    def logger_def(self):
+        self.logger = logging.getLogger(__name__)
+        c_handler = logging.StreamHandler(stream=self.centralW.console)
+        c_handler.setLevel(logging.WARNING)
+        c_format = logging.Formatter('%(levelname)s - %(message)s')
+        c_handler.setFormatter(c_format)
+        f_handler = logging.FileHandler('reveda.log')
+        f_handler.setLevel(logging.DEBUG)
+        f_format = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        f_handler.setFormatter(f_format)
+        self.logger.addHandler(c_handler)
+        self.logger.addHandler(f_handler)
 
         # create actions
 
@@ -153,6 +166,25 @@ class mainWindow(QMainWindow):
             self.libraryBrowser.show()
             self.libraryBrowser.raise_()
 
+    def saveState(self):
+        confFilePath = self.runPath.joinpath('reveda.conf')
+        items = dict()
+        items.update({'textEditorPath': str(self.textEditorPath)})
+        items.update({'switchViewList': self.switchViewList})
+        items.update({'stopViewList': self.stopViewList})
+        with confFilePath.open(mode='w', encoding='utf') as f:
+            json.dump(items, f, indent=4)
+
+    def loadState(self):
+        confFilePath = self.runPath.joinpath('reveda.conf')
+        items = dict()
+        if confFilePath.exists():
+            with confFilePath.open(mode ='r') as f:
+                items = json.load(f)
+            self.textEditorPath = pathlib.Path(items.get('textEditorPath'))
+            self.switchViewList = items.get('switchViewList')
+            self.stopViewList = items.get('stopViewList')
+
     def importVerilogaClick(self):
         '''
         Import a verilog-a view and add it to a design library
@@ -161,7 +193,7 @@ class mainWindow(QMainWindow):
             # create libBrowser if it does not exist, but do not show it
             self.libraryBrowser = edw.libraryBrowser(self)
         libraryModel = self.libraryBrowser.libBrowserCont.designView.libraryModel
-        importDlg = fd.importCellDialogue(libraryModel, self)
+        importDlg = fd.importVerilogaCellDialogue(libraryModel, self)
         importDlg.vaViewName.setText('veriloga')
         if importDlg.exec() == QDialog.Accepted:
             self.importedVaObj = hdl.verilogaC(pathlib.Path(importDlg.vaFileEdit.text()))
@@ -176,7 +208,7 @@ class mainWindow(QMainWindow):
             cellName = importDlg.cellNamesCB.currentText().strip()
             if cellName not in libCellNames and cellName != '':
                 scb.createCell(self, libraryModel, libItem, cellName)
-            cellItem = fd.createCellDialog.getCellItem(libItem, cellName)
+            cellItem = libm.getCellItem(libItem, cellName)
 
             symbolViewItem = scb.createCellView(self, 'symbol', cellItem)
             symbolWindow = edw.symbolEditor(symbolViewItem.data(Qt.UserRole + 2),
@@ -287,14 +319,50 @@ class mainWindow(QMainWindow):
                 symbolWindow.show()
                 symbolWindow.libraryView.openViews[f'{libItem.libraryName}_{cellName}_' \
                                                    f'{symbolViewItem.viewName}'] = symbolWindow
+                # TODO: fix this to move veriloga view content creation to here.
+                vaItem = scb.createCellView(self,importDlg.vaViewName.text(),cellItem)
+                items = list()
+                items.insert(0,{'cellView': 'veriloga'})
+                items.insert(1,{'filePath': str(self.importedVaObj.pathObj)})
+                items.insert(2,{'vaModule': self.importedVaObj.vaModule})
+                items.insert(3, {'netlistLine': self.importedVaObj.netListLine})
+                with vaItem.data(Qt.UserRole + 2).open(mode = 'w') as f:
+                    json.dump(items,f, indent = 4)
 
-                scb.createCellView(self, importDlg.vaViewName.text(), cellItem)
     def optionsClick(self):
         dlg = fd.appProperties(self)
-        if self.textEditorPath:
-            dlg.editorPathEdit.setText(self.textEditorPath)
+        dlg.editorPathEdit.setText(str(self.textEditorPath))
+        dlg.switchViewsEdit.setText(','.join(self.switchViewList))
+        dlg.stopViewsEdit.setText(','.join(self.stopViewList))
         if dlg.exec() == QDialog.Accepted:
             self.textEditorPath = pathlib.Path(dlg.editorPathEdit.text())
+            self.switchViewList = [switchView.strip() for switchView in
+                                   dlg.switchViewsEdit.text().split(',')]
+            self.stopViewList = [stopView.strip() for stopView in
+                                 dlg.stopViewsEdit.text().split(',')]
+            for openView in \
+                    self.openViews.values():
+                if isinstance(openView,gui.editorWindows.schematicEditor):
+                    openView.switchViewList = self.switchViewList
+                    openView.stopViewList = self.stopViewList
+    def readLibDefFile(self,libPath: pathlib.Path, logger):
+        libraryDict = dict()
+        data = dict()
+        if libPath.exists():
+            with libPath.open(mode = 'r') as f:
+                data = json.load(f)
+        # try:
+        #     with libPath.open(mode='r') as f:
+        #         data = json.load(f)
+        # except IOError:
+        #     logger.warning(f'No {str(libPath)} is found.')
+            if data.get('libdefs') is not None:
+                for key, value in data['libdefs'].items():
+                    libraryDict[key] = pathlib.Path(value)
+            elif data.get('include') is not None:
+                for item in data.get('include'):
+                    libraryDict.update(self.readLibDefFile(pathlib.Path(item), logger))
+        return libraryDict
 
     def libDictUpdate(self):
         self.libraryDict = self.libraryBrowser.libraryDict
@@ -303,6 +371,7 @@ class mainWindow(QMainWindow):
         self.app.closeAllWindows()
 
     def closeEvent(self, event):
+        self.saveState()
         self.app.closeAllWindows()
         event.accept()
 

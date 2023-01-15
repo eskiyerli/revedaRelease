@@ -1,4 +1,3 @@
-
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -27,10 +26,12 @@ from pathlib import Path
 
 from PySide6.QtCore import (Qt, )
 from PySide6.QtGui import (QStandardItem, )
-from PySide6.QtWidgets import (QMessageBox, )
+from PySide6.QtWidgets import (QMessageBox, QGroupBox, QVBoxLayout, QDialog,
+                               QDialogButtonBox, QFormLayout)
 # from ruamel.yaml import YAML
 import json
 import fileio.symbolEncoder as se
+import gui.editFunctions as edf
 
 
 class libraryItem(QStandardItem):
@@ -62,6 +63,7 @@ class libraryItem(QStandardItem):
 class cellItem(QStandardItem):
     def __init__(self, cellPath: pathlib.Path) -> None:
         self._cellName = cellPath.stem
+        # self._libName = self.parent.libraryName
         super().__init__(self.cellName)
         self.setEditable(False)
         self.setData("cell", Qt.UserRole + 1)
@@ -74,6 +76,7 @@ class cellItem(QStandardItem):
     def cellName(self):
         return self._cellName
 
+
 class viewItem(QStandardItem):
     def __init__(self, viewPath: pathlib.Path) -> None:
         self.viewPath = viewPath
@@ -81,10 +84,19 @@ class viewItem(QStandardItem):
         self.setEditable(False)
         self.setData('view', Qt.UserRole + 1)
         # set the data to the item to be the path to the view.
-        self.setData(viewPath, Qt.UserRole + 2 )
+        self.setData(viewPath, Qt.UserRole + 2)
 
     def type(self):
         return QStandardItem.UserType + 1
+
+    def delete(self):
+        '''
+        delete the view file and remove the row.
+        '''
+        self.viewPath.unlink()
+        viewRow = self.row()
+        parent = self.parent()
+        parent.removeRow(viewRow)
 
     @property
     def viewType(self):
@@ -94,12 +106,19 @@ class viewItem(QStandardItem):
             return 'symbol'
         elif 'veriloga' in self.viewPath.stem:
             return 'veriloga'
+        elif 'config' in self.viewPath.stem:
+            return 'config'
+        elif 'xyce' in self.viewPath.stem:
+            return 'xyce'
+        elif 'spice' in self.viewPath.stem:
+            return 'spice'
         else:
             return None
 
     @property
     def viewName(self):
         return self.viewPath.stem
+
 
 def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
     if libraryName.strip() == "":
@@ -131,44 +150,41 @@ def createCell(parent, model, selectedLib, cellName) -> cellItem:
             return None
         else:
             cellPath.mkdir()
-            parentLibrary = model.findItems(selectedLibPath.stem,
-                                            flags=Qt.MatchExactly)[0]
+            # parentLibrary = model.findItems(selectedLibPath.stem,
+            #                                 flags=Qt.MatchExactly)[0]
             newCellItem = cellItem(cellPath)
             selectedLib.appendRow(newCellItem)
             parent.logger.warning(f"Created {cellName} cell at {str(cellPath)}")
             return newCellItem
 
 
-def createCellView(parent, viewName, cellItem:cellItem) -> viewItem:
+def createCellView(parent, viewName, cellItem: cellItem) -> viewItem:
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
         return None
-    elif cellItem.data(Qt.UserRole+2).joinpath(f'{viewName}.json').exists():
-        QMessageBox.warning(parent, "Error", "View exists. Delete cellview first.")
-        return None
-    else:
-        viewPath = cellItem.data(Qt.UserRole+2).joinpath(f'{viewName}.json')
-        viewPath.touch()  # create the view file
-        newViewItem = viewItem(viewPath)
-        items = []
-        if newViewItem.viewType == 'schematic':
-            items.insert(0, {'cellView': 'schematic'})
-            with open(viewPath, "w") as f:
-                json.dump(items, f, cls=se.schematicEncoder, indent=4)
-        elif newViewItem.viewType == 'symbol':
-            items.insert(0, {'cellView': 'symbol'})
-            with open(viewPath, "w") as f:
-                json.dump(items, f, cls=se.symbolEncoder, indent=4)
-        elif newViewItem.viewType == 'veriloga':
-            items.insert(0, {'cellView': 'veriloga'})
-            items.insert(1, {'filePath': str(parent.importedVaObj.pathObj)})
-            items.insert(2, {'vaModule': parent.importedVaObj.vaModule})
-            items.insert(3, {'netlistLine': parent.importedVaObj.netListLine})
-            with open(viewPath, "w") as f:
-                json.dump(items, f, cls=se.schematicEncoder, indent=4)
-        parent.logger.warning(f'Created {viewName} at {str(viewPath)}')
-        cellItem.appendRow(newViewItem)
-        return newViewItem
+    viewPath = cellItem.data(Qt.UserRole + 2).joinpath(f'{viewName}.json')
+    if viewPath.exists():
+        parent.logger.warning('Replacing the cell view.')
+        oldView = [cellItem.child(row) for row in range(cellItem.rowCount()) if
+                   cellItem.child(row).viewName == viewName][0]
+        oldView.delete()
+    newViewItem = viewItem(viewPath)
+    viewPath.touch()  # create empty cell view
+    items = list()
+    if 'schematic' in viewName:
+        items.insert(0, {'viewName': 'schematic'})
+    elif 'symbol' in viewName:
+        items.insert(0, {'viewName': 'symbol'})
+    elif 'veriloga' in viewName:
+        items.insert(0, {'viewName': 'veriloga'})
+    elif 'config' in viewName:
+        items.insert(0, {'viewName': 'config'})
+    with viewPath.open(mode='w') as f:
+        json.dump(items, f, indent=4)
+    parent.logger.warning(f'Created {viewName} at {str(viewPath)}')
+    cellItem.appendRow(newViewItem)
+
+    return newViewItem
 
 
 # function for copying a cell
@@ -206,7 +222,7 @@ def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -
             addedView.setData("view", Qt.UserRole + 1)
             # set the data to the item to be the path to the view.
             addedView.setData(copyPath.joinpath(view).with_suffix(".json"),
-                Qt.UserRole + 2, )
+                              Qt.UserRole + 2, )
             addedView.setEditable(False)
             cellItem.appendRow(addedView)
         libraryItem.appendRow(cellItem)
@@ -222,36 +238,3 @@ def renameCell(parent, oldCell, newName) -> bool:
         cellPath.rename(cellPath.parent / newName)
         oldCell.setText(newName)
         return True
-
-
-def writeLibDefFile(libPathDict:dict, libFilePath: pathlib.Path, logger) -> None:
-
-    # yaml = YAML()
-    # yaml.explicit_start = True
-    # yaml.default_flow_style = False
-    libTempDict = dict(zip(libPathDict.keys(),map(str,libPathDict.values())))
-    try:
-        with libFilePath.open(mode="w") as f:
-            json.dump({'libdefs': libTempDict},f, indent=4)
-    #         yaml.dump(libDefDict, libFilePath)
-    #     logger.warning('writing library definition file.')
-    except IOError:
-        logger.error(f"Cannot save library definitions in {libFilePath}")
-
-
-def readLibDefFile(libPath:Path, logger):
-    libraryDict = dict()
-    try:
-        with libPath.open(mode='r') as f:
-            data = json.load(f)
-    except IOError:
-        logger.warning(f'No {str(libPath)} is found.')
-    if data.get('libdefs') is not None:
-        for key, value in data['libdefs'].items():
-            libraryDict[key] = Path(value)
-    elif data.get('include') is not None:
-        for item in data.get('include'):
-            libraryDict.update(readLibDefFile(Path(item),logger))
-    return libraryDict
-
-

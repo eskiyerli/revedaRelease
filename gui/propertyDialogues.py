@@ -693,7 +693,7 @@ class libraryPathEditorDialog(QDialog):
         self.libraryEditNameList = list()
         self.libraryEditPathList = list()
         self.libraryDict = self.parent.libraryDict
-        self.logger = self.parent.parent.logger
+        self.logger = self.parent.logger
         self.setWindowTitle("Library Path Editor")
         self.mainLayout = QVBoxLayout()
         self.gridLayout = QGridLayout()
@@ -768,7 +768,7 @@ class libraryNameEditC(QLineEdit):
         self.parent = parent
         self.fileDialog = QFileDialog()
         self.fileDialog.setFileMode(QFileDialog.Directory)
-        self.logger = self.parent.parent.parent.logger
+        self.logger = self.parent.logger
         self._pathEditField = None
         self.init_UI()
 
