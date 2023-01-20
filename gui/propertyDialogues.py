@@ -24,7 +24,7 @@
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QDialogButtonBox, QLineEdit, QLabel, QComboBox,
                                QGroupBox, QRadioButton, QGridLayout, QTextEdit,
-                               QPushButton, QWidget, QFileDialog, QMenu )
+                               QMainWindow, QWidget, QFileDialog, QMenu )
 
 from PySide6.QtGui import (QFontDatabase,)
 from PySide6.QtCore import (QDir,)

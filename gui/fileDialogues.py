@@ -109,7 +109,6 @@ class newCellViewDialog(createCellDialog):
         self.cellCB.setEditable(False)
         self.setWindowTitle('Create Cell View')
         self.viewType = QComboBox()
-        self.viewType.addItems(self.parent.cellViews)
         self.layout.addRow(edf.boldLabel("View Type:"), self.viewType)
         self.viewName = edf.longLineEdit()
         self.layout.addRow(edf.boldLabel('View Name:'), self.viewName)

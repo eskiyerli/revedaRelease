@@ -4,5 +4,6 @@
 *.json
 *.spec
 *.log
+*.xml
 icons/
 
