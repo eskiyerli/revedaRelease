@@ -74,14 +74,8 @@ class mainWindow(QMainWindow):
         self.app = app
         self.textEditorPath = None
         # this list is the list of usable cellviews.i
-        self.cellViews = [
-            "schematic",
-            "symbol",
-            "layout",
-            "veriloga",
-            "config",
-            "spice",
-        ]
+        self.cellViews = ["schematic", "symbol", "layout", "veriloga", "config",
+            "spice", ]
         self.switchViewList = ["schematic", "veriloga", "spice", "symbol"]
         self.stopViewList = ["symbol"]
         self.openViews = dict()
@@ -130,8 +124,7 @@ class mainWindow(QMainWindow):
         f_handler = logging.FileHandler("reveda.log")
         f_handler.setLevel(logging.DEBUG)
         f_format = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         f_handler.setFormatter(f_format)
         self.logger.addHandler(c_handler)
         self.logger.addHandler(f_handler)
@@ -149,9 +142,8 @@ class mainWindow(QMainWindow):
         self.libraryBrowserAction = QAction(openLibIcon, "Library Browser", self)
         self.menuTools.addAction(self.libraryBrowserAction)
         importVerilogaIcon = QIcon(":/icons/document--plus.png")
-        self.importVerilogaAction = QAction(
-            importVerilogaIcon, "Import Verilog-a file..."
-        )
+        self.importVerilogaAction = QAction(importVerilogaIcon,
+            "Import Verilog-a file...")
         self.importTools.addAction(self.importVerilogaAction)
         optionsIcon = QIcon(":/icons/resource-monitor.png")
         self.optionsAction = QAction(optionsIcon, "Options...", self)
@@ -175,11 +167,11 @@ class mainWindow(QMainWindow):
             self.libraryBrowser.show()
             self.libraryBrowser.raise_()
 
-
     def saveState(self):
         confFilePath = self.runPath.joinpath("reveda.conf")
         items = dict()
         items.update({"textEditorPath": str(self.textEditorPath)})
+        items.update({'simulationPath': str(self.simulationPath)})
         items.update({"switchViewList": self.switchViewList})
         items.update({"stopViewList": self.stopViewList})
         with confFilePath.open(mode="w", encoding="utf") as f:
@@ -192,6 +184,7 @@ class mainWindow(QMainWindow):
             with confFilePath.open(mode="r") as f:
                 items = json.load(f)
             self.textEditorPath = pathlib.Path(items.get("textEditorPath"))
+            self.simulationPath = pathlib.Path(items.get("simulationPath"))
             self.switchViewList = items.get("switchViewList")
             self.stopViewList = items.get("stopViewList")
 
@@ -206,38 +199,26 @@ class mainWindow(QMainWindow):
         importDlg = fd.importVerilogaCellDialogue(libraryModel, self)
         importDlg.vaViewName.setText("veriloga")
         if importDlg.exec() == QDialog.Accepted:
-            self.importedVaObj = hdl.verilogaC(
-                pathlib.Path(importDlg.vaFileEdit.text())
-            )
-            libItem = fd.createCellDialog.getLibItem(
-                libraryModel, importDlg.libNamesCB.currentText()
-            )
+            self.importedVaObj = hdl.verilogaC(pathlib.Path(importDlg.vaFileEdit.text()))
+            libItem = fd.createCellDialog.getLibItem(libraryModel,
+                importDlg.libNamesCB.currentText())
 
             # selectedLibName = dlg.libNamesCB.currentText()
             # selectedLibItem = libraryModel.findItems(selectedLibName)[0]
             libItemRow = libItem.row()
-            libCellNames = [
-                libraryModel.item(libItemRow).child(i).cellName
-                for i in range(libraryModel.item(libItemRow).rowCount())
-            ]
+            libCellNames = [libraryModel.item(libItemRow).child(i).cellName for i in
+                range(libraryModel.item(libItemRow).rowCount())]
             cellName = importDlg.cellNamesCB.currentText().strip()
             if cellName not in libCellNames and cellName != "":
                 scb.createCell(self, libraryModel, libItem, cellName)
             cellItem = libm.getCellItem(libItem, cellName)
 
             symbolViewItem = scb.createCellView(self, "symbol", cellItem)
-            symbolWindow = edw.symbolEditor(
-                symbolViewItem.data(Qt.UserRole + 2),
-                self.libraryDict,
-                self.libraryBrowser.libBrowserCont.designView,
-            )
+            symbolWindow = edw.symbolEditor(symbolViewItem,
+                self.libraryDict, self.libraryBrowser.libBrowserCont.designView, )
 
-            dlg = pdlg.symbolCreateDialog(
-                self,
-                self.importedVaObj.inPins,
-                self.importedVaObj.outPins,
-                self.importedVaObj.inoutPins,
-            )
+            dlg = pdlg.symbolCreateDialog(self, self.importedVaObj.inPins,
+                self.importedVaObj.outPins, self.importedVaObj.inoutPins, )
             dlg.leftPinsEdit.setText(",".join(self.importedVaObj.inPins))
             dlg.rightPinsEdit.setText(",".join(self.importedVaObj.outPins))
             dlg.topPinsEdit.setText(",".join(self.importedVaObj.inoutPins))
@@ -247,179 +228,82 @@ class mainWindow(QMainWindow):
 
             if dlg.exec() == QDialog.Accepted:
                 try:
-                    leftPinNames = list(
-                        filter(
-                            None,
-                            [
-                                pinName.strip()
-                                for pinName in dlg.leftPinsEdit.text().split(",")
-                            ],
-                        )
-                    )
-                    rightPinNames = list(
-                        filter(
-                            None,
-                            [
-                                pinName.strip()
-                                for pinName in dlg.rightPinsEdit.text().split(",")
-                            ],
-                        )
-                    )
-                    topPinNames = list(
-                        filter(
-                            None,
-                            [
-                                pinName.strip()
-                                for pinName in dlg.topPinsEdit.text().split(",")
-                            ],
-                        )
-                    )
-                    bottomPinNames = list(
-                        filter(
-                            None,
-                            [
-                                pinName.strip()
-                                for pinName in dlg.bottomPinsEdit.text().split(",")
-                            ],
-                        )
-                    )
+                    leftPinNames = list(filter(None, [pinName.strip() for pinName in
+                        dlg.leftPinsEdit.text().split(",")], ))
+                    rightPinNames = list(filter(None, [pinName.strip() for pinName in
+                        dlg.rightPinsEdit.text().split(",")], ))
+                    topPinNames = list(filter(None, [pinName.strip() for pinName in
+                        dlg.topPinsEdit.text().split(",")], ))
+                    bottomPinNames = list(filter(None, [pinName.strip() for pinName in
+                        dlg.bottomPinsEdit.text().split(",")], ))
                     stubLength = int(float(dlg.stubLengthEdit.text().strip()))
                     pinDistance = int(float(dlg.pinDistanceEdit.text().strip()))
-                    rectXDim = (
-                        max(len(topPinNames), len(bottomPinNames)) + 1
-                    ) * pinDistance
-                    rectYDim = (
-                        max(len(leftPinNames), len(rightPinNames)) + 1
-                    ) * pinDistance
+                    rectXDim = (max(len(topPinNames),
+                                    len(bottomPinNames)) + 1) * pinDistance
+                    rectYDim = (max(len(leftPinNames),
+                                    len(rightPinNames)) + 1) * pinDistance
                 except ValueError:
                     self.logger.error("Enter valid value")
                 symbolScene = symbolWindow.centralW.scene
-                symbolScene.rectDraw(
-                    QPoint(0, 0),
-                    QPoint(rectXDim, rectYDim),
-                    symbolPen,
-                    symbolScene.gridTuple,
-                )
-                symbolScene.labelDraw(
-                    QPoint(int(0.25 * rectXDim), int(0.4 * rectYDim)),
-                    labelPen,
-                    "[@cellName]",
-                    symbolScene.gridTuple,
-                    "NLPLabel",
-                    "12",
-                    "Center",
-                    "R0",
-                    "Instance",
-                )
-                symbolScene.labelDraw(
-                    QPoint(int(rectXDim), int(-0.2 * rectYDim)),
-                    labelPen,
-                    "[@instName]",
-                    symbolScene.gridTuple,
-                    "NLPLabel",
-                    "12",
-                    "Center",
-                    "R0",
-                    "Instance",
-                )
+                symbolScene.rectDraw(QPoint(0, 0), QPoint(rectXDim, rectYDim), symbolPen,
+                    symbolScene.gridTuple, )
+                symbolScene.labelDraw(QPoint(int(0.25 * rectXDim), int(0.4 * rectYDim)),
+                    labelPen, "[@cellName]", symbolScene.gridTuple, "NLPLabel", "12",
+                    "Center", "R0", "Instance", )
+                symbolScene.labelDraw(QPoint(int(rectXDim), int(-0.2 * rectYDim)),
+                    labelPen, "[@instName]", symbolScene.gridTuple, "NLPLabel", "12",
+                    "Center", "R0", "Instance", )
                 vaFileLabel = symbolScene.labelDraw(
-                    QPoint(int(0.25 * rectXDim), int(0.6 * rectYDim)),
-                    labelPen,
+                    QPoint(int(0.25 * rectXDim), int(0.6 * rectYDim)), labelPen,
                     f"[@vaFile:vaFile=%:vaFile={str(self.importedVaObj.pathObj)}]",
-                    symbolScene.gridTuple,
-                    "NLPLabel",
-                    "12",
-                    "Center",
-                    "R0",
-                    "Instance",
-                )
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance", )
                 vaFileLabel.labelVisible = False
                 vaModuleLabel = symbolScene.labelDraw(
-                    QPoint(int(0.25 * rectXDim), int(0.8 * rectYDim)),
-                    labelPen,
+                    QPoint(int(0.25 * rectXDim), int(0.8 * rectYDim)), labelPen,
                     f"[@vaModule:vaModule=%:vaModule={self.importedVaObj.vaModule}]",
-                    symbolScene.gridTuple,
-                    "NLPLabel",
-                    "12",
-                    "Center",
-                    "R0",
-                    "Instance",
-                )
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance", )
                 vaModuleLabel.labelVisible = False
                 vaModelLabel = symbolScene.labelDraw(
-                    QPoint(int(0.25 * rectXDim), int(1 * rectYDim)),
-                    labelPen,
+                    QPoint(int(0.25 * rectXDim), int(1 * rectYDim)), labelPen,
                     f"[@vaModel:vaModel=%:vaModel={self.importedVaObj.vaModule}Model]",
-                    symbolScene.gridTuple,
-                    "NLPLabel",
-                    "12",
-                    "Center",
-                    "R0",
-                    "Instance",
-                )
+                    symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0", "Instance", )
                 vaModelLabel.labelVisible = False
                 i = 0
                 instParamNum = len(self.importedVaObj.instanceParams)
                 for key, value in self.importedVaObj.instanceParams.items():
                     symbolScene.labelDraw(
                         QPoint(int(rectXDim), int(i * 0.2 * rectYDim / instParamNum)),
-                        labelPen,
-                        f"[@{key}:{key}=%:{key}={value}]",
-                        symbolScene.gridTuple,
-                        "NLPLabel",
-                        "12",
-                        "Center",
-                        "R0",
-                        "Instance",
-                    )
+                        labelPen, f"[@{key}:{key}=%:{key}={value}]",
+                        symbolScene.gridTuple, "NLPLabel", "12", "Center", "R0",
+                        "Instance", )
 
-                leftPinLocs = [
-                    QPoint(-stubLength, (i + 1) * pinDistance)
-                    for i in range(len(leftPinNames))
-                ]
-                rightPinLocs = [
-                    QPoint(rectXDim + stubLength, (i + 1) * pinDistance)
-                    for i in range(len(rightPinNames))
-                ]
-                bottomPinLocs = [
-                    QPoint((i + 1) * pinDistance, rectYDim + stubLength)
-                    for i in range(len(bottomPinNames))
-                ]
-                topPinLocs = [
-                    QPoint((i + 1) * pinDistance, -stubLength)
-                    for i in range(len(topPinNames))
-                ]
+                leftPinLocs = [QPoint(-stubLength, (i + 1) * pinDistance) for i in
+                    range(len(leftPinNames))]
+                rightPinLocs = [QPoint(rectXDim + stubLength, (i + 1) * pinDistance) for i
+                    in range(len(rightPinNames))]
+                bottomPinLocs = [QPoint((i + 1) * pinDistance, rectYDim + stubLength) for
+                    i in range(len(bottomPinNames))]
+                topPinLocs = [QPoint((i + 1) * pinDistance, -stubLength) for i in
+                    range(len(topPinNames))]
                 for i, pinName in enumerate(leftPinNames):
-                    symbolScene.lineDraw(
-                        leftPinLocs[i],
-                        leftPinLocs[i] + QPoint(stubLength, 0),
-                        symbolScene.symbolPen,
-                        symbolScene.gridTuple,
-                    )
+                    symbolScene.lineDraw(leftPinLocs[i],
+                        leftPinLocs[i] + QPoint(stubLength, 0), symbolScene.symbolPen,
+                        symbolScene.gridTuple, )
                     symbolScene.addItem(shp.pin(leftPinLocs[i], pinPen, pinName))
                 for i, pinName in enumerate(rightPinNames):
-                    symbolScene.lineDraw(
-                        rightPinLocs[i],
-                        rightPinLocs[i] + QPoint(-stubLength, 0),
-                        symbolScene.symbolPen,
-                        symbolScene.gridTuple,
-                    )
+                    symbolScene.lineDraw(rightPinLocs[i],
+                        rightPinLocs[i] + QPoint(-stubLength, 0), symbolScene.symbolPen,
+                        symbolScene.gridTuple, )
                     symbolScene.addItem(shp.pin(rightPinLocs[i], pinPen, pinName))
                 for i, pinName in enumerate(topPinNames):
-                    symbolScene.lineDraw(
-                        topPinLocs[i],
-                        topPinLocs[i] + QPoint(0, stubLength),
-                        symbolScene.symbolPen,
-                        symbolScene.gridTuple,
-                    )
+                    symbolScene.lineDraw(topPinLocs[i],
+                        topPinLocs[i] + QPoint(0, stubLength), symbolScene.symbolPen,
+                        symbolScene.gridTuple, )
                     symbolScene.addItem(shp.pin(topPinLocs[i], pinPen, pinName))
                 for i, pinName in enumerate(bottomPinNames):
-                    symbolScene.lineDraw(
-                        bottomPinLocs[i],
-                        bottomPinLocs[i] + QPoint(0, -stubLength),
-                        symbolScene.symbolPen,
-                        symbolScene.gridTuple,
-                    )
+                    symbolScene.lineDraw(bottomPinLocs[i],
+                        bottomPinLocs[i] + QPoint(0, -stubLength), symbolScene.symbolPen,
+                        symbolScene.gridTuple, )
                     symbolScene.addItem(shp.pin(bottomPinLocs[i], pinPen, pinName))
                 symbolScene.attributeList = list()  # empty attribute list
                 for key, value in self.importedVaObj.modelParams.items():
@@ -433,8 +317,7 @@ class mainWindow(QMainWindow):
                 #                 f'{vaModelLabel.labelDefinition} {instParamString}'))
                 symbolWindow.show()
                 symbolWindow.libraryView.openViews[
-                    f"{libItem.libraryName}_{cellName}_" f"{symbolViewItem.viewName}"
-                ] = symbolWindow
+                    f"{libItem.libraryName}_{cellName}_" f"{symbolViewItem.viewName}"] = symbolWindow
                 # TODO: fix this to move veriloga view content creation to here.
                 vaItem = scb.createCellView(self, importDlg.vaViewName.text(), cellItem)
                 items = list()
@@ -447,22 +330,29 @@ class mainWindow(QMainWindow):
 
     def optionsClick(self):
         dlg = fd.appProperties(self)
-        dlg.editorPathEdit.setText(str(self.textEditorPath))
-        dlg.switchViewsEdit.setText(",".join(self.switchViewList))
-        dlg.stopViewsEdit.setText(",".join(self.stopViewList))
+        if self.textEditorPath:
+            dlg.editorPathEdit.setText(str(self.textEditorPath))
+        if self.simulationPath:
+            dlg.simPathEdit.setText(str(self.simulationPath))
+        if self.switchViewList:
+            dlg.switchViewsEdit.setText(", ".join(self.switchViewList))
+        if self.stopViewList:
+            dlg.stopViewsEdit.setText(", ".join(self.stopViewList))
         if dlg.exec() == QDialog.Accepted:
-            self.textEditorPath = pathlib.Path(dlg.editorPathEdit.text())
-            self.switchViewList = [
-                switchView.strip()
-                for switchView in dlg.switchViewsEdit.text().split(",")
-            ]
-            self.stopViewList = [
-                stopView.strip() for stopView in dlg.stopViewsEdit.text().split(",")
-            ]
-            for openView in self.openViews.values():
-                if isinstance(openView, gui.editorWindows.schematicEditor):
-                    openView.switchViewList = self.switchViewList
-                    openView.stopViewList = self.stopViewList
+            try:
+                self.textEditorPath = pathlib.Path(dlg.editorPathEdit.text())
+                self.simulationPath = pathlib.Path(dlg.simPathEdit.text())
+                self.switchViewList = [switchView.strip() for switchView in
+                    dlg.switchViewsEdit.text().split(",")]
+                self.stopViewList = [stopView.strip() for stopView in
+                    dlg.stopViewsEdit.text().split(",")]
+                # apply switchviewlist and stopviewlist values to all open schematic windows
+                for openView in self.openViews.values():
+                    if isinstance(openView, gui.editorWindows.schematicEditor):
+                        openView.switchViewList = self.switchViewList
+                        openView.stopViewList = self.stopViewList
+            except AttributeError:
+                self.logger.error('Attribute Error')
 
     def readLibDefFile(self, libPath: pathlib.Path, logger):
         libraryDict = dict()

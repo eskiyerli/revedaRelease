@@ -50,3 +50,8 @@ def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
         return viewItems[0]
     else:
         return None
+
+def findViewItem(libraryModel, libName:str,cellName:str,viewName:str):
+    libItem = getLibItem(libraryModel,libName)
+    cellItem = getCellItem(libItem, cellName)
+    return getViewItem(cellItem,viewName)

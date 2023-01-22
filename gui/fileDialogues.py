@@ -331,8 +331,8 @@ class deleteSymbolDialog(QDialog):
 
 
 class netlistExportDialogue(QDialog):
-    def __init__(self, parent, *args):
-        super().__init__(parent, *args)
+    def __init__(self, parent):
+        super().__init__(parent)
         self.parent = parent
         self.setWindowTitle(f'Export Netlist?')
         self.setMinimumSize(500, 100)
@@ -343,6 +343,19 @@ class netlistExportDialogue(QDialog):
 
         self.mainLayout = QVBoxLayout()
         self.mainLayout.addStretch(2)
+        viewBox = QGroupBox('Select a view to Netlist')
+        viewBoxLayout = QFormLayout()
+        self.libNameEdit = edf.longLineEdit()
+        self.libNameEdit.setDisabled(True)
+        viewBoxLayout.addRow(edf.boldLabel('Library:'),self.libNameEdit)
+        self.cellNameEdit = edf.longLineEdit()
+        self.cellNameEdit.setDisabled(True)
+        viewBoxLayout.addRow(edf.boldLabel('Cell:'), self.cellNameEdit)
+        self.viewNameCombo = QComboBox()
+        viewBoxLayout.addRow(edf.boldLabel('View:'),self.viewNameCombo)
+        viewBox.setLayout(viewBoxLayout)
+        self.mainLayout.addWidget(viewBox)
+        switchBox = QGroupBox('Switch and Stop View Lists')
         self.formLayout = QFormLayout()
         self.switchViewEdit = edf.longLineEdit()
         self.switchViewEdit.setText((', ').join(self.parent.switchViewList))
@@ -350,7 +363,9 @@ class netlistExportDialogue(QDialog):
         self.stopViewEdit = edf.longLineEdit()
         self.stopViewEdit.setText((', ').join(self.parent.stopViewList))
         self.formLayout.addRow((edf.boldLabel('Stop View: ')), self.stopViewEdit)
-        self.mainLayout.addLayout(self.formLayout)
+        switchBox.setLayout(self.formLayout)
+        self.mainLayout.addWidget(switchBox)
+        fileBox = QGroupBox('Select Simulation Directory')
         fileDialogLayout = QHBoxLayout()
         fileDialogLayout.addWidget(edf.boldLabel('Export Directory:'))
         self.netlistDirEdit = edf.longLineEdit()
@@ -358,8 +373,8 @@ class netlistExportDialogue(QDialog):
         self.netListDirButton = QPushButton('...')
         self.netListDirButton.clicked.connect(self.onDirButtonClicked)
         fileDialogLayout.addWidget(self.netListDirButton)
-
-        self.mainLayout.addLayout(fileDialogLayout)
+        fileBox.setLayout(fileDialogLayout)
+        self.mainLayout.addWidget(fileBox)
         self.mainLayout.addStretch(2)
         self.mainLayout.addWidget(self.buttonBox)
         self.setLayout(self.mainLayout)
@@ -501,19 +516,27 @@ class appProperties(QDialog):
         self.initUI()
 
     def initUI(self):
-        self.setMinimumSize(500, 200)
+        self.setMinimumSize(550, 200)
         self.setWindowTitle('Revolution EDA Options')
         mainLayout = QVBoxLayout()
         filePathsGroup = QGroupBox('Paths')
         filePathsLayout = QVBoxLayout()
         fileDialogLayout = QHBoxLayout()
-        fileDialogLayout.addWidget(edf.boldLabel('Select Editor Path:'), 1)
+        fileDialogLayout.addWidget(edf.boldLabel('Text Editor Path:'), 2)
         self.editorPathEdit = edf.longLineEdit()
-        fileDialogLayout.addWidget(self.editorPathEdit, 4)
+        fileDialogLayout.addWidget(self.editorPathEdit, 5)
         self.editFileButton = QPushButton('...')
         self.editFileButton.clicked.connect(self.onFileButtonClicked)
         fileDialogLayout.addWidget(self.editFileButton, 1)
         filePathsLayout.addLayout(fileDialogLayout)
+        simPathDialogLayout = QHBoxLayout()
+        simPathDialogLayout.addWidget(edf.boldLabel('Simulation Path:'),2)
+        self.simPathEdit = edf.longLineEdit()
+        simPathDialogLayout.addWidget(self.simPathEdit,5)
+        self.simPathButton = QPushButton('...')
+        self.simPathButton.clicked.connect(self.onSimPathButtonClicked)
+        simPathDialogLayout.addWidget(self.simPathButton,1)
+        filePathsLayout.addLayout(simPathDialogLayout)
         filePathsGroup.setLayout(filePathsLayout)
         mainLayout.addWidget(filePathsGroup)
         switchViewsGroup = QGroupBox('Switch and Stop Views')
@@ -533,7 +556,9 @@ class appProperties(QDialog):
         self.setLayout(mainLayout)
 
     def onFileButtonClicked(self):
-        self.editorPath = QFileDialog.getOpenFileName(self, caption='Select a text '
-                                                                    'editor.')[0]
-        if self.editorPath:
-            self.editorPathEdit.setText(self.editorPath)
+       self.editorPathEdit.setText(QFileDialog.getOpenFileName(self, caption='Select text '
+                                                                    'editor path.')[0])
+
+    def onSimPathButtonClicked(self):
+        self.simPathEdit.setText(QFileDialog.getExistingDirectory(self, caption =
+        'Simulation path:'))

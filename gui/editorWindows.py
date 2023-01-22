@@ -61,13 +61,16 @@ class editorWindow(QMainWindow):
     Base class for editor windows.
     """
 
-    def __init__(self, filePath: pathlib.Path, libraryDict: dict,
+    def __init__(self, viewItem:scb.viewItem, libraryDict: dict,
                  libraryView):  # file is a pathlib.Path object
         super().__init__()
-        self.file = filePath
-        self.cellName = self.file.parent.stem
-        self.libName = self.file.parent.parent.stem
-        self.viewName = self.file.stem
+        self.viewItem = viewItem
+        self.file = self.viewItem.data(Qt.UserRole+2)
+        self.cellItem = self.viewItem.parent()
+        self.cellName = self.cellItem.cellName
+        self.libItem = self.cellItem.parent()
+        self.libName = self.libItem.libraryName
+        self.viewName = self.viewItem.viewName
         self.libraryDict = libraryDict
         self.libraryView = libraryView
         self.parentView = None
@@ -399,8 +402,8 @@ class editorWindow(QMainWindow):
 
 
 class schematicEditor(editorWindow):
-    def __init__(self, filePath: pathlib.Path, libraryDict: dict, libraryView) -> None:
-        super().__init__(filePath, libraryDict, libraryView)
+    def __init__(self, viewItem:scb.viewItem, libraryDict: dict, libraryView) -> None:
+        super().__init__(viewItem, libraryDict, libraryView)
         self.setWindowTitle(f"Schematic Editor - {self.cellName}")
         self.setWindowIcon(QIcon(":/icons/layer-shape.png"))
         self.configDict = dict()
@@ -611,7 +614,7 @@ class schematicEditor(editorWindow):
                                 cellItem.cellName: [libItem.libraryName, viewName,
                                                     itemSwitchViewList, ]})
                             schematicObj = schematicEditor(
-                                viewDict[viewName].data(Qt.UserRole + 2),
+                                viewDict[viewName],
                                 self.libraryDict, self.libraryView, )
                             schematicObj.loadSchematic()
                             schematicObj.createConfigView(configItem, configDict,
@@ -631,19 +634,44 @@ class schematicEditor(editorWindow):
         event.accept()
 
     def createNetlistClick(self, s):
-        netlistExportDialogue = fd.netlistExportDialogue(self)
-        if hasattr(self, "netlistDir"):
-            netlistExportDialogue.netlistDirEdit.setText(self.netlistDir)
-        if netlistExportDialogue.exec() == QDialog.Accepted:
-            self.netlistDir = netlistExportDialogue.netlistDirEdit.text()
+        dlg = fd.netlistExportDialogue(self)
+        dlg.libNameEdit.setText(self.libName)
+        dlg.cellNameEdit.setText(self.cellName)
+        configViewItems = [self.cellItem.child(row) for row in range(
+            self.cellItem.rowCount()) if self.cellItem.child(row).viewType == 'config']
+        netlistableViews = [self.viewItem.viewName]
+        for item in configViewItems:
+            # is there a better way of doing it?
+            with item.data(Qt.UserRole + 2).open(mode='r') as f:
+                configItems = json.load(f)
+                if configItems[1]['reference'] == self.viewItem.viewName:
+                    netlistableViews.append(item.viewName)
+        dlg.viewNameCombo.addItems(netlistableViews)
+        if hasattr(self.appMainW, "simulationPath"):
+            dlg.netlistDirEdit.setText(str(self.appMainW.simulationPath))
+        if dlg.exec() == QDialog.Accepted:
+            self.netlistDir = dlg.netlistDirEdit.text()
+            selectedViewName = dlg.viewNameCombo.currentText()
             self.switchViewList = [item.strip() for item in
-                                   netlistExportDialogue.switchViewEdit.text().split(",")]
-            print(self.switchViewList)
-            self.stopViewList = [netlistExportDialogue.stopViewEdit.text().strip()]
-            print(self.stopViewList)
-            netlistFile = (pathlib.Path(self.netlistDir).joinpath(
-                f"{self.cellName}_schematic").with_suffix(".cir"))
-        self.centralW.scene.createNetlist(netlistFile, True)
+                                   dlg.switchViewEdit.text().split(",")]
+            self.stopViewList = [dlg.stopViewEdit.text().strip()]
+            simDirPathObj = pathlib.Path(self.netlistDir)
+            subDirPathObj= simDirPathObj.joinpath(self.cellName)
+            subDirPathObj.mkdir(parents=True,exist_ok = True)
+            netlistFilePathObj = subDirPathObj.joinpath(f'{self.cellName}_'
+                                        f'{selectedViewName}').with_suffix('.cir')
+            if 'schematic' in dlg.viewNameCombo.currentText():
+                netlistObj = xyceNetlist(self,netlistFilePathObj)
+            else:
+                netlistObj =xyceNetlist(self,netlistFilePathObj, True)
+                configItem = libm.findViewItem(self.libraryView.libraryModel,self.libName,
+                                               self.cellName,
+                                               dlg.viewNameCombo.currentText())
+                with configItem.data(Qt.UserRole +2 ).open(mode='r') as f:
+                    netlistObj.configDict = json.load(f)[2]
+                print('writing config netlist')
+            netlistObj.writeNetlist()
+
 
     def goDownClick(self, s):
         self.centralW.scene.goDownHier()
@@ -653,8 +681,8 @@ class schematicEditor(editorWindow):
 
 
 class symbolEditor(editorWindow):
-    def __init__(self, filePath: pathlib.Path, libraryDict: dict, libraryView):
-        super().__init__(filePath, libraryDict, libraryView)
+    def __init__(self, viewItem:scb.viewItem, libraryDict: dict, libraryView):
+        super().__init__(viewItem, libraryDict, libraryView)
         self.setWindowTitle(f"Symbol Editor - {self.cellName}")
         self._symbolActions()
 
@@ -840,7 +868,7 @@ class symbolEditor(editorWindow):
         Closes the application.
         """
         self.centralW.scene.saveSymbolCell(self.file)
-        self.app.openViews.pop(f"{self.libName}_{self.cellName}_{self.viewName}")
+        self.appMainW.openViews.pop(f"{self.libName}_{self.cellName}_{self.viewName}")
         event.accept()
 
 
@@ -1730,21 +1758,8 @@ class schematic_scene(editor_scene):
         """
         Creates a netlist from the schematic.
         """
-        netlistObj = netlist(self, netlistFile, writeNetlist)
-
-    #     self.analyzeSchematic()
-    #     with open(netlistFile, "w") as cirFile:
-    #         cirFile.write(f'{80 * "*"}\n')
-    #         cirFile.write('* Revolution EDA CDL Netlist\n')
-    #         cirFile.write(f'* Library: {self.parent.parent.libName}\n')
-    #         cirFile.write(f'* Top Cell Name: {self.parent.parent.cellName}\n')
-    #         cirFile.write(f'* View Name: {self.parent.parent.viewName}\n')
-    #         cirFile.write(f'* Date: {datetime.datetime.now()}\n')
-    #         cirFile.write(f'{80 * "*"}\n')
-    #         cirFile.write('.GLOBAL gnd!\n')
-    #         cirFile.write('\n')
-    #         self.recursiveNetlisting(cirFile, writeNetlist)
-    #         cirFile.write('.END\n')
+        pass
+        # netlistObj = xyceNetlist(self, netlistFile, writeNetlist)
     #
     # def recursiveNetlisting(self, cirFile, writeNetlist):
     #     '''
@@ -1787,7 +1802,7 @@ class schematic_scene(editor_scene):
     #                                     cellPath.joinpath(f'{circuitView}.json')) as temp:
     #                                 try:
     #                                     itemsList = json.load(temp)
-    #                                 except json.decoder.JSONDecodeError:
+    #                                 except jsondecoder.JSONDecodeError:
     #                                     print("Invalid JSON file")
     #                             new_scene.loadSchematicCell(itemsList)
     #                             new_scene.recursiveNetlisting(cirFile, True)
@@ -2082,7 +2097,7 @@ class schematic_scene(editor_scene):
                 for item in symbolInstance.labels.values():
                     item.labelDefs()
                 return symbolInstance
-            except json.decoder.JSONDecodeError:
+            except jsondecoder.JSONDecodeError:
                 # print("Invalid JSON file")
                 self.logger.warning("Invalid JSON File")
 
@@ -2291,9 +2306,8 @@ class schematic_scene(editor_scene):
             symbolViewItem = scb.createCellView(self.parent.parent, symbolViewName,
                                                 cellItem)
             libraryDict = self.parent.parent.libraryDict
-            symbolViewPath = symbolViewItem.data(Qt.UserRole + 2)
             # create symbol editor window with an empty items list
-            symbolWindow = symbolEditor(symbolViewPath, libraryDict, libraryView)
+            symbolWindow = symbolEditor(symbolViewItem, libraryDict, libraryView)
             try:
                 leftPinNames = list(filter(None, [pinName.strip() for pinName in
                                                   dlg.leftPinsEdit.text().split(",")], ))
@@ -2378,22 +2392,21 @@ class schematic_scene(editor_scene):
                         libName = item.libraryName
                         cellName = item.cellName
                         libraryView = self.parent.parent.libraryView
-                        viewPath = (self.parent.parent.libraryDict.get(libName).joinpath(
-                            cellName).joinpath(selectedView).with_suffix(".json"))
+                        libraryModel = libraryView.libraryModel
+                        libraryDict = libraryView.libraryDict
+                        viewItem = libm.findViewItem(libraryModel, libName, cellName,
+                                                     selectedView)
 
                         if "symbol" in selectedView:
-                            symbolWindow = symbolEditor(viewPath,
-                                                        self.parent.parent.libraryDict,
-                                                        self.parent.parent.libraryView, )
+                            symbolWindow = symbolEditor(viewItem,libraryDict,libraryView, )
                             symbolWindow.loadSymbol()
                             symbolWindow.parentView = self.parent.parent
                             symbolWindow.show()
                             libraryView.openViews[
                                 f"{libName}_{cellName}_{selectedView}"] = symbolWindow
                         elif "schematic" in selectedView:
-                            schematicWindow = schematicEditor(viewPath,
-                                                              self.parent.parent.libraryDict,
-                                                              self.parent.parent.libraryView, )
+                            schematicWindow = schematicEditor(viewItem, libraryDict,
+                                                              libraryView, )
                             schematicWindow.loadSchematic()
                             schematicWindow.parentView = self.parent.parent
                             schematicWindow.show()
@@ -2723,7 +2736,7 @@ class libraryBrowser(QMainWindow):
                 if dlg.exec() == QDialog.Accepted:
                     selectedSchName = dlg.viewNameCB.currentText()
                     selectedSchItem = libm.getViewItem(cellItem, selectedSchName)
-                    schematicWindow = schematicEditor(selectedSchItem.viewPath,
+                    schematicWindow = schematicEditor(selectedSchItem,
                                                       self.libraryDict,
                                                       self.libBrowserCont.designView, )
                     schematicWindow.loadSchematic()
@@ -2741,8 +2754,8 @@ class libraryBrowser(QMainWindow):
                                                      schematicWindow.netlistedCells, )
                     configFilePathObj = viewItem.data(Qt.UserRole + 2)
                     items = list()
-                    items.insert(0, {"viewName": "config"})
-                    items.insert(1, {"schematic": selectedSchName})
+                    items.insert(0, {"cellView": "config"})
+                    items.insert(1, {"reference": selectedSchName})
                     items.insert(2, schematicWindow.configDict)
                     with configFilePathObj.open(mode="w+") as configFile:
                         json.dump(items, configFile, indent=4)
@@ -2751,13 +2764,13 @@ class libraryBrowser(QMainWindow):
                                               selectedSchItem, viewItem)
             case "schematic":
                 scb.createCellView(self.appMainW, viewItem.viewName, cellItem)
-                schematicWindow = schematicEditor(viewItem.viewPath, self.libraryDict,
+                schematicWindow = schematicEditor(viewItem, self.libraryDict,
                                                   self.libBrowserCont.designView)
                 schematicWindow.loadSchematic()
                 schematicWindow.show()
             case "symbol":
                 scb.createCellView(self.appMainW, viewItem.viewName, cellItem)
-                symbolWindow = symbolEditor(viewItem.viewPath, self.libraryDict,
+                symbolWindow = symbolEditor(viewItem, self.libraryDict,
                                             self.libBrowserCont.designView)
                 symbolWindow.loadSymbol()
                 symbolWindow.show()
@@ -2807,7 +2820,6 @@ class libraryBrowser(QMainWindow):
         self.openCellView(viewItem, cellItem, libItem)
 
     def openCellView(self, viewItem, cellItem, libItem):
-        viewPath = viewItem.data(Qt.UserRole + 2)
         viewName = viewItem.viewName
         cellName = cellItem.cellName
         libName = libItem.libraryName
@@ -2816,14 +2828,14 @@ class libraryBrowser(QMainWindow):
             self.appMainW.openViews[f"{libName}_{cellName}_" f"{viewName}"].raise_()
         else:
             if viewItem.viewType == "schematic":
-                schematicWindow = schematicEditor(viewPath, self.libraryDict,
+                schematicWindow = schematicEditor(viewItem, self.libraryDict,
                                                   self.libBrowserCont.designView)
                 schematicWindow.loadSchematic()
                 schematicWindow.show()
                 self.appMainW.openViews[
                     f"{libName}_{cellName}_" f"{viewName}"] = schematicWindow
             elif viewItem.viewType == "symbol":
-                symbolWindow = symbolEditor(viewPath, self.libraryDict,
+                symbolWindow = symbolEditor(viewItem, self.libraryDict,
                                             self.libBrowserCont.designView)
                 symbolWindow.loadSymbol()
                 symbolWindow.show()
@@ -2832,16 +2844,16 @@ class libraryBrowser(QMainWindow):
             elif viewItem.viewType == "veriloga":
                 with open(viewItem.viewPath) as tempFile:
                     items = json.load(tempFile)
-                if items[1]("filePath"):
+                if items[1]["filePath"]:
                     p = QProcess(self.appMainW)
-                    p.start(str(self.appMainW.textEditorPath), [items[1]("filePath")])
+                    p.start(str(self.appMainW.textEditorPath), [items[1]["filePath"]])
                 else:
                     self.logger.warning("File path not defined.")
             elif viewItem.viewType == "config":
                 with open(viewItem.viewPath) as tempFile:
                     items = json.load(tempFile)
-                viewName = items[0]["viewName"]
-                schematicName = items[1]["schematic"]
+                viewName = items[0]["cellView"]
+                schematicName = items[1]["reference"]
                 schViewItem = libm.getViewItem(cellItem,schematicName)
                 configDict = items[2]
                 self.openConfigEditWindow(configDict, schViewItem, viewItem)
@@ -3157,89 +3169,116 @@ class symbolViewsModel(designLibrariesModel):
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
 
 
-class netlist:
-    def __init__(self, schematic: schematic_scene, filePathObj: pathlib.Path,
-                 writeNetlist: bool = False, ):
+class xyceNetlist:
+    def __init__(self, schematic: schematicEditor, filePathObj: pathlib.Path,
+                 use_config:bool = False):
         self.filePathObj = filePathObj
         self.schematic = schematic
-        self.libraryDict = self.schematic.parent.parent.libraryDict
-        self.libraryView = self.schematic.parent.parent.libraryView
+        self.scene = self.schematic.centralW.scene
+        self.libraryDict = self.schematic.libraryDict
+        self.libraryView = self.schematic.libraryView
+        self._configDict = None
         self.libItem = libm.getLibItem(
-            self.schematic.parent.parent.libraryView.libraryModel,
-            self.schematic.parent.parent.libName, )
+            self.schematic.libraryView.libraryModel,
+            self.schematic.libName, )
         self.cellItem = libm.getCellItem(self.libItem,
-                                         self.schematic.parent.parent.cellName)
-        self.writeNetlist = writeNetlist
-        self.switchViewList = schematic.parent.parent.switchViewList
+                                         self.schematic.cellName)
+        self.use_config = use_config
+        self.switchViewList = schematic.switchViewList
         self.netlistedViews = dict()
+
+    def writeNetlist(self):
         with self.filePathObj.open(mode="w") as cirFile:
             cirFile.write(f'{80 * "*"}\n')
             cirFile.write("* Revolution EDA CDL Netlist\n")
-            cirFile.write(f"* Library: {schematic.parent.parent.libName}\n")
-            cirFile.write(f"* Top Cell Name: {schematic.parent.parent.cellName}\n")
-            cirFile.write(f"* View Name: {schematic.parent.parent.viewName}\n")
+            cirFile.write(f"* Library: {self.schematic.libName}\n")
+            cirFile.write(f"* Top Cell Name: {self.schematic.cellName}\n")
+            cirFile.write(f"* View Name: {self.schematic.viewName}\n")
             cirFile.write(f"* Date: {datetime.datetime.now()}\n")
             cirFile.write(f'{80 * "*"}\n')
             cirFile.write(".GLOBAL gnd!\n")
             cirFile.write("\n")
-            self.recursiveNetlisting(self.schematic, cirFile)
+            self.recursiveNetlisting(self.schematic, cirFile, self.use_config)
             cirFile.write(".END\n")
 
-    def recursiveNetlisting(self, schematic: schematic_scene, cirFile):
+    @property
+    def configDict(self):
+        return self._configDict
+
+    @configDict.setter
+    def configDict(self, value:dict):
+        if value:
+            self._configDict = value
+
+    def recursiveNetlisting(self, schematic: schematicEditor, cirFile,
+                            use_config:bool = False):
         """
         Recursively traverse all sub-circuits and netlist them.
         """
         # self.analyseSchematic(self.schematic)
-        schematic.groupAllNets()  # name all nets in the schematic
-        sceneSymbolSet = schematic.findSceneSymbolSet()
-        schematic.generatePinNetMap(sceneSymbolSet)
+        scene = schematic.centralW.scene
+        scene.groupAllNets()  # name all nets in the schematic
+        sceneSymbolSet = scene.findSceneSymbolSet()
+        scene.generatePinNetMap(sceneSymbolSet)
         for item in sceneSymbolSet:
-            libItem = libm.getLibItem(schematic.parent.parent.libraryView.libraryModel,
+            libItem = libm.getLibItem(schematic.libraryView.libraryModel,
                                       item.libraryName)
             cellItem = libm.getCellItem(libItem, item.cellName)
             viewItems = [cellItem.child(row) for row in range(cellItem.rowCount())]
             viewNames = [view.viewName for view in viewItems]
-            viewDict = dict(zip(viewNames, viewItems))
-            for view in self.switchViewList:
-                if view in viewDict.keys():
-                    if viewDict[view].viewType == "schematic":
-                        schematicObj = schematicEditor(
-                            viewDict[view].data(Qt.UserRole + 2), self.libraryDict,
-                            self.libraryView, )
-                        schematicObj.loadSchematic()
-                        pins = " ".join(list(item.pinNetMap.keys()))
-                        nets = " ".join(list(item.pinNetMap.values()))
-                        cirFile.write(f"X{item.instanceName} {nets} {item.cellName}\n")
-                        if item.cellName not in self.netlistedViews.keys():
-                            self.netlistedViews[item.cellName] = [libItem.libraryName,
-                                                                  "schematic", ]
-                            cirFile.write(f".SUBCKT {item.cellName} {pins}\n")
-                            self.recursiveNetlisting(schematicObj.centralW.scene, cirFile)
-                            cirFile.write(".ENDS\n")
-                    elif viewDict[view].viewType == "veriloga":
-                        with viewDict[view].data(Qt.UserRole + 2).open(
-                                mode="r") as vaview:
-                            items = json.load(vaview)
-                        # vaModule = items[2]['vaModule']
-                        netlistLine = items["netlistLine"]
-                        netlistLine = netlistLine.replace("[@instName]",
-                                                          f"{item.instanceName}")
-                        for pinName, netName in item.pinNetMap.items():
-                            netlistLine = netlistLine.replace(f"[|{pinName}:%]",
-                                                              f"{netName}")
-                        for labelItem in item.labels.values():
-                            if labelItem.labelDefinition in netlistLine:
-                                netlistLine = netlistLine.replace(
-                                    labelItem.labelDefinition, labelItem.labelText)
-                        cirFile.write(f"{netlistLine}\n")
-                        self.netlistedViews[item.cellName] = [libItem.libraryName,
-                                                              "veriloga", ]
-                    elif viewDict[view].viewType == "symbol":
-                        cirFile.write(f"{item.createNetlistLine()}\n")
-                        self.netlistedViews[item.cellName] = [libItem.libraryName,
-                                                              "symbol", ]
-                    break
 
+            viewDict = dict(zip(viewNames, viewItems))
+            if use_config:
+                netlistableViews = [self.configDict.get(item.cellName)[1]]
+            else:
+                netlistableViews = [viewItemName for viewItemName in self.switchViewList
+                                    if viewItemName in viewNames]
+            self.createItemLine(cirFile, item, libItem, netlistableViews, viewDict)
+
+    def createItemLine(self, cirFile, item, libItem, netlistableViews, viewDict):
+        for view in netlistableViews:
+            if view in viewDict.keys():
+                if viewDict[view].viewType == "schematic":
+                    schematicObj = schematicEditor(
+                        viewDict[view], self.libraryDict,
+                        self.libraryView, )
+                    schematicObj.loadSchematic()
+                    pins = " ".join(list(item.pinNetMap.keys()))
+                    nets = " ".join(list(item.pinNetMap.values()))
+                    cirFile.write(f"X{item.instanceName} {nets} {item.cellName}\n")
+                    if item.cellName not in self.netlistedViews.keys():
+                        self.netlistedViews[item.cellName] = [libItem.libraryName, view, ]
+                        cirFile.write(f".SUBCKT {item.cellName} {pins}\n")
+                        self.recursiveNetlisting(schematicObj, cirFile)
+                        cirFile.write(".ENDS\n")
+                elif viewDict[view].viewType == "veriloga":
+                    with viewDict[view].data(Qt.UserRole + 2).open(
+                            mode="r") as vaview:
+                        items = json.load(vaview)
+                    netlistLine = items[3]['netlistLine']
+                    netlistLine = netlistLine.replace("[@instName]",
+                                                      f"{item.instanceName}")
+                    for pinName, netName in item.pinNetMap.items():
+                        netlistLine = netlistLine.replace(f"[|{pinName}:%]",
+                                                          f"{netName}")
+                    for labelItem in item.labels.values():
+                        if labelItem.labelDefinition in netlistLine:
+                            netlistLine = netlistLine.replace(
+                                labelItem.labelDefinition, labelItem.labelText)
+                    cirFile.write(f"{netlistLine}\n")
+                    modelParamsLine = ', '.join(' = '.join((key, val)) for (key,
+                                                                            val) in
+                                                item.attr.items())
+                    modelLine = f'.MODEL {item.labels["vaModel"].labelValue} ' \
+                                f'{item.labels["vaModule"].labelValue} {modelParamsLine}'
+                    cirFile.write(f'{modelLine}\n')
+                    self.netlistedViews[item.cellName] = [libItem.libraryName,
+                                                          "veriloga", ]
+                elif viewDict[view].viewType == "symbol":
+                    cirFile.write(f"{item.createNetlistLine()}\n")
+                    self.netlistedViews[item.cellName] = [libItem.libraryName,
+                                                          "symbol", ]
+                break
 
 
 class configViewEdit(QMainWindow):
@@ -3267,13 +3306,17 @@ class configViewEdit(QMainWindow):
 
     def _createActions(self):
         updateIcon = QIcon(":/icons/arrow-circle.png")
-        self.updateAction = QAction(updateIcon, "Update...", self)
+        self.updateAction = QAction(updateIcon, "Update", self)
+        saveIcon = QIcon(":/icons/database--plus.png")
+        self.saveAction = QAction(saveIcon, "Save", self)
 
     def _addActions(self):
         self.fileMenu.addAction(self.updateAction)
+        self.fileMenu.addAction(self.saveAction)
 
     def _createTriggers(self):
         self.updateAction.triggered.connect(self.updateClick)
+        self.saveAction.triggered.connect(self.saveClick)
 
     def updateClick(self):
         self.centralWidget.configViewTable.updateModel()
@@ -3287,7 +3330,7 @@ class configViewEdit(QMainWindow):
                                                         model.item(i, 2).text(), viewList]
         if self.appmainW.libraryBrowser is None:
             self.appmainW.createLibraryBrowser()
-        topSchematicWindow = schematicEditor(self.schViewItem.data(Qt.UserRole+2),
+        topSchematicWindow = schematicEditor(self.schViewItem,
                                              self.appmainW.libraryDict,
                                              self.appmainW.libraryBrowser.libBrowserCont.designView)
         topSchematicWindow.loadSchematic()
@@ -3302,6 +3345,14 @@ class configViewEdit(QMainWindow):
         self.centralWidget.configDictLayout.addWidget(self.centralWidget.configViewTable)
         # self.centralWidget.configDictGroup.setVisible(True)
 
+    def saveClick(self):
+        configFilePathObj = self.viewItem.data(Qt.UserRole + 2)
+        items = list()
+        items.insert(0, {"cellView": "config"})
+        items.insert(1, {"reference": self.schViewItem.viewName})
+        items.insert(2, self.configDict)
+        with configFilePathObj.open(mode="w+") as configFile:
+            json.dump(items, configFile, indent=4)
 
 class configViewEditContainer(QWidget):
     def __init__(self, parent):

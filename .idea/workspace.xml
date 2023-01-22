@@ -5,11 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1bc50337-ac78-479e-9623-519fcf9a93d6" name="Changes" comment="Config view edit is coming full circle. Good point to commit.">
-      <change beforePath="$PROJECT_DIR$/.idea/schematicEditor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematicEditor.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/ui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/configEditor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/libraryMethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/libraryMethods.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/editorWindows.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/fileDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/fileDialogues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/propertyDialogues.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reveda.conf" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.conf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reveda.log" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.log" afterDir="false" />
     </list>
@@ -108,7 +110,14 @@
       <option name="project" value="LOCAL" />
       <updated>1674252914458</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Config view edit is coming full circle. Good point to commit.">
+      <created>1674301456825</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1674301456826</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
