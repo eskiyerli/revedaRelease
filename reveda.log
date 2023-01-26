@@ -293,3 +293,9 @@
 2023-01-21 09:31:30,507 - __main__ - WARNING - Created config at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/designs/newFilter/config.json
 2023-01-21 13:05:55,124 - __main__ - ERROR - left unconnected:dnet0
 2023-01-21 23:56:20,117 - __main__ - ERROR - Attribute Error
+2023-01-25 22:36:58,658 - __main__ - WARNING - writing netlist
+2023-01-26 13:02:17,280 - __main__ - WARNING - writing netlist
+2023-01-26 14:30:10,157 - __main__ - WARNING - writing netlist
+2023-01-26 18:06:48,327 - __main__ - WARNING - writing netlist
+2023-01-26 18:07:19,481 - __main__ - WARNING - writing netlist
+2023-01-26 18:07:19,515 - __main__ - WARNING - Netlisting finished

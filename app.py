@@ -26,9 +26,9 @@ import pathlib
 import sys
 from contextlib import redirect_stderr, redirect_stdout
 
-from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import QAction, QFont, QIcon
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QDialog
+from PySide6.QtCore import (Qt, QPoint, QRunnable, QThreadPool)
+from PySide6.QtGui import (QAction, QFont, QIcon)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, QDialog)
 
 import gui.editorWindows
 import resources.resources
@@ -90,6 +90,7 @@ class mainWindow(QMainWindow):
         self.libraryPathObj = self.runPath.joinpath("library.json")
         self.libraryDict = self.readLibDefFile(self.libraryPathObj, self.logger)
         self.textEditorPath = self.runPath  # placeholder path
+        self.threadPool = QThreadPool.globalInstance()
         self.loadState()
 
     def init_UI(self):
@@ -118,11 +119,11 @@ class mainWindow(QMainWindow):
     def logger_def(self):
         self.logger = logging.getLogger(__name__)
         c_handler = logging.StreamHandler(stream=self.centralW.console)
-        c_handler.setLevel(logging.WARNING)
+        c_handler.setLevel(logging.INFO)
         c_format = logging.Formatter("%(levelname)s - %(message)s")
         c_handler.setFormatter(c_format)
         f_handler = logging.FileHandler("reveda.log")
-        f_handler.setLevel(logging.DEBUG)
+        f_handler.setLevel(logging.INFO)
         f_format = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         f_handler.setFormatter(f_format)

@@ -29,7 +29,8 @@ import pathlib
 import shutil
 
 # import numpy as np
-from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, QProcess, )
+from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, QProcess,
+                            QRunnable, Signal, Slot)
 from PySide6.QtGui import (QAction, QKeySequence, QColor, QIcon, QPainter, QPen, QImage,
                            QStandardItemModel, QCursor, QUndoStack, QTextDocument,
                            QGuiApplication, QCloseEvent, QFont,QStandardItem)
@@ -669,9 +670,9 @@ class schematicEditor(editorWindow):
                                                dlg.viewNameCombo.currentText())
                 with configItem.data(Qt.UserRole +2 ).open(mode='r') as f:
                     netlistObj.configDict = json.load(f)[2]
-                print('writing config netlist')
-            netlistObj.writeNetlist()
-
+            xyceNetlRunner = runXNetlistThread(netlistObj,self)
+            self.logger.warning('writing netlist')
+            self.appMainW.threadPool.start(xyceNetlRunner)
 
     def goDownClick(self, s):
         self.centralW.scene.goDownHier()
@@ -3424,3 +3425,15 @@ class configTable(QTableView):
         for row in range(self.model.rowCount()):
             item = QStandardItem(self.combos[row].currentText())
             self.model.setItem(row, 2, item)
+
+class runXNetlistThread(QRunnable):
+    def __init__(self, netlistObj:xyceNetlist, parent):
+        super().__init__()
+        self.netlistObj = netlistObj
+        self.parent = parent
+
+    def run(self) -> None:
+        self.netlistObj.writeNetlist()
+        self.parent.logger.warning('Netlisting finished')
+
+

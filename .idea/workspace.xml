@@ -4,16 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1bc50337-ac78-479e-9623-519fcf9a93d6" name="Changes" comment="Config view edit is coming full circle. Good point to commit.">
+    <list default="true" id="1bc50337-ac78-479e-9623-519fcf9a93d6" name="Changes" comment="Config view has now worked for netlisting.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/ui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/libraryMethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/libraryMethods.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/editorWindows.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/fileDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/fileDialogues.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/propertyDialogues.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reveda.conf" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.conf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reveda.log" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +114,14 @@
       <option name="project" value="LOCAL" />
       <updated>1674301456826</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Config view has now worked for netlisting.">
+      <created>1674428822969</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1674428822969</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -135,6 +139,7 @@
     <MESSAGE value="Merge remote-tracking branch 'origin/experimental' into experimental" />
     <MESSAGE value="Merge remote-tracking branch 'revedaRelease/experimental' into experimental" />
     <MESSAGE value="Config view edit is coming full circle. Good point to commit." />
-    <option name="LAST_COMMIT_MESSAGE" value="Config view edit is coming full circle. Good point to commit." />
+    <MESSAGE value="Config view has now worked for netlisting." />
+    <option name="LAST_COMMIT_MESSAGE" value="Config view has now worked for netlisting." />
   </component>
 </project>

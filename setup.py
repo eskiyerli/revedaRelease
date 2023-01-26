@@ -27,7 +27,7 @@ setup(
     version='0.3',
     packages=[''],
     url='www.reveda.eu',
-    license='Proprietary',
+    license='Mozilla Public License 2.0 with Commons Clause',
     author='Murat Eskiyerli',
     author_email='eskiyerli@reveda.eu',
     description=''
