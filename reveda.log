@@ -299,26 +299,3 @@
 2023-01-26 18:06:48,327 - __main__ - WARNING - writing netlist
 2023-01-26 18:07:19,481 - __main__ - WARNING - writing netlist
 2023-01-26 18:07:19,515 - __main__ - WARNING - Netlisting finished
-2023-01-27 10:00:34,696 - __main__ - WARNING - writing netlist
-2023-01-27 10:00:34,709 - __main__ - WARNING - Netlisting finished
-2023-01-27 10:01:34,913 - __main__ - WARNING - writing netlist
-2023-01-27 10:01:34,926 - __main__ - WARNING - Netlisting finished
-2023-01-27 10:01:58,659 - __main__ - WARNING - writing netlist
-2023-01-27 10:01:58,667 - __main__ - WARNING - Netlisting finished
-2023-01-27 10:03:09,716 - __main__ - WARNING - writing netlist
-2023-01-27 10:03:09,761 - __main__ - WARNING - Netlisting finished
-2023-01-27 10:04:27,412 - __main__ - WARNING - writing netlist
-2023-01-27 10:04:27,466 - __main__ - WARNING - Netlisting finished
-2023-01-27 10:06:40,953 - __main__ - WARNING - Replacing the cell view.
-2023-01-27 10:06:40,956 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\designs\higherOrderFilter\symbol.json
-2023-01-27 15:20:21,561 - __main__ - WARNING - Writing netlist
-2023-01-27 15:20:21,628 - __main__ - WARNING - Netlisting finished
-2023-01-27 15:22:27,267 - __main__ - WARNING - Writing netlist
-2023-01-27 15:22:27,318 - __main__ - WARNING - Netlisting finished
-2023-01-27 15:24:31,756 - __main__ - WARNING - Writing netlist
-2023-01-27 15:24:31,804 - __main__ - WARNING - Netlisting finished
-2023-01-27 15:25:16,629 - __main__ - WARNING - Writing netlist
-2023-01-27 15:25:16,692 - __main__ - WARNING - Netlisting finished
-2023-01-27 15:39:28,027 - __main__ - WARNING - Writing netlist
-2023-01-27 15:50:36,260 - __main__ - WARNING - Writing netlist
-2023-01-27 15:50:36,352 - __main__ - INFO - Netlisting finished
