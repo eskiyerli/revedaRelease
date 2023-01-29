@@ -21,11 +21,11 @@
 
 import pathlib
 
-from PySide6.QtCore import (Qt)
-from PySide6.QtGui import (QStandardItemModel)
+from PySide6.QtCore import (Qt, QDir)
+from PySide6.QtGui import (QStandardItemModel, QStandardItem, QCursor, QAction)
 from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog,
                                QFormLayout, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout,
-                               QPushButton, QGroupBox, )
+                               QPushButton, QGroupBox, QTableView, QMenu, )
 
 import backend.schBackEnd as scb
 import common.shape as shp
@@ -278,12 +278,13 @@ class renameLibDialog(QDialog):
 
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-
+        formBox = QGroupBox('Rename Library')
         layout = QVBoxLayout()
         formLayout = QFormLayout()
         self.newLibraryName = edf.longLineEdit()
         formLayout.addRow(edf.boldLabel('New Library Name:', self), self.newLibraryName)
-        layout.addLayout(formLayout)
+        formBox.setLayout(formLayout)
+        layout.addWidget(formBox)
         layout.addSpacing(40)
         layout.addWidget(self.buttonBox)
         self.setLayout(layout)
@@ -562,3 +563,84 @@ class appProperties(QDialog):
     def onSimPathButtonClicked(self):
         self.simPathEdit.setText(QFileDialog.getExistingDirectory(self, caption =
         'Simulation path:'))
+
+class libraryPathsModel(QStandardItemModel):
+    def __init__(self, libraryDict):
+        super().__init__()
+        self.libraryDict = libraryDict
+        self.setHorizontalHeaderLabels(['Library Name', 'Library Path'])
+        for key, value in self.libraryDict.items():
+            libName = QStandardItem(key)
+            libPath = QStandardItem(str(value))
+            self.appendRow([libName, libPath])
+        self.appendRow([QStandardItem('Right click here...'), QStandardItem('')])
+
+
+class libraryPathsTableView(QTableView):
+    def __init__(self, model,logger):
+        super().__init__()
+        self.model = model
+        self.logger = logger
+        self.setModel(self.model)
+        self.setShowGrid(True)
+        self.setColumnWidth(0,200)
+        self.setColumnWidth(1,400)
+        self.fileDialog = QFileDialog()
+        self.fileDialog.setFileMode(QFileDialog.Directory)
+        self.libNameEditList = list()
+        self.libPathEditList = list()
+        for row in range(self.model.rowCount()):
+            self.libPathEditList.append(edf.longLineEdit())
+            self.setIndexWidget(self.model.index(row,1),self.libPathEditList[-1])
+            self.libPathEditList[-1].setText(self.model.item(row,1).text())
+
+
+    def contextMenuEvent(self, event) -> None:
+        self.menu = QMenu(self)
+        try:
+            selectedIndex = self.selectedIndexes()[0]
+        except IndexError:
+            self.model.appendRow([QStandardItem('Click here...'), QStandardItem('')])
+            selectedIndex = self.model.index(0,0)
+        removePathAction = self.menu.addAction('Remove Path')
+        removePathAction.triggered.connect(lambda : self.removeLibraryPath(selectedIndex))
+        addPathAction = self.menu.addAction('Add Library Path')
+        addPathAction.triggered.connect(lambda : self.addLibraryPath(selectedIndex))
+        self.menu.exec(event.globalPos())
+
+    def removeLibraryPath(self,index):
+        self.model.takeRow(index.row())
+        self.logger.info('Removed Library Path.')
+
+    def addLibraryPath(self,index):
+        row = index.row()
+        self.selectRow(row)
+        self.fileDialog.exec()
+        if self.fileDialog.selectedFiles():
+            self.selectedDirectory = QDir(self.fileDialog.selectedFiles()[0])
+        self.model.insertRow(row,[QStandardItem(self.selectedDirectory.dirName()),
+                                  QStandardItem(self.selectedDirectory.absolutePath())])
+
+
+class libraryPathEditorDialog(QDialog):
+    def __init__(self, parent, libraryDict: dict):
+        super().__init__(parent)
+        self.parent = parent
+        self.logger = self.parent.logger
+        self.libraryDict = libraryDict
+        self.setWindowTitle('Library Paths Dialogue')
+        self.setMinimumSize(700,300)
+        self.mainLayout = QVBoxLayout()
+        self.pathsBox = QGroupBox()
+        self.boxLayout = QVBoxLayout()
+        self.pathsBox.setLayout(self.boxLayout)
+        self.pathsModel = libraryPathsModel(self.libraryDict)
+        self.tableView = libraryPathsTableView(self.pathsModel,self.logger)
+        self.boxLayout.addWidget(self.tableView)
+        self.mainLayout.addWidget(self.pathsBox)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)

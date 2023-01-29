@@ -19,7 +19,7 @@
 #   License: Mozilla Public License 2.0
 #   Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
-import copy
+from copy import deepcopy
 import datetime
 import json
 import math
@@ -33,7 +33,7 @@ from PySide6.QtCore import (QDir, Qt, QRect, QPoint, QMargins, QRectF, QProcess,
                             QRunnable, Signal, Slot)
 from PySide6.QtGui import (QAction, QKeySequence, QColor, QIcon, QPainter, QPen, QImage,
                            QStandardItemModel, QCursor, QUndoStack, QTextDocument,
-                           QGuiApplication, QCloseEvent, QFont,QStandardItem)
+                           QGuiApplication, QCloseEvent, QFont, QStandardItem)
 from PySide6.QtPrintSupport import (QPrintDialog, )
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayout,
                                QGraphicsScene, QHBoxLayout, QLabel, QLineEdit,
@@ -62,11 +62,11 @@ class editorWindow(QMainWindow):
     Base class for editor windows.
     """
 
-    def __init__(self, viewItem:scb.viewItem, libraryDict: dict,
+    def __init__(self, viewItem: scb.viewItem, libraryDict: dict,
                  libraryView):  # file is a pathlib.Path object
         super().__init__()
         self.viewItem = viewItem
-        self.file = self.viewItem.data(Qt.UserRole+2)
+        self.file = self.viewItem.data(Qt.UserRole + 2)
         self.cellItem = self.viewItem.parent()
         self.cellName = self.cellItem.cellName
         self.libItem = self.cellItem.parent()
@@ -403,7 +403,7 @@ class editorWindow(QMainWindow):
 
 
 class schematicEditor(editorWindow):
-    def __init__(self, viewItem:scb.viewItem, libraryDict: dict, libraryView) -> None:
+    def __init__(self, viewItem: scb.viewItem, libraryDict: dict, libraryView) -> None:
         super().__init__(viewItem, libraryDict, libraryView)
         self.setWindowTitle(f"Schematic Editor - {self.cellName}")
         self.setWindowIcon(QIcon(":/icons/layer-shape.png"))
@@ -592,7 +592,7 @@ class schematicEditor(editorWindow):
         self.centralW.scene.loadSchematicCell(items)
 
     def createConfigView(self, configItem: scb.viewItem, configDict: dict,
-                         newConfigDict:dict,netlistedCells: set):
+                         newConfigDict: dict, netlistedCells: set):
 
         sceneSymbolSet = self.centralW.scene.findSceneSymbolSet()
         for item in sceneSymbolSet:
@@ -602,7 +602,7 @@ class schematicEditor(editorWindow):
             viewNames = [viewItem.viewName for viewItem in viewItems]
             netlistableViews = [viewItemName for viewItemName in self.switchViewList if
                                 viewItemName in viewNames]
-            itemSwitchViewList = copy.deepcopy(netlistableViews)
+            itemSwitchViewList = deepcopy(netlistableViews)
             viewDict = dict(zip(viewNames, viewItems))
             if cellItem.cellName not in netlistedCells:
                 cellLine = configDict.get(cellItem.cellName)
@@ -614,9 +614,9 @@ class schematicEditor(editorWindow):
                             newConfigDict.update({
                                 cellItem.cellName: [libItem.libraryName, viewName,
                                                     itemSwitchViewList, ]})
-                            schematicObj = schematicEditor(
-                                viewDict[viewName],
-                                self.libraryDict, self.libraryView, )
+                            schematicObj = schematicEditor(viewDict[viewName],
+                                                           self.libraryDict,
+                                                           self.libraryView, )
                             schematicObj.loadSchematic()
                             schematicObj.createConfigView(configItem, configDict,
                                                           newConfigDict, netlistedCells)
@@ -628,7 +628,6 @@ class schematicEditor(editorWindow):
                             break
                 netlistedCells.append(cellItem.cellName)
 
-
     def closeEvent(self, event):
         self.centralW.scene.saveSchematicCell(self.file)
         self.libraryView.openViews.pop(f"{self.libName}_{self.cellName}_{self.viewName}")
@@ -638,8 +637,9 @@ class schematicEditor(editorWindow):
         dlg = fd.netlistExportDialogue(self)
         dlg.libNameEdit.setText(self.libName)
         dlg.cellNameEdit.setText(self.cellName)
-        configViewItems = [self.cellItem.child(row) for row in range(
-            self.cellItem.rowCount()) if self.cellItem.child(row).viewType == 'config']
+        configViewItems = [self.cellItem.child(row) for row in
+                           range(self.cellItem.rowCount()) if
+                           self.cellItem.child(row).viewType == 'config']
         netlistableViews = [self.viewItem.viewName]
         for item in configViewItems:
             # is there a better way of doing it?
@@ -657,20 +657,21 @@ class schematicEditor(editorWindow):
                                    dlg.switchViewEdit.text().split(",")]
             self.stopViewList = [dlg.stopViewEdit.text().strip()]
             simDirPathObj = pathlib.Path(self.netlistDir)
-            subDirPathObj= simDirPathObj.joinpath(self.cellName)
-            subDirPathObj.mkdir(parents=True,exist_ok = True)
+            subDirPathObj = simDirPathObj.joinpath(self.cellName)
+            subDirPathObj.mkdir(parents=True, exist_ok=True)
             netlistFilePathObj = subDirPathObj.joinpath(f'{self.cellName}_'
-                                        f'{selectedViewName}').with_suffix('.cir')
+                                                        f'{selectedViewName}').with_suffix(
+                '.cir')
             if 'schematic' in dlg.viewNameCombo.currentText():
-                netlistObj = xyceNetlist(self,netlistFilePathObj)
+                netlistObj = xyceNetlist(self, netlistFilePathObj)
             else:
-                netlistObj =xyceNetlist(self,netlistFilePathObj, True)
-                configItem = libm.findViewItem(self.libraryView.libraryModel,self.libName,
-                                               self.cellName,
+                netlistObj = xyceNetlist(self, netlistFilePathObj, True)
+                configItem = libm.findViewItem(self.libraryView.libraryModel,
+                                               self.libName, self.cellName,
                                                dlg.viewNameCombo.currentText())
-                with configItem.data(Qt.UserRole +2 ).open(mode='r') as f:
+                with configItem.data(Qt.UserRole + 2).open(mode='r') as f:
                     netlistObj.configDict = json.load(f)[2]
-            xyceNetlRunner = runXNetlistThread(netlistObj,self)
+            xyceNetlRunner = runXNetlistThread(netlistObj, self)
             self.logger.info('Writing netlist')
             self.appMainW.threadPool.start(xyceNetlRunner)
 
@@ -682,7 +683,7 @@ class schematicEditor(editorWindow):
 
 
 class symbolEditor(editorWindow):
-    def __init__(self, viewItem:scb.viewItem, libraryDict: dict, libraryView):
+    def __init__(self, viewItem: scb.viewItem, libraryDict: dict, libraryView):
         super().__init__(viewItem, libraryDict, libraryView)
         self.setWindowTitle(f"Symbol Editor - {self.cellName}")
         self._symbolActions()
@@ -1431,7 +1432,7 @@ class symbol_scene(editor_scene):
         View symbol properties dialog.
         """
         # copy symbol attribute list to another list by deepcopy to be safe
-        attributeListCopy = copy.deepcopy(self.attributeList)
+        attributeListCopy = deepcopy(self.attributeList)
         symbolPropDialogue = pdlg.symbolLabelsDialogue(self.parent.parent, self.items(),
                                                        attributeListCopy)
         if symbolPropDialogue.exec() == QDialog.Accepted:
@@ -1452,7 +1453,7 @@ class symbol_scene(editor_scene):
                     localAttributeList.append(se.symbolAttribute(item.text(),
                                                                  symbolPropDialogue.attributeDefList[
                                                                      i].text()))
-                self.attributeList = copy.deepcopy(localAttributeList)
+                self.attributeList = deepcopy(localAttributeList)
 
 
 class schematic_scene(editor_scene):
@@ -1759,8 +1760,8 @@ class schematic_scene(editor_scene):
         """
         Creates a netlist from the schematic.
         """
-        pass
-        # netlistObj = xyceNetlist(self, netlistFile, writeNetlist)
+        pass  # netlistObj = xyceNetlist(self, netlistFile, writeNetlist)
+
     #
     # def recursiveNetlisting(self, cirFile, writeNetlist):
     #     '''
@@ -2098,7 +2099,7 @@ class schematic_scene(editor_scene):
                 for item in symbolInstance.labels.values():
                     item.labelDefs()
                 return symbolInstance
-            except jsondecoder.JSONDecodeError:
+            except json.JSONDecodeError:
                 # print("Invalid JSON file")
                 self.logger.warning("Invalid JSON File")
 
@@ -2399,7 +2400,8 @@ class schematic_scene(editor_scene):
                                                      selectedView)
 
                         if "symbol" in selectedView:
-                            symbolWindow = symbolEditor(viewItem,libraryDict,libraryView, )
+                            symbolWindow = symbolEditor(viewItem, libraryDict,
+                                                        libraryView, )
                             symbolWindow.loadSymbol()
                             symbolWindow.parentView = self.parent.parent
                             symbolWindow.show()
@@ -2542,7 +2544,8 @@ class libraryBrowser(QMainWindow):
         self.libFilePath = self.appMainW.libraryPathObj
         self.libBrowserCont = libraryBrowserContainer(self)
         self.setCentralWidget(self.libBrowserCont)
-        self.libraryModel = self.libBrowserCont.designView.libraryModel
+        self.designView = self.libBrowserCont.designView
+        self.libraryModel = self.designView.libraryModel
 
     def _createMenuBar(self):
         self.browserMenubar = self.menuBar()
@@ -2618,20 +2621,15 @@ class libraryBrowser(QMainWindow):
         toolbar.addAction(self.openCellViewAction)
         toolbar.addAction(self.deleteCellViewAction)
 
-    def writeLibDefFile(self, libPathDict: dict, libFilePath: pathlib.Path,
-                        logger) -> None:
+    def writeLibDefFile(self, libPathDict: dict, libFilePath: pathlib.Path) -> None:
 
-        # yaml = YAML()
-        # yaml.explicit_start = True
-        # yaml.default_flow_style = False
         libTempDict = dict(zip(libPathDict.keys(), map(str, libPathDict.values())))
         try:
             with libFilePath.open(mode="w") as f:
                 json.dump({"libdefs": libTempDict}, f, indent=4)
-        #         yaml.dump(libDefDict, libFilePath)
-        #     logger.warning('writing library definition file.')
+            self.logger.info(f'Wrote library definition file in {libFilePath}')
         except IOError:
-            logger.error(f"Cannot save library definitions in {libFilePath}")
+            self.logger.error(f"Cannot save library definitions in {libFilePath}")
 
     def openLibClick(self):
         """
@@ -2647,38 +2645,41 @@ class libraryBrowser(QMainWindow):
             # create an empty file to denote it is a design library.
             # TODO: add some library information to this file.
             libPathObj.joinpath("reveda.lib").touch(exist_ok=True)
-            self.libBrowserCont.designView.reworkDesignLibrariesView()
-            self.writeLibDefFile(self.libraryDict, self.libFilePath, self.logger)
+            # self.designView.reworkDesignLibrariesView()
+            self.libraryModel.populateLibrary(libPathObj)
+            self.writeLibDefFile(self.libraryDict, self.libFilePath)
 
     def closeLibClick(self):
         libCloseDialog = fd.closeLibDialog(self.libraryDict, self)
         if libCloseDialog.exec() == QDialog.Accepted:
             libName = libCloseDialog.libNamesCB.currentText()
+            libItem = libm.getLibItem(self.libraryModel, libName)
             try:
                 self.libraryDict.pop(libName)
             except KeyError:
                 self.logger.error(f"{libName} not found.")
             finally:
-                self.libBrowserCont.designView.reworkDesignLibrariesView()
+                self.libraryModel.rootItem.removeRow(
+                    libItem)  # self.designView.reworkDesignLibrariesView()
 
     def libraryEditorClick(self, s):
         """
         Open library editor dialogue.
         """
-        pathEditDlg = pdlg.libraryPathEditorDialog(self)
-        # dlg.buttonBox.clicked(dlg.buttonBox.)
-
+        tempDict = deepcopy(self.libraryDict)
+        pathEditDlg = fd.libraryPathEditorDialog(self, tempDict)
+        self.libraryDict.clear()
         if pathEditDlg.exec() == QDialog.Accepted:
-            tempLibDict = {}
-            for item in pathEditDlg.libraryEditNameList:
-                if item.text().strip() != "":  # check if the key is empty
-                    tempLibDict[item.text()] = pathlib.Path(item.pathEditField.text())
-            self.reworkLibraryModel(tempLibDict)
-            #  now update root libraryDict
-            # self.parent.libraryDict = self.libraryDict
-            self.appMainW.libraryDict = tempLibDict
-            self.libBrowserCont.designView.setModel(
-                self.libBrowserCont.designView.libraryModel)
+            model = pathEditDlg.pathsModel
+            for row in range(model.rowCount()):
+
+                if model.itemFromIndex(model.index(row, 1)).text().strip():
+                    self.libraryDict[model.itemFromIndex(
+                        model.index(row, 0)).text().strip()] = pathlib.Path(
+                        model.itemFromIndex(model.index(row, 1)).text().strip())
+        self.writeLibDefFile(self.libraryDict,
+                             pathlib.Path.cwd().joinpath('library.json'))
+        self.designView.reworkDesignLibrariesView()
 
     def newCellClick(self, s):
         dlg = fd.createCellDialog(self, self.libraryModel)
@@ -2737,8 +2738,7 @@ class libraryBrowser(QMainWindow):
                 if dlg.exec() == QDialog.Accepted:
                     selectedSchName = dlg.viewNameCB.currentText()
                     selectedSchItem = libm.getViewItem(cellItem, selectedSchName)
-                    schematicWindow = schematicEditor(selectedSchItem,
-                                                      self.libraryDict,
+                    schematicWindow = schematicEditor(selectedSchItem, self.libraryDict,
                                                       self.libBrowserCont.designView, )
                     schematicWindow.loadSchematic()
                     switchViewList = [viewName.strip() for viewName in
@@ -2750,9 +2750,8 @@ class libraryBrowser(QMainWindow):
                     schematicWindow.configDict = dict()  # clear config dictionary
                     schematicWindow.netlistedCells = list()
                     # clear netlisted cells list
-                    schematicWindow.createConfigView(viewItem,
-                                                     schematicWindow.configDict, [],
-                                                     schematicWindow.netlistedCells, )
+                    schematicWindow.createConfigView(viewItem, schematicWindow.configDict,
+                                                     [], schematicWindow.netlistedCells, )
                     configFilePathObj = viewItem.data(Qt.UserRole + 2)
                     items = list()
                     items.insert(0, {"cellView": "config"})
@@ -2761,8 +2760,8 @@ class libraryBrowser(QMainWindow):
                     with configFilePathObj.open(mode="w+") as configFile:
                         json.dump(items, configFile, indent=4)
 
-                    self.openConfigEditWindow(schematicWindow.configDict,
-                                              selectedSchItem, viewItem)
+                    self.openConfigEditWindow(schematicWindow.configDict, selectedSchItem,
+                                              viewItem)
             case "schematic":
                 scb.createCellView(self.appMainW, viewItem.viewName, cellItem)
                 schematicWindow = schematicEditor(viewItem, self.libraryDict,
@@ -2788,9 +2787,8 @@ class libraryBrowser(QMainWindow):
         configWindow.centralWidget.libraryNameEdit.setText(libItem.libraryName)
         cellItem = viewItem.parent()
         configWindow.centralWidget.cellNameEdit.setText(cellItem.cellName)
-        schViewsList = [cellItem.child(row).viewName for row in
-                        range(cellItem.rowCount()) if
-                        cellItem.child(row).viewType == "schematic"]
+        schViewsList = [cellItem.child(row).viewName for row in range(cellItem.rowCount())
+                        if cellItem.child(row).viewType == "schematic"]
         configWindow.centralWidget.viewNameCB.addItems(schViewsList)
         configWindow.centralWidget.viewNameCB.setCurrentText(schematicName)
         configWindow.centralWidget.switchViewsEdit.setText(
@@ -2855,7 +2853,7 @@ class libraryBrowser(QMainWindow):
                     items = json.load(tempFile)
                 viewName = items[0]["cellView"]
                 schematicName = items[1]["reference"]
-                schViewItem = libm.getViewItem(cellItem,schematicName)
+                schViewItem = libm.getViewItem(cellItem, schematicName)
                 configDict = items[2]
                 self.openConfigEditWindow(configDict, schViewItem, viewItem)
 
@@ -2867,22 +2865,6 @@ class libraryBrowser(QMainWindow):
         except OSError as e:
             # print(f"Error:{e.strerror}")
             self.logger.warning(f"Error:{e.strerror}")
-
-    def reworkLibraryModel(self, tempLibDict: dict):
-        """
-        Recreate library.yaml file from library editor dialog
-        """
-        # self.parent.centralWidget.treeView.addLibrary()
-        self.libraryDict = {}  # now empty the library dict
-        for key, value in tempLibDict.items():
-            self.libraryDict[key] = value
-        self.libBrowserCont.designView.libraryModel.clear()
-        self.libBrowserCont.designView.initModel()
-        self.libBrowserCont.designView.setModel(self.libraryModel)
-        for designPath in self.libraryDict.values():  # type: pathlib.Path
-            self.libBrowserCont.designView.populateLibrary(designPath)
-        self.libBrowserCont.designView.libraryDict = self.libraryDict
-        self.writeLibDefFile(self.libraryDict, self.libFilePath, self.logger)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.appMainW.libraryBrowser = None
@@ -2916,41 +2898,15 @@ class designLibrariesView(QTreeView):
         self.logger = self.appMainW.logger
         self.selectedItem = None
         # library model is based on qstandarditemmodel
-        self.initModel()
+        self.libraryModel = designLibrariesModel(self.libraryDict)
         self.setSortingEnabled(True)
         self.setUniformRowHeights(True)
         self.expandAll()
         # iterate design library directories. Designpath is the path of library
         # obtained from libraryDict
-        for designPath in self.libraryDict.values():  # type: Path
-            self.populateLibrary(designPath)
+        # for designPath in self.libraryDict.values():  # type: Path
+        #     self.populateLibrary(designPath)
         self.setModel(self.libraryModel)
-
-    def initModel(self):
-        self.libraryModel = QStandardItemModel()
-        self.libraryModel.setHorizontalHeaderLabels(["Libraries"])
-        self.rootItem = self.libraryModel.invisibleRootItem()
-
-    def populateLibrary(self, designPath):  # designPath: Path
-        """
-        Populate library view.
-        """
-        # assert isinstance(designPath,pathlib.Path)
-        if designPath.joinpath("reveda.lib").exists():
-            libraryItem = self.addLibraryToModel(designPath)
-            cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
-            for cell in cellList:  # type: str
-                cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
-                viewList = [view.name for view in designPath.joinpath(cell).iterdir() if
-                            view.suffix == ".json"]
-                for view in viewList:
-                    self.addViewToModel(designPath.joinpath(cell, view), cellItem)
-
-    # library related methods
-    def addLibraryToModel(self, designPath):
-        libraryEntry = scb.libraryItem(designPath)
-        self.rootItem.appendRow(libraryEntry)
-        return libraryEntry
 
     def removeLibrary(self):
         button = QMessageBox.question(self, "Library Deletion",
@@ -2966,18 +2922,12 @@ class designLibrariesView(QTreeView):
         oldLibraryName = self.selectedItem.libraryName
         dlg = fd.renameLibDialog(self, oldLibraryName)
         if dlg.exec() == QDialog.Accepted:
-            self.logger.warning("OK")
-
-    # cell related methods
-    def addCellToModel(self, cellPath, parentItem):
-        cellEntry = scb.cellItem(cellPath)
-        parentItem.appendRow(cellEntry)
-        return cellEntry
-
-    # cellview related methods
-    def addViewToModel(self, viewPath, parentItem):
-        viewEntry = scb.viewItem(viewPath)
-        parentItem.appendRow(viewEntry)  # return viewEntry
+            newLibraryName = dlg.newLibraryName.text().strip()
+            libraryItem = libm.getLibItem(self.libraryModel, oldLibraryName)
+            libraryItem.setText(newLibraryName)
+            oldLibraryPath = libraryItem.data(Qt.UserRole + 2)
+            newLibraryPath = oldLibraryPath.parent.joinpath(newLibraryName)
+            oldLibraryPath.rename(newLibraryPath)
 
     def createCell(self):
         dlg = fd.createCellDialog(self, self.libraryModel)
@@ -3080,10 +3030,8 @@ class designLibrariesView(QTreeView):
         Recreate library model from libraryDict.
         """
         self.libraryModel.clear()
-        self.initModel()
+        self.libraryModel = designLibrariesModel(self.appMainW.libraryDict)
         self.setModel(self.libraryModel)
-        for designPath in self.libraryDict.values():  # type: Path
-            self.populateLibrary(designPath)
 
     # context menu
     def contextMenuEvent(self, event):
@@ -3119,6 +3067,7 @@ class designLibrariesModel(QStandardItemModel):
         self.libraryDict = libraryDict
         super().__init__()
         self.rootItem = self.invisibleRootItem()
+        self.setHorizontalHeaderLabels(["Libraries"])
         for designPath in self.libraryDict.values():
             self.populateLibrary(designPath)
 
@@ -3151,6 +3100,36 @@ class designLibrariesModel(QStandardItemModel):
         parentItem.appendRow(viewEntry)  # return viewEntry
 
 
+class libraryPathsModel(QStandardItemModel):
+    def __init__(self, libraryDict):
+        super().__init__()
+        self.libraryDict = libraryDict
+        self.setHorizontalHeaderLabels(['Library Name', 'Library Path'])
+        for key, value in self.libraryDict.items():
+            libName = QStandardItem(key)
+            libPath = QStandardItem(str(value))
+            self.appendRow(libName, libPath)
+        self.appendRow(QStandardItem('Click here...'), QStandardItem(''))
+
+
+class libraryPathsTableView(QTableView):
+    def __init__(self, model):
+        self.model = model
+        self.setModel(self.model)
+        self.setShowGrid(True)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+
+    def contextMenuEvent(self, event) -> None:
+        self.menu = QMenu(self)
+        removePathAction = QAction('Remove Library Path...', self.menu)
+        removePathAction.triggered.connect(lambda: self.removeLibraryPath(event))
+        self.menu.addAction(removePathAction)
+        self.menu.popup(QCursor.pos())
+
+    def removeLibraryPath(self, event):
+        print('remove library path')
+
+
 class symbolViewsModel(designLibrariesModel):
     def __init__(self, libraryDict):
         super().__init__(libraryDict)
@@ -3172,18 +3151,16 @@ class symbolViewsModel(designLibrariesModel):
 
 class xyceNetlist:
     def __init__(self, schematic: schematicEditor, filePathObj: pathlib.Path,
-                 use_config:bool = False):
+                 use_config: bool = False):
         self.filePathObj = filePathObj
         self.schematic = schematic
         self.scene = self.schematic.centralW.scene
         self.libraryDict = self.schematic.libraryDict
         self.libraryView = self.schematic.libraryView
         self._configDict = None
-        self.libItem = libm.getLibItem(
-            self.schematic.libraryView.libraryModel,
-            self.schematic.libName, )
-        self.cellItem = libm.getCellItem(self.libItem,
-                                         self.schematic.cellName)
+        self.libItem = libm.getLibItem(self.schematic.libraryView.libraryModel,
+                                       self.schematic.libName, )
+        self.cellItem = libm.getCellItem(self.libItem, self.schematic.cellName)
         self.use_config = use_config
         self.switchViewList = schematic.switchViewList
         self.netlistedViews = dict()
@@ -3207,12 +3184,12 @@ class xyceNetlist:
         return self._configDict
 
     @configDict.setter
-    def configDict(self, value:dict):
+    def configDict(self, value: dict):
         if value:
             self._configDict = value
 
     def recursiveNetlisting(self, schematic: schematicEditor, cirFile,
-                            use_config:bool = False):
+                            use_config: bool = False):
         """
         Recursively traverse all sub-circuits and netlist them.
         """
@@ -3240,9 +3217,8 @@ class xyceNetlist:
         for view in netlistableViews:
             if view in viewDict.keys():
                 if viewDict[view].viewType == "schematic":
-                    schematicObj = schematicEditor(
-                        viewDict[view], self.libraryDict,
-                        self.libraryView, )
+                    schematicObj = schematicEditor(viewDict[view], self.libraryDict,
+                                                   self.libraryView, )
                     schematicObj.loadSchematic()
                     pins = " ".join(list(item.pinNetMap.keys()))
                     nets = " ".join(list(item.pinNetMap.values()))
@@ -3253,23 +3229,20 @@ class xyceNetlist:
                         self.recursiveNetlisting(schematicObj, cirFile)
                         cirFile.write(".ENDS\n")
                 elif viewDict[view].viewType == "veriloga":
-                    with viewDict[view].data(Qt.UserRole + 2).open(
-                            mode="r") as vaview:
+                    with viewDict[view].data(Qt.UserRole + 2).open(mode="r") as vaview:
                         items = json.load(vaview)
                     netlistLine = items[3]['netlistLine']
                     netlistLine = netlistLine.replace("[@instName]",
                                                       f"{item.instanceName}")
                     for pinName, netName in item.pinNetMap.items():
-                        netlistLine = netlistLine.replace(f"[|{pinName}:%]",
-                                                          f"{netName}")
+                        netlistLine = netlistLine.replace(f"[|{pinName}:%]", f"{netName}")
                     for labelItem in item.labels.values():
                         if labelItem.labelDefinition in netlistLine:
-                            netlistLine = netlistLine.replace(
-                                labelItem.labelDefinition, labelItem.labelText)
+                            netlistLine = netlistLine.replace(labelItem.labelDefinition,
+                                                              labelItem.labelText)
                     cirFile.write(f"{netlistLine}\n")
-                    modelParamsLine = ', '.join(' = '.join((key, val)) for (key,
-                                                                            val) in
-                                                item.attr.items())
+                    modelParamsLine = ', '.join(
+                        ' = '.join((key, val)) for (key, val) in item.attr.items())
                     modelLine = f'.MODEL {item.labels["vaModel"].labelValue} ' \
                                 f'{item.labels["vaModule"].labelValue} {modelParamsLine}'
                     cirFile.write(f'{modelLine}\n')
@@ -3277,15 +3250,14 @@ class xyceNetlist:
                                                           "veriloga", ]
                 elif viewDict[view].viewType == "symbol":
                     cirFile.write(f"{item.createNetlistLine()}\n")
-                    self.netlistedViews[item.cellName] = [libItem.libraryName,
-                                                          "symbol", ]
+                    self.netlistedViews[item.cellName] = [libItem.libraryName, "symbol", ]
                 break
 
 
 class configViewEdit(QMainWindow):
     def __init__(self, appmainW, schViewItem, configDict, viewItem):
         super().__init__(parent=appmainW)
-        self.appmainW = appmainW # app mainwindow
+        self.appmainW = appmainW  # app mainwindow
         self.schViewItem = schViewItem
         self.configDict = configDict
         self.viewItem = viewItem
@@ -3326,25 +3298,25 @@ class configViewEdit(QMainWindow):
         model = self.centralWidget.confModel
         for i in range(model.rowCount()):
             viewList = [item.strip() for item in
-                     model.itemFromIndex(model.index(i, 3)).text().split(',')]
+                        model.itemFromIndex(model.index(i, 3)).text().split(',')]
             self.configDict[model.item(i, 1).text()] = [model.item(i, 0).text(),
                                                         model.item(i, 2).text(), viewList]
         if self.appmainW.libraryBrowser is None:
             self.appmainW.createLibraryBrowser()
-        topSchematicWindow = schematicEditor(self.schViewItem,
-                                             self.appmainW.libraryDict,
+        topSchematicWindow = schematicEditor(self.schViewItem, self.appmainW.libraryDict,
                                              self.appmainW.libraryBrowser.libBrowserCont.designView)
         topSchematicWindow.loadSchematic()
-        topSchematicWindow.createConfigView(self.viewItem, self.configDict,
-                                            newConfigDict,[])
+        topSchematicWindow.createConfigView(self.viewItem, self.configDict, newConfigDict,
+                                            [])
         self.configDict = newConfigDict
 
         self.centralWidget.confModel = configModel(self.configDict)
         # self.centralWidget.configDictGroup.setVisible(False)
-        self.centralWidget.configDictLayout.removeWidget(self.centralWidget.configViewTable)
+        self.centralWidget.configDictLayout.removeWidget(
+            self.centralWidget.configViewTable)
         self.centralWidget.configViewTable = configTable(self.centralWidget.confModel)
-        self.centralWidget.configDictLayout.addWidget(self.centralWidget.configViewTable)
-        # self.centralWidget.configDictGroup.setVisible(True)
+        self.centralWidget.configDictLayout.addWidget(
+            self.centralWidget.configViewTable)  # self.centralWidget.configDictGroup.setVisible(True)
 
     def saveClick(self):
         configFilePathObj = self.viewItem.data(Qt.UserRole + 2)
@@ -3354,6 +3326,7 @@ class configViewEdit(QMainWindow):
         items.insert(2, self.configDict)
         with configFilePathObj.open(mode="w+") as configFile:
             json.dump(items, configFile, indent=4)
+
 
 class configViewEditContainer(QWidget):
     def __init__(self, parent):
@@ -3417,8 +3390,8 @@ class configTable(QTableView):
             items = [item.strip() for item in
                      self.model.itemFromIndex(self.model.index(row, 3)).text().split(',')]
             self.combos[-1].addItems(items)
-            self.combos[-1].setCurrentText(self.model.itemFromIndex(self.model.index(row,
-                                                                             2)).text())
+            self.combos[-1].setCurrentText(
+                self.model.itemFromIndex(self.model.index(row, 2)).text())
             self.setIndexWidget(self.model.index(row, 3), self.combos[-1])
 
     def updateModel(self):
@@ -3426,8 +3399,9 @@ class configTable(QTableView):
             item = QStandardItem(self.combos[row].currentText())
             self.model.setItem(row, 2, item)
 
+
 class runXNetlistThread(QRunnable):
-    def __init__(self, netlistObj:xyceNetlist, parent):
+    def __init__(self, netlistObj: xyceNetlist, parent):
         super().__init__()
         self.netlistObj = netlistObj
         self.parent = parent
@@ -3435,5 +3409,3 @@ class runXNetlistThread(QRunnable):
     def run(self) -> None:
         self.netlistObj.writeNetlist()
         self.parent.logger.info('Netlisting finished')
-
-

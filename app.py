@@ -88,7 +88,7 @@ class mainWindow(QMainWindow):
         self.runPath = pathlib.Path.cwd()
         # look for library.json file where the script is invoked
         self.libraryPathObj = self.runPath.joinpath("library.json")
-        self.libraryDict = self.readLibDefFile(self.libraryPathObj, self.logger)
+        self.libraryDict = self.readLibDefFile(self.libraryPathObj)
         self.textEditorPath = self.runPath  # placeholder path
         self.threadPool = QThreadPool.globalInstance()
         self.loadState()
@@ -356,23 +356,18 @@ class mainWindow(QMainWindow):
             except AttributeError:
                 self.logger.error('Attribute Error')
 
-    def readLibDefFile(self, libPath: pathlib.Path, logger):
+    def readLibDefFile(self, libPath: pathlib.Path):
         libraryDict = dict()
         data = dict()
         if libPath.exists():
             with libPath.open(mode="r") as f:
                 data = json.load(f)
-            # try:
-            #     with libPath.open(mode='r') as f:
-            #         data = json.load(f)
-            # except IOError:
-            #     logger.warning(f'No {str(libPath)} is found.')
             if data.get("libdefs") is not None:
                 for key, value in data["libdefs"].items():
                     libraryDict[key] = pathlib.Path(value)
             elif data.get("include") is not None:
                 for item in data.get("include"):
-                    libraryDict.update(self.readLibDefFile(pathlib.Path(item), logger))
+                    libraryDict.update(self.readLibDefFile(pathlib.Path(item)))
         return libraryDict
 
     def libDictUpdate(self):

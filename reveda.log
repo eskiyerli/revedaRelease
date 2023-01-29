@@ -299,3 +299,38 @@
 2023-01-26 18:06:48,327 - __main__ - WARNING - writing netlist
 2023-01-26 18:07:19,481 - __main__ - WARNING - writing netlist
 2023-01-26 18:07:19,515 - __main__ - WARNING - Netlisting finished
+2023-01-27 23:21:37,505 - __main__ - INFO - Wrote library definition file in {str(libFilePath}}
+2023-01-27 23:26:26,017 - __main__ - INFO - Wrote library definition file in {str(libFilePath}}
+2023-01-28 12:18:41,081 - __main__ - INFO - Wrote library definition file in {str(libFilePath}}
+2023-01-28 12:20:54,350 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-28 12:21:01,911 - __main__ - WARNING - OK
+2023-01-29 16:38:04,688 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:38:18,007 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:39:04,334 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:40:31,701 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:42:52,805 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:42:54,644 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:42:55,761 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:42:57,126 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:42:58,288 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:42:59,436 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:43:00,808 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:43:02,803 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:43:03,711 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:43:05,030 - __main__ - INFO - Removed Library Path.
+2023-01-29 16:44:12,636 - __main__ - INFO - Removed Library Path.
+2023-01-29 23:54:34,638 - __main__ - ERROR - Cannot save library definitions in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor
+2023-01-29 23:56:09,451 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-29 23:58:14,850 - __main__ - INFO - Removed Library Path.
+2023-01-29 23:58:16,567 - __main__ - INFO - Removed Library Path.
+2023-01-29 23:58:17,408 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-29 23:58:38,475 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 00:00:07,873 - __main__ - INFO - Removed Library Path.
+2023-01-30 00:00:09,313 - __main__ - INFO - Removed Library Path.
+2023-01-30 00:00:13,102 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 00:00:35,054 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 00:01:42,800 - __main__ - INFO - Removed Library Path.
+2023-01-30 00:01:44,683 - __main__ - INFO - Removed Library Path.
+2023-01-30 00:01:45,336 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 00:02:03,021 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 00:03:08,040 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
