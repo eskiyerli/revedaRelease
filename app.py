@@ -197,7 +197,7 @@ class mainWindow(QMainWindow):
         if self.libraryBrowser is None:
             # create libBrowser if it does not exist, but do not show it
             self.libraryBrowser = edw.libraryBrowser(self)
-        libraryModel = self.libraryBrowser.libBrowserCont.designView.libraryModel
+        libraryModel = self.libraryBrowser.libraryModel
         importDlg = fd.importVerilogaCellDialogue(libraryModel, self)
         importDlg.vaViewName.setText("veriloga")
         if importDlg.exec() == QDialog.Accepted:

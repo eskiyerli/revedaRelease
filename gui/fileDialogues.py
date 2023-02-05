@@ -30,6 +30,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog
 import backend.schBackEnd as scb
 import common.shape as shp
 import gui.editFunctions as edf
+import backend.libraryMethods as libm
 
 
 class createCellDialog(QDialog):
@@ -50,7 +51,7 @@ class createCellDialog(QDialog):
         self.libNamesCB.currentTextChanged.connect(self.selectLibrary)
         self.layout.addRow(edf.boldLabel("Library:"), self.libNamesCB)
         self.cellCB = QComboBox()
-        libItem = self.getLibItem(self.model, self.libNamesCB.currentText())
+        libItem = libm.getLibItem(self.model, self.libNamesCB.currentText())
         self.cellList = [libItem.child(i).cellName for i in range(libItem.rowCount())]
         self.cellCB.addItems(self.cellList)
         self.cellCB.setEditable(True)
@@ -63,37 +64,22 @@ class createCellDialog(QDialog):
         self.setLayout(self.layout)
 
     def selectLibrary(self):
-        libItem = self.getLibItem(self.model, self.libNamesCB.currentText())
+        libItem = libm.getLibItem(self.model, self.libNamesCB.currentText())
         cellList = [libItem.child(i).cellName for i in range(libItem.rowCount())]
         self.cellCB.clear()
         self.cellCB.addItems(cellList)
 
-    @staticmethod
-    def getLibItem(libraryModel: QStandardItemModel, libName: str) -> scb.libraryItem:
-        libItem = [item for item in libraryModel.findItems(libName) if
-                   item.data(Qt.UserRole + 1) == 'library'][0]
-        return libItem
-
-    @staticmethod
-    def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> scb.cellItem:
-        cellItems = [libItem.child(i) for i in range(libItem.rowCount()) if
-                     libItem.child(i).cellName == cellNameInp]
-        if cellItems:
-            return cellItems[0]
-        else:
-            return None
-
-    @staticmethod
-    def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
-        if cellItem is not None:
-            viewItems = [cellItem.child(i) for i in range(cellItem.rowCount()) if
-                         cellItem.child(i).text() == viewNameInp]
-        else:
-            return None
-        if viewItems:
-            return viewItems[0]
-        else:
-            return None
+    # @staticmethod
+    # def getLibItem(libraryModel: QStandardItemModel, libName: str) -> scb.libraryItem:
+    #     return libm.getLibItem(libraryModel, libName)
+    #
+    # @staticmethod
+    # def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> scb.cellItem:
+    #     return libm.getCellItem(libItem,cellNameInp)
+    #
+    # @staticmethod
+    # def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
+    #     return libm.getViewItem(cellItem, viewNameInp)
 
 
 class deleteCellDialog(createCellDialog):
@@ -120,11 +106,11 @@ class newCellViewDialog(createCellDialog):
 class selectCellViewDialog(deleteCellDialog):
     def __init__(self, parent, model):
         super().__init__(parent=parent, model=model)
-        libItem = self.getLibItem(self.model, self.libNamesCB.currentText())
+        libItem = libm.getLibItem(self.model, self.libNamesCB.currentText())
         self.setWindowTitle("Select CellView")
         self.cellCB.currentTextChanged.connect(self.cellNameChanged)
         self.viewCB = QComboBox()
-        cellItem = self.getCellItem(libItem, self.cellCB.currentText())
+        cellItem = libm.getCellItem(libItem, self.cellCB.currentText())
         self.viewCB.addItems(
             [cellItem.child(i).text() for i in range(cellItem.rowCount())])
 
@@ -134,8 +120,8 @@ class selectCellViewDialog(deleteCellDialog):
         self.setLayout(self.layout)
 
     def cellNameChanged(self):
-        libItem = self.getLibItem(self.model, self.libNamesCB.currentText())
-        cellItem = self.getCellItem(libItem, self.cellCB.currentText())
+        libItem = libm.getLibItem(self.model, self.libNamesCB.currentText())
+        cellItem = libm.getCellItem(libItem, self.cellCB.currentText())
         if cellItem is not None:
             viewList = [cellItem.child(i).text() for i in range(cellItem.rowCount())]
         else:

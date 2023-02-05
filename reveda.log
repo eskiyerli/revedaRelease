@@ -334,3 +334,49 @@
 2023-01-30 00:01:45,336 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
 2023-01-30 00:02:03,021 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
 2023-01-30 00:03:08,040 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 00:18:38,183 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 00:20:12,001 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 00:20:45,613 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-30 10:01:08,179 - __main__ - INFO - Removed Library Path.
+2023-01-30 10:01:09,520 - __main__ - INFO - Removed Library Path.
+2023-01-30 10:01:27,698 - __main__ - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\src\schematicEditor\library.json
+2023-01-30 10:01:43,182 - __main__ - ERROR - Please enter a cell name.
+2023-01-30 10:02:04,712 - __main__ - ERROR - Please enter a cell name.
+2023-01-30 11:52:24,771 - __main__ - ERROR - Please enter a cell name.
+2023-01-30 12:17:41,433 - __main__ - ERROR - Please enter a cell name.
+2023-01-30 12:18:01,180 - __main__ - ERROR - Please enter a cell name.
+2023-01-30 12:22:30,738 - __main__ - WARNING - Created ind cell at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind
+2023-01-30 12:22:46,705 - __main__ - WARNING - Created ind cell at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind
+2023-01-30 12:25:03,584 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 12:25:03,585 - __main__ - WARNING - Replacing the cell view.
+2023-01-30 12:25:03,587 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 14:10:47,375 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 14:10:47,376 - __main__ - WARNING - Replacing the cell view.
+2023-01-30 14:10:47,378 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 14:12:58,152 - __main__ - WARNING - Created ind at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\ind.json
+2023-01-30 14:13:19,452 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 14:13:19,452 - __main__ - WARNING - Replacing the cell view.
+2023-01-30 14:13:19,454 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 14:32:28,920 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 14:32:28,921 - __main__ - WARNING - Replacing the cell view.
+2023-01-30 14:32:28,923 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 14:36:50,544 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 14:37:35,265 - __main__ - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\ind\symbol.json
+2023-01-30 22:02:23,173 - __main__ - INFO - Removed Library Path.
+2023-01-30 22:02:24,477 - __main__ - INFO - Removed Library Path.
+2023-01-30 22:02:41,497 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-01-31 12:31:15,564 - __main__ - INFO - Removed Library Path.
+2023-01-31 12:31:18,157 - __main__ - INFO - Removed Library Path.
+2023-01-31 12:31:40,012 - __main__ - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\src\schematicEditor\library.json
+2023-01-31 18:47:39,254 - __main__ - INFO - Removed Library Path.
+2023-01-31 18:47:40,447 - __main__ - INFO - Removed Library Path.
+2023-01-31 18:47:47,872 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-02-01 10:26:32,474 - __main__ - INFO - Removed Library Path.
+2023-02-01 10:26:41,750 - __main__ - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\src\schematicEditor\library.json
+2023-02-01 21:43:28,875 - __main__ - INFO - Removed Library Path.
+2023-02-01 21:43:46,729 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
+2023-02-03 14:01:16,951 - __main__ - INFO - Removed Library Path.
+2023-02-03 14:01:32,487 - __main__ - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\src\schematicEditor\library.json
+2023-02-03 20:57:12,855 - __main__ - INFO - Removed Library Path.
+2023-02-03 20:57:15,804 - __main__ - INFO - Removed Library Path.
+2023-02-03 20:57:25,166 - __main__ - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/src/schematicEditor/library.json
