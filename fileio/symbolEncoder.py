@@ -80,6 +80,14 @@ class symbolEncoder(json.JSONEncoder):
                         "loc": (item.scenePos() - item.scene().origin).toTuple(),
                         "ang": item.angle, }
             return itemDict
+        elif isinstance(item, shp.arc):
+            itemDict = {"type": "arc",
+                        "st":  item.rect.normalized().bottomLeft().toTuple(),
+                        "end": item.rect.normalized().topRight().toTuple(),
+                        "pen": item.pen.pname,
+                        "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                        "ang": item.angle, }
+            return itemDict
         elif isinstance(item, shp.pin):
             itemDict = {"type": "pin",
                         "st": item.start.toTuple(),

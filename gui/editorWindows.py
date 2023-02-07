@@ -85,6 +85,8 @@ class editorWindow(QMainWindow):
         self.statusLine = self.statusBar()
         self.messageLine = QLabel()  # message line
         self.statusLine.addPermanentWidget(self.messageLine)
+        self.majorGrid = 10 # snapping grid size
+        self.gridTuple = (self.majorGrid, self.majorGrid)
         self.init_UI()
 
     def init_UI(self):
@@ -349,14 +351,11 @@ class editorWindow(QMainWindow):
         self.deleteAction.setShortcut(QKeySequence.Delete)
 
     def dispConfDialog(self):
-        dcd = displayConfigDialog(self)
+        dcd = pdlg.displayConfigDialog(self)
+        dlg.majorGridEntry.setText(str(self.majorGrid))
         if dcd.exec() == QDialog.Accepted:
-            gridValue = int(float(dcd.majorGridEntry.text()))
-            self.centralW.scene.gridMajor = gridValue
-            self.centralW.view.gridMajor = gridValue
-            self.centralW.scene.gridTuple = (gridValue, gridValue)
-            self.centralW.scene.update()
-            self.centralW.view.update()
+            self.majorGrid = int(float(dcd.majorGridEntry.text()))
+
 
     def printClick(self):
         dlg = QPrintDialog(self)
@@ -873,40 +872,16 @@ class symbolEditor(editorWindow):
         event.accept()
 
 
-class displayConfigDialog(QDialog):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent = parent
-        self.setWindowTitle("Display Options")
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        self.vLayout = QVBoxLayout()
-        fLayout = QFormLayout()
-        self.majorGridEntry = QLineEdit()
-        fLayout.addRow("Major Grid:", self.majorGridEntry)
-        if self.parent.centralW.scene.gridMajor:
-            self.majorGridEntry.setText(str(self.parent.centralW.scene.gridMajor))
-        else:
-            self.majorGridEntry.setText("10")
-        self.vLayout.addLayout(fLayout)
-        self.vLayout.addStretch(1)
-        self.vLayout.addWidget(self.buttonBox)
-        self.setLayout(self.vLayout)
-        self.show()
-
 
 class symbolContainer(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.parent = parent
+        self.scene = symbol_scene(self)
+        self.view = symbol_view(self.scene, self)
         self.init_UI()
 
     def init_UI(self):
-        self.scene = symbol_scene(self)
-        self.view = symbol_view(self.scene, self)
-
         # layout statements, using a grid layout
         gLayout = QGridLayout()
         gLayout.setSpacing(10)
@@ -941,21 +916,23 @@ class editor_scene(QGraphicsScene):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.gridMajor = 10
-        self.gridTuple = (self.gridMajor, self.gridMajor)
+        self.editor = self.parent.parent
+        self.majorGrid = self.editor.majorGrid
+        self.gridTuple = self.editor.gridTuple
         self.selectedItems = None  # selected item
         self.defineSceneLayers()
         self.setPens()
         self.undoStack = QUndoStack()
         self.changeOrigin = False
         self.origin = QPoint(0, 0)
-        self.cellName = self.parent.parent.file.parent.stem
-        self.libraryDict = self.parent.parent.libraryDict
+        self.cellName = self.editor.file.parent.stem
+        self.libraryDict = self.editor.libraryDict
         self.rotateItem = False
         self.itemContextMenu = QMenu()
-        self.appMainW = self.parent.parent.appMainW
+        self.appMainW = self.editor.appMainW
         self.logger = self.appMainW.logger
-        self.messageLine = self.parent.parent.messageLine
+        self.messageLine = self.editor.messageLine
+        self.statusLine = self.editor.statusLine
 
     def setPens(self):
         self.wirePen = pens.pen.returnPen("wirePen")
@@ -974,15 +951,18 @@ class editor_scene(QGraphicsScene):
         self.labelLayer = cel.labelLayer
         self.textLayer = cel.textLayer
 
-    def snapGrid(self, number, base):
-        return base * int(round(number / base))
+    def snapToBase(self, number, base):
+        '''
+        Restrict a number to the multiples of base
+        '''
+        return int(base * int(round(number / base)))
 
-    def snap2Grid(self, point: QPoint, gridTuple: tuple[int, int]):
+    def snapToGrid(self, point: QPoint, gridTuple: tuple[int, int]):
         """
         snap point to grid. Divides and multiplies by grid size.
         """
-        return QPoint(gridTuple[0] * int(round(point.x() / gridTuple[0])),
-                      gridTuple[1] * int(round(point.y() / gridTuple[1])), )
+        return QPoint(int(gridTuple[0] * int(round(point.x() / gridTuple[0]))),
+                      int(gridTuple[1] * int(round(point.y() / gridTuple[1]))) )
 
     def rotateSelectedItems(self, point: QPoint):
         """
@@ -1025,6 +1005,7 @@ class symbol_scene(editor_scene):
                 self.drawLine or self.drawArc or self.drawRect or self.drawCircle)
         self.symbolShapes = ["line", "arc", "rect", "circle", "pin", "label"]
         self.changeOrigin = False
+        self.origin = QPoint(0, 0)
         # some default attributes
         self.pinName = ""
         self.pinType = shp.pin.pinTypes[0]
@@ -1041,7 +1022,8 @@ class symbol_scene(editor_scene):
     def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(mouse_event)
         if mouse_event.button() == Qt.LeftButton:
-            self.start = self.snap2Grid(mouse_event.scenePos().toPoint(), self.gridTuple)
+            eventScenePos = mouse_event.scenePos()
+            self.start = self.snapToGrid(eventScenePos.toPoint(), self.gridTuple)
             if self.changeOrigin:  # change origin of the symbol
                 self.origin = self.start
             if self.itemSelect:
@@ -1049,7 +1031,7 @@ class symbol_scene(editor_scene):
                 #     # find the view rectangle every time mouse is pressed.
                 self.viewRect = self.parent.view.mapToScene(
                     self.parent.view.viewport().rect()).boundingRect()
-                itemsAtMousePress = self.items(mouse_event.scenePos())
+                itemsAtMousePress = self.items(eventScenePos)
                 if itemsAtMousePress:
                     self.selectedItems = [item for item in itemsAtMousePress if
                                           item.isSelected()]
@@ -1077,8 +1059,8 @@ class symbol_scene(editor_scene):
 
     def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(mouse_event)
-        #
-        self.current = self.snap2Grid(mouse_event.scenePos().toPoint(), self.gridTuple)
+        eventScenePos = mouse_event.scenePos()
+        self.current = self.snapToGrid(eventScenePos.toPoint(), self.gridTuple)
         modifiers = QGuiApplication.keyboardModifiers()
         if mouse_event.buttons() == Qt.LeftButton:
             if hasattr(self, "draftItem"):
@@ -1117,19 +1099,20 @@ class symbol_scene(editor_scene):
                         QRect.span(self.start, self.current))
                     self.draftItem.setPen(self.draftPen)
                     self.addItem(self.draftItem)
-                    self.parent.parent.messageLine.setText("Select an Area")
+                    self.messageLine.setText("Select an Area")
 
-        self.parent.parent.statusLine.showMessage(
-            "Cursor Position: " + str(self.current.toTuple()))
+        self.statusLine.showMessage(
+            "Cursor Position: " + str((self.current-self.origin).toTuple()))
 
     def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
-
-        self.current = self.snap2Grid(mouse_event.scenePos(), self.gridTuple)
+        super().mouseReleaseEvent(mouse_event)
+        eventScenePos = mouse_event.scenePos()
+        self.current = self.snapToGrid(eventScenePos.toPoint(), self.gridTuple)
         if mouse_event.button() == Qt.LeftButton:
             if (self.itemSelect and hasattr(self, "draftItem") and isinstance(
                     self.draftItem, QGraphicsRectItem)):
                 self.selectedItems = [item for item in self.items(self.draftItem.rect(),
-                                                                  mode=Qt.IntersectsItemBoundingRect)]
+                                                    mode=Qt.IntersectsItemBoundingRect)]
                 for item in self.selectedItems:
                     item.setSelected(True)
             if self.drawLine and hasattr(self, "start"):
@@ -1168,7 +1151,6 @@ class symbol_scene(editor_scene):
             if self.changeOrigin:
                 self.changeOrigin = False
             self.itemSelect = True
-        super().mouseReleaseEvent(mouse_event)
 
     def lineDraw(self, start: QPoint, current: QPoint, pen: QPen, gridTuple: tuple):
         line = shp.line(start, current, pen, gridTuple)
@@ -1195,7 +1177,7 @@ class symbol_scene(editor_scene):
         """
         Draws a circle on the scene
         """
-        snappedEnd = self.snap2Grid(end, gridTuple)
+        snappedEnd = self.snapToGrid(end, gridTuple)
         circle = shp.circle(start, snappedEnd, pen, gridTuple)
         self.addItem(circle)
         undoCommand = us.addShapeUndo(self, circle)
@@ -1237,6 +1219,7 @@ class symbol_scene(editor_scene):
         return label
 
     def keyPressEvent(self, key_event):
+        super().keyPressEvent(key_event)
         if key_event.key() == Qt.Key_Escape:
             self.resetSceneMode()
         elif key_event.key() == Qt.Key_C:
@@ -1253,7 +1236,7 @@ class symbol_scene(editor_scene):
         #         self.changeSelection(self.selectCount)
         #         self.selectCount += 1
 
-        super().keyPressEvent(key_event)
+
 
     # def changeSelection(self, i):
     #     """
@@ -1303,65 +1286,78 @@ class symbol_scene(editor_scene):
         """
         When item properties is queried.
         """
-        for item in self.selectedItems:
-            if isinstance(item, shp.rectangle):
-                self.queryDlg = pdlg.rectPropertyDialog(self.parent.parent, item)
-                if self.queryDlg.exec() == QDialog.Accepted:
-                    self.updateRectangleShape(item)
-            if isinstance(item, shp.circle):
-                self.queryDlg = pdlg.circlePropertyDialog(self.parent.parent, item)
-                if self.queryDlg.exec() == QDialog.Accepted:
-                    self.updateCircleShape(item)
-            elif isinstance(item, shp.line):
-                self.queryDlg = pdlg.linePropertyDialog(self.parent.parent, item)
-                if self.queryDlg.exec() == QDialog.Accepted:
-                    self.updateLineShape(item)
-            elif isinstance(item, shp.pin):
-                self.queryDlg = pdlg.pinPropertyDialog(self.parent.parent, item)
-                if self.queryDlg.exec() == QDialog.Accepted:
-                    self.updatePinShape(item)
-            elif isinstance(item, shp.label):
-                self.queryDlg = pdlg.labelPropertyDialog(self.parent.parent, item)
-                if self.queryDlg.exec() == QDialog.Accepted:
-                    self.updateLabelShape(item)
+        if self.selectedItems:
+            for item in self.selectedItems:
+                if isinstance(item, shp.rectangle):
+                    self.queryDlg = pdlg.rectPropertyDialog(self.editor, item)
+                    if self.queryDlg.exec() == QDialog.Accepted:
+                        self.updateRectangleShape(item)
+                if isinstance(item, shp.circle):
+                    self.queryDlg = pdlg.circlePropertyDialog(self.editor, item)
+                    if self.queryDlg.exec() == QDialog.Accepted:
+                        self.updateCircleShape(item)
+                if isinstance(item,shp.arc):
+                    self.queryDlg = pdlg.arcPropertyDialog(self.editor,item)
+                    if self.queryDlg.exec() == QDialog.Accepted:
+                        self.updateArcShape(item)
+                elif isinstance(item, shp.line):
+                    self.queryDlg = pdlg.linePropertyDialog(self.editor, item)
+                    if self.queryDlg.exec() == QDialog.Accepted:
+                        self.updateLineShape(item)
+                elif isinstance(item, shp.pin):
+                    self.queryDlg = pdlg.pinPropertyDialog(self.editor, item)
+                    if self.queryDlg.exec() == QDialog.Accepted:
+                        self.updatePinShape(item)
+                elif isinstance(item, shp.label):
+                    self.queryDlg = pdlg.labelPropertyDialog(self.editor, item)
+                    if self.queryDlg.exec() == QDialog.Accepted:
+                        self.updateLabelShape(item)
 
-            del self.queryDlg
-        else:
-            print("No item selected")
 
     def updateRectangleShape(self, item: shp.rectangle):
-        location = item.scenePos().toTuple()
-        newLeft = self.snapGrid(
-            float(self.queryDlg.rectLeftLine.text()) - float(location[0]),
-            self.gridTuple[0], )
-        newTop = self.snapGrid(
-            float(self.queryDlg.rectTopLine.text()) - float(location[1]),
-            self.gridTuple[1], )
-        newWidth = self.snapGrid(float(self.queryDlg.rectWidthLine.text()),
-                                 self.gridTuple[0])
-        newHeight = self.snapGrid(float(self.queryDlg.rectHeightLine.text()),
-                                  self.gridTuple[1])
-        undoUpdateRectangle = us.updateShapeUndo()
-        us.keepOriginalShape(self, item, self.gridTuple, parent=undoUpdateRectangle)
-        item.start = QPoint(newLeft, newTop)
-        item.end = QPoint(newLeft + newWidth, newTop + newHeight)
-        item.setLeft(newLeft)
-        item.setTop(newTop)
-        item.setWidth(newWidth)
-        item.setHeight(newHeight)
-        us.changeOriginalShape(self, item, parent=undoUpdateRectangle)
-        self.undoStack.push(undoUpdateRectangle)
-        self.selectedItem.update()
+        left = self.snapToBase(float(self.queryDlg.rectLeftLine.text()),
+                               self.gridTuple[0])
+        top = self.snapToBase(float(self.queryDlg.rectTopLine.text()),
+                                self.gridTuple[1])
+        width = self.snapToBase(float(self.queryDlg.rectWidthLine.text()),
+                                self.gridTuple[0])
+        height = self.snapToBase(float(self.queryDlg.rectHeightLine.text()),
+                                 self.gridTuple[1])
+        topLeft= item.mapFromScene(QPoint(left,top))
+        # undoUpdateRectangle = us.updateShapeUndo()
+        # us.keepOriginalShape(self, item, self.gridTuple, parent=undoUpdateRectangle)
+        item.rect = QRect(topLeft.x(),topLeft.y(),width, height)
+
+        # us.changeOriginalShape(self, item, parent=undoUpdateRectangle)
+        # self.undoStack.push(undoUpdateRectangle)
+        # self.selectedItem.update()
 
     def updateCircleShape(self, item: shp.circle):
 
-        centerX = float(self.queryDlg.centerXEdit.text())
-        centerY = float(self.queryDlg.centerYEdit.text())
-        radius = float(self.queryDlg.radiusEdit.text())
-        centerPoint = QPoint(centerX, centerY)
+        centerX = self.snapToBase(float(self.queryDlg.centerXEdit.text()),
+                                  self.gridTuple[0])
+        centerY = self.snapToBase(float(self.queryDlg.centerYEdit.text()),
+                                  self.gridTuple[1])
+        radius = self.snapToBase(float(self.queryDlg.radiusEdit.text()),
+                                 self.gridTuple[0])
+        centerPoint = self.snapToGrid(QPoint(centerX, centerY), self.gridTuple)
+        item.centre(self.selectedItem.mapFromScene(centerPoint))
+        item.radius(radius)
 
-        item.setCentre(self.selectedItem.mapFromScene(centerPoint))
-        item.setRadius(radius)
+    def updateArcShape(self, item: shp.arc):
+        item.arcType = self.queryDlg.arcTypeCombo.currentText()
+        startX = self.snapToBase(float(self.queryDlg.startXEdit.text()),
+                                 self.gridTuple[0])
+        startY = self.snapToBase(float(self.queryDlg.startYEdit.text()),
+                                 self.gridTuple[1])
+        item.start = item.mapFromScene(QPoint(startX,startY)).toPoint()
+        item.width = self.snapToBase(float(self.queryDlg.widthEdit.text()),
+                                     self.gridTuple[0])
+        item.height = self.snapToBase(float(self.queryDlg.heightEdit.text()),
+                                      self.gridTuple[1])
+
+
+
 
     def updateLineShape(self, item: shp.line):
         """
@@ -1376,7 +1372,7 @@ class symbol_scene(editor_scene):
 
     def updatePinShape(self, item: shp.pin):
         location = item.scenePos().toTuple()
-        item.start = self.snap2Grid(
+        item.start = self.snapToGrid(
             QPoint(float(self.queryDlg.pinXLine.text()) - float(location[0]),
                    float(self.queryDlg.pinYLine.text()) - float(location[1]), ),
             self.gridTuple, )
@@ -1392,7 +1388,7 @@ class symbol_scene(editor_scene):
         update pin shape with new values.
         """
         location = item.scenePos().toTuple()
-        item.start = self.snap2Grid(
+        item.start = self.snapToGrid(
             QPoint(float(self.queryDlg.labelXLine.text()) - float(location[0]),
                    float(self.queryDlg.labelYLine.text()) - float(location[1]), ),
             self.gridTuple, )
@@ -1447,11 +1443,10 @@ class symbol_scene(editor_scene):
             try:
                 for item in self.selectedItems:
                     if hasattr(item,'stretch'):
-                        print(item.objName)
-                        print('item can be stretched')
                         item.stretch = True
+
             except AttributeError:
-                self.parent.parent.messageLine.setText("Nothing selected")
+                self.messageLine.setText("Nothing selected")
 
     def viewSymbolProperties(self):
         """
@@ -1530,7 +1525,7 @@ class schematic_scene(editor_scene):
         super().mousePressEvent(mouse_event)
         if mouse_event.button() == Qt.LeftButton:
             self.mousePressLoc = mouse_event.scenePos().toPoint()
-            self.start = self.snap2Grid(self.mousePressLoc, self.gridTuple)
+            self.start = self.snapToGrid(self.mousePressLoc, self.gridTuple)
             if self.itemSelect:
                 self.parent.parent.messageLine.setText("Select an item")
                 #     # find the view rectangle every time mouse is pressed.
@@ -1564,7 +1559,7 @@ class schematic_scene(editor_scene):
     def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(mouse_event)
         self.mouseMoveLoc = mouse_event.scenePos().toPoint()
-        self.current = self.snap2Grid(self.mouseMoveLoc, self.gridTuple)
+        self.current = self.snapToGrid(self.mouseMoveLoc, self.gridTuple)
         modifiers = QGuiApplication.keyboardModifiers()
         if mouse_event.buttons() == Qt.LeftButton:
             if hasattr(self, "draftItem"):
@@ -1583,11 +1578,11 @@ class schematic_scene(editor_scene):
                     self.parent.parent.messageLine.setText("Select an Area")
             if self.drawPin:
                 self.draftPin.setPos(
-                    self.snap2Grid(self.mouseMoveLoc - self.mousePressLoc,
+                    self.snapToGrid(self.mouseMoveLoc - self.mousePressLoc,
                                    self.gridTuple))
             if self.drawText:
                 self.draftText.setPos(
-                    self.snap2Grid(self.mouseMoveLoc - self.mousePressLoc,
+                    self.snapToGrid(self.mouseMoveLoc - self.mousePressLoc,
                                    self.gridTuple))
         self.parent.parent.statusLine.showMessage(
             "Cursor Position: " + str(self.current.toTuple()))
@@ -1595,7 +1590,7 @@ class schematic_scene(editor_scene):
     def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(mouse_event)
         self.mouseReleaseLoc = mouse_event.scenePos().toPoint()
-        self.current = self.snap2Grid(self.mouseReleaseLoc, self.gridTuple)
+        self.current = self.snapToGrid(self.mouseReleaseLoc, self.gridTuple)
 
         if mouse_event.button() == Qt.LeftButton:
             if self.addInstance:
@@ -1605,7 +1600,7 @@ class schematic_scene(editor_scene):
                 self.addInstance = False
             elif self.drawText:
                 self.removeItem(self.draftText)
-                note = self.addNote(self.snap2Grid(self.mouseReleaseLoc, self.gridTuple))
+                note = self.addNote(self.snapToGrid(self.mouseReleaseLoc, self.gridTuple))
                 self.rotateAnItem(self.current, note, float(self.noteOrient[1:]))
                 self.addItem(note)
                 note.setSelected(True)
@@ -1613,7 +1608,7 @@ class schematic_scene(editor_scene):
                 self.drawText = False
             elif self.drawPin:
                 self.removeItem(self.draftPin)
-                pin = self.addPin(self.snap2Grid(self.mouseReleaseLoc, self.gridTuple))
+                pin = self.addPin(self.snapToGrid(self.mouseReleaseLoc, self.gridTuple))
                 self.addItem(pin)
                 pin.setSelected(True)
                 self.parent.parent.messageLine.setText("Pin added")
@@ -1685,8 +1680,8 @@ class schematic_scene(editor_scene):
                     self.removeItem(netItem)  # remove the old net from the scene
                     self.removeItem(drawnNet)  # remove the drawn net from the scene
                     mergedNet = self.netDraw(
-                        self.snap2Grid(mergedRect.bottomLeft(), self.gridTuple),
-                        self.snap2Grid(mergedRect.bottomRight(), self.gridTuple),
+                        self.snapToGrid(mergedRect.bottomLeft(), self.gridTuple),
+                        self.snapToGrid(mergedRect.bottomRight(), self.gridTuple),
                         self.wirePen, )
                     horizontalNetsInView.discard(netItem)
                     self.mergeNets(mergedNet, viewRect)
@@ -1699,8 +1694,8 @@ class schematic_scene(editor_scene):
                     self.removeItem(netItem)  # remove the old net from the scene
                     self.removeItem(drawnNet)  # remove the drawn net from the scene
                     mergedNet = self.netDraw(
-                        self.snap2Grid(mergedRect.bottomRight(), self.gridTuple),
-                        self.snap2Grid(mergedRect.topRight(), self.gridTuple),
+                        self.snapToGrid(mergedRect.bottomRight(), self.gridTuple),
+                        self.snapToGrid(mergedRect.topRight(), self.gridTuple),
                         self.wirePen, )  # create a new net with the merged rectangle
                     verticalNetsInView.discard(netItem)
                     self.mergeNets(mergedNet, viewRect)
@@ -1719,7 +1714,7 @@ class schematic_scene(editor_scene):
             for vNetItem in verticalNetsInView:
                 vNetBRect = vNetItem.sceneBoundingRect().toRect()
                 if vNetBRect.intersects(hNetBRect):
-                    crossPoint = self.snap2Grid(vNetBRect.intersected(hNetBRect).center(),
+                    crossPoint = self.snapToGrid(vNetBRect.intersected(hNetBRect).center(),
                                                 self.gridTuple)
                     if crossPoint != vNetItem.end and crossPoint != vNetItem.start:
                         addedNets.add(
@@ -1736,7 +1731,7 @@ class schematic_scene(editor_scene):
             for hNetItem in horizontalNetsInView:
                 hNetBRect = hNetItem.sceneBoundingRect().toRect()
                 if hNetBRect.intersects(vNetBRect):
-                    crossPoint = self.snap2Grid(hNetBRect.intersected(vNetBRect).center(),
+                    crossPoint = self.snapToGrid(hNetBRect.intersected(vNetBRect).center(),
                                                 self.gridTuple)
                     if crossPoint != hNetItem.end and crossPoint != hNetItem.start:
                         addedNets.add(
@@ -2153,7 +2148,7 @@ class schematic_scene(editor_scene):
                                 label.labelValue = item.instanceName
                             elif label.labelDefinition == "[@cellName]":
                                 label.labelValue = item.cellName
-                        location = self.snap2Grid(
+                        location = self.snapToGrid(
                             QPoint(float(dlg.xLocationEdit.text().strip()),
                                    float(dlg.yLocationEdit.text().strip()), ),
                             self.gridTuple, )
@@ -2374,8 +2369,10 @@ class editor_view(QGraphicsView):
     def __init__(self, scene, parent):
         super().__init__(scene, parent)
         self.parent = parent
+        self.editor = self.parent.parent
         self.scene = scene
-        self.gridMajor = self.scene.gridMajor
+        self.majorGrid = self.editor.majorGrid
+        self.gridTuple = self.editor.gridTuple
         self.gridbackg = True
         self.init_UI()
 
@@ -2402,7 +2399,7 @@ class editor_view(QGraphicsView):
         self.centerOn(scene_pos - delta)
         super().wheelEvent(mouse_event)
 
-    def snapGrid(self, number, base):
+    def snapToBase(self, number, base):
         return base * int(math.floor(number / base))
 
     def drawBackground(self, painter, rect):
@@ -2411,14 +2408,14 @@ class editor_view(QGraphicsView):
             rectCoord = rect.getRect()
             painter.fillRect(rect, QColor("black"))
             painter.setPen(QColor("gray"))
-            grid_x_start = math.ceil(rectCoord[0] / self.gridMajor) * self.gridMajor
-            grid_y_start = math.ceil(rectCoord[1] / self.gridMajor) * self.gridMajor
-            num_x_points = math.floor(rectCoord[2] / self.gridMajor)
-            num_y_points = math.floor(rectCoord[3] / self.gridMajor)
+            grid_x_start = math.ceil(rectCoord[0] / self.majorGrid) * self.majorGrid
+            grid_y_start = math.ceil(rectCoord[1] / self.majorGrid) * self.majorGrid
+            num_x_points = math.floor(rectCoord[2] / self.majorGrid)
+            num_y_points = math.floor(rectCoord[3] / self.majorGrid)
             for i in range(int(num_x_points)):  # rect width
                 for j in range(int(num_y_points)):  # rect length
-                    painter.drawPoint(grid_x_start + i * self.gridMajor,
-                                      grid_y_start + j * self.gridMajor, )
+                    painter.drawPoint(grid_x_start + i * self.majorGrid,
+                                      grid_y_start + j * self.majorGrid, )
         else:
             super().drawBackground(painter, rect)
 

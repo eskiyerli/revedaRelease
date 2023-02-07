@@ -41,6 +41,8 @@ def createSymbolItems(item, gridTuple):
         return createRectItem(item, gridTuple)
     elif item["type"] == "circle":
         return createCircleItem(item, gridTuple)
+    elif item["type"] == "arc":
+        return createArcItem(item, gridTuple)
     elif item["type"] == "line":
         return createLineItem(item, gridTuple)
     elif item["type"] == "pin":
@@ -73,7 +75,14 @@ def createCircleItem(item, gridTuple):
     circle.angle = item["ang"]
     return circle
 
-
+def createArcItem(item, gridTuple):
+    start = QPoint(item["st"][0], item["st"][1])
+    pen = pens.pen.returnPen(item['pen'])
+    end = QPoint(item["end"][0], item["end"][1])
+    arc = shp.arc(start, end, pen,gridTuple)  # note that we are using grid values for scene
+    arc.setPos(QPoint(item["loc"][0], item["loc"][1]), )
+    arc.angle = item["ang"]
+    return arc
 def createLineItem(item, gridTuple):
     start = QPoint(item["st"][0], item["st"][1])
     end = QPoint(item["end"][0], item["end"][1])

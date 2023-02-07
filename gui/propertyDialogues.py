@@ -88,13 +88,13 @@ class circlePropertyDialog(QDialog):
         self.mainLayout = QVBoxLayout()
         self.fLayout = QFormLayout()
         self.fLayout.setContentsMargins(10, 10, 10, 10)
-        self.centerXEdit = QLineEdit()
+        self.centerXEdit = edf.shortLineEdit()
         self.centerXEdit.setText(str(self.centre[0]))
         self.fLayout.addRow(QLabel("center x-coord:"), self.centerXEdit)
-        self.centerYEdit = QLineEdit()
+        self.centerYEdit = edf.shortLineEdit()
         self.centerYEdit.setText(str(self.centre[1]))
         self.fLayout.addRow(QLabel("center y-coord:"), self.centerYEdit)
-        self.radiusEdit = QLineEdit()
+        self.radiusEdit = edf.shortLineEdit()
         self.radiusEdit.setText(str(self.radius))
         self.fLayout.addRow(QLabel("radius:"), self.radiusEdit)
         self.mainLayout.addLayout(self.fLayout)
@@ -105,6 +105,44 @@ class circlePropertyDialog(QDialog):
         self.setLayout(self.mainLayout)
         self.show()
 
+class arcPropertyDialog(QDialog):
+    def __init__(self, parent, arcItem: shp.arc):
+        super().__init__(parent)
+        self.parent = parent
+        self.setWindowTitle("Arc Properties")
+        self.arcItem = arcItem
+        self.location = self.arcItem.scenePos().toTuple()
+        self.arcType = self.arcItem.arcType
+        self.arcTypeCombo = QComboBox()
+        self.arcTypeCombo.addItems(shp.arc.arcTypes)
+        self.arcTypeCombo.setCurrentText(self.arcType)
+
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.mainLayout = QVBoxLayout()
+        self.fLayout = QFormLayout()
+        self.fLayout.setContentsMargins(10, 10, 10, 10)
+        self.mainLayout.addWidget(self.arcTypeCombo)
+        self.startXEdit = edf.shortLineEdit()
+        self.startXEdit.setText(
+            str(self.arcItem.start.toTuple()[0] + self.location[0]))
+        self.fLayout.addRow(QLabel("X Origin:"), self.startXEdit)
+        self.startYEdit = edf.shortLineEdit()
+        self.startYEdit.setText(
+            str(self.arcItem.start.toTuple()[1] + self.location[1]))
+        self.fLayout.addRow(QLabel("Y Origin:"), self.startYEdit)
+        self.widthEdit = edf.shortLineEdit()
+        self.widthEdit.setText(str(self.arcItem.width))
+        self.fLayout.addRow(QLabel("Width:"), self.widthEdit)
+        self.heightEdit = edf.shortLineEdit()
+        self.heightEdit.setText(str(self.arcItem.height))
+        self.fLayout.addRow(QLabel("Height:"), self.heightEdit)
+        self.mainLayout.addLayout(self.fLayout)
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.show()
 
 class linePropertyDialog(QDialog):
     def __init__(self, parent, lineItem: shp.line):
@@ -686,3 +724,22 @@ class noteTextEditProperties(noteTextEdit):
         self.textOrientCB.setCurrentText(self.note.textOrient)
 
 
+class displayConfigDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.setWindowTitle("Display Options")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        self.vLayout = QVBoxLayout()
+        fLayout = QFormLayout()
+        self.majorGridEntry = QLineEdit()
+        fLayout.addRow("Major Grid:", self.majorGridEntry)
+
+        self.vLayout.addLayout(fLayout)
+        self.vLayout.addStretch(1)
+        self.vLayout.addWidget(self.buttonBox)
+        self.setLayout(self.vLayout)
+        self.show()
