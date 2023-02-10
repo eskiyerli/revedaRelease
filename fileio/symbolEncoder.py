@@ -84,8 +84,8 @@ class symbolEncoder(json.JSONEncoder):
         elif isinstance(item, shp.pin):
             itemDict = {"type": "pin", "st": item.start.toTuple(),
                         "pen": item.pen.pname, "nam": item.pinName,
-                        "pd": item.pinDir, "pt": item.pinType, "loc": (
-                            item.scenePos() - item.scene().origin).toTuple(),
+                        "pd": item.pinDir, "pt": item.pinType,
+                        "loc": (item.scenePos() - item.scene().origin).toTuple(),
                         "ang": item.angle, }
             return itemDict
         elif isinstance(item, shp.text):
@@ -94,7 +94,7 @@ class symbolEncoder(json.JSONEncoder):
                         'ff': item.fontFamily, 'fs': item.fontStyle,
                         'th': item.textHeight, 'ta': item.textAlignment,
                         'to': item.textOrient,
-                        "loc": (item.start - item.scene().origin).toTuple(),
+                        "loc": (item.scenePos() - item.scene().origin).toTuple(),
                         "ang": item.angle, }
             return itemDict
         elif isinstance(item, shp.label):
@@ -107,7 +107,7 @@ class symbolEncoder(json.JSONEncoder):
                         "lt": item.labelType, "ht": item.labelHeight,
                         "al": item.labelAlign, "or": item.labelOrient,
                         "use": item.labelUse,
-                        "loc": (item.start - item.scene().origin).toTuple(),
+                        "loc": (item.scenePos() - item.scene().origin).toTuple(),
                         "ang": item.angle, }
             return itemDict
         elif isinstance(item, symbolAttribute):

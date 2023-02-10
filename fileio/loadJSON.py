@@ -78,11 +78,11 @@ def createCircleItem(item, gridTuple):
 
 def createArcItem(item, gridTuple):
     start = QPoint(item["st"][0], item["st"][1])
-    pen = pens.pen.returnPen(item['pen'])
     end = QPoint(item["end"][0], item["end"][1])
+    pen = pens.pen.returnPen(item['pen'])
     arc = shp.arc(start, end, pen,
                   gridTuple)  # note that we are using grid values for scene
-    arc.setPos(QPoint(item["loc"][0], item["loc"][1]), )
+    arc.setPos(QPoint(item["loc"][0], item["loc"][1]))
     arc.angle = item["ang"]
     return arc
 
@@ -123,8 +123,8 @@ def createLabelItem(item, gridTuple):
 def createTextItem(item, gridTuple: (int, int)):
     start = QPoint(item["st"][0], item["st"][1])
     pen = pens.pen.returnPen(item['pen'])
-    text = shp.text(start, pen, item['tc'], gridTuple, item['ff'], item['fs'], item['th'],
-                    item['ta'], item['to'])
+    text = shp.text(start, pen, item['tc'], gridTuple, item['ff'], item['fs'],
+                    item['th'], item['ta'], item['to'])
     text.setPos(QPoint(item["loc"][0], item["loc"][1]))
     return text
 
@@ -161,7 +161,7 @@ def createSchematicItems(item, libraryDict, viewName: str, gridTuple: (int, int)
                     elif shape["type"] == "circle":
                         itemShapes.append(createCircleItem(shape, gridTuple))
                     elif shape["type"] == "arc":
-                        itemShapes.append(createArcItem(item, gridTuple))
+                        itemShapes.append(createArcItem(shape, gridTuple))
                     elif shape["type"] == "line":
                         itemShapes.append(createLineItem(shape, gridTuple))
                     elif shape["type"] == "pin":
@@ -217,7 +217,8 @@ def createSchematicPins(item, gridTuple):
         pinName = item["pn"]
         pinDir = item["pd"]
         pinType = item["pt"]
-        pinItem = shp.schematicPin(start, pen, pinName, pinDir, pinType, gridTuple)
+        pinItem = shp.schematicPin(start, pen, pinName, pinDir, pinType,
+                                   gridTuple)
         pinItem.setPos(QPoint(item["loc"][0], item["loc"][1]))
         pinItem.angle = item["ang"]
         return pinItem

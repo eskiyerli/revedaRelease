@@ -23,3 +23,13 @@
 2023-02-10 11:21:37,866 - gui.appWindow - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa\symbol.json
 2023-02-10 11:21:43,928 - gui.appWindow - WARNING - Replacing the cell view.
 2023-02-10 11:21:43,930 - gui.appWindow - WARNING - Created veriloga at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa\veriloga.json
+2023-02-10 14:17:57,953 - gui.appWindow - INFO - Removed Library Path.
+2023-02-10 14:17:59,293 - gui.appWindow - INFO - Removed Library Path.
+2023-02-10 14:18:34,551 - gui.appWindow - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-02-10 14:19:57,915 - gui.appWindow - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-02-10 19:16:43,620 - gui.appWindow - WARNING - Created LCFilter cell at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\designs\LCFilter
+2023-02-10 19:16:51,770 - gui.appWindow - WARNING - Created schematic at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\designs\LCFilter\schematic.json
+2023-02-10 21:41:23,361 - gui.appWindow - WARNING - Created ind2 cell at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\analogLib\ind2
+2023-02-10 21:41:35,123 - gui.appWindow - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\analogLib\ind2\symbol.json
+2023-02-10 22:05:56,088 - gui.appWindow - WARNING - Created schematic at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\designs\LCFilter\schematic.json
+2023-02-10 22:08:44,493 - gui.appWindow - WARNING - Created schematic at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\designs\LCFilter\schematic.json
