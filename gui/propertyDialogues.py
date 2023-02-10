@@ -112,16 +112,16 @@ class arcPropertyDialog(QDialog):
         self.setWindowTitle("Arc Properties")
         self.arcItem = arcItem
         self.location = self.arcItem.scenePos().toTuple()
-        self.arcType = self.arcItem.arcType
-        self.arcTypeCombo = QComboBox()
-        self.arcTypeCombo.addItems(shp.arc.arcTypes)
-        self.arcTypeCombo.setCurrentText(self.arcType)
+        # self.arcType = self.arcItem.arcType
+        # self.arcTypeCombo = QComboBox()
+        # self.arcTypeCombo.addItems(shp.arc.arcTypes)
+        # self.arcTypeCombo.setCurrentText(self.arcType)
 
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.mainLayout = QVBoxLayout()
         self.fLayout = QFormLayout()
         self.fLayout.setContentsMargins(10, 10, 10, 10)
-        self.mainLayout.addWidget(self.arcTypeCombo)
+        # self.mainLayout.addWidget(self.arcTypeCombo)
         self.startXEdit = edf.shortLineEdit()
         self.startXEdit.setText(
             str(self.arcItem.start.toTuple()[0] + self.location[0]))

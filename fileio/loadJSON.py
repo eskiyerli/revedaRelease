@@ -75,14 +75,18 @@ def createCircleItem(item, gridTuple):
     circle.angle = item["ang"]
     return circle
 
+
 def createArcItem(item, gridTuple):
     start = QPoint(item["st"][0], item["st"][1])
     pen = pens.pen.returnPen(item['pen'])
     end = QPoint(item["end"][0], item["end"][1])
-    arc = shp.arc(start, end, pen,gridTuple)  # note that we are using grid values for scene
+    arc = shp.arc(start, end, pen,
+                  gridTuple)  # note that we are using grid values for scene
     arc.setPos(QPoint(item["loc"][0], item["loc"][1]), )
     arc.angle = item["ang"]
     return arc
+
+
 def createLineItem(item, gridTuple):
     start = QPoint(item["st"][0], item["st"][1])
     end = QPoint(item["end"][0], item["end"][1])
@@ -121,6 +125,7 @@ def createTextItem(item, gridTuple: (int, int)):
     pen = pens.pen.returnPen(item['pen'])
     text = shp.text(start, pen, item['tc'], gridTuple, item['ff'], item['fs'], item['th'],
                     item['ta'], item['to'])
+    text.setPos(QPoint(item["loc"][0], item["loc"][1]))
     return text
 
 
@@ -155,6 +160,8 @@ def createSchematicItems(item, libraryDict, viewName: str, gridTuple: (int, int)
                         itemShapes.append(createRectItem(shape, gridTuple))
                     elif shape["type"] == "circle":
                         itemShapes.append(createCircleItem(shape, gridTuple))
+                    elif shape["type"] == "arc":
+                        itemShapes.append(createArcItem(item, gridTuple))
                     elif shape["type"] == "line":
                         itemShapes.append(createLineItem(shape, gridTuple))
                     elif shape["type"] == "pin":
