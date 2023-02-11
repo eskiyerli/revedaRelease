@@ -1,24 +1,3 @@
-"""
-======================= START OF LICENSE NOTICE =======================
-  Copyright (C) 2022 Murat Eskiyerli. All Rights Reserved
-
-  NO WARRANTY. THE PRODUCT IS PROVIDED BY DEVELOPER "AS IS" AND ANY
-  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DEVELOPER BE LIABLE FOR
-  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-  GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE PRODUCT, EVEN
-  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-======================== END OF LICENSE NOTICE ========================
-  Primary Author: Murat Eskiyerli
-
-"""
-
-
 #   “Commons Clause” License Condition v1.0
 #  #
 #   The Software is provided to you by the Licensor under the License, as defined
@@ -62,6 +41,8 @@ def createSymbolItems(item, gridTuple):
         return createRectItem(item, gridTuple)
     elif item["type"] == "circle":
         return createCircleItem(item, gridTuple)
+    elif item["type"] == "arc":
+        return createArcItem(item, gridTuple)
     elif item["type"] == "line":
         return createLineItem(item, gridTuple)
     elif item["type"] == "pin":
@@ -93,6 +74,17 @@ def createCircleItem(item, gridTuple):
     circle.setPos(QPoint(item["loc"][0], item["loc"][1]), )
     circle.angle = item["ang"]
     return circle
+
+
+def createArcItem(item, gridTuple):
+    start = QPoint(item["st"][0], item["st"][1])
+    end = QPoint(item["end"][0], item["end"][1])
+    pen = pens.pen.returnPen(item['pen'])
+    arc = shp.arc(start, end, pen,
+                  gridTuple)  # note that we are using grid values for scene
+    arc.setPos(QPoint(item["loc"][0], item["loc"][1]))
+    arc.angle = item["ang"]
+    return arc
 
 
 def createLineItem(item, gridTuple):
@@ -131,8 +123,9 @@ def createLabelItem(item, gridTuple):
 def createTextItem(item, gridTuple: (int, int)):
     start = QPoint(item["st"][0], item["st"][1])
     pen = pens.pen.returnPen(item['pen'])
-    text = shp.text(start, pen, item['tc'], gridTuple, item['ff'], item['fs'], item['th'],
-                    item['ta'], item['to'])
+    text = shp.text(start, pen, item['tc'], gridTuple, item['ff'], item['fs'],
+                    item['th'], item['ta'], item['to'])
+    text.setPos(QPoint(item["loc"][0], item["loc"][1]))
     return text
 
 
@@ -167,6 +160,8 @@ def createSchematicItems(item, libraryDict, viewName: str, gridTuple: (int, int)
                         itemShapes.append(createRectItem(shape, gridTuple))
                     elif shape["type"] == "circle":
                         itemShapes.append(createCircleItem(shape, gridTuple))
+                    elif shape["type"] == "arc":
+                        itemShapes.append(createArcItem(shape, gridTuple))
                     elif shape["type"] == "line":
                         itemShapes.append(createLineItem(shape, gridTuple))
                     elif shape["type"] == "pin":
@@ -222,7 +217,8 @@ def createSchematicPins(item, gridTuple):
         pinName = item["pn"]
         pinDir = item["pd"]
         pinType = item["pt"]
-        pinItem = shp.schematicPin(start, pen, pinName, pinDir, pinType, gridTuple)
+        pinItem = shp.schematicPin(start, pen, pinName, pinDir, pinType,
+                                   gridTuple)
         pinItem.setPos(QPoint(item["loc"][0], item["loc"][1]))
         pinItem.angle = item["ang"]
         return pinItem

@@ -1,7 +1,14 @@
 *.png
 *.pyc*
 *.zip
-*.yaml
 *.json
+*.spec
+*.log
+*.xml
 icons/
+dist/
+build/
+schematicEditor.kdev4
+reveda.log
+revolution_eda.egg-info/
 
