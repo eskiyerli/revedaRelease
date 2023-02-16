@@ -87,7 +87,9 @@ class verilogaC:
                         self.outPins.extend([pin.strip() for pin in pinsList])
                     elif splitLine[0] == 'inout':
                         pinsList = splitLine[1].split(';')[0].split(',')
+
                         self.inoutPins.extend([pin.strip() for pin in pinsList])
+
                     elif splitLine[0] == "parameter":
                         paramDefPart = tempLine.split('*(')[0]
                         paramName = paramDefPart.split('=')[0].split()[-1].strip()
@@ -121,8 +123,8 @@ class verilogaC:
         instParamString = ' '.join(
             [f'[@{key}:{key}=%:{key}={item}]' for key, item in
              self.instanceParams.items()])
-        self._netlistLine = f'Y{self._vaModule} [@instName] {pinsString} ' \
-                f'[@vaModel:vaModel=%:vaModel={self._vaModule}Model] {instParamString}'
+        self._netlistLine = f'Y{self._vaModule} [@instName] {pinsString}  ' \
+                            f'{self._vaModule}Model {instParamString}'
         return self._netlistLine
 
     @netlistLine.setter

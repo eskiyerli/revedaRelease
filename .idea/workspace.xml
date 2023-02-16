@@ -4,15 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c3bfc055-06a1-4538-9fbc-36904dec3758" name="Changes" comment="Version 0.4.0 is released.">
-      <change beforePath="$PROJECT_DIR$/.idea/revedaRelease.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/revedaRelease.iml" afterDir="false" />
+    <list default="true" id="17d01615-5f03-4bcd-af39-60c2e4b772b2" name="Changes" comment="Documentation update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/shape.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fileio/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/fileio/loadJSON.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fileio/symbolEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/fileio/symbolEncoder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/editorWindows.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/labels.md" beforeDir="false" afterPath="$PROJECT_DIR$/labels.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reveda.log" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/Revolution EDA Symbol and Schematic Editors.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,22 +23,21 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectId" id="2LVXtBeBg4p0fOnyf3Dmpm7pLKs" />
+  <component name="ProjectId" id="2LdPtJX3H0EBExYhRWcR807FaO5" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "last_opened_file_path": "C:/Users/eskiy/OneDrive - Revolution Semiconductor/Projects/revedaRelease/reveda.py",
-    "settings.editor.selected.configurable": "copyright.filetypes.Python"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/exampleLibraries&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
-    <configuration name="__main__" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="reveda" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="revedaRelease" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -56,6 +49,11 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="software.aws.toolkits.jetbrains.core.execution.PythonAwsConnectionExtension">
+        <option name="credential" />
+        <option name="region" />
+        <option name="useCurrentConnection" value="false" />
+      </EXTENSION>
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/reveda.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -65,33 +63,68 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.__main__" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="c3bfc055-06a1-4538-9fbc-36904dec3758" name="Changes" comment="" />
-      <created>1675957436460</created>
+      <changelist id="17d01615-5f03-4bcd-af39-60c2e4b772b2" name="Changes" comment="" />
+      <created>1676198202123</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1675957436460</updated>
+      <updated>1676198202123</updated>
     </task>
-    <task id="LOCAL-00001" summary="Version 0.4.0 is released.">
-      <created>1676031037388</created>
+    <task id="LOCAL-00001" summary="Bugfixes and documentation. Start of simulation interface.">
+      <created>1676553420603</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1676031037388</updated>
+      <updated>1676553420603</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Bugfixes and documentation. Start of simulation interface.">
+      <created>1676553426796</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1676553426796</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Documentation update">
+      <created>1676554390773</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1676554390773</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Documentation update">
+      <created>1676554490730</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1676554490730</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Documentation update">
+      <created>1676554767250</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1676554767250</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Version 0.4.0 is released." />
-    <option name="LAST_COMMIT_MESSAGE" value="Version 0.4.0 is released." />
+    <MESSAGE value="Bugfixes and documentation. Start of simulation interface." />
+    <MESSAGE value="Documentation update" />
+    <option name="LAST_COMMIT_MESSAGE" value="Documentation update" />
   </component>
 </project>
