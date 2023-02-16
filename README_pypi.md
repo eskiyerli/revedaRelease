@@ -9,6 +9,10 @@
 5. Netlsting process can be guided by a config view like commercial tools allowing designer to choose between different views for simulation.
 6. Netlisting is geared towards Xyce although not everything has not been implemented yet, for example subcircuit parameters.
 
+# Installation
+
+After PyPi installation, just issue `reveda` command to start the program.
+
 ## Attribution
 
 - Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). Licensed under a [Creative Commons Attribution 3.0 License](http://creativecommons.org/licenses/by/3.0/).

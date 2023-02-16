@@ -19,9 +19,3 @@
 #  License: Mozilla Public License 2.0
 #  Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
-
-import sys
-import pathlib
-# version
-__version__ = "0.4.1"
-#import revedaeditor.pdk.callbacks as cb

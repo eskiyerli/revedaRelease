@@ -57,7 +57,7 @@ import fileio.symbolEncoder as se
 import gui.fileDialogues as fd
 import gui.propertyDialogues as pdlg
 import gui.editFunctions as edf
-
+import revedasim.simMainWindow as smw
 
 class editorWindow(QMainWindow):
     """
@@ -350,7 +350,7 @@ class editorWindow(QMainWindow):
         self.fitAction.triggered.connect(self.fitToWindow)
         self.zoomInAction.triggered.connect(self.zoomIn)
         self.zoomOutAction.triggered.connect(self.zoomOut)
-        self.dispConfigAction.triggered.connect(self.dispConfDialog)
+        self.dispConfigAction.triggered.connect(self.dispConfigEdit)
         self.moveOriginAction.triggered.connect(self.moveOrigin)
 
     def _createShortcuts(self):
@@ -362,11 +362,12 @@ class editorWindow(QMainWindow):
         self.createTextAction.setShortcut("Shift+L")
         self.deleteAction.setShortcut(QKeySequence.Delete)
 
-    def dispConfDialog(self):
+    def dispConfigEdit(self):
         dcd = pdlg.displayConfigDialog(self)
-        dlg.majorGridEntry.setText(str(self.majorGrid))
+        dcd.majorGridEntry.setText(str(self.majorGrid))
         if dcd.exec() == QDialog.Accepted:
             self.majorGrid = int(float(dcd.majorGridEntry.text()))
+
 
     def printClick(self):
         dlg = QPrintDialog(self)
@@ -529,6 +530,12 @@ class schematicEditor(editorWindow):
         self.createWireAction.setShortcut(Qt.Key_W)
         self.createPinAction.setShortcut(Qt.Key_P)
 
+    def dispConfigEdit(self):
+        super().dispConfigEdit()
+        self.centralW.view.majorGrid = self.majorGrid
+        self.centralW.scene.majorGrid = self.majorGrid
+        self.centralW.scene.gridTuple = (self.majorGrid, self.majorGrid)
+        self.centralW.view.gridTuple = (self.majorGrid, self.majorGrid)
     def createWireClick(self, s):
         self.centralW.scene.drawWire = True
 
@@ -594,7 +601,7 @@ class schematicEditor(editorWindow):
         self.centralW.scene.itemSelect = False
 
     def startSimClick(self, s):
-        simguiw = revedasim.simGUImainWindow(self)
+        simguiw = smw.simMainWindow(self.appMainW,self)
         simguiw.show()
 
     def checkSaveCell(self):
@@ -689,9 +696,9 @@ class schematicEditor(editorWindow):
                                                dlg.viewNameCombo.currentText())
                 with configItem.data(Qt.UserRole + 2).open(mode='r') as f:
                     netlistObj.configDict = json.load(f)[2]
-            xyceNetlRunner = runXNetlistThread(netlistObj, self)
-            self.logger.info('Writing netlist')
-            self.appMainW.threadPool.start(xyceNetlRunner)
+            netlistObj.writeNetlist()
+            # xyceNetlRunner = runXNetlistThread(netlistObj, self)
+            # self.appMainW.threadPool.start(xyceNetlRunner)
 
     def goDownClick(self, s):
         self.centralW.scene.goDownHier()
@@ -781,6 +788,12 @@ class symbolEditor(editorWindow):
         self.centralW.scene.itemContextMenu.addAction(self.deleteAction)
         self.centralW.scene.itemContextMenu.addAction(self.objPropAction)
 
+    def dispConfigEdit(self):
+        super().dispConfigEdit()
+        self.centralW.view.majorGrid = self.majorGrid
+        self.centralW.scene.majorGrid = self.majorGrid
+        self.centralW.view.gridTuple = (self.majorGrid, self.majorGrid)
+        self.centralW.scene.gridTuple = (self.majorGrid, self.majorGrid)
     def objPropClick(self):
         self.centralW.scene.itemProperties()
 
@@ -1428,7 +1441,6 @@ class symbol_scene(editor_scene):
                     # items should be always visible in symbol view
                     if isinstance(itemShape, shp.label):
                         itemShape.setOpacity(1)
-                    print(item['type'])
                     self.addItem(itemShape)
                 elif item["type"] == "attr":
                     attr = lj.createSymbolAttribute(item)
@@ -2173,19 +2185,22 @@ class schematic_scene(editor_scene):
                 if isinstance(item, shp.symbolShape):
                     dlg = pdlg.instanceProperties(self.parent.parent, item)
                     if dlg.exec() == QDialog.Accepted:
-                        item.libraryName = dlg.libNameEdit.text().strip()
-                        item.cellName = dlg.cellNameEdit.text().strip()
-                        item.viewName = dlg.viewNameEdit.text().strip()
-                        filePath = pathlib.Path(
-                            self.libraryDict[item.libraryName].joinpath(
-                                item.cellName, item.viewName + ".json"))
+                        # item.libraryName = dlg.libNameEdit.text().strip()
+                        # item.cellName = dlg.cellNameEdit.text().strip()
+                        # item.viewName = dlg.viewNameEdit.text().strip()
+                        #
+                        # # filePath = pathlib.Path(
+                        # #     self.libraryDict[item.libraryName].joinpath(
+                        # #         item.cellName, item.viewName + ".json"))
                         item.instanceName = dlg.instNameEdit.text().strip()
                         item.angle = float(dlg.angleEdit.text().strip())
                         for label in item.labels.values():
                             if label.labelDefinition == "[@instName]":
                                 label.labelValue = item.instanceName
+                                label.labelText = label.labelValue
                             elif label.labelDefinition == "[@cellName]":
                                 label.labelValue = item.cellName
+                                label.labelDefs()
                         location = self.snapToGrid(
                             QPoint(float(dlg.xLocationEdit.text().strip()),
                                    float(dlg.yLocationEdit.text().strip()), ),
@@ -2455,7 +2470,6 @@ class editor_view(QGraphicsView):
         return base * int(math.floor(number / base))
 
     def drawBackground(self, painter, rect):
-
         if self.gridbackg:
             rectCoord = rect.getRect()
             painter.fillRect(rect, QColor("black"))
@@ -2544,6 +2558,7 @@ class libraryBrowser(QMainWindow):
         self.setCentralWidget(self.libBrowserCont)
         self.designView = self.libBrowserCont.designView
         self.libraryModel = self.designView.libraryModel
+        self.editProcess = None
 
     def _createMenuBar(self):
         self.browserMenubar = self.menuBar()
@@ -2784,10 +2799,11 @@ class libraryBrowser(QMainWindow):
                 symbolWindow.loadSymbol()
                 symbolWindow.show()
             case "veriloga":
-                # scb.createCellView(self.appMainW, viewItem.viewName, cellItem)
-                p = QProcess(self.appMainW)
-                p.finished.connect(self.appMainW.importVerilogaClick)
-                p.start(str(self.appMainW.textEditorPath), [])
+                scb.createCellView(self.appMainW, viewItem.viewName, cellItem)
+                if self.editProcess is None:
+                    self.editProcess = QProcess()
+                    self.editProcess.finished.connect(self.editProcessFinished)
+                    self.editProcess.start(str(self.appMainW.textEditorPath), [])
 
     def openConfigEditWindow(self, configDict, schViewItem, viewItem):
         schematicName = schViewItem.viewName
@@ -2856,12 +2872,13 @@ class libraryBrowser(QMainWindow):
                 with open(viewItem.viewPath) as tempFile:
                     items = json.load(tempFile)
                 if items[1]["filePath"]:
-                    p = QProcess(self.appMainW)
-                    p.finished.connect(self.appMainW.importVerilogaClick)
-                    p.start(str(self.appMainW.textEditorPath), [
-                        str(viewItem.viewPath.parent.joinpath(
-                            items[1]["filePath"]))])
-
+                    if self.editProcess is None:
+                        self.editProcess = QProcess()
+                        VerilogafilePathObj =viewItem.parent().data(
+                            Qt.UserRole+2).joinpath(items[1]["filePath"])
+                        self.editProcess.finished.connect(self.editProcessFinished)
+                        self.editProcess.start(str(self.appMainW.textEditorPath),
+                            [str(VerilogafilePathObj)])
                 else:
                     self.logger.warning("File path not defined.")
             elif viewItem.viewType == "config":
@@ -2872,6 +2889,10 @@ class libraryBrowser(QMainWindow):
                 schViewItem = libm.getViewItem(cellItem, schematicName)
                 configDict = items[2]
                 self.openConfigEditWindow(configDict, schViewItem, viewItem)
+
+    def editProcessFinished(self):
+        self.appMainW.importVerilogaClick()
+        self.editProcess = None
 
     def deleteCellViewClick(self, s):
         viewItem = self.selectCellView(self.libraryModel)
@@ -3283,12 +3304,16 @@ class xyceNetlist:
                             netlistLine = netlistLine.replace(
                                 labelItem.labelDefinition, labelItem.labelText)
                     cirFile.write(f"{netlistLine}\n")
-                    modelParamsLine = ', '.join(
-                        ' = '.join((key, val)) for (key, val) in
-                        item.attr.items())
-                    modelLine = f'.MODEL {item.labels["vaModel"].labelValue} ' \
-                                f'{item.labels["vaModule"].labelValue} {modelParamsLine}'
-                    cirFile.write(f'{modelLine}\n')
+                    # TODO: model lines should be only one per model.
+                    # modelParamsLine = ', '.join(
+                    #     ' = '.join((key, val)) for (key, val) in
+                    #     item.attr.items())
+                    # modelLine = f'.MODEL {item.labels["vaModel"].labelValue} ' \
+                    #             f'{item.labels["vaModule"].labelValue} {modelParamsLine}'
+                    # cirFile.write(f'{modelLine}\n')
+                    # TODO: if two cells from different libraries have the same
+                    #  cell name the second one may not get netlisted.
+                    # think about changing to a namedtuple of dataclass
                     self.netlistedViews[item.cellName] = [libItem.libraryName,
                                                           "veriloga", ]
                 elif viewDict[view].viewType == "symbol":
@@ -3433,6 +3458,9 @@ class configTable(QTableView):
         self.model = model
         self.setModel(self.model)
         self.combos = list()
+        self.horizontalHeader().setStretchLastSection(True)
+        self.setSelectionMode(QTableView.SingleSelection)
+        self.setEditTriggers(QTableView.NoEditTriggers)
         for row in range(self.model.rowCount()):
             self.combos.append(QComboBox())
             items = [item.strip() for item in self.model.itemFromIndex(
@@ -3455,5 +3483,6 @@ class runXNetlistThread(QRunnable):
         self.parent = parent
 
     def run(self) -> None:
+        self.parent.logger.info('Netlist started')
         self.netlistObj.writeNetlist()
         self.parent.logger.info('Netlisting finished')

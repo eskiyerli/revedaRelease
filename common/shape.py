@@ -1306,7 +1306,7 @@ class label(shape):
     def labelDefs(self):
         """
         This method will create label name and text from label definition. It
-        should be only run during the label initiation.
+        should be run label is defined or redefined.
         """
         if self._labelType == label.labelTypes[0]:
             self._labelText = self._labelDefinition

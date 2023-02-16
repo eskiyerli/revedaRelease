@@ -90,5 +90,21 @@
     <file>icons/home.png</file>
     <file>icons/question.png</file>
     <file>icons/sticky-note-text.png</file>
+    <file>icons/blue-document-node.png</file>
+    <file>icons/screwdriver.png</file>
+    <file>icons/books-stack.png</file>
+    <file>icons/calculator-scientific.png</file>
+    <file>icons/gear--pencil.png</file>
+    <file>icons/table.png</file>
+    <file>icons/node-select.png</file>
+    <file>icons/toggle-expand.png</file>
+    <file>icons/regular-expression.png</file>
+    <file>icons/control.png</file>
+    <file>icons/control-double.png</file>
+    <file>icons/control-stop-square.png</file>
+    <file>icons/ui-check-boxes-list.png</file>
+    <file>icons/scripts-text.png</file>
+    <file>icons/clipboard-text.png</file>
+    <file>icons/blue-document-attribute-s.png</file>
 </qresource>
 </RCC>
