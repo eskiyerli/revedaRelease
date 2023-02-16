@@ -2,7 +2,7 @@
 title: Revolution EDA Integrated Circuit Symbol and Schematic Editors
 author: Murat Eskiyerli, PhD
 category: EDA, semiconductor
-layout: default
+
 ---
 
 # Revolution EDA Integrated Circuit Symbol and Schematic Editors
@@ -45,7 +45,7 @@ There are a few different methods to clone the repository:
 
 3. Using Github Desktop:  Under `File` menu, find clone `Clone Repository...` item and click. Choose `Github.com` tab and enter repository URL:  https://github.com/eskiyerli/revedaRelease
 
-   <img src="./assets/image-20230209082047928.png" alt="image-20230209082047928" style="zoom:50%;" />
+   <img src="assets/image-20230209082047928.png" alt="image-20230209082047928" style="zoom:50%;" />
 
 ### Download a release from RevEDA Release repository
 
@@ -89,13 +89,13 @@ Revolution EDA window is the first window an user interacts. At the moment, `Too
 
 A typical user will be regularly interacting with `Library Browser` to access design data files. Library Browser is used to create, open and delete libraries, create, copy and rename cells and cellviews. Note that Revolution EDA does not have a central database structure. Each library is in its folder and each cell is a sub-folder under the library folder. Each cellview is a file in the cell folder. Library folders are denoted by an empty `reveda.lib` file. 
 
-<img src="./assets/Screenshot_20230214_210207.png" style="zoom:80%;" />
+<img src="docs/assets/Screenshot_20230214_210207.png" style="zoom:80%;" />
 
 ### Library Editor
 
 Library editor should feel familiar to the experienced custom IC designers. It has only menu item: `Library`. Under this menu, all functions related to library, cell and cellviews are grouped. 
 
-<img src="./assets/Screenshot_20230214_211158.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_211158.png" style="zoom:67%;" />
 
 A library can be created using `Create/Open Lib...` dialogue, which will open a file browser. An existing library can be selected or a new folder can be created. Revolution EDA will create a `reveda.lib` file to denote that it is a valid library. At the moment, it is an empty file. 
 
@@ -114,7 +114,7 @@ A library can be created using `Create/Open Lib...` dialogue, which will open a 
 
 Note that the name for any cellview should include cellview name. For example, `schematic123` or `Newschematic` are valid schematic cellview names but `schem` or `schem123ic` are not. 
 
-<img src="./assets/Screenshot_20230214_212122.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_212122.png" style="zoom:67%;" />
 
 `Open CellView...` dialogue can be used to the relevant editor for a cellview.
 
@@ -129,11 +129,11 @@ Note that the name for any cellview should include cellview name. For example, `
 
 There are also contextual menus defined for library, cell and cellview items in the Library Browser. Selecting an item and clicking right mouse button will display the relevant menu:
 
-<img src="./assets/Screenshot_20230214_213352.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_213352.png" style="zoom:67%;" />
 
-<img src="./assets/Screenshot_20230214_213448.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_213448.png" style="zoom:67%;" />
 
-<img src="./assets/Screenshot_20230214_213534.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_213534.png" style="zoom:67%;" />
 
 Their function are the same as the relevant menu item under `Library` menu.
 
@@ -156,7 +156,7 @@ Edits can be undone or redone using `Undo` or `Redo` toolbar buttons, or `U` or 
 
 Lines are drawn by pointing-and-pressing left mouse button at the start and releasing at the end point of the line. Lines can be horizontal or vertical. A drawn line can be edited either by selecting it and pressing `q` key
 
-<img src="./assets/Screenshot_20230214_204324.png" style="zoom: 67%;" />
+<img src="assets/Screenshot_20230214_204324.png" style="zoom: 67%;" />
 
  or by selecting `stretch` mode (`m`-key or selecting `stretch` option at the right-mouse button click). Then, select either end of the line, the line will turn red and selected line end will be indicated by a circle.
 
@@ -166,11 +166,11 @@ Lines are drawn by pointing-and-pressing left mouse button at the start and rele
 
 Circles are drawn by selecting a center point, pressing left-mouse button at that point and releasing left-mouse button. It can be also edited similarly to a line either by displaying the properties dialogue (select the circle and press `q` key or select the `Properties` option in the contextual menu),
 
-<img src="./assets/Screenshot_20230214_214328.png" style="zoom:80%;" />
+<img src="assets/Screenshot_20230214_214328.png" style="zoom:80%;" />
 
 or by pressing `m` key or selecting `stretch` option. The circle will turn red and a hand shape will denote that stretch mode is activated. Just move the hand-cursor so that the circle is the right size.
 
-<img src="./assets/Screenshot_20230214_214720.png" style="zoom: 67%;" />
+<img src="assets/Screenshot_20230214_214720.png" style="zoom: 67%;" />
 
 
 
@@ -180,11 +180,11 @@ Beyond drawing a the symbol outline, the symbol editor can also indicate pins, w
 
 Rectangles are similarly created by pressing mouse button at one corner and then releasing it at the other diagonal corner.
 
-<img src="./assets/Screenshot_20230214_215123.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_215123.png" style="zoom:67%;" />
 
 Rectangles can be similarly edited using properties dialogues or stretching any side by selecting that side after pressing `m` key or selecting `stretch` option in the contextual menu.
 
-<img src="./assets/Screenshot_20230214_215437.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_215437.png" style="zoom:67%;" />
 
 #### Arcs
 
@@ -199,13 +199,13 @@ Arc drawing is performed similarly to a rectangle drawing. Depending on the angl
 
 Similarly to other shapes, arcs can be also be edited using property dialogue or by stretching. One caveat in stretching is that if the bounding rectangle of a stretched arc is flipped, it will be saved correctly in the cellview file. This is a known bug.
 
-<img src="./assets/Screenshot_20230214_215836.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_215836.png" style="zoom:67%;" />
 
 ### Pins
 
 Pins denote the connection of the element or circuit defined by symbol to the external circuits. Pins can be created by clicking toolbar icon or selecting `create Pin…` menu item under `Create` menu.  Note that pin direction and pin type information is not saved or used for the symbol cell views at the moment.
 
-<img src="./assets/Screenshot_20230214_220729.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_220729.png" style="zoom:67%;" />
 
 ### Labels
 
@@ -273,7 +273,7 @@ There are three types of labels:
 
    For example, an `nmos` symbol has a `asparm()` function defined. We can use it to define the value of a label for `nmos` symbol. When this symbol is instantiated in a schematic, the value of `as` label will determined by `asparm()` function defined in the `callbacks.py` file. This means that instance callbacks can now use the all the facilities of Python, even conceivably ==machine learning== libraries to optimise designs.
 
-   ![](./assets/Screenshot_20230214_221911.png)
+   ![](assets/Screenshot_20230214_221911.png)
 
    Labels can be also be hidden to reduce the clutter in the schematic instance of a symbol. Hidden labels are as valid as visible labels. Label properties dialogue also have `labelAlignment`, `labelOrientation` and `labelUse` fields, which are currently not implemented. However, labels can be rotated using context menu’s `rotate` option.
 
@@ -295,7 +295,7 @@ Similarly, `[@modelName]` label will take its value from `modelName` attribute.
 
 Attributes are defined in the `Cellview properties` dialogue that can be accessed under `Edit` menu:
 
-<img src="./assets/Screenshot_20230214_225857.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230214_225857.png" style="zoom:67%;" />
 
 This dialogue has two parts.
 
@@ -313,7 +313,7 @@ The cursor position is displayed at left-bottom corner of the editor. If the use
 
 Schematic editor is used to instantiate symbol and define the nets that connect them.. The schematic editor is where the circuit design process begins. The schematic editor window is very similar to symbol editor window:
 
-<img src="./assets/Screenshot_20230215_113354.png" style="zoom:80%;" />
+<img src="assets/Screenshot_20230215_113354.png" style="zoom:80%;" />
 
 Main functions of the schematic editor are:
 
@@ -328,17 +328,17 @@ Main functions of the schematic editor are:
 
 A symbol to be placed on the schematic editor is selected by first pressing `i` key or selecting relevant menu item or toolbar button. A symbol selection dialogue is displayed.
 
-<img src="./assets/Screenshot_20230215_113556.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230215_113556.png" style="zoom:67%;" />
 
 Symbol selection dialogue only displays the symbol views. Choose the desired symbol and click `OK` button and click anywhere on the symbol editor window. The symbol will placed at that point. Note that `[@instName]` label will be converted to an instance name that starts with **I** and ends with a unique number. If any of other *NLPLabel*s have a default definition, they will be used. For NLPLabels without a default definition and *PyLabel*s only the definition of the label will be shown.
 
-![](./assets/Screenshot_20230215_114312.png)
+![](assets/Screenshot_20230215_114312.png)
 
 Now the select the instance and press `q` button to display ==instance properties== dialogue. Note that `as` parameter has ? shown for its value. Because it is defined as PyLabel in the symbol, once the values for other labels, e.g. *w*, *l*, *nf* and *m* are defined, its value will be calculated according to the formula defined in `callbacks.py` file.
 
 Note that symbol attributes are also shown under *Instance Attributes* heading. However, the user cannot edit them using this dialogue, it is just there to inform the designer.
 
-![](./assets/Screenshot_20230215_114438.png)
+![](assets/Screenshot_20230215_114438.png)
 
 At the moment, only instance name, location and angle can be changed as well as instance label values.
 
@@ -348,11 +348,11 @@ Wires are used to make connections between instances at pins. A wire can be crea
 
 Wire starts at first point the left mouse button is clicked and ends at where it is released. For each net, a net name can be defined using `Net Properties` dialogue. This name will also propagate all other wires that wire touches. 
 
-<img src="./assets/Screenshot_20230215_152849.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230215_152849.png" style="zoom:67%;" />
 
 If a wire is extended by drawing another wire along its direction, i.e. horizontal or vertical, those wires will be merged and will become a single wire. If two wires are connected such that one wire is orthogonal to the other and connects at a mid-point, a solder-dot will be placed. Solder dot algorithm is not perfect and occasionally will not remove the solder dot even the original net is removed. It will be removed after a netlisting of the circuit. Solder-dots are ornaments and do not have any bearing on the netlisting process.
 
-![](./assets/Screenshot_20230215_153445.png)
+![](assets/Screenshot_20230215_153445.png)
 
 ### Creating Pins
 
@@ -364,13 +364,13 @@ Like symbol pins, schematic pins define the connection points for the circuit in
 
 At the moment, *Pin Type* definition is not used.
 
-![](./assets/Screenshot_20230215_153909.png)
+![](assets/Screenshot_20230215_153909.png)
 
 ### Creating Text
 
 Texts can be placed on the schematics. All monospaced fonts on the system can be used. However the Qt will try to find the closest font if it can find the exact font when the schematic were to be used in another system. 
 
-<img src="./assets/Screenshot_20230215_154320.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230215_154320.png" style="zoom:67%;" />
 
 
 
@@ -378,31 +378,31 @@ Texts can be placed on the schematics. All monospaced fonts on the system can be
 
 A symbol for a schematic can be created automatically using `Create Symbol` menu item. Revolution EDA first verify the name of the symbol cell view. As explained earlier,  the cell view name should include *symbol* in the text.
 
-<img src="./assets/Screenshot_20230215_154633.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230215_154633.png" style="zoom:67%;" />
 
 Once the symbol view name is entered, click `OK`. If a view with the same name exists, the Revolution EDA will confirm the designer wants to overwrite that view. If the input to that dialogue is also `OK`,  a new dialogue will be displayed:
 
-<img src="./assets/Screenshot_20230215_154905.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230215_154905.png" style="zoom:67%;" />
 
 The initial placement of pins is according to their directions. The designer is free to change the location of pins. It is advisable to keep *Stub Length* and *Pin spacing* values to keep a consistent look. Once the designer is satisfied the pin locations and symbol geometry parameters, he/she can proceed to creating a symbol view. The symbol view will be opened in another window. A library browser will also show a symbol view is added to the relevant cell.
 
-<img src="./assets/Screenshot_20230215_155308.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230215_155308.png" style="zoom:67%;" />
 
 The symbol is now ready to use where *NLPDeviceFormat* is also defined for netlisting.
 
-<img src="./assets/Screenshot_20230215_163913.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230215_163913.png" style="zoom:67%;" />
 
 ### Creating Netlists
 
 Netlist creation can be done through `Simulation` menu and `Create Netlist` menu item. It will start an `Export Netlist` dialog.  Depending on the availability of *schematic* and *config* views, there could be more than one option to choose for `view` combobox. Here we will be concentrating on using *Switch view list* field to control the netlisting process. Once we explain the *config* view and the associated editor, we will also touch use of config views in netlisting process.
 
-<img src="./assets/Screenshot_20230215_173829.png" style="zoom:67%;" />
+<img src="assets/Screenshot_20230215_173829.png" style="zoom:67%;" />
 
 In this dialogue, the view to be netlisted is *schematic*. Switch view list is the order of preference in netlisting a cell. If a cell has both veriloga and schematic views, *schematic* view will be preferred and *veriloga* will not be used. Note that *spice* view is not yet implemented, but will be available soon.
 
 *Export directory* field determines the parent folder name for the simulations. It is normally entered at *Options* menu of main window. 
 
-<img src="./assets/Screenshot_20230215_172655.png" style="zoom:75%;" />
+<img src="assets/Screenshot_20230215_172655.png" style="zoom:75%;" />
 
 However it could be changed at *export netlist* field as well. However, it ==will not be saved== in the Revolution EDA configuration file unlike the entries in *Options* dialogue.
 
@@ -435,7 +435,7 @@ Revolution EDA also offers the ability to create a *config* view to control the 
 
 Config view is created like any other cell view. Just start the `Create Cell View` dialogue as discussed above and selected `config` as view type and enter a view name that has *config* string in it.
 
-![Screenshot_20230216_100322](./assets/Screenshot_20230216_100322.png)
+![Screenshot_20230216_100322](assets/Screenshot_20230216_100322.png)
 
 A new dialogue will be displayed for the config view specific information.  It will ask which cell view *config* view will be based on and the default preference order of the cellviews for netlisting, i.e. *view list* field in *Switch/Stop Views* box. The dialogue has already default values displayed. 
 
@@ -443,11 +443,11 @@ A new dialogue will be displayed for the config view specific information.  It w
 
 After making desired changes in the dialogue, if any, the designer should press `OK` button. Now, the *config view editor* window will be shown.  At first, window will not have any fields displayed. Under `File` menu, select `Update` menu item and the *Cell View Configuration* box will display all the cells in the design and default view to use for netlisting.
 
-<img src="./assets/Screenshot_20230216_101413.png" alt="Screenshot_20230216_101413" style="zoom:67%;" />
+<img src="assets/Screenshot_20230216_101413.png" alt="Screenshot_20230216_101413" style="zoom:67%;" />
 
 The combo box under *View to Use* heading for each cell in the circuit can be used to select the view to use for netlist. This is a fairly simple circuit, but let’s select *symbol* view for *highPassFilter* cell. This means that the netlister will stop at *symbol* view and will not go down the hierarchy. Once again, select `Update` menu item under `File` menu. The updated config view will now show only *highPassFilter* and *capVa* cells.
 
-<img src="./assets/Screenshot_20230216_103427.png" alt="Screenshot_20230216_103427" style="zoom:67%;" />
+<img src="assets/Screenshot_20230216_103427.png" alt="Screenshot_20230216_103427" style="zoom:67%;" />
 
 ### Netlisting a circuit using Config View
 
@@ -499,15 +499,15 @@ Verilog-A is frequently used hardware description language (HDL) for analogue ci
 
 Verilog-a file to be imported should only have one verilog-a module. To start the import procedure, select `Tools` menu, `Import` submenu and then `Import Verilog-a file…` menu item. The following dialogue will be displayed:
 
-![Screenshot_20230216_123430](./assets/Screenshot_20230216_123430.png)
+![Screenshot_20230216_123430](assets/Screenshot_20230216_123430.png)
 
 *Select Verilog-A file* field is for selection of Verilog-A file to be imported. Once the file is selected, the library, cell name and veriloga view name should be entered. Note that cell name and view name fields are editable. Thus a new cell with a veriloga view can be created. Once `OK` button is clicked, *Create Symbol* dialogue will be displayed. In that dialogue, fill the pin location forms as needed to cover all the pins:
 
-![Screenshot_20230216_123713](./assets/Screenshot_20230216_123713.png)
+![Screenshot_20230216_123713](assets/Screenshot_20230216_123713.png)
 
 Once again, press `OK` button to see the created symbol in *Symbol Editor*. Symbol will have all the needed labels for correct netlisting. `[@vaFile]` and `[@vaModule]` labels will be hidden in the schematic. *Symbol labels* dialogue will also show the symbol labels and attributes. 
 
-<img src="./assets/Screenshot_20230216_124059.png" alt="Screenshot_20230216_124059" style="zoom:67%;" />
+<img src="assets/Screenshot_20230216_124059.png" alt="Screenshot_20230216_124059" style="zoom:67%;" />
 
 In the *Library Browser* window, the user will find two cell views under the selected cell name:
 
