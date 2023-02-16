@@ -89,7 +89,7 @@ Revolution EDA window is the first window an user interacts. At the moment, `Too
 
 A typical user will be regularly interacting with `Library Browser` to access design data files. Library Browser is used to create, open and delete libraries, create, copy and rename cells and cellviews. Note that Revolution EDA does not have a central database structure. Each library is in its folder and each cell is a sub-folder under the library folder. Each cellview is a file in the cell folder. Library folders are denoted by an empty `reveda.lib` file. 
 
-<img src="docs/assets/Screenshot_20230214_210207.png" style="zoom:80%;" />
+<img src="assets/Screenshot_20230214_210207.png" style="zoom:80%;" />
 
 ### Library Editor
 

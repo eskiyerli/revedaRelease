@@ -5,8 +5,55 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="17d01615-5f03-4bcd-af39-60c2e4b772b2" name="Changes" comment="Documentation update">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/Revolution EDA Symbol and Schematic Editors.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/revedaRelease.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/revedaRelease.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230209_082011.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230209_082011.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230210_113658.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230210_113658.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230210_142342.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230210_142342.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230210_142507.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230210_142507.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_204024.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_204024.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_204324.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_204324.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_210207.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_210207.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_211158.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_211158.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_212122.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_212122.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_213352.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_213352.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_213448.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_213448.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_213534.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_213534.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_214328.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_214328.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_214720.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_214720.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_215123.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_215123.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_215437.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_215437.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_215836.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_215836.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_220729.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_220729.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_221911.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_221911.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_225857.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230214_225857.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_104815.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_104815.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_113354.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_113354.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_113556.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_113556.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_113949.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_113949.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_114312.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_114312.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_114438.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_114438.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_152849.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_152849.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_153445.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_153445.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_153909.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_153909.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_154320.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_154320.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_154633.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_154633.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_154905.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_154905.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_155308.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_155308.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_163913.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_163913.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_164434.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_164434.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_172217.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_172217.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_172655.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_172655.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_173829.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230215_173829.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_100322.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_100322.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_101413-1676540084030-7.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_101413-1676540084030-7.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_101413.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_101413.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_103427.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_103427.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_120741.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_120741.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_123430.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_123430.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_123713.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_123713.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_124059.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/Screenshot_20230216_124059.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
