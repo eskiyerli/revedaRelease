@@ -1,35 +1,22 @@
-2023-02-09 23:54:24,286 - gui.appWindow - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-02-10 00:07:08,726 - gui.appWindow - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-02-10 00:10:15,447 - gui.appWindow - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-02-10 00:16:01,017 - gui.appWindow - WARNING - Created config at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\designs\newFilter\config.json
-2023-02-10 09:30:23,731 - gui.appWindow - WARNING - Created config at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\designs\newFilter\config.json
-2023-02-10 09:39:07,125 - gui.appWindow - WARNING - Created config at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\designs\newFilter\config.json
-2023-02-10 09:41:48,538 - gui.appWindow - INFO - Writing netlist
-2023-02-10 09:41:48,711 - gui.appWindow - INFO - Netlisting finished
-2023-02-10 09:42:10,202 - gui.appWindow - INFO - Writing netlist
-2023-02-10 09:42:10,245 - gui.appWindow - INFO - Netlisting finished
-2023-02-10 11:03:29,309 - gui.appWindow - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\designs\newFilter\symbol.json
-2023-02-10 11:04:32,854 - gui.appWindow - WARNING - Replacing the cell view.
-2023-02-10 11:04:32,856 - gui.appWindow - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\designs\newFilter\symbol.json
-2023-02-10 11:04:38,000 - gui.appWindow - WARNING - Created veriloga at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\designs\newFilter\veriloga.json
-2023-02-10 11:05:13,830 - gui.appWindow - WARNING - Created capVa cell at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa
-2023-02-10 11:05:13,831 - gui.appWindow - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa\symbol.json
-2023-02-10 11:05:19,902 - gui.appWindow - WARNING - Created veriloga at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa\veriloga.json
-2023-02-10 11:20:41,296 - gui.appWindow - WARNING - Replacing the cell view.
-2023-02-10 11:20:41,298 - gui.appWindow - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa\symbol.json
-2023-02-10 11:20:49,750 - gui.appWindow - WARNING - Replacing the cell view.
-2023-02-10 11:20:49,752 - gui.appWindow - WARNING - Created veriloga at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa\veriloga.json
-2023-02-10 11:21:37,864 - gui.appWindow - WARNING - Replacing the cell view.
-2023-02-10 11:21:37,866 - gui.appWindow - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa\symbol.json
-2023-02-10 11:21:43,928 - gui.appWindow - WARNING - Replacing the cell view.
-2023-02-10 11:21:43,930 - gui.appWindow - WARNING - Created veriloga at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\RevEDA\analogLib\capVa\veriloga.json
-2023-02-10 14:17:57,953 - gui.appWindow - INFO - Removed Library Path.
-2023-02-10 14:17:59,293 - gui.appWindow - INFO - Removed Library Path.
-2023-02-10 14:18:34,551 - gui.appWindow - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-02-10 14:19:57,915 - gui.appWindow - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-02-10 19:16:43,620 - gui.appWindow - WARNING - Created LCFilter cell at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\designs\LCFilter
-2023-02-10 19:16:51,770 - gui.appWindow - WARNING - Created schematic at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\designs\LCFilter\schematic.json
-2023-02-10 21:41:23,361 - gui.appWindow - WARNING - Created ind2 cell at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\analogLib\ind2
-2023-02-10 21:41:35,123 - gui.appWindow - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\analogLib\ind2\symbol.json
-2023-02-10 22:05:56,088 - gui.appWindow - WARNING - Created schematic at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\designs\LCFilter\schematic.json
-2023-02-10 22:08:44,493 - gui.appWindow - WARNING - Created schematic at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\exampleLibraries\designs\LCFilter\schematic.json
+2023-05-08 20:03:55,904 - reveda - ERROR - Error in creating netlist: local variable 'netlistObj' referenced before assignment
+2023-05-08 20:04:12,680 - reveda - ERROR - Error in creating netlist: local variable 'netlistObj' referenced before assignment
+2023-05-08 22:26:58,863 - reveda - ERROR - Error in creating netlist: 'Logger' object is not callable
+2023-05-08 22:33:27,932 - reveda - ERROR - I/O operation on closed file.
+2023-05-08 22:33:27,932 - reveda - ERROR - Error in creating netlist: I/O operation on closed file.
+2023-05-08 22:34:14,254 - reveda - WARNING - left unconnected:dnet0
+2023-05-08 23:16:15,873 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-05-09 09:48:33,646 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2023-05-09 09:48:41,667 - reveda - INFO - Removed Library Path.
+2023-05-09 09:48:42,688 - reveda - INFO - Removed Library Path.
+2023-05-09 09:48:58,367 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\library.json
+2023-05-09 09:49:22,734 - reveda - ERROR - Error in creating netlist: 'MainWindow' object has no attribute 'threadPool'
+2023-05-09 09:49:56,269 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2023-05-09 09:50:53,523 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2023-05-09 09:53:06,717 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2023-05-09 09:53:21,115 - reveda - INFO - Netlisting finished.
+2023-05-09 11:12:01,546 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2023-05-09 11:18:13,817 - reveda - INFO - Netlisting finished.
+2023-05-09 22:30:40,090 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-09 22:30:57,206 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
+2023-05-09 22:31:10,010 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
+2023-05-09 22:31:29,540 - reveda - INFO - Netlisting finished.
