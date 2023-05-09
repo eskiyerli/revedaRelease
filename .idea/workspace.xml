@@ -5,26 +5,72 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="17d01615-5f03-4bcd-af39-60c2e4b772b2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/exampleLibraries/analogLib/amp2/amp2.va" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/revedasim/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/revedasim/analysisPanel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/revedasim/fileOps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/revedasim/outputsPanel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/revedasim/simMainWindow.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/revedasim/variablesPanel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.kdev4/revedaRelease.kdev4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.project" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/Mozilla Public License, version 2.0.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/README_pypi.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/backend/dataDefinitions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/backend/importViews.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/common/net.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/gui/revedaMain.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/labels.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/mozillaPublicLicense.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/pyproject.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/reveda.conf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/reveda.qrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revedaEditor/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/revedaRelease.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/revedaRelease.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/hdlBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hdlBackEnd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/shape.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/appWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/appWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/editorWindows.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/resources.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources/resources.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reveda.conf" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reveda.log" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reveda.qrc" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.qrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/api/ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/backend/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hdlBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/backend/hdlBackEnd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/libraryMethods.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/backend/libraryMethods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/schBackEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/backend/schBackEnd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/undoStack.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/backend/undoStack.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Point.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/LICENSE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Vector.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/debug/debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/common/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/cellview.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/reveda.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/fonts.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/common/fonts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/layers.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/common/layers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/net.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/pens.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/common/pens.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/common/shape.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/docs/index.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exampleLibraries/analogLib/amp2/amp2.va" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/exampleLibraries/analogLib/capVa/cap.va" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/exampleLibraries/designs/newFilter/cap.va" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exampleLibraries/analogLib/reveda.lib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/exampleLibraries/designs/reveda.lib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fileio/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/fileio/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fileio/loadJSON.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/fileio/loadJSON.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fileio/symbolEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/fileio/symbolEncoder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/gui/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/appWindow.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/editFunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/gui/editFunctions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/editorWindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/gui/editorWindows.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/fileDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/gui/fileDialogues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/propertyDialogues.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/gui/propertyDialogues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/pythonConsole.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/gui/pythonConsole.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labels.md" beforeDir="false" afterPath="$PROJECT_DIR$/labels.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdk/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdk/callbacks.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/pdk/callbacks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/resources.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/resources/resources.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reveda.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reveda.py" beforeDir="false" afterPath="$PROJECT_DIR$/reveda.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/revedasim/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/pdk/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/revedasim/analysisPanel.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/revedasim/fileOps.py" beforeDir="false" afterPath="$PROJECT_DIR$/revedaEditor/revinit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/revedasim/outputsPanel.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/revedasim/simMainWindow.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/revedasim/variablesPanel.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/revinit.py" beforeDir="false" afterPath="$PROJECT_DIR$/revinit.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -39,6 +85,14 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -47,14 +101,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/exampleLibraries&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "experimental",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "/home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/exampleLibraries",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PythonContentEntriesConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="reveda" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="revedaRelease" />
@@ -93,5 +149,16 @@
       <updated>1676198202123</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

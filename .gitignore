@@ -5,10 +5,12 @@
 *.spec
 *.log
 *.xml
+.vs/
+.idea/
+__pycache__/
 icons/
 dist/
 build/
-revedasim/
 schematicEditor.kdev4
 reveda.log
 revolution_eda.egg-info/
