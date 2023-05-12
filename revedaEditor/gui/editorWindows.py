@@ -55,10 +55,7 @@ import revedaEditor.fileio.symbolEncoder as se
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.propertyDialogues as pdlg
 import revedaEditor.gui.editFunctions as edf
-try:
-    import revedasim.simMainWindow as smw
-except ImportError:
-    pass
+
 
 
 class editorWindow(QMainWindow):
@@ -214,10 +211,10 @@ class editorWindow(QMainWindow):
         self.createPinAction = QAction(createPinIcon, "Create Pin...", self)
 
         goUpIcon = QIcon(":/icons/arrow-step-out.png")
-        self.goUpAction = QAction(goUpIcon, "Go Up   Ã¢â€ â€˜", self)
+        self.goUpAction = QAction(goUpIcon, "Go Up", self)
 
         goDownIcon = QIcon(":/icons/arrow-step.png")
-        self.goDownAction = QAction(goDownIcon, "Go Down Ã¢â€ â€œ", self)
+        self.goDownAction = QAction(goDownIcon, "Go Down", self)
 
         self.selectAllIcon = QIcon(":/icons/node-select-all.png")
         self.selectAllAction = QAction(self.selectAllIcon, "Select All", self)
@@ -325,7 +322,7 @@ class editorWindow(QMainWindow):
         # edit menu
         self.menuEdit.addAction(self.undoAction)
         self.menuEdit.addAction(self.redoAction)
-        self.menuEdit.addAction(self.yankAction)
+        # self.menuEdit.addAction(self.yankAction)
         self.menuEdit.addAction(self.pasteAction)
         self.menuEdit.addAction(self.deleteAction)
         self.menuEdit.addAction(self.copyAction)
@@ -347,6 +344,8 @@ class editorWindow(QMainWindow):
         self.zoomOutAction.triggered.connect(self.zoomOut)
         self.dispConfigAction.triggered.connect(self.dispConfigEdit)
         self.moveOriginAction.triggered.connect(self.moveOrigin)
+        self.selectAllAction.triggered.connect(self.selectAllClick)
+        self.deselectAllAction.triggered.connect(self.deselectAllClick)
 
     def _createShortcuts(self):
         self.redoAction.setShortcut("Shift+U")
@@ -357,6 +356,7 @@ class editorWindow(QMainWindow):
         self.createTextAction.setShortcut("Shift+L")
         self.fitAction.setShortcut(Qt.Key_F)
         self.deleteAction.setShortcut(QKeySequence.Delete)
+        self.selectAllAction.setShortcut("Ctrl+A")
 
     def dispConfigEdit(self):
         dcd = pdlg.displayConfigDialog(self)
@@ -365,6 +365,7 @@ class editorWindow(QMainWindow):
         if dcd.exec() == QDialog.Accepted:
             self.majorGrid = int(float(dcd.majorGridEntry.text()))
             self.snapDistance = int(float(dcd.snapDistanceEntry.text()))
+            self.gridTuple = (self.majorGrid, self.majorGrid)
 
     def printClick(self):
         dlg = QPrintDialog(self)
@@ -394,6 +395,12 @@ class editorWindow(QMainWindow):
             imageFile = fdlg.selectedFiles()[0]
             image.save(imageFile)
 
+    def selectAllClick(self):
+        self.centralW.scene.selectAll()
+
+    def deselectAllClick(self):
+        self.centralW.scene.deselectAll()
+
     def fitToWindow(self):
         self.centralW.view.fitToView()
 
@@ -406,6 +413,7 @@ class editorWindow(QMainWindow):
     def closeWindow(self):
         self.close()
 
+
     def closeEvent(self, event):
         cellViewTuple = ddef.viewTuple(self.libName, self.cellName, self.viewName)
         self.appMainW.openViews.pop(cellViewTuple)
@@ -416,7 +424,6 @@ class editorWindow(QMainWindow):
 
     def moveOrigin(self):
         self.centralW.scene.changeOrigin = True
-
 
 class schematicEditor(editorWindow):
     def __init__(self, viewItem: scb.viewItem, libraryDict: dict, libraryView) -> None:
@@ -687,18 +694,20 @@ class schematicEditor(editorWindow):
                 subDirPathObj = self.appMainW.simulationPath.joinpath(self.cellName)
                 subDirPathObj.mkdir(parents=True, exist_ok=True)
                 netlistFilePathObj = subDirPathObj.joinpath(f'{self.cellName}_'
-                                            f'{selectedViewName}').with_suffix('.cir')
+                                                            f'{selectedViewName}').with_suffix(
+                    '.cir')
                 simViewName = dlg.viewNameCombo.currentText()
                 if 'schematic' in simViewName:
                     netlistObj = xyceNetlist(self, netlistFilePathObj)
                 elif 'config' in simViewName:
                     netlistObj = xyceNetlist(self, netlistFilePathObj, True)
-                    configItem = libm.findViewItem(self.libraryView.libraryModel, self.libName,
+                    configItem = libm.findViewItem(self.libraryView.libraryModel,
+                                                   self.libName,
                                                    self.cellName,
                                                    dlg.viewNameCombo.currentText())
                     with configItem.data(Qt.UserRole + 2).open(mode='r') as f:
                         netlistObj.configDict = json.load(f)[2]
-                
+
                 if netlistObj:
                     xyceNetlRunner = runXNetlistThread(netlistObj.writeNetlist())
                     self.appMainW.threadPool.start(xyceNetlRunner)
@@ -717,7 +726,7 @@ class schematicEditor(editorWindow):
 class symbolEditor(editorWindow):
     def __init__(self, viewItem: scb.viewItem, libraryDict: dict, libraryView):
         super().__init__(viewItem, libraryDict, libraryView)
-        self.setWindowTitle(f"Symbol Editor - {self.cellName}")
+        self.setWindowTitle(f"Symbol Editor - {self.cellName} - {self.viewName}")
         self._symbolActions()
 
     def init_UI(self):
@@ -737,6 +746,7 @@ class symbolEditor(editorWindow):
         self.createRectAction.setShortcut(Qt.Key_R)
         self.createLineAction.setShortcut(Qt.Key_W)
         self.createLabelAction.setShortcut(Qt.Key_L)
+        self.createPinAction.setShortcut(Qt.Key_P)
 
     def _createMenuBar(self):
         super()._createMenuBar()
@@ -759,6 +769,9 @@ class symbolEditor(editorWindow):
         super()._addActions()
         self.menuEdit.addAction(self.stretchAction)
         self.menuEdit.addAction(self.viewPropAction)
+        self.selectMenu = self.menuEdit.addMenu("Select")
+        self.selectMenu.addAction(self.selectAllAction)
+        self.selectMenu.addAction(self.deselectAllAction)
         self.menuCreate.addAction(self.createLineAction)
         self.menuCreate.addAction(self.createRectAction)
         self.menuCreate.addAction(self.createPolyAction)
@@ -775,7 +788,7 @@ class symbolEditor(editorWindow):
         self.createPolyAction.triggered.connect(self.createPolyClick)
         self.createArcAction.triggered.connect(self.createArcClick)
         self.createCircleAction.triggered.connect(self.createCircleClick)
-        self.createLabelAction.triggered.connect(self.createSymbolLabelDialogue)
+        self.createLabelAction.triggered.connect(self.createLabelClick)
         self.createPinAction.triggered.connect(self.createPinClick)
         self.objPropAction.triggered.connect(self.objPropClick)
         self.copyAction.triggered.connect(self.copyClick)
@@ -795,12 +808,12 @@ class symbolEditor(editorWindow):
         self.centralW.scene.itemContextMenu.addAction(self.deleteAction)
         self.centralW.scene.itemContextMenu.addAction(self.objPropAction)
 
-    def dispConfigEdit(self):
-        super().dispConfigEdit()
-        self.centralW.view.majorGrid = self.majorGrid
-        self.centralW.scene.majorGrid = self.majorGrid
-        self.centralW.view.gridTuple = (self.majorGrid, self.majorGrid)
-        self.centralW.scene.gridTuple = (self.majorGrid, self.majorGrid)
+    # def dispConfigEdit(self):
+    #     super().dispConfigEdit()
+    #     self.centralW.view.majorGrid = self.majorGrid
+    #     self.centralW.scene.majorGrid = self.majorGrid
+    #     self.centralW.view.gridTuple = (self.majorGrid, self.majorGrid)
+    #     self.centralW.scene.gridTuple = (self.majorGrid, self.majorGrid)
 
     def objPropClick(self):
         self.centralW.scene.itemProperties()
@@ -808,32 +821,56 @@ class symbolEditor(editorWindow):
     def checkSaveCell(self):
         self.centralW.scene.saveSymbolCell(self.file)
 
+    def setDrawMode(self, *args):
+        """
+        Sets the drawing mode in the symbol editor.
+        """
+        self.centralW.scene.drawPin = args[0]
+        self.centralW.scene.itemSelect = args[1]
+        self.centralW.scene.drawArc = args[2]  # draw arc
+        self.centralW.scene.drawRect = args[3]  # draw rect
+        self.centralW.scene.drawLine = args[4]  # draw line
+        self.centralW.scene.addLabel = args[5]
+        self.centralW.scene.drawCircle = args[6]
+        self.centralW.scene.rotateItem = args[7]
+
     def createRectClick(self, s):
-        self.setDrawMode(False, False, False, True, False, False, False)
+        modeList = [False for i in range(8)]
+        modeList[3] = True
+        self.setDrawMode(*modeList)
 
     def createLineClick(self, s):
-        self.setDrawMode(False, False, False, False, True, False, False)
-
+        modeList = [False for i in range(8)]
+        modeList[4] = True
+        self.setDrawMode(*modeList)
     def createPolyClick(self, s):
         pass
 
     def createArcClick(self, s):
-        self.setDrawMode(False, False, True, False, False, False, False)
+        modeList = [False for i in range(8)]
+        modeList[2] = True
+        self.setDrawMode(*modeList)
 
     def createCircleClick(self, s):
-        self.setDrawMode(False, False, False, False, False, False, True)
+        modeList = [False for i in range(8)]
+        modeList[6] = True
+        self.setDrawMode(*modeList)
 
     def createPinClick(self, s):
         createPinDlg = pdlg.createPinDialog(self)
         if createPinDlg.exec() == QDialog.Accepted:
+            modeList = [False for i in range(8)]
+            modeList[0] = True
             self.centralW.scene.pinName = createPinDlg.pinName.text()
             self.centralW.scene.pinType = createPinDlg.pinType.currentText()
             self.centralW.scene.pinDir = createPinDlg.pinDir.currentText()
-            self.setDrawMode(True, False, False, False, False, False, False)
+            self.setDrawMode(*modeList)
 
     def rotateItemClick(self, s):
         self.centralW.scene.rotateItem = True
-        self.centralW.scene.selectItem = False
+        modeList = [False for i in range(8)]
+        modeList[7] = True
+        self.setDrawMode(*modeList)
         self.messageLine.setText("Click on an item to rotate CW 90 degrees.")
 
     def undoClick(self, s):
@@ -854,32 +891,24 @@ class symbolEditor(editorWindow):
     def viewPropClick(self, s):
         self.centralW.scene.viewSymbolProperties()
 
-    def setDrawMode(self, *args):
-        """
-        Sets the drawing mode in the symbol editor.
-        """
-        self.centralW.scene.drawPin = args[0]
-        self.centralW.scene.selectItem = args[1]
-        self.centralW.scene.drawArc = args[2]  # draw arc
-        self.centralW.scene.drawRect = args[3]  # draw rect
-        self.centralW.scene.drawLine = args[4]  # draw line
-        self.centralW.scene.addLabel = args[5]
-        self.centralW.scene.drawCircle = args[6]
-        if hasattr(self.centralW.scene, "start"):
-            del self.centralW.scene.start
-
     def loadSymbol(self):
         """
         symbol is loaded to the scene.
         """
         with open(self.file) as tempFile:
-            items = json.load(tempFile)
+            try:
+                items = json.load(tempFile)
+            except json.decoder.JSONDecodeError:
+                self.logger.error("Cannot load symbol. JSON Decode Error")
         self.centralW.scene.loadSymbol(items)
 
-    def createSymbolLabelDialogue(self):
+    def createLabelClick(self):
         createLabelDlg = pdlg.createSymbolLabelDialog(self)
+        self.messageLine.setText('Place a label')
         if createLabelDlg.exec() == QDialog.Accepted:
-            self.setDrawMode(False, False, False, False, False, True, False)
+            modeList = [False for i in range(8)]
+            modeList[5] = True
+            self.setDrawMode(*modeList)
             # directly setting scene class attributes here to pass the information.
             self.centralW.scene.labelDefinition = createLabelDlg.labelDefinition.text()
             self.centralW.scene.labelHeight = (
@@ -964,6 +993,7 @@ class editor_scene(QGraphicsScene):
         self.origin = QPoint(0, 0)
         self.snapDistance = self.editor.snapDistance
         self.cellName = self.editor.file.parent.stem
+        self.selectedItems = None
         self.libraryDict = self.editor.libraryDict
         self.rotateItem = False
         self.itemContextMenu = QMenu()
@@ -1033,6 +1063,19 @@ class editor_scene(QGraphicsScene):
         else:
             return super().eventFilter(source, event)
 
+    def selectAll(self):
+        """
+        Select all items in the scene.
+        """
+        self.selectedItems = self.items()
+        [item.setSelected(True) for item in self.selectedItems]
+
+    def deselectAll(self):
+        """
+        Deselect all items in the scene.
+        """
+        [item.setSelected(False) for item in self.selectedItems]
+        self.selectedItems = None
 
 class symbol_scene(editor_scene):
     """
@@ -1041,8 +1084,10 @@ class symbol_scene(editor_scene):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
+        self.symbolWindow = self.parent.parent
         # drawing switches
-        self.resetSceneMode()  # reset to select mode
+        self.selectMode()  # reset to select mode
         # pen definitions
         self.setPens()
         self.draftPen = QPen(self.guideLineLayer.color, 1)
@@ -1058,6 +1103,7 @@ class symbol_scene(editor_scene):
         self.changeOrigin = False
         self.origin = QPoint(0, 0)
         # some default attributes
+        self.newPin = None
         self.pinName = ""
         self.pinType = shp.pin.pinTypes[0]
         self.pinDir = shp.pin.pinDirs[0]
@@ -1069,151 +1115,146 @@ class symbol_scene(editor_scene):
         self.labelVisible = False
         self.labelHeight = "12"
         self.labelOpaque = True
+        self.newLine = None
+        self.newRect = None
+        self.newCirc = None
+        self.newArc = None
 
     def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
-        super().mousePressEvent(mouse_event)
-        if mouse_event.button() == Qt.LeftButton:
-            eventScenePos = mouse_event.scenePos()
-            self.start = self.snapToGrid(eventScenePos.toPoint(), self.gridTuple)
-            if self.changeOrigin:  # change origin of the symbol
-                self.origin = self.start
-            if self.itemSelect:
-                self.messageLine.setText("Select an item")
-                #     # find the view rectangle every time mouse is pressed.
-                self.viewRect = self.parent.view.mapToScene(
-                    self.parent.view.viewport().rect()).boundingRect()
-                itemsAtMousePress = self.items(eventScenePos)
-                if itemsAtMousePress:
-                    self.selectedItems = [item for item in itemsAtMousePress if
-                                          item.isSelected()]
-                    self.messageLine.setText("Item selected")
-                else:
-                    self.selectedItems = None
-                    self.parent.parent.messageLine.setText("Nothing selected")
-            if self.drawPin:
-                if hasattr(self, "draftPin"):
-                    self.removeItem(self.draftPin)
-                self.draftPin = shp.pin(self.start, self.draftPen, "", "Input", "Signal",
-                                        self.gridTuple, )
-                self.addItem(self.draftPin)
-                self.draftPin.setSelected(True)
-            if self.addLabel:
-                if hasattr(self, "draftLabel"):
-                    self.removeItem(self.draftLabel)
-                self.draftLabel = shp.label(self.start, self.draftPen, "12",
-                                            self.gridTuple, )
-                self.addItem(self.draftLabel)
-                self.draftLabel.setSelected(True)
-            if self.rotateItem and self.selectedItems:
-                    self.rotateSelectedItems(self.start)
+        try:
+            super().mousePressEvent(mouse_event)
+            modifiers = QGuiApplication.keyboardModifiers()
+            self.viewRect = self.parent.view.mapToScene(
+                self.parent.view.viewport().rect()).boundingRect()
+            if mouse_event.button() == Qt.LeftButton:
+                self.mousePressLoc = mouse_event.scenePos().toPoint()
+                if self.changeOrigin:  # change origin of the symbol
+                    self.origin = self.mousePressLoc
+                    self.changeOrigin = False
+                if self.itemSelect:
+                    if modifiers == Qt.ShiftModifier:
+                        self.symbolWindow.messageLine.setText("Draw Selection Rectangle")
+                        self.selectionRect = self.rectDraw(self.mousePressLoc,
+                                                           self.mousePressLoc,
+                                                           self.draftPen,
+                                                           self.gridTuple)
+                    else:
+                        self.symbolWindow.messageLine.setText("Select an item")
+                        itemsAtMousePress = self.items(self.mousePressLoc)
+                        if itemsAtMousePress:
+                            self.selectedItems = [item for item in itemsAtMousePress if
+                                                  item.isSelected()]
+                            self.symbolWindow.messageLine.setText("Item selected")
+                        else:
+                            self.selectedItems = None
+                            self.symbolWindow.messageLine.setText("Nothing selected")
+                if self.drawPin:
+                    self.symbolWindow.messageLine.setText("Add Symbol Pin")
+                    self.newPin = self.pinDraw(self.mousePressLoc)
+                    self.newPin.setSelected(True)
+                elif self.drawLine:
+                    self.symbolWindow.messageLine.setText('Drawing a Line')
+                    self.newLine = self.lineDraw(self.mousePressLoc, self.mousePressLoc)
+                    self.newLine.setSelected(True)
+                elif self.addLabel:
+                    self.newLabel = self.labelDraw(self.mousePressLoc, self.labelPen,
+                                                   self.labelDefinition, self.gridTuple,
+                                                   self.labelType, self.labelHeight,
+                                                   self.labelAlignment, self.labelOrient,
+                                                   self.labelUse)
+                    self.newLabel.setSelected(True)
+                elif self.drawRect:
+                    self.newRect = self.rectDraw(self.mousePressLoc, self.mousePressLoc,
+                                                 self.symbolPen, self.gridTuple)
+                elif self.drawCircle:
+                    self.symbolWindow.messageLine.setText('Click on the center of the circle')
+                    self.newCircle = self.circleDraw(self.mousePressLoc, self.mousePressLoc,
+                                                     self.symbolPen, self.gridTuple)
+                elif self.drawArc:
+                    self.symbolWindow.messageLine.setText('Start drawing an arc')
+                    self.newArc = self.arcDraw(self.mousePressLoc, self.mousePressLoc,
+                                               self.symbolPen, self.gridTuple)
+                if self.rotateItem and self.selectedItems:
+                    self.rotateSelectedItems(self.mousePressLoc)
+        except Exception as e:
+            print(f'mouse press error: {e}')
 
     def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
-        super().mouseMoveEvent(mouse_event)
-        eventScenePos = mouse_event.scenePos()
-        self.current = self.snapToGrid(eventScenePos.toPoint(), self.gridTuple)
-        modifiers = QGuiApplication.keyboardModifiers()
-        if mouse_event.buttons() == Qt.LeftButton:
-            if hasattr(self, "draftItem"):
-                self.removeItem(self.draftItem)
-                del self.draftItem
-            # if hasattr(self, "draftRect"):
-            #     self.removeItem(self.draftRect)
-            if self.drawLine and hasattr(self, "start"):
-                self.parent.parent.messageLine.setText("Line Mode")
-                self.draftItem = shp.line(self.start, self.current, self.draftPen,
-                                          self.gridTuple)
-                self.addItem(self.draftItem)
-            if self.drawRect and hasattr(self, "start"):
-                self.draftItem = shp.rectangle(self.start, self.current, self.draftPen,
-                                               self.gridTuple)
-                self.addItem(self.draftItem)
-            if self.drawCircle and hasattr(self, "start"):
-                xlen = abs(self.current.x() - self.start.x())
-                ylen = abs(self.current.y() - self.start.y())
-                length = math.sqrt(xlen ** 2 + ylen ** 2)
-                self.draftItem = QGraphicsEllipseItem(
-                    QRectF(self.start - QPoint(int(length), int(length)),
-                           self.start + QPoint(int(length), int(length)), ))
-                self.draftItem.setPen(self.draftPen)
-                self.addItem(self.draftItem)
-            if self.drawArc and hasattr(self, "start"):
-                self.draftItem = shp.arc(self.start, self.current, self.draftPen,
-                                         self.gridTuple)
-                # self.draftRect = shp.rectangle(self.start,self.current, self.draftPen,
-                #                                self.gridTuple)
-                self.addItem(self.draftItem)  # self.addItem(self.draftRect)
-            if self.itemSelect and modifiers == Qt.ShiftModifier:
-                    self.draftItem = QGraphicsRectItem(QRect.span(self.start, self.current))
-                    self.draftItem.setPen(self.draftPen)
-                    self.addItem(self.draftItem)
-                    self.messageLine.setText("Select an Area")
-
-        self.statusLine.showMessage(
-            "Cursor Position: " + str((self.current - self.origin).toTuple()))
+        try:
+            super().mouseMoveEvent(mouse_event)
+            self.mouseMoveLoc = mouse_event.scenePos().toPoint()
+            modifiers = QGuiApplication.keyboardModifiers()
+            if mouse_event.buttons() == Qt.LeftButton:
+                if self.drawLine:
+                    self.symbolWindow.messageLine.setText("Release mouse on the end point")
+                    self.newLine.end=self.mouseMoveLoc
+                elif self.drawPin and self.newPin.isSelected():
+                    self.newPin.setPos(self.mouseMoveLoc - self.mousePressLoc)
+                elif self.drawRect:
+                    self.symbolWindow.messageLine.setText("Release mouse on the bottom "
+                                                          "left point")
+                    self.newRect.end = self.mouseMoveLoc
+                elif self.drawCircle:
+                    self.symbolWindow.messageLine.setText('Extend Circle')
+                    radius = ((self.mouseMoveLoc.x() - self.mousePressLoc.x())**2 + (
+                            self.mouseMoveLoc.y() - self.mousePressLoc.y())**2)**0.5
+                    self.newCircle.radius = radius
+                elif self.drawArc:
+                    self.symbolWindow.messageLine.setText('Extend Arc')
+                    self.newArc.end = self.mouseMoveLoc
+                elif self.itemSelect and modifiers == Qt.ShiftModifier:
+                    self.selectionRect.end = self.mouseMoveLoc
+            self.statusLine.showMessage(
+                "Cursor Position: " + str((self.mouseMoveLoc - self.origin).toTuple()))
+        except Exception as e:
+            print(f'mouse move error: {e}')
 
     def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(mouse_event)
-        eventScenePos = mouse_event.scenePos()
-        self.current = self.snapToGrid(eventScenePos.toPoint(), self.gridTuple)
+        self.mouseReleaseLoc = mouse_event.scenePos().toPoint()
+        modifiers = QGuiApplication.keyboardModifiers()
         if mouse_event.button() == Qt.LeftButton:
-            if (self.itemSelect and hasattr(self, "draftItem") and isinstance(
-                    self.draftItem, QGraphicsRectItem)):
-                self.selectedItems = [item for item in self.items(self.draftItem.rect(),
-                                                                  mode=Qt.IntersectsItemBoundingRect)]
-                for item in self.selectedItems:
-                    item.setSelected(True)
-            if self.drawLine and hasattr(self, "start"):
-                self.lineDraw(self.start, self.current, self.symbolPen, self.gridTuple)
+            if self.drawLine:
+                self.newLine.setSelected(False)
+            elif self.drawCircle:
+                self.newCircle.setSelected(False)
+                self.newCircle.update()
+            elif self.drawPin:
+                self.newPin.setSelected(False)
 
-            if self.drawRect and hasattr(self, "start"):
-                self.rectDraw(self.start, self.current, self.symbolPen, self.gridTuple)
+            elif self.drawRect:
+                drawnRect = QRect(self.mousePressLoc,self.mouseReleaseLoc)
+                self.newRect.rect= drawnRect
+                self.newRect.setSelected(False)
+            elif self.drawArc:
+                self.newArc.setSelected(False)
+            elif self.addLabel:
+                self.newLabel.setSelected(False)
+            elif self.itemSelect and modifiers == Qt.ShiftModifier:
+                self.selectedItems = self.items(self.selectionRect.rect)
+                [item.setSelected(True) for item in self.selectedItems]
+                self.removeItem(self.selectionRect)
+                self.selectionRect = None
 
-            if self.drawCircle and hasattr(self, "start"):
-                self.circleDraw(self.start, self.current, self.symbolPen, self.gridTuple)
+            self.selectMode()
 
-            if self.drawArc and hasattr(self, 'start'):
-                self.arcDraw(self.start, self.current, self.symbolPen, self.gridTuple)
-            if self.drawPin and hasattr(self, "draftPin"):
-                self.pinDraw(self.current, self.pinPen, self.pinName, self.pinDir,
-                             self.pinType, self.gridTuple, )  # draw pin
-
-            if self.addLabel and hasattr(self, "draftLabel"):
-                self.labelDraw(self.current, self.labelPen, self.labelDefinition,
-                               self.gridTuple, self.labelType, self.labelHeight,
-                               self.labelAlignment, self.labelOrient,
-                               self.labelUse, )  # draw label
-
-            if hasattr(self, "draftItem"):
-                self.removeItem(self.draftItem)
-                del self.draftItem
-            elif hasattr(self, "draftPin"):
-                self.removeItem(self.draftPin)
-                del self.draftPin
-            elif hasattr(self, "draftLabel"):
-                self.removeItem(self.draftLabel)
-                del self.draftLabel  # if hasattr(self,"draftRect"):  #     self.removeItem(self.draftRect)  # del self.draftRect
-            if self.changeOrigin:
-                self.changeOrigin = False
-            self.itemSelect = True
-
-    def lineDraw(self, start: QPoint, current: QPoint, pen: pens.sPen, gridTuple: tuple):
-        line = shp.line(start, current, pen, gridTuple)
+    def lineDraw(self, start: QPoint, current: QPoint):
+        line = shp.line(start, current, self.symbolPen, self.gridTuple)
         self.addItem(line)
         undoCommand = us.addShapeUndo(self, line)
         self.undoStack.push(undoCommand)
-        self.drawLine = False
         return line
 
     def rectDraw(self, start: QPoint, end: QPoint, pen: pens.sPen, gridTuple: tuple):
         """
         Draws a rectangle on the scene
         """
-        rect = shp.rectangle(start, end - QPoint(pen.width() / 2, pen.width() / 2), pen,
-                             gridTuple)
+        # rect = shp.rectangle(start, end - QPoint(pen.width() / 2, pen.width() / 2), pen,
+        #                      gridTuple)
+        rect = shp.rectangle(start, end, pen, gridTuple)
         self.addItem(rect)
         undoCommand = us.addShapeUndo(self, rect)
         self.undoStack.push(undoCommand)
-        self.drawRect = False
         return rect
 
     def circleDraw(self, start: QPoint, end: QPoint, pen: pens.sPen,
@@ -1226,7 +1267,6 @@ class symbol_scene(editor_scene):
         self.addItem(circle)
         undoCommand = us.addShapeUndo(self, circle)
         self.undoStack.push(undoCommand)
-        self.drawCircle = False
         return circle
 
     def arcDraw(self, start: QPoint, end: QPoint, pen: pens.sPen,
@@ -1238,16 +1278,14 @@ class symbol_scene(editor_scene):
         self.addItem(arc)
         undoCommand = us.addShapeUndo(self, arc)
         self.undoStack.push(undoCommand)
-        self.drawArc = False
         return arc
 
-    def pinDraw(self, current, pen: pens.sPen, pinName: str, pinDir, pinType,
-                gridTuple: tuple):
-        pin = shp.pin(current, pen, pinName, pinDir, pinType, gridTuple)
+    def pinDraw(self, current):
+        pin = shp.pin(current, self.pinPen, self.pinName, self.pinDir, self.pinType,
+                      self.gridTuple)
         self.addItem(pin)
         undoCommand = us.addShapeUndo(self, pin)
         self.undoStack.push(undoCommand)
-        self.drawPin = False
         return pin
 
     def labelDraw(self, current, pen: pens.sPen, labelDefinition, gridTuple, labelType,
@@ -1260,41 +1298,41 @@ class symbol_scene(editor_scene):
         self.addItem(label)
         undoCommand = us.addShapeUndo(self, label)
         self.undoStack.push(undoCommand)
-        self.addLabel = False
         return label
 
     def keyPressEvent(self, key_event):
         super().keyPressEvent(key_event)
         if key_event.key() == Qt.Key_Escape:
-            self.resetSceneMode()
+            self.selectMode()
         elif key_event.key() == Qt.Key_C:
             self.copySelectedItems()
         elif key_event.key() == Qt.Key_M:
-            self.stretchSelectedItem()  # elif key_event.key() == Qt.Key_Up:  #     selectedItemsCount = len(self.itemsAtMousePress)  #     if self.selectCount == selectedItemsCount:  #         self.selectCount = 0  #         self.changeSelection(self.selectCount)  #         self.selectCount += 1  #     elif self.selectCount < selectedItemsCount:  #         self.changeSelection(self.selectCount)  #         self.selectCount += 1
+            self.stretchSelectedItem()
 
-    def resetSceneMode(self):
+
+    def selectMode(self):
         """
         Reset the scene mode to default. Select mode is set to True.
         """
-        self.drawItem = False  # flag to indicate if an item is being drawn
-        self.drawLine = False  # flag to indicate if a line is being drawn
-        self.drawArc = False  # flag to indicate if an arc is being drawn
-        self.drawPin = False  # flag to indicate if a pin is being drawn
-        self.drawRect = False  # flag to indicate if a rectangle is being drawn
-        self.addLabel = False  # flag to indicate if a label is being drawn
-        self.selectCount = 0  # index of item selected
-        self.selectedItems = None
-        if hasattr(self, "draftItem"):
-            self.removeItem(self.draftItem)
+        self.symbolWindow.messageLine.setText("Select Mode")
+        self.drawPin = False
         self.itemSelect = True
+        self.drawArc = False  # draw arc
+        self.drawRect = False # draw rect
+        self.drawLine = False # draw line
+        self.addLabel = False
+        self.drawCircle = False
+        self.rotateItem = False
 
     def deleteSelectedItems(self):
         if self.selectedItems:
             for item in self.selectedItems:
                 self.removeItem(item)
+                undoCommand = us.deleteShapeUndo(self, item)
+                self.undoStack.push(undoCommand)
             del self.selectedItems
             self.update()
-            self.itemSelect = True
+            # self.selectMode()
 
     def copySelectedItems(self):
         if hasattr(self, "selectedItems"):
@@ -1406,7 +1444,7 @@ class symbol_scene(editor_scene):
         location = item.scenePos().toTuple()
         item.start = self.snapToGrid(
             QPoint(int(float(self.queryDlg.labelXLine.text()) - float(location[0])),
-                int(float(self.queryDlg.labelYLine.text()) - float(location[1])), ),
+                   int(float(self.queryDlg.labelYLine.text()) - float(location[1])), ),
             self.gridTuple, )
         item.labelDefinition = self.queryDlg.labelDefinition.text()
         item.labelHeight = self.queryDlg.labelHeightEdit.text()
@@ -1565,7 +1603,6 @@ class schematic_scene(editor_scene):
             elif self.drawPin:
                 self.schematicWindow.messageLine.setText("Add a pin")
                 self.newPin = self.addPin(self.mousePressLoc)
-
                 self.newPin.setSelected(True)
 
             elif self.drawText:
@@ -1598,14 +1635,12 @@ class schematic_scene(editor_scene):
                     self.schematicWindow.messageLine.setText("Nothing selected")
 
     def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
-        # self.mouseMoveLoc = self.snapToGrid(
-        #     mouse_event.scenePos().toPoint(),
-        #     self.gridTuple)
+        super().mouseMoveEvent(mouse_event)
         self.mouseMoveLoc = mouse_event.scenePos().toPoint()
-
         modifiers = QGuiApplication.keyboardModifiers()
         if mouse_event.buttons() == Qt.LeftButton:
             if self.addInstance:
+                # TODO: think how to do it with mapFromScene
                 self.newInstance.setPos(self.mouseMoveLoc - self.mousePressLoc)
 
             elif self.drawWire:
@@ -1632,12 +1667,9 @@ class schematic_scene(editor_scene):
 
         self.schematicWindow.statusLine.showMessage(
             "Cursor Position: " + str(self.mouseMoveLoc.toTuple()))
-        super().mouseMoveEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(mouse_event)
-        # self.mouseReleaseLoc = self.snapToGrid(mouse_event.scenePos().toPoint(),
-        #                                        self.gridTuple)
         self.mouseReleaseLoc = mouse_event.scenePos().toPoint()
         modifiers = QGuiApplication.keyboardModifiers()
         if mouse_event.button() == Qt.LeftButton:
@@ -1673,7 +1705,7 @@ class schematic_scene(editor_scene):
                 # self.selectionRect.setBottomRight(self.mouseReleaseLoc)
                 self.selectedItems = [item for item in
                                       self.items(self.selectionRectItem.rect().toRect(),
-                                          mode=Qt.IntersectsItemBoundingRect)]
+                                                 mode=Qt.IntersectsItemBoundingRect)]
                 [item.setSelected(True) for item in self.selectedItems]
                 if self.selectedItems:
                     self.schematicWindow.messageLine.setText("Items selected")
@@ -1685,7 +1717,6 @@ class schematic_scene(editor_scene):
                 self.removeItem(self.draftItem)
                 del self.draftItem
                 del self.mouseReleaseLoc
-
 
     def findSnapPoint(self, eventLoc: QPoint, snapDistance: int, ignoredNetSet: set):
         snapRect = QRect(eventLoc.x() - snapDistance, eventLoc.y() - snapDistance,
@@ -1726,7 +1757,6 @@ class schematic_scene(editor_scene):
         except Exception as e:
             self.logger.error(e)  # no items found
             return eventLoc
-
 
     def groupAllNets(self) -> None:
         """
@@ -2774,7 +2804,7 @@ class libraryBrowser(QMainWindow):
                         json.dump(items, configFile, indent=4)
 
                     configWindow = self.openConfigEditWindow(schematicWindow.configDict,
-                        selectedSchItem, viewItem)
+                                                             selectedSchItem, viewItem)
                     self.appMainW.openViews[viewTuple] = configWindow
             case "schematic":
                 # scb.createCellView(self.appMainW, viewItem.viewName, cellItem)
@@ -3199,7 +3229,7 @@ class xyceNetlist:
                                     f"* Date: {datetime.datetime.now()}\n",
                                     80 * "*", "\n", ".GLOBAL gnd!\n\n"]))
 
-        # now go down the rabbit hole to track all circuit elements.
+            # now go down the rabbit hole to track all circuit elements.
             self.recursiveNetlisting(self.schematic, cirFile)
 
             cirFile.write(".END\n")
@@ -3266,7 +3296,7 @@ class xyceNetlist:
                     for labelItem in item.labels.values():
                         if labelItem.labelDefinition in netlistLine:
                             netlistLine = netlistLine.replace(labelItem.labelDefinition,
-                                labelItem.labelText)
+                                                              labelItem.labelText)
                     cirFile.write(f"{netlistLine}\n")
 
                     # TODO: if two cells from different libraries have the same

@@ -40,6 +40,19 @@ class addShapeUndo(QUndoCommand):
     def redo(self):
         self._scene.addItem(self._shape)
 
+class deleteShapeUndo(QUndoCommand):
+    def __init__(self, scene, shape):
+        super().__init__()
+        self._scene = scene
+        self._shape = shape
+        self.setText("Delete Shape")
+
+    def undo(self):
+        self._scene.addItem(self._shape)
+
+    def redo(self):
+        self._scene.removeItem(self._shape)
+
 class updateShapeUndo(QUndoCommand):
     def __init__(self):
         super().__init__()

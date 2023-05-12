@@ -21,3 +21,7 @@
 #   Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
 
+try:
+    import revedasim.simMainWindow as smw
+except ImportError:
+    pass
