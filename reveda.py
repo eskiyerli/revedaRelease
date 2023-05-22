@@ -27,6 +27,7 @@ import revedaEditor.gui.revedaMain as rvm
 import revedaEditor.gui.pythonConsole as pcon
 from contextlib import redirect_stdout, redirect_stderr
 from dotenv import load_dotenv
+from pathlib import Path
 
 
 # simulation window
@@ -43,15 +44,36 @@ class revedaApp(QApplication):
         super().__init__(*args, **kwargs)
         # Load environment variables
         load_dotenv()
+        reveda_runpathObj = Path(__file__).resolve().parent
+        self.revedaeditor_path = None
+        self.revedasim_path = None
+        self.reveda_pdk_path = None
+        self.setPaths(reveda_runpathObj)
+
+    def setPaths(self, reveda_runpathObj):
         # Set the paths to the revedaeditor and revedasim
         self.revedaeditor_path = os.environ.get("REVEDAEDIT_PATH", None)
-        self.revedasim_path = os.environ.get("REVEDASIM_PATH", None)
-         # Add the revedaeditor path to the system path if available
         if self.revedaeditor_path:
-            sys.path.append(self.revedaeditor_path)
-         # Add the revedasim path to the system path if available
+            if Path(self.revedaeditor_path).is_absolute():
+                self.revedaeditor_pathObj = Path(self.revedaeditor_path)
+            else:
+                self.revedaeditor_pathObj = reveda_runpathObj.joinpath(
+                    self.revedaeditor_path)
+        self.revedasim_path = os.environ.get("REVEDASIM_PATH", None)
         if self.revedasim_path:
-            sys.path.append(self.revedasim_path)
+            if Path(self.revedasim_path).is_absolute():
+                self.revedasim_pathObj = Path(self.revedasim_path)
+            else:
+                self.revedasim_pathObj = reveda_runpathObj.joinpath(self.revedasim_path)
+            sys.path.append(self.revedasim_pathObj)
+        self.reveda_pdk_path = os.environ.get("REVEDA_PDK_PATH", None)
+        if self.reveda_pdk_path:
+            if Path(self.reveda_pdk_path).is_absolute():
+                self.reveda_pdk_pathObj = Path(self.reveda_pdk_path)
+            else:
+                self.reveda_pdk_pathObj = reveda_runpathObj.joinpath(self.reveda_pdk_path)
+            sys.path.append(self.reveda_pdk_pathObj)
+
 
 def main():
     # Start Main application window
