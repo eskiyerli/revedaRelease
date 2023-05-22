@@ -19,9 +19,3 @@
 #   Software: Revolution EDA
 #   License: Mozilla Public License 2.0
 #   Licensor: Revolution Semiconductor (Registered in the Netherlands)
-
-
-try:
-    import revedasim.simMainWindow as smw
-except ImportError:
-    pass

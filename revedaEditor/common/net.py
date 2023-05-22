@@ -37,7 +37,6 @@ class schematicNet(QGraphicsLineItem):
     '''
     uses = ["SIGNAL", "ANALOG", "CLOCK", "GROUND", "POWER", ]
 
-
     def __init__(self, start: QPoint, end: QPoint, pen: QPen):
         assert isinstance(pen, QPen)
         self._pen = pen
@@ -46,8 +45,8 @@ class schematicNet(QGraphicsLineItem):
         self._start = start
         self._end = end
         self._nameSet = False  # if a name has been set
+        self._nameAdded = False # net name is propagated to the net
         self._nameConflict = False  # if a name conflict has been detected
-        self._connections = dict()  # dictionary of connections
         super().__init__(QLineF(self._start, self._end))
         self.setPen(self._pen)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)

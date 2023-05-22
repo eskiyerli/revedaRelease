@@ -1,0 +1,15 @@
+*.pyc*
+*.zip
+*.json
+*.spec
+*.log
+*.xml
+icons/
+dist/
+build/
+revedasim/
+schematicEditor.kdev4
+reveda.log
+revolution_eda.egg-info/
+.idea/
+

@@ -48,10 +48,10 @@ class sPen(QPen):
     def returnPen(cls, penName):
         match penName:
             case 'wirePen':
-                rpen = cls('wirePen', wireLayer.color, 1)
+                rpen = cls('wirePen', wireLayer.color, 2)
                 rpen.setCosmetic(True)
             case 'symbolPen':
-                rpen = cls("symbolPen", symbolLayer.color, 3)
+                rpen = cls("symbolPen", symbolLayer.color, 2)
                 rpen.setCosmetic(True)
             case 'selectedWirePen':
                 rpen = cls("selectedWirePen", selectedWireLayer.color, 2)
@@ -62,7 +62,7 @@ class sPen(QPen):
             case 'textPen':
                 rpen = cls('textPen', textLayer.color, 1)
             case 'draftPen':
-                rpen = cls('draftPen', draftLayer.color, 1, Qt.DashLine)
+                rpen = cls('draftPen', draftLayer.color, 2, Qt.DashLine)
             case other:
-                rpen = cls('otherPen', QColor('darkGray'), 1, Qt.DotLine)
+                rpen = cls('otherPen', QColor('darkGray'), 2, Qt.DotLine)
         return rpen

@@ -54,10 +54,13 @@ edw.designLibrariesModel, importedVaObj: hdl.verilogaC):
         scb.createCell(parent, libraryModel, libItem, cellName)
     cellItem = libm.getCellItem(libItem, cellName)
     newVaFilePathObj = cellItem.data(Qt.UserRole + 2).joinpath(
-        importedVaFilePathObj.name
-    )
+        importedVaFilePathObj.name)
     vaItem = scb.createCellView(parent, importDlg.vaViewName.text(), cellItem)
-    shutil.copy(importedVaFilePathObj, newVaFilePathObj)
+    tempFilePathObj = importedVaFilePathObj.with_suffix(".temp")
+    shutil.copy(importedVaFilePathObj, tempFilePathObj)
+
+    shutil.copy(tempFilePathObj, newVaFilePathObj)
+    tempFilePathObj.unlink()
     items = list()
     items.insert(0, {"cellView": "veriloga"})
     items.insert(1, {"filePath": str(newVaFilePathObj.name)})
@@ -159,58 +162,58 @@ def createVaSymbol(parent: QMainWindow,
             QPoint(int(0.25 * rectXDim), int(0.4 * rectYDim)),
             labelPen,
             "[@cellName]",
-            symbolScene.gridTuple,
             "NLPLabel",
             "12",
             "Center",
             "R0",
             "Instance",
+            symbolScene.gridTuple,
         )
         symbolScene.labelDraw(
             QPoint(int(rectXDim), int(-0.2 * rectYDim)),
             labelPen,
             "[@instName]",
-            symbolScene.gridTuple,
             "NLPLabel",
             "12",
             "Center",
             "R0",
             "Instance",
+            symbolScene.gridTuple,
         )
         vaFileLabel = symbolScene.labelDraw(
             QPoint(int(0.25 * rectXDim), int(0.6 * rectYDim)),
             labelPen,
             f"[@vaFile:vaFile=%:vaFile={str(newVaFilePathObj)}]",
-            symbolScene.gridTuple,
             "NLPLabel",
             "12",
             "Center",
             "R0",
             "Instance",
+            symbolScene.gridTuple,
         )
         vaFileLabel.labelVisible = False
         vaModuleLabel = symbolScene.labelDraw(
             QPoint(int(0.25 * rectXDim), int(0.8 * rectYDim)),
             labelPen,
             f"[@vaModule:vaModule=%:vaModule={importedVaObj.vaModule}]",
-            symbolScene.gridTuple,
             "NLPLabel",
             "12",
             "Center",
             "R0",
             "Instance",
+            symbolScene.gridTuple,
         )
         vaModuleLabel.labelVisible = False
         vaModelLabel = symbolScene.labelDraw(
             QPoint(int(0.25 * rectXDim), int(1 * rectYDim)),
             labelPen,
             f"[@vaModel:vaModel=%:vaModel={importedVaObj.vaModule}Model]",
-            symbolScene.gridTuple,
             "NLPLabel",
             "12",
             "Center",
             "R0",
             "Instance",
+            symbolScene.gridTuple,
         )
         vaModelLabel.labelVisible = False
         i = 0
@@ -223,12 +226,12 @@ def createVaSymbol(parent: QMainWindow,
                 ),
                 labelPen,
                 f"[@{key}:{key}=%:{key}={value}]",
-                symbolScene.gridTuple,
                 "NLPLabel",
                 "12",
                 "Center",
                 "R0",
                 "Instance",
+                symbolScene.gridTuple,
             )
 
         leftPinLocs = [
@@ -292,9 +295,12 @@ def createVaSymbol(parent: QMainWindow,
             )
         symbolScene.attributeList.append(
             se.symbolAttribute(
-                "NLPDeviceFormat", importedVaObj.netListLine
-            )
-        )
+                "XyceNetlistLine", importedVaObj.netListLine
+            ))
+        symbolScene.attributeList.append(
+            se.symbolAttribute(
+                "pinOrder", importedVaObj.pinOrder
+        ))
         symbolWindow.show()
         symbolViewTuple = ddef.viewTuple(vaItemTuple.libraryItem.libraryName,
                                          vaItemTuple.cellItem.cellName, 'symbol')

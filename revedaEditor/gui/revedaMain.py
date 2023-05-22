@@ -38,9 +38,7 @@ import revedaEditor.gui.editorWindows as edw
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.pythonConsole as pcon
 import revedaEditor.resources.resources
-# import revedaEditor.revinit as revinit
 import revinit
-
 
 class mainwContainer(QWidget):
     """
@@ -100,7 +98,6 @@ class MainWindow(QMainWindow):
         self.libraryPathObj = self.runPath.joinpath("library.json")
         self.libraryDict = self.readLibDefFile(self.libraryPathObj)
         self.libraryBrowser = edw.libraryBrowser(self)
-
         self.logger_def()
         # revEDAPathObj = Path(__file__)
         # library definition file path
@@ -237,7 +234,6 @@ class MainWindow(QMainWindow):
             self.logger.info(f'Configuration file: {self.confFilePath} exists')
             with self.confFilePath.open(mode="r") as f:
                 items = json.load(f)
-
             self.textEditorPath = pathlib.Path(items.get("textEditorPath"))
             self.simulationPath = pathlib.Path(items.get("simulationPath"))
             if items.get("switchViewList")[0] != '':
@@ -251,6 +247,7 @@ class MainWindow(QMainWindow):
             "simulationPath": str(self.simulationPath),
             "switchViewList": self.switchViewList,
             "stopViewList": self.stopViewList,
+
         }
         with self.confFilePath.open(mode="w", encoding="utf") as f:
             json.dump(items, f, indent=4)

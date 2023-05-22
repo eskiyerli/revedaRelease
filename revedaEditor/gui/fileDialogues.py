@@ -28,7 +28,7 @@ from PySide6.QtCore import (Qt, QDir)
 from PySide6.QtGui import (QStandardItemModel, QStandardItem)
 from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog,
                                QFormLayout, QHBoxLayout, QLabel, QLineEdit,
-                               QVBoxLayout,
+                               QVBoxLayout, QRadioButton, QButtonGroup,
                                QPushButton, QGroupBox, QTableView, QMenu,
                                QCheckBox)
 
@@ -362,40 +362,43 @@ class netlistExportDialogue(QDialog):
 
 
 class goDownHierDialogue(QDialog):
-    def __init__(self, symbolShape: shp.symbolShape, libraryDict: dict[str, pathlib.Path],
-                 *args):
-        self.symbolShape = symbolShape
-        self.libraryDict = libraryDict
-        super().__init__(*args)
+    def __init__(self, parent,):
+        super().__init__(parent=parent)
+        self._parent = parent
+        self.setWindowTitle('Go Down Hierarchy')
+        self.setMinimumWidth(250)
+        self.buttonId = 1
+        _mainLayout = QVBoxLayout()
+        viewGroup = QGroupBox('Select a cellview')
+        viewGroupLayout = QVBoxLayout()
+        viewGroup.setLayout(viewGroupLayout)
+        self.viewListCB = QComboBox()
+        viewGroupLayout.addWidget(self.viewListCB)
+        _mainLayout.addWidget(viewGroup)
+        buttonGroupBox = QGroupBox('Open')
+        buttonGroupLayout = QHBoxLayout()
+        buttonGroupBox.setLayout(buttonGroupLayout)
+        self.openButton = QRadioButton('Edit')
+        self.openButton.setChecked(True)
+        self.readOnlyButton = QRadioButton('Read Only')
+        buttonGroupLayout.addWidget(self.openButton)
+        buttonGroupLayout.addWidget(self.readOnlyButton)
+        _mainLayout.addWidget(buttonGroupBox)
+        self.buttonGroup = QButtonGroup()
+        self.buttonGroup.addButton(self.openButton, id = 1)
+        self.buttonGroup.addButton(self.readOnlyButton, id = 2)
+        self.buttonGroup.buttonClicked.connect(self.onButtonClicked)
+        _mainLayout.addWidget(buttonGroupBox)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-
-        mainLayout = QVBoxLayout()
-        cellPropLayout = QFormLayout()
-        libraryNameEdit = edf.shortLineEdit()
-        libraryNameEdit.setText(self.symbolShape.libraryName)
-        libraryNameEdit.setReadOnly(True)
-        cellPropLayout.addRow(edf.boldLabel("Library Name:", self), libraryNameEdit)
-        cellNameEdit = edf.shortLineEdit()
-        cellNameEdit.setText(self.symbolShape.cellName)
-        cellNameEdit.setReadOnly(True)
-        cellPropLayout.addRow(edf.boldLabel("Cell Name:", self), cellNameEdit)
-        cellPath = pathlib.Path(
-            self.libraryDict.get(self.symbolShape.libraryName).joinpath(
-                self.symbolShape.cellName))
-        viewList = [str(view.stem) for view in cellPath.iterdir() if
-                    view.suffix == ".json"]
-        self.viewNameCB = QComboBox()
-        self.viewNameCB.addItems(viewList)
-        cellPropLayout.addRow(edf.boldLabel("Select View:", self), self.viewNameCB)
-        mainLayout.addLayout(cellPropLayout)
-        mainLayout.addStretch(2)
-        mainLayout.addWidget(self.buttonBox)
-        self.setLayout(mainLayout)
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+        _mainLayout.addWidget(buttonBox)
+        self.setLayout(_mainLayout)
         self.show()
 
+    def onButtonClicked(self):
+        self.buttonId = self.buttonGroup.checkedId()
 
 class importVerilogaCellDialogue(QDialog):
     def __init__(self, model, parent):

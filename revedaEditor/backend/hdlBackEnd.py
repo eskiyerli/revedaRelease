@@ -39,6 +39,7 @@ class verilogaC:
         self.outPins = list()
         self._netlistLine = ''
         self.statementLines = list()
+        self._pinOrder = ''
 
         with open(self._pathObj) as f:
             self.fileLines = f.readlines()
@@ -87,7 +88,6 @@ class verilogaC:
                         self.outPins.extend([pin.strip() for pin in pinsList])
                     elif splitLine[0] == 'inout':
                         pinsList = splitLine[1].split(';')[0].split(',')
-
                         self.inoutPins.extend([pin.strip() for pin in pinsList])
 
                     elif splitLine[0] == "parameter":
@@ -118,12 +118,22 @@ class verilogaC:
         self._pathObj = value
 
     @property
+    def pinOrder(self):
+        return self._pinOrder
+
+    @pinOrder.setter
+    def pinOrder(self, value:str):
+        assert isinstance(value,str)
+        self._pinOrder = value
+
+    @property
     def netlistLine(self):
-        pinsString = ' '.join([f'[|{pin}:%]' for pin in self.pins])
+        self._pinOrder = ','.join(self.pins)
+        print(f'pinOrder : {self.pinOrder}')
         instParamString = ' '.join(
             [f'[@{key}:{key}=%:{key}={item}]' for key, item in
              self.instanceParams.items()])
-        self._netlistLine = f'Y{self._vaModule} [@instName] {pinsString}  ' \
+        self._netlistLine = f'Y{self._vaModule} [@instName] [@pinList]  ' \
                             f'{self._vaModule}Model {instParamString}'
         return self._netlistLine
 

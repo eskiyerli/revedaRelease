@@ -452,16 +452,23 @@ class instanceProperties(QDialog):
         self.buttonBox = QDialogButtonBox(QBtn)
         formLayout = QFormLayout()
         self.libNameEdit = edf.longLineEdit()
+        self.libNameEdit.setReadOnly(True)
         self.libNameEdit.setText(self.instance.libraryName)
+        self.libNameEdit.setToolTip("Library Name (Read Only)")
         formLayout.addRow(edf.boldLabel("Library Name", self), self.libNameEdit)
         self.cellNameEdit = edf.longLineEdit()
         self.cellNameEdit.setText(self.instance.cellName)
+        self.cellNameEdit.setReadOnly(True)
+        self.cellNameEdit.setToolTip("Cell Name (Read Only)")
         formLayout.addRow(edf.boldLabel("Cell Name", self), self.cellNameEdit)
         self.viewNameEdit = edf.longLineEdit()
         self.viewNameEdit.setText(self.instance.viewName)
+        self.viewNameEdit.setReadOnly(True)
+        self.viewNameEdit.setToolTip("View Name (Read Only)")
         formLayout.addRow(edf.boldLabel("View Name", self), self.viewNameEdit)
         self.instNameEdit = edf.longLineEdit()
         self.instNameEdit.setText(self.instance.instanceName)
+        self.instNameEdit.setToolTip("Instance Name")
         formLayout.addRow(edf.boldLabel("Instance Name", self), self.instNameEdit)
         location = (
                 self.instance.scenePos() - self.instance.scene().origin).toTuple()
@@ -476,6 +483,12 @@ class instanceProperties(QDialog):
         formLayout.addRow(edf.boldLabel("Angle", self), self.angleEdit)
         formLayout.setVerticalSpacing(10)
         self.instanceLabelsLayout = QGridLayout()
+        self.instanceLabelsLayout.setColumnMinimumWidth(0, 100)
+        self.instanceLabelsLayout.setColumnMinimumWidth(1, 200)
+        self.instanceLabelsLayout.setColumnMinimumWidth(2, 100)
+        self.instanceLabelsLayout.setColumnStretch(0, 0)
+        self.instanceLabelsLayout.setColumnStretch(1, 1)
+        self.instanceLabelsLayout.setColumnStretch(2, 0)
         row_index = 0
         for label in self.instance.labels.values():
             if label.labelDefinition not in shp.label.predefinedLabels:
@@ -497,14 +510,19 @@ class instanceProperties(QDialog):
 
         instanceAttributesLayout = QGridLayout()
         instanceAttributesLayout.setColumnMinimumWidth(0, 100)
+        instanceAttributesLayout.setColumnMinimumWidth(1, 200)
+        instanceAttributesLayout.setColumnStretch(0, 0)
+        instanceAttributesLayout.setColumnStretch(1, 1)
+        # now list instance attributes
         for counter, name in enumerate(self.instance.attr.keys()):
             instanceAttributesLayout.addWidget(edf.boldLabel(name, self), counter,
                 0)
             labelType = edf.longLineEdit()
             labelType.setReadOnly(True)
-            labelName = edf.longLineEdit()
-            labelName.setText(self.instance.attr[name])
-            instanceAttributesLayout.addWidget(labelName, counter, 1)
+            labelNameEdit = edf.longLineEdit()
+            labelNameEdit.setText(self.instance.attr.get(name))
+            labelNameEdit.setToolTip(f"{name} attribute (Read Only)")
+            instanceAttributesLayout.addWidget(labelNameEdit, counter, 1)
 
         self.mainLayout.addLayout(formLayout)
         self.mainLayout.addWidget(edf.boldLabel("Instance Labels", self))
