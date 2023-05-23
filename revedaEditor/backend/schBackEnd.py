@@ -43,6 +43,9 @@ class libraryItem(QStandardItem):
     def type(self):
         return Qt.StandardItem.UserType
 
+    def __repr__(self):
+        return f"library item path: {self.libraryPath}, \nlibrary item name: {self.libraryName}"
+
     @property
     def libraryPath(self):
         return self._libraryPath
@@ -69,6 +72,9 @@ class cellItem(QStandardItem):
     def type(self):
         return QStandardItem.UserType + 1
 
+    def __repr__(self):
+        return f"cell item path: {self.cellPath}, \ncell item name: {self.cellName}"
+
     @property
     def cellName(self):
         return self._cellName
@@ -85,6 +91,9 @@ class viewItem(QStandardItem):
 
     def type(self):
         return QStandardItem.UserType + 1
+
+    def __repr__(self):
+        return f"view item path: {self.viewPath}, \nview item name: {self.viewName}"
 
     def delete(self):
         '''
@@ -205,26 +214,21 @@ def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -
     else:
         assert cellPath.exists()
         shutil.copytree(cellPath, copyPath)  # copied the cell
-        libraryItem = model.findItems(selectedLibPath.cellName, flags=Qt.MatchExactly)[
+        libraryItem = model.findItems(selectedLibPath.name, flags=Qt.MatchExactly)[
             0]  # find the library item
         # create new cell item
-        newCellItem = cellItem(copyPath.cellName)
+        newCellItem = cellItem(copyPath)
         newCellItem.setEditable(False)
         newCellItem.setData("cell", Qt.UserRole + 1)
         newCellItem.setData(copyPath, Qt.UserRole + 2)
         # go through view list and add to cell item
-        viewList = [str(view.stem) for view in copyPath.iterdir() if
-                    view.suffix == ".json"]
+        addedViewList = [viewItem(viewPath) for viewPath in copyPath.iterdir() if
+                    viewPath.suffix == ".json"]
+        [addedView.setEditable(False) for addedView in addedViewList]
 
-        for view in viewList:
-            addedView = viewItem(copyPath.joinpath(view).with_suffix(".json"))
-            addedView.setData("view", Qt.UserRole + 1)
-            # set the data to the item to be the path to the view.
-            addedView.setData(copyPath.joinpath(view).with_suffix(".json"),
-                              Qt.UserRole + 2, )
-            addedView.setEditable(False)
-            cellItem.appendRow(addedView)
-        libraryItem.appendRow(cellItem)
+        newCellItem.appendRows(addedViewList)
+        # add the new cell item to the library item
+        libraryItem.appendRow(newCellItem)
         return True
 
 

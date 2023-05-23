@@ -27,8 +27,8 @@ import pathlib
 import shutil
 from copy import deepcopy
 import os
-if os.environ.get('REVEDASIM_PATH'):
-    import revedasim.simMainWindow as smw
+# if os.environ.get('REVEDASIM_PATH'):
+#     import revedasim.simMainWindow as smw
 
 # import numpy as np
 from PySide6.QtCore import (QEvent, QMargins, QPoint, QPointF, QProcess, QRect,
@@ -59,7 +59,7 @@ import revedaEditor.fileio.symbolEncoder as se
 import revedaEditor.gui.editFunctions as edf
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.propertyDialogues as pdlg
-
+import revedaEditor.resources.resources
 
 class editorWindow(QMainWindow):
     """
@@ -1445,7 +1445,7 @@ class symbol_scene(editor_scene):
         radius = self.snapToBase(float(self.queryDlg.radiusEdit.text()),
                                  self.gridTuple[0])
         centerPoint = self.snapToGrid(QPoint(centerX, centerY), self.gridTuple)
-        item.centre(self.selectedItem.mapFromScene(centerPoint))
+        item.centre(item.mapFromScene(centerPoint))
         item.radius(radius)
 
     def updateArcShape(self, item: shp.arc):
@@ -1478,8 +1478,8 @@ class symbol_scene(editor_scene):
                    int(float(self.queryDlg.pinYLine.text()) - float(
                        location[1])), ),
             self.gridTuple, )
-        item.rect = QRect(self.selectedItem.start.x() - 5,
-                          self.selectedItem.start.y() - 5,
+        item.rect = QRect(self.item.start.x() - 5,
+                          self.item.start.y() - 5,
                           10, 10)
         item.pinName = self.queryDlg.pinName.text()
         item.pinType = self.queryDlg.pinType.currentText()
@@ -2366,6 +2366,7 @@ class schematic_scene(editor_scene):
                     dlg = pdlg.netProperties(self.parent.parent, item)
                     if dlg.exec() == QDialog.Accepted:
                         item.name = dlg.netNameEdit.text().strip()
+                        item.nameSet = True
                         item.update()
                 elif isinstance(item, shp.text):
                     dlg = pdlg.noteTextEditProperties(self.parent.parent, item)
@@ -2705,6 +2706,7 @@ class schematic_view(editor_view):
 class libraryBrowser(QMainWindow):
     def __init__(self, appMainW: QMainWindow) -> None:
         super().__init__()
+        self.resize(300,600)
         self.appMainW = appMainW
         self.libraryDict = self.appMainW.libraryDict
         self.cellViews = self.appMainW.cellViews
@@ -3043,7 +3045,7 @@ class libraryBrowser(QMainWindow):
                             Qt.UserRole + 2).joinpath(items[1]["filePath"])
                         self.editProcess.finished.connect(
                             self.editProcessFinished)
-                        self.editProcess.start(str(self.appMainW.textEditorPath),
+                        self.editProcess.start(self.appMainW.textEditorPath,
                                                [str(VerilogafilePathObj)])
                 else:
                     self.logger.warning("File path not defined.")
