@@ -27,8 +27,8 @@ import pathlib
 import shutil
 from copy import deepcopy
 import os
-if os.environ.get('REVEDASIM_PATH'):
-    import revedasim.simMainWindow as smw
+# if os.environ.get('REVEDASIM_PATH'):
+#     import revedasim.simMainWindow as smw
 
 # import numpy as np
 from PySide6.QtCore import (QEvent, QMargins, QPoint, QPointF, QProcess, QRect,
@@ -59,7 +59,7 @@ import revedaEditor.fileio.symbolEncoder as se
 import revedaEditor.gui.editFunctions as edf
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.propertyDialogues as pdlg
-
+import revedaEditor.resources.resources
 
 class editorWindow(QMainWindow):
     """
@@ -2705,6 +2705,7 @@ class schematic_view(editor_view):
 class libraryBrowser(QMainWindow):
     def __init__(self, appMainW: QMainWindow) -> None:
         super().__init__()
+        self.resize(300,600)
         self.appMainW = appMainW
         self.libraryDict = self.appMainW.libraryDict
         self.cellViews = self.appMainW.cellViews
@@ -3043,7 +3044,7 @@ class libraryBrowser(QMainWindow):
                             Qt.UserRole + 2).joinpath(items[1]["filePath"])
                         self.editProcess.finished.connect(
                             self.editProcessFinished)
-                        self.editProcess.start(str(self.appMainW.textEditorPath),
+                        self.editProcess.start(self.appMainW.textEditorPath,
                                                [str(VerilogafilePathObj)])
                 else:
                     self.logger.warning("File path not defined.")

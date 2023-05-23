@@ -470,8 +470,7 @@ class instanceProperties(QDialog):
         self.instNameEdit.setText(self.instance.instanceName)
         self.instNameEdit.setToolTip("Instance Name")
         formLayout.addRow(edf.boldLabel("Instance Name", self), self.instNameEdit)
-        location = (
-                self.instance.scenePos() - self.instance.scene().origin).toTuple()
+        location = (self.instance.scenePos() - self.instance.scene().origin).toTuple()
         self.xLocationEdit = edf.shortLineEdit()
         self.xLocationEdit.setText(str(location[0]))
         formLayout.addRow(edf.boldLabel("x location", self), self.xLocationEdit)

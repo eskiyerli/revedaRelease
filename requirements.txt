@@ -1,3 +1,0 @@
-PySide6>=6.4.2
-quantiphy>=2.19
-setuptools>=65.5.0
