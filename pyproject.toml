@@ -7,7 +7,7 @@ packages = ['api', 'gui', 'pdk', 'common', 'fileio', 'backend', 'resources']
 py-modules = ['revinit']
 [project]
 name = "revolution-eda"
-version = "0.4.0"
+version = "0.4.2"
 description = 'Revolution EDA is a new generation integrated circuit design environment.'
 readme = "README.md"
 classifiers = ["Development Status :: 3 - Alpha",
