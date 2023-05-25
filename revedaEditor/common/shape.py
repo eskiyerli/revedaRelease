@@ -1205,7 +1205,7 @@ class label(shape):
     def labelValue(self, labelValue):
         self._labelValue = labelValue
         self._labelValueSet = True
-        self.labelDefs()
+        # self.labelDefs()
 
     @property
     def labelValueSet(self) -> bool:
@@ -1231,7 +1231,7 @@ class label(shape):
     @labelText.setter
     def labelText(self, labelText):
         self._labelText = labelText
-        self._rect = self._fm.boundingRect(self._labelText)
+        self._rect = self._fm.boundingRect(self._labelText).normalized().adjusted(0, 0, 0, 5)
 
     def objName(self):
         return "LABEL"
@@ -1368,7 +1368,7 @@ class label(shape):
                                 labelFields[2].strip().split("=")[-1].split()[-1])
                             if self.labelValueSet:
                                 self._labelText = labelFields[2].replace(
-                                    tempLabelValue, self.labelValue)
+                                    tempLabelValue, self._labelValue)
                             else:
                                 self._labelText = labelFields[2]
                                 self._labelValue = tempLabelValue

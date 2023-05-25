@@ -381,6 +381,17 @@ class editorWindow(QMainWindow):
             self.snapDistance = int(float(dcd.snapDistanceEntry.text()))
             self.gridTuple = (self.majorGrid, self.majorGrid)
 
+            if dcd.dotType.isChecked():
+                self.centralW.view.gridbackg = True
+                self.centralW.view.linebackg = False
+            elif dcd.lineType.isChecked():
+                self.centralW.view.gridbackg = False
+                self.centralW.view.linebackg = True
+            else:
+                self.centralW.view.gridbackg = False
+                self.centralW.view.linebackg = False
+            self.centralW.view.resetCachedContent()
+
     def printClick(self):
         dlg = QPrintDialog(self)
         if dlg.exec() == QDialog.Accepted:
@@ -2307,6 +2318,7 @@ class schematic_scene(editor_scene):
                     self.addItem(itemShape)
                     if itemShape.counter > self.itemCounter:
                         self.itemCounter = itemShape.counter
+                    [labelItem.labelDefs() for labelItem in itemShape.labels.values()]
                 elif item["type"] == "schematicNet":
                     netShape = lj.createSchematicNets(item)
                     self.addItem(netShape)
@@ -2583,6 +2595,7 @@ class editor_view(QGraphicsView):
         self.majorGrid = self.editor.majorGrid
         self.gridTuple = self.editor.gridTuple
         self.gridbackg = True
+        self.linebackg = False
         self.init_UI()
 
     def init_UI(self):
@@ -2622,10 +2635,11 @@ class editor_view(QGraphicsView):
                       self.snapToBase(point.y(), gridTuple[1]))
 
     def drawBackground(self, painter, rect):
+
+        rectCoord = rect.getRect()
+        painter.fillRect(rect, QColor("black"))
+        painter.setPen(QColor("gray"))
         if self.gridbackg:
-            rectCoord = rect.getRect()
-            painter.fillRect(rect, QColor("black"))
-            painter.setPen(QColor("gray"))
             grid_x_start = math.ceil(rectCoord[0] / self.gridTuple[0]) * \
                            self.gridTuple[0]
             grid_y_start = math.ceil(rectCoord[1] / self.gridTuple[1]) * \
@@ -2636,6 +2650,20 @@ class editor_view(QGraphicsView):
                 for j in range(int(num_y_points)):  # rect length
                     painter.drawPoint(grid_x_start + i * self.gridTuple[0],
                                       grid_y_start + j * self.gridTuple[1], )
+        elif self.linebackg:
+            left = int(rect.left()) - (int(rect.left()) % self.gridTuple[0])
+            top = int(rect.top()) - (int(rect.top()) % self.gridTuple[1])
+
+            x = left
+            while x < rect.right():
+                painter.drawLine(x, rect.top(), x, rect.bottom())
+                x += self.gridTuple[0]
+
+            # Draw the horizontal grid lines
+            y = top
+            while y < rect.bottom():
+                painter.drawLine(rect.left(), y, rect.right(), y)
+                y += self.gridTuple[1]
         else:
             super().drawBackground(painter, rect)
 
@@ -2669,7 +2697,7 @@ class symbol_view(editor_view):
         self.scene = scene
         self.parent = parent
         super().__init__(self.scene, self.parent)
-        self.visibleRect = QRect(0, 0, 0, 0)  # initialize to an empty rectangle
+        self.visibleRect = None
 
 
 class schematic_view(editor_view):
@@ -2678,29 +2706,6 @@ class schematic_view(editor_view):
         self.parent = parent
         super().__init__(self.scene, self.parent)
         self.visibleRect = None  # initialize to an empty rectangle
-        self.viewSymbolItemsSet = set()
-        self.viewNetItemsSet = set()
-        self.viewSymbolPinItemsSet = set()
-
-    def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
-        if mouse_event.button() == Qt.LeftButton:
-            try:
-                self.visibleRect = self.viewport().geometry()
-                self.viewSymbolItemsSet = {item for item in
-                                           self.items(self.visibleRect,
-                                                      mode=Qt.IntersectsItemShape)
-                                           if isinstance(item, shp.symbolShape)}
-                self.viewNetItemsSet = {item for item in
-                                        self.items(self.visibleRect,
-                                                   mode=Qt.IntersectsItemShape)
-                                        if isinstance(item, net.schematicNet)}
-                self.viewSymbolPinItemsSet = {item for item in
-                                              self.items(self.visibleRect,
-                                                         mode=Qt.IntersectsItemShape)
-                                              if isinstance(item, shp.pin)}
-            except Exception as e:
-                self.logger.error(e)
-        super().mousePressEvent(mouse_event)
 
 
 class libraryBrowser(QMainWindow):

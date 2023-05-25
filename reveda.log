@@ -3,3 +3,45 @@
 2023-05-23 20:55:19,004 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
 2023-05-23 20:57:10,374 - reveda - WARNING - Created veriloga at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\tb_anotherFilter\veriloga.json
 2023-05-23 20:57:10,386 - reveda - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\tb_anotherFilter\symbol.json
+2023-05-24 19:44:58,499 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-24 19:51:03,604 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-24 20:10:00,551 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-24 20:16:06,130 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-24 20:16:35,484 - reveda - ERROR - '?': not a valid number.
+2023-05-24 20:23:50,489 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-24 20:28:28,244 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-24 20:28:44,410 - reveda - ERROR - replace() argument 2 must be str, not None
+2023-05-24 20:28:44,410 - reveda - ERROR - Netlist line is not defined for I10
+2023-05-24 20:28:44,449 - reveda - INFO - Netlisting finished.
+2023-05-24 21:35:53,812 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 21:36:03,810 - reveda - INFO - Removed Library Path.
+2023-05-24 21:36:06,263 - reveda - INFO - Removed Library Path.
+2023-05-24 21:36:28,434 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
+2023-05-24 21:37:00,740 - reveda - ERROR - replace() argument 2 must be str, not None
+2023-05-24 21:37:00,741 - reveda - ERROR - Netlist line is not defined for I10
+2023-05-24 21:37:00,761 - reveda - INFO - Netlisting finished.
+2023-05-24 21:44:09,268 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 21:44:38,649 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 21:48:48,168 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 21:49:48,468 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 21:51:52,570 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 21:52:32,096 - reveda - INFO - Netlisting finished.
+2023-05-24 22:45:28,575 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 23:26:21,540 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 23:27:34,173 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 23:28:41,413 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 23:31:23,686 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 23:50:01,144 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 23:50:49,458 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 23:55:05,798 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-24 23:56:00,584 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-25 00:02:30,879 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-25 00:05:40,909 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-25 10:01:24,525 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-25 10:01:31,349 - reveda - INFO - Removed Library Path.
+2023-05-25 10:01:32,345 - reveda - INFO - Removed Library Path.
+2023-05-25 10:01:56,177 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-25 10:03:39,877 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-25 10:06:22,795 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-25 10:08:33,645 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-25 10:10:15,538 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists

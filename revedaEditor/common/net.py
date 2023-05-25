@@ -212,8 +212,7 @@ class schematicNet(QGraphicsLineItem):
              self._dotPoints]
             [dot.setParentItem(self) for dot in self._dots]
             [self.scene().addItem(dot) for dot in self._dots]
-            for netItem in self._touchingNets:
-                netItem.findDotPoints()
+            [netItem.findDotPoints() for netItem in self._touchingNets]
 
         except Exception as e:
             self.scene().logger.error(f'Error in net.findDotPoints: {e}')

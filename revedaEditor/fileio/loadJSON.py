@@ -181,11 +181,10 @@ def createSchematicItems(item, libraryDict, viewName: str, gridTuple: (int, int)
         symbolInstance.angle = item["ang"]
         symbolInstance.viewName = viewName
         symbolInstance.attributes = symbolAttributes
-        for label in symbolInstance.labels.values():
-            if label.labelName in labelDict.keys():
-                label.labelValueSet = True
-                label.labelValue = labelDict[label.labelName][0]
-                label.labelVisible = labelDict[label.labelName][1]
+        for labelItem in symbolInstance.labels.values():
+            if labelItem.labelName in labelDict.keys():
+                labelItem.labelValue = labelDict[labelItem.labelName][0]
+                labelItem.labelVisible = labelDict[labelItem.labelName][1]
         symbolInstance.setPos(item["loc"][0], item["loc"][1])
         return symbolInstance
 
