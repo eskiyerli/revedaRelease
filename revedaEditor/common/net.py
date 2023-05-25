@@ -314,13 +314,13 @@ class schematicNet(QGraphicsLineItem):
             self.findDotPoints()
         elif change == QGraphicsItem.ItemSelectedHasChanged and self.scene():
             if value:
-                self.scene().schematicWindow.messageLine.setText("Selected Net")
+                self.scene().editorWindow.messageLine.setText("Selected Net")
                 self.mergeNets()
                 self.findDotPoints()
             else:
                 # self.removeDashedLines()
                 # self.mergeNets()
-                self.scene().schematicWindow.messageLine.setText("Unselected Net")
+                self.scene().editorWindow.messageLine.setText("Unselected Net")
         return super().itemChange(change, value)
 
     def removeDashedLines(self):
