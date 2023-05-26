@@ -3488,7 +3488,7 @@ class xyceNetlist:
                                            viewName)
                 # print(viewTuple)
                 if viewDict[viewName].viewType == "schematic":
-                    cirFile.write(self.createXyceNetlistLine(item))
+                    cirFile.write(self.createXyceSymbolLine(item))
 
                     schematicObj = schematicEditor(viewDict[viewName],
                                                    self.libraryDict,
@@ -3523,12 +3523,12 @@ class xyceNetlist:
                     cirFile.write(f"{netlistLine}\n")
                     self.netlistedViewsSet.add(viewTuple)
                 elif viewDict[viewName].viewType == "symbol":
-                    cirFile.write(f"{self.createXyceNetlistLine(item)}")
+                    cirFile.write(f"{self.createXyceSymbolLine(item)}")
                     self.netlistedViewsSet.add(ddef.viewTuple(
                         item.libraryName, item.cellName, item.viewName))
                 break
 
-    def createXyceNetlistLine(self, item):
+    def createXyceSymbolLine(self, item):
         """
         Create a netlist line from a nlp device format line.
         """
@@ -3538,10 +3538,13 @@ class xyceNetlist:
                 if labelItem.labelDefinition in xyceNetlistFormatLine:
                     xyceNetlistFormatLine = xyceNetlistFormatLine.replace(
                         labelItem.labelDefinition, labelItem.labelText)
+
+            for attrb, value in item.attr.items():
+                if f'[%{attrb}]' in xyceNetlistFormatLine:
+                    xyceNetlistFormatLine = xyceNetlistFormatLine.replace(
+                        f'[%{attrb}]', value)
             pinList = " ".join(item.pinNetMap.values())
-            xyceNetlistFormatLine = xyceNetlistFormatLine.replace("[@instName]",
-                                                                  f"{item.instanceName}").replace(
-                "[@pinList]", pinList) + "\n"
+            xyceNetlistFormatLine = xyceNetlistFormatLine.replace('[@pinList]', pinList)+'\n'
             return xyceNetlistFormatLine
         except Exception as e:
             self._scene.logger.error(e)

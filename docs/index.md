@@ -44,7 +44,7 @@ There are a few different methods to clone the repository:
 2. Using Github CLI: `gh repo clone eskiyerli/revedaRelease`
 
 3. Using Github Desktop:  Under `File` menu, find clone `Clone Repository...` item and click. Choose `Github.com` tab and enter repository URL:  https://github.com/eskiyerli/revedaRelease
-
+   
    <img src="assets/image-20230209082047928.png" alt="image-20230209082047928" style="zoom:50%;" />
 
 ### Download a release from RevEDA Release repository
@@ -74,7 +74,6 @@ Requirement already satisfied: PySide6>=6.4.2 in /usr/lib/python3.10/site-packag
 Requirement already satisfied: shiboken6==6.4.2 in /usr/lib/python3.10/site-packages (from PySide6>=6.4.2->revolution-eda) (6.4.2)
 Installing collected packages: revolution-eda
 Successfully installed revolution-eda-0.4.1
-
 ```
 
 Then just start it `reveda` command.
@@ -118,13 +117,11 @@ Note that the name for any cellview should include cellview name. For example, `
 
 `Open CellView...` dialogue can be used to the relevant editor for a cellview.
 
-
-
-| CellView  | Editor             | Note                                                         |
-| --------- | ------------------ | ------------------------------------------------------------ |
-| Schematic | Schematic Editor   |                                                              |
-| Symbol    | Symbol Editor      |                                                              |
-| Config    | Config view editor |                                                              |
+| CellView  | Editor             | Note                                                          |
+| --------- | ------------------ | ------------------------------------------------------------- |
+| Schematic | Schematic Editor   |                                                               |
+| Symbol    | Symbol Editor      |                                                               |
+| Config    | Config view editor |                                                               |
 | Verilog-a | Text Editor        | Set text editor path in `Options...` dialogue of main window. |
 
 There are also contextual menus defined for library, cell and cellview items in the Library Browser. Selecting an item and clicking right mouse button will display the relevant menu:
@@ -172,8 +169,6 @@ or by pressing `m` key or selecting `stretch` option. The circle will turn red a
 
 <img src="assets/Screenshot_20230214_214720.png" style="zoom: 67%;" />
 
-
-
 Beyond drawing a the symbol outline, the symbol editor can also indicate pins, where the element or the circuit is connected to the other elements or circuits. 
 
 #### Rectangles
@@ -216,16 +211,16 @@ There are three types of labels:
 1. **Normal**: These type of labels is just adding some notes on the text. They are not used in netlisting.
 
 2. **NLPLabel**: These types of labels are evaluated using simple rules. Their format is:
-
+   
    `[@propertyName:propertyName=%:propertyName=defaultValue]`
-
+   
    The parts of the NLPLabel is separated by columns(:). Note that
    only **@propertyName** part is mandatory. The second and third parts
    do not need to exist in all NLPLabels.
-
+   
    If only first part exists, there are a limited number of *predefined* labels that can be used.
    These are:
-
+   
    | Label Name     | Label Definition | Explanation                                       |
    | -------------- | ---------------- | ------------------------------------------------- |
    | cell name      | `[@cellName]`    | Cell Name, e.g. nand2, nmos, etc                  |
@@ -234,12 +229,12 @@ There are three types of labels:
    | view Name      | `[@viewName]`    | View Name, normally includes *symbol* in the name |
    | element Number | `[@elementNum]`  | Element Number, forms a part of Instance Name     |
    | model Name     | `[@modelName]`   | Model name for the element in the netlist         |
-
+   
    Model name label `[@modelName]` defaults to `modelName` entry in symbol attributes. 
    If the third part exists, the label text is determined by whether a label value is entered for the instance. If the label value is entered, then the second part is used to display the label, if not the third part is shown and used.
 
 3. **Python Label** : Python labels allow the label values to be determined depending on the values of other labels or any other values defined in the process design kit (PDK). The ==relevant functions that can be used in the Python labels are defined in `PDK/callbacks.py` file==. Each symbol should have a class defined in `callbacks.py` file. A few sample definitions are shown in the included `PDK/callbacks.py` file:
-
+   
    ```python
    from quantiphy import Quantity
    
@@ -270,25 +265,21 @@ There are three types of labels:
        def asparm(self):
            return self.sourceDiffs(self.nf)*(self.w/self.nf)*self.sd1p8v
    ```
-
+   
    For example, an `nmos` symbol has a `asparm()` function defined. We can use it to define the value of a label for `nmos` symbol. When this symbol is instantiated in a schematic, the value of `as` label will determined by `asparm()` function defined in the `callbacks.py` file. This means that instance callbacks can now use the all the facilities of Python, even conceivably ==machine learning== libraries to optimise designs.
-
+   
    ![](assets/Screenshot_20230214_221911.png)
-
+   
    Labels can be also be hidden to reduce the clutter in the schematic instance of a symbol. Hidden labels are as valid as visible labels. Label properties dialogue also have `labelAlignment`, `labelOrientation` and `labelUse` fields, which are currently not implemented. However, labels can be rotated using context menu’s `rotate` option.
 
 ### Attributes
 
-Attributes are properties that are common to all instances of a symbol. They could denote for example, how a particular symbol would be netlisted using `NLPDeviceFormat` attribute. NLPDeviceFormat is originaly used by Glade by Peardrop Design Systems. It consists of string constants and NLP Expressions. NLP expressions can either NLPlabels as defined earlier or expressions that represent the pins of the symbol:
+Attributes are properties that are common to all instances of a symbol. They could denote for example, how a particular symbol would be netlisted in Xyce circuit simulator netlist using `XyceNetlistLine` attribute. NLPDeviceFormat is originaly used by Glade by Peardrop Design Systems. It consists of string constants and NLP Expressions. 
+
+When writing`XyceNetlistLine`, the labels should be directly copied from their definitions without any alterations. `[@pinList]` field is for pin names of the symbol. Note that order of pin names in this field will be determined by `pinOrder` attribute. `pinOrder` attribute should have a list of pins separated by comman. It is especially important to keep the pin order of a symbol consistent with, for example, `veriloga` module pin order. Similarly, device models require a particular order of pins in the device netlist line. For example, MOSFET devices will have `D, G, B, S` `pinOrder` attribute.
 
 ```
-[|<pinName>:%]
-```
-
-`<pinName>` should be one of the pins of defined for the symbol. Thus, an NLPDeviceFormat line can be as below:
-
-```
-M[@elementNum] [|D:%] [|G:%] [|S:%] [|B:%] [@modelName] [@w:w=%u:w=2.0u] [@l:l=%u:l=0.13u] [@m:m=%]
+M[@elementNum] [@pinList] [@modelName] [@w:w=%u:w=2.0u] [@l:l=%u:l=0.13u] [@m:m=%]
 ```
 
 Similarly, `[@modelName]` label will take its value from `modelName` attribute. 
@@ -306,8 +297,6 @@ The first part summarizes the already defined labels. Label properties can be ch
 Any item on the symbol editor can be ==rotated, moved or copied== using by selecting menu item or by clicking on the relevant button on the toolbar as well as using context menu.
 
 The cursor position is displayed at left-bottom corner of the editor. If the user wants to move the origin point of the symbol editor, it can use `Move Origin` menu item under `Edit` menu. Once it is selected, click at the new origin point. Hereafter, all the editing functions will refer to the new origin point.
-
-
 
 ## Schematic Editor
 
@@ -371,8 +360,6 @@ At the moment, *Pin Type* definition is not used.
 Texts can be placed on the schematics. All monospaced fonts on the system can be used. However the Qt will try to find the closest font if it can find the exact font when the schematic were to be used in another system. 
 
 <img src="assets/Screenshot_20230215_154320.png" style="zoom:67%;" />
-
-
 
 ### Creating Symbols
 
