@@ -1719,42 +1719,45 @@ class schematic_scene(editor_scene):
                 elif self.itemSelect:
                     self.selectSceneItems(modifiers)
         except Exception as e:
-            print(e)
+            self.logger.error(e)
 
     def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseMoveEvent(mouse_event)
         self.mouseMoveLoc = mouse_event.scenePos().toPoint()
         modifiers = QGuiApplication.keyboardModifiers()
-        if mouse_event.buttons() == Qt.LeftButton:
-            if self.addInstance:
-                # TODO: think how to do it with mapFromScene
-                self.newInstance.setPos(self.mouseMoveLoc - self.mousePressLoc)
+        try:
+            if mouse_event.buttons() == Qt.LeftButton:
+                if self.addInstance:
+                    # TODO: think how to do it with mapFromScene
+                    self.newInstance.setPos(self.mouseMoveLoc - self.mousePressLoc)
 
-            elif self.drawWire:
-                self.mouseMoveLoc = self.findSnapPoint(self.mouseMoveLoc,
-                                                       self.snapDistance,
-                                                       set(self.wires))
-                if self.snapPointRect is None:
-                    rect = QRectF(QPointF(-5, -5), QPointF(5, 5))
-                    self.snapPointRect = QGraphicsRectItem(rect)
-                    self.snapPointRect.setPen(self.draftPen)
-                    self.addItem(self.snapPointRect)
-                self.snapPointRect.setPos(self.mouseMoveLoc)
+                elif self.drawWire:
+                    self.mouseMoveLoc = self.findSnapPoint(self.mouseMoveLoc,
+                                                           self.snapDistance,
+                                                           set(self.wires))
+                    if self.snapPointRect is None:
+                        rect = QRectF(QPointF(-5, -5), QPointF(5, 5))
+                        self.snapPointRect = QGraphicsRectItem(rect)
+                        self.snapPointRect.setPen(self.draftPen)
+                        self.addItem(self.snapPointRect)
+                    self.snapPointRect.setPos(self.mouseMoveLoc)
 
-                self.extendWires(self.wires, self.mousePressLoc,
-                                 self.mouseMoveLoc)
-            elif self.drawPin and self.newPin.isSelected():
-                self.newPin.setPos(self.mouseMoveLoc - self.mousePressLoc)
+                    self.extendWires(self.wires, self.mousePressLoc,
+                                     self.mouseMoveLoc)
+                elif self.drawPin and self.newPin.isSelected():
+                    self.newPin.setPos(self.mouseMoveLoc - self.mousePressLoc)
 
-            elif self.drawText and self.newText.isSelected():
-                self.newText.setPos(self.mouseMoveLoc - self.mousePressLoc)
+                elif self.drawText and self.newText.isSelected():
+                    self.newText.setPos(self.mouseMoveLoc - self.mousePressLoc)
 
-            elif self.itemSelect and modifiers == Qt.ShiftModifier:
-                    self.selectionRectItem.setRect(
-                        QRectF(self.mousePressLoc, self.mouseMoveLoc))
+                elif self.itemSelect and modifiers == Qt.ShiftModifier:
+                        self.selectionRectItem.setRect(
+                            QRectF(self.mousePressLoc, self.mouseMoveLoc))
 
-        self.editorWindow.statusLine.showMessage(
-            "Cursor Position: " + str(self.mouseMoveLoc.toTuple()))
+            self.editorWindow.statusLine.showMessage(
+                "Cursor Position: " + str(self.mouseMoveLoc.toTuple()))
+        except Exception as e:
+            self.logger.error(e)
 
     def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(mouse_event)
@@ -2186,13 +2189,16 @@ class schematic_scene(editor_scene):
             return lines
 
     def addPin(self, pos: QPoint):
-        pin = shp.schematicPin(pos, self.pinPen, self.pinName, self.pinDir,
-                               self.pinType,
-                               self.gridTuple)
-        self.addItem(pin)
-        undoCommand = us.addShapeUndo(self, pin)
-        self.undoStack.push(undoCommand)
-        return pin
+        try:
+            pin = shp.schematicPin(pos, self.pinPen, self.pinName, self.pinDir,
+                                   self.pinType,
+                                   self.gridTuple)
+            self.addItem(pin)
+            undoCommand = us.addShapeUndo(self, pin)
+            self.undoStack.push(undoCommand)
+            return pin
+        except Exception as e:
+            self.logger.error(e)
 
     def addNote(self, pos: QPoint):
         """

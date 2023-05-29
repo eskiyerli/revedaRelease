@@ -26,7 +26,8 @@ viewTuple = namedtuple('viewTuple', ['libraryName', 'cellName', 'viewName'])
 cellTuple = namedtuple('cellTuple', ['libraryName', 'cellName'])
 viewItemTuple = namedtuple('viewItemTuple', ['libraryItem', 'cellItem',
                                              'viewItem'])
-pinNetTuple = namedtuple('pinNetTuple',  ['pin', 'net', 'netEnd'])
+pinNetTuple = namedtuple('pinNetTuple',  ['pin', 'net', 'start'])
+netTuple = namedtuple('netTuple', ['net', 'start'])
 # this namedtuple is used to collect information on dashed lines.
 # net is the dashed line
 # index is the index of the self (schematicNet) where dashed line ends,

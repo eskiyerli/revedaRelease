@@ -1411,7 +1411,7 @@ class symbolShape(shape):
         self._pins = dict()  # dict of pins
         self.pinLocations = dict()  # pinName: pinRect
         self.pinNetMap = dict()  # pinName: netName
-        self.pinNetTupleList = list()
+        self.pinNetTupleList = list()  # list of pinNetTuple
         for item in self.shapes:
             item.setFlag(QGraphicsItem.ItemIsSelectable, False)
             item.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
@@ -1460,58 +1460,46 @@ class symbolShape(shape):
             # item's position has changed
             # do something here
             for item in self.pinNetTupleList:
-                if item.net.isVisible():
-                    item.net.hide()
-                self.dashLines[item.net].start = item.pin.mapToScene(
-                    item.pin.start)
+                if item.start == 1:
+                    item.net.start = item.pin.mapToScene(item.pin.start)
+                elif item.start == 0:
+                    item.net.end = item.pin.mapToScene(item.pin.start)
+
         return super().itemChange(change, value)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        self.dashLines = dict()
         self.pinNetTupleList = list()
-        view = self.scene().parent.view
-        viewNets = [item for item in view.items() if
-                    isinstance(item, net.schematicNet)]
         # create a named tuple to record whether the pin is located at the start or at
         # the end of the net.
         pins = [item for item in self.pins.values()]
         for pinItem in pins:
-            for viewNet in viewNets:
-                if pinItem.sceneBoundingRect().adjusted(-2, -2, 2, 2).contains(
-                        viewNet.start):
-                    self.pinNetTupleList.append(
-                        ddef.pinNetTuple(pinItem, viewNet, "start"))
-                elif pinItem.sceneBoundingRect().adjusted(-2, -2, 2, 2).contains(
-                        viewNet.end):
-                    self.pinNetTupleList.append(
-                        ddef.pinNetTuple(pinItem, viewNet, "end"))
-
+            for pinNet in self.scene().items(pinItem.sceneBoundingRect().adjusted(
+                    -2, -2, 2, 2), Qt.IntersectsItemShape):
+                if isinstance(pinNet, net.schematicNet):
+                    if pinItem.sceneBoundingRect().adjusted(-2, -2, 2, 2).contains(
+                            pinNet.mapToScene(pinNet.start)):
+                        self.pinNetTupleList.append(ddef.pinNetTuple(pinItem, pinNet, 1))
+                    elif pinItem.sceneBoundingRect().adjusted(-2, -2, 2, 2).contains(
+                            pinNet.mapToScene(pinNet.end)):
+                        self.pinNetTupleList.append(ddef.pinNetTuple(pinItem, pinNet, 0))
         for item in self.pinNetTupleList:
             pinSceneLoc = item.pin.mapToScene(item.pin.start)
-            if item.netEnd == 'start':
-                self.dashLines[item.net] = net.schematicNet(pinSceneLoc,
-                                                            item.net.end,
-                                                            self.scene().otherPen)
-            elif item.netEnd == 'end':
-                self.dashLines[item.net] = net.schematicNet(pinSceneLoc,
-                                                            item.net.start,
-                                                            self.scene().otherPen)
-            self.scene().addItem(self.dashLines[item.net])
+            if item.start == 1:
+                item.net.start = pinSceneLoc
+            else:
+                item.net.end = pinSceneLoc
+            item.net.pen = self.scene().otherPen
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        for key, net in self.dashLines.items():
-            wires = self.scene().addWires(net.start, self.scene().wirePen)
-
-            self.scene().extendWires(wires, net.start, net.end)
-            finalWires = self.scene().pruneWires(wires, self.scene().wirePen)
-            if key.nameSet:
-                for wire in finalWires:
-                    wire.name = key.name
-            self.scene().removeItem(key)
-            self.scene().removeItem(net)
-        # self.dashLines =dict()
         super().mouseReleaseEvent(event)
+
+        for item in self.pinNetTupleList:
+            lines = self.scene().addWires(item.net.start, self.scene().wirePen)
+            self.scene().extendWires(lines,item.net.start,item.net.end)
+            self.scene().pruneWires(lines,self.scene().wirePen)
+            self.scene().removeItem(item.net)
+
 
     @property
     def libraryName(self):
@@ -1598,6 +1586,7 @@ class schematicPin(shape):
         self._pinName = pinName
         self._pinDir = pinDir
         self._pinType = pinType
+        self._netTupleSet = set()
 
     def __repr__(self):
         return f"schematicPin({self._start}, {self._pen}, {self._pinName}, {self._pinDir}, {self._pinType})"
@@ -1648,9 +1637,56 @@ class schematicPin(shape):
         else:
             super().sceneEvent(event)
             return True
+    #
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mousePressEvent(event)
+        # create a named tuple to record whether the pin is located at the start or at
+        # the end of the net.
 
-    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        self.setPos(event.scenePos() - event.buttonDownPos(Qt.LeftButton))
+        for pinNet in self.scene().items(self.sceneBoundingRect().adjusted(
+                -2, -2, 2, 2), Qt.IntersectsItemShape):
+            if isinstance(pinNet, net.schematicNet):
+                if self.sceneBoundingRect().adjusted(-2, -2, 2, 2).contains(
+                        pinNet.mapToScene(pinNet.start)):
+                    self._netTupleSet.add(ddef.netTuple(pinNet, 1))
+                elif self.sceneBoundingRect().adjusted(-2, -2, 2, 2).contains(
+                        pinNet.mapToScene(pinNet.end)):
+                    self._netTupleSet.addd(ddef.netTuple(pinNet, 0))
+        for item in self._netTupleSet:
+            pinSceneLoc = self.mapToScene(self.start)
+            if item.start == 1:
+                item.net.start = pinSceneLoc
+            else:
+                item.net.end = pinSceneLoc
+            item.net.pen = self.scene().otherPen
+        super().mousePressEvent(event)
+    #
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        super().mouseReleaseEvent(event)
+
+        for item in self._netTupleSet:
+            lines = self.scene().addWires(item.net.start, self.scene().wirePen)
+            self.scene().extendWires(lines,item.net.start,item.net.end)
+            self.scene().pruneWires(lines,self.scene().wirePen)
+            self.scene().removeItem(item.net)
+        self._netTupleSet = set()
+
+    def itemChange(self, change, value):
+
+
+        if self.scene() and change == QGraphicsItem.ItemPositionHasChanged:
+            # item's position has changed
+            # do something here
+            for item in self._netTupleSet:
+                if item.start == 1:
+                    item.net.start = self.mapToScene(self.start)
+                elif item.start == 0:
+                    item.net.end = self.mapToScene(self.start)
+        return super().itemChange(change, value)
+
+    # def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+    #     super().mouseMoveEvent(event)
+    #     self.setPos(event.scenePos() - event.buttonDownPos(Qt.LeftButton))
 
     def toSymbolPin(self, start: QPoint, pen: QPen, gridTuple: tuple):
         return pin(start, pen, self.pinName, self.pinDir, self.pinType, gridTuple)

@@ -128,6 +128,7 @@ class schematicNet(QGraphicsLineItem):
     def pen(self, pen: QPen):
         self._pen = pen
         self.setPen(pen)
+        self.update()
 
     @property
     def name(self):
@@ -288,10 +289,8 @@ class schematicNet(QGraphicsLineItem):
         if change == QGraphicsItem.ItemPositionChange and self.scene():
             newPos = value.toPoint()
             sceneRect = self.scene().sceneRect()
-            gridTuple = self.scene().gridTuple
             viewRect = self.scene().views()[0].viewport().rect()
-            # newPos.setX(round(newPos.x() / gridTuple[0]) * gridTuple[0])
-            # newPos.setY(round(newPos.y() / gridTuple[1]) * gridTuple[1])
+
             # Keep the item inside the view rect.
             if not sceneRect.contains(newPos):
                 # Keep the item inside the scene rect.
