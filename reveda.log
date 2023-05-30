@@ -237,3 +237,36 @@
 2023-05-29 22:36:59,723 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
 2023-05-29 22:37:00,605 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
 2023-05-29 22:37:25,137 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-30 12:00:31,571 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:08:34,975 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:08:40,588 - reveda - INFO - Removed Library Path.
+2023-05-30 12:08:41,725 - reveda - INFO - Removed Library Path.
+2023-05-30 12:08:55,218 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:09:09,388 - reveda - INFO - Removed Library Path.
+2023-05-30 12:09:27,475 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:10:35,879 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:10:55,108 - reveda - WARNING - Created commonGateAmp cell at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\commonGateAmp
+2023-05-30 12:12:59,050 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:13:45,659 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:13:56,248 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:14:06,875 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:17:05,350 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:17:19,609 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:17:41,468 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:19:07,087 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:19:32,394 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:23:37,816 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:24:00,105 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:24:20,600 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:24:45,606 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:26:25,022 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:26:44,204 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:27:43,055 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:28:04,667 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:28:21,169 - reveda - INFO - Removed Library Path.
+2023-05-30 12:28:29,196 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:29:34,091 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:29:58,800 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:32:49,446 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-30 12:33:09,222 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-05-30 12:33:33,954 - reveda - WARNING - Created commonDrainAmplifier cell at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\commonDrainAmplifier

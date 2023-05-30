@@ -2561,7 +2561,7 @@ class schematic_scene(editor_scene):
                                                             "X[@instName] [@cellName] [@pinList]"))
 
         symbolWindow.checkSaveCell()
-        libraryView.reworkDesignLibrariesView()
+        libraryView.reworkDesignLibrariesView(self.appMainW.libraryDict)
         # symbolWindow.show()
         return symbolViewItem
 
@@ -2894,7 +2894,7 @@ class libraryBrowser(QMainWindow):
                         model.itemFromIndex(model.index(row, 1)).text().strip())
         self.writeLibDefFile(self.libraryDict, libDefFilePathObj)
         self.appMainW.libraryDict = self.libraryDict
-        self.designView.reworkDesignLibrariesView()
+        self.designView.reworkDesignLibrariesView(self.appMainW.libraryDict)
 
     def newCellClick(self, s):
         dlg = fd.createCellDialog(self, self.libraryModel)
@@ -3266,13 +3266,13 @@ class designLibrariesView(QTreeView):
             # print(f"Error:{e.strerror}")
             self.logger.warning(f"Error:{e.strerror}")
 
-    def reworkDesignLibrariesView(self):
+    def reworkDesignLibrariesView(self,libraryDict:dict):
         """
         Recreate library model from libraryDict.
         """
-        # self.libraryModel.clear()
-        self.libraryModel = designLibrariesModel(self.appMainW.libraryDict)
+        self.libraryModel = designLibrariesModel(libraryDict)
         self.setModel(self.libraryModel)
+        self.libBrowsW.libraryModel = self.libraryModel
 
     # context menu
     def contextMenuEvent(self, event):
