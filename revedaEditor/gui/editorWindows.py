@@ -1779,8 +1779,11 @@ class schematic_scene(editor_scene):
                     if lines:
                         for line in lines:
                             line.mergeNets()
-                            line.findDotPoints()
                     self.wires = None  # self.mergeNets()
+                    viewNets = {netItem for netItem in
+                                self.editorWindow.centralW.view.items() if
+                                isinstance(netItem,net.schematicNet)}
+                    [netItem.findDotPoints() for netItem in viewNets]
 
                 elif self.addInstance:
                     self.addInstance = False

@@ -57,7 +57,7 @@ class schematicNet(QGraphicsLineItem):
         self._endPoints = [self._start, self._end]
         self._dots = set()
         self._dotPoints = set()
-        self._touchingNets = set()
+        # self._touchingNets = set()
         self._dashedLines = dict()
         self._newWires = list()
 
@@ -188,7 +188,7 @@ class schematicNet(QGraphicsLineItem):
             [self.scene().removeItem(dot) for dot in self._dots]
             self._dots.clear()
             self._dotPoints.clear()
-            self._touchingNets.clear()
+            # self._touchingNets.clear()
 
             if self.horizontal:
                 nets = {netItem for netItem in self.scene().items(
@@ -207,13 +207,13 @@ class schematicNet(QGraphicsLineItem):
                             selfEnd) and selfEnd not in
                             netItem.endPoints):
                         self._dotPoints.add(self.mapFromScene(selfEnd).toPoint())
-                        self._touchingNets.add(netItem)
+                        # self._touchingNets.add(netItem)
 
             [self._dots.add(crossingDot(dotPoint,3,self.scene().wirePen)) for dotPoint in
              self._dotPoints]
             [dot.setParentItem(self) for dot in self._dots]
             [self.scene().addItem(dot) for dot in self._dots]
-            [netItem.findDotPoints() for netItem in self._touchingNets]
+            # [netItem.findDotPoints() for netItem in self._touchingNets]
 
         except Exception as e:
             self.scene().logger.error(f'Error in net.findDotPoints: {e}')

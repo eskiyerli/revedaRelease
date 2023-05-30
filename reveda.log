@@ -214,3 +214,26 @@
 2023-05-28 23:54:20,738 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
 2023-05-28 23:55:12,815 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
 2023-05-28 23:56:35,686 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-29 22:25:53,156 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-29 22:30:37,727 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-29 22:31:54,958 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-29 22:32:46,681 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-29 22:33:53,043 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-29 22:36:46,081 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-05-29 22:36:52,629 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:52,630 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:52,631 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:52,632 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:52,633 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:52,634 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:52,635 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:57,116 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:57,116 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:57,116 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:57,117 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:57,117 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:57,117 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:57,118 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:36:59,723 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:37:00,605 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
+2023-05-29 22:37:25,137 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
