@@ -1409,6 +1409,7 @@ class symbolShape(shape):
         self._drawings = list()
         self._labels = dict()  # dict of labels
         self._pins = dict()  # dict of pins
+        self._netlistIgnore = False
         self.pinLocations = dict()  # pinName: pinRect
         self.pinNetMap = dict()  # pinName: netName
         self.pinNetTupleList = list()  # list of pinNetTuple
@@ -1440,6 +1441,12 @@ class symbolShape(shape):
         if self.isSelected():
             painter.setPen(QPen(Qt.yellow, 2, Qt.DashLine))
             painter.drawRect(self.borderRect)
+        if self.netlistIgnore:
+            painter.setPen(QPen(Qt.red,5, Qt.SolidLine))
+            painter.drawLine(self.borderRect.bottomLeft(),
+                             self.borderRect.topRight())
+            painter.drawLine(self.borderRect.topLeft(),
+                             self.borderRect.bottomRight())
 
     def boundingRect(self):
         return self.childrenBoundingRect()
@@ -1569,6 +1576,14 @@ class symbolShape(shape):
     @property
     def drawings(self):
         return self._drawings
+
+    @property
+    def netlistIgnore(self) -> bool:
+        return self._netlistIgnore
+
+    @netlistIgnore.setter
+    def netlistIgnore(self, value: bool):
+        self._netlistIgnore = value
 
 
 class schematicPin(shape):

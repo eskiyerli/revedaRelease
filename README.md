@@ -15,6 +15,8 @@ Revolution EDA is a new generation of schematic and symbol editor targeting cust
 9. Configuration parameters can be saved in a configuration file.
 10. Log file logs error, warning and info messages.
 
+When downloading the package from pypi repository, you may want to download to source package as well to download *exampleLibraries*.
+
 ## Attribution
 
 - Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). Licensed under a [Creative Commons Attribution 3.0 License](http://creativecommons.org/licenses/by/3.0/).

@@ -3,11 +3,11 @@
 requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 [tool.setuptools]
-packages = ['revedaEditor','pdk']
+packages = ['revedaEditor.gui','revedaEditor.common','revedaEditor.fileio','revedaEditor.backend','revedaEditor.resources','pdk']
 py-modules = ['revinit', 'reveda']
 [project]
 name = "revolution-eda"
-version = "0.4.2"
+version = "0.5.1"
 description = 'Revolution EDA is a new generation integrated circuit design environment.'
 readme = "README.md"
 classifiers = ["Development Status :: 3 - Alpha",

@@ -178,7 +178,8 @@ def createSchematicItems(item, libraryDict, viewName: str, gridTuple: (int, int)
         symbolInstance.cellName = item["cell"]
         symbolInstance.counter = instCounter
         symbolInstance.instanceName = item["nam"]
-        symbolInstance.angle = item["ang"]
+        symbolInstance.angle = item.get("ang", 0)
+        symbolInstance.netlistIgnore = bool(item.get("ign",0))
         symbolInstance.viewName = viewName
         symbolInstance.attributes = symbolAttributes
         for labelItem in symbolInstance.labels.values():

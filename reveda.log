@@ -270,3 +270,42 @@
 2023-05-30 12:32:49,446 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
 2023-05-30 12:33:09,222 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
 2023-05-30 12:33:33,954 - reveda - WARNING - Created commonDrainAmplifier cell at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\commonDrainAmplifier
+2023-05-31 10:06:25,228 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-31 14:19:17,471 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-31 14:20:23,976 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-05-31 14:20:34,474 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-06-01 13:46:57,580 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 13:47:08,190 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-06-01 13:47:18,066 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-06-01 17:27:10,411 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 17:28:02,089 - reveda - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\complexFilter\symbol.json
+2023-06-01 17:29:17,183 - reveda - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\complexFilter\symbol.json
+2023-06-01 17:31:06,655 - reveda - WARNING - Created schematic2 at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\complexFilter\schematic2.json
+2023-06-01 19:46:37,733 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 19:46:51,566 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-06-01 19:46:59,113 - reveda - INFO - Removed Library Path.
+2023-06-01 19:47:08,389 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-06-01 19:48:21,036 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 19:50:18,527 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 19:51:25,898 - reveda - INFO - Netlisting finished.
+2023-06-01 19:52:55,360 - reveda - INFO - Netlisting finished.
+2023-06-01 19:53:18,451 - reveda - INFO - Netlisting finished.
+2023-06-01 19:53:34,957 - reveda - INFO - Netlisting finished.
+2023-06-01 19:55:50,781 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 19:56:17,572 - reveda - INFO - Netlisting finished.
+2023-06-01 21:58:16,074 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 21:58:50,952 - reveda - INFO - Netlisting finished.
+2023-06-01 22:00:08,226 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 22:00:48,652 - reveda - INFO - Netlisting finished.
+2023-06-01 22:20:49,164 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 22:22:29,396 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 22:23:15,681 - reveda - INFO - Netlisting finished.
+2023-06-01 22:25:21,988 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-01 22:25:37,377 - reveda - INFO - Netlisting finished.
+2023-06-02 09:45:59,240 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 09:46:05,725 - reveda - INFO - Removed Library Path.
+2023-06-02 09:46:06,679 - reveda - INFO - Removed Library Path.
+2023-06-02 09:54:04,563 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-06-02 09:54:55,015 - reveda - INFO - Netlisting finished.
+2023-06-02 09:55:45,980 - reveda - WARNING - No symbol selected
+2023-06-02 09:56:18,261 - reveda - INFO - Netlisting finished.
