@@ -572,9 +572,16 @@ class schematicPinPropertiesDialog(createPinDialog):
     def __init__(self, parent, item):
         super().__init__(parent)
         self.setWindowTitle(f"{item.pinName} - Pin Properties")
-        self.pinName.setText(item.pinName)
-        self.pinDir.setCurrentText(item.pinDir)
-        self.pinType.setCurrentText(item.pinType)
+        self.xlocationEdit = edf.shortLineEdit()
+        self.xlocationEdit.setToolTip("x location of pin")
+        self.fLayout.addRow("x location:", self.xlocationEdit)
+        self.ylocationEdit = edf.shortLineEdit()
+        self.ylocationEdit.setToolTip("y location of pin")
+        self.fLayout.addRow("y location:", self.ylocationEdit)
+        self.angleEdit = edf.shortLineEdit()
+        self.angleEdit.setToolTip("angle of pin")
+        self.fLayout.addRow("angle:", self.angleEdit)
+
 
 class symbolNameDialog(QDialog):
     def __init__(self, cellPath:pathlib.Path, cellName: str, parent):

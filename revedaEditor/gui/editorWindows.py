@@ -41,7 +41,8 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox, QDial
                                QFileDialog, QFormLayout, QGraphicsRectItem, QGraphicsScene,
                                QGraphicsSceneMouseEvent, QGraphicsView, QGridLayout,
                                QGroupBox, QLabel, QMainWindow, QMenu, QMessageBox,
-                               QTableView, QToolBar, QTreeView, QVBoxLayout, QWidget)
+                               QTableView, QToolBar, QTreeView, QVBoxLayout, QWidget,
+                               )
 
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
@@ -552,6 +553,9 @@ class schematicEditor(editorWindow):
         self.schematicToolbar.addAction(self.createSymbolAction)
         self.schematicToolbar.addSeparator()
         self.schematicToolbar.addAction(self.viewCheckAction)
+        self.schematicToolbar.addSeparator()
+        self.schematicToolbar.addAction(self.goDownAction)
+
 
     def _schematicActions(self):
         self.centralW.scene.itemContextMenu.addAction(self.copyAction)
@@ -561,8 +565,6 @@ class schematicEditor(editorWindow):
         self.centralW.scene.itemContextMenu.addAction(self.objPropAction)
         self.centralW.scene.itemContextMenu.addAction(self.ignoreAction)
         self.centralW.scene.itemContextMenu.addAction(self.goDownAction)
-        if self.parentView is not None:
-            self.centralW.scene.itemContextMenu.addAction(self.goUpAction)
 
     def _createShortcuts(self):
         super()._createShortcuts()
@@ -570,6 +572,7 @@ class schematicEditor(editorWindow):
         self.createWireAction.setShortcut(Qt.Key_W)
         self.createPinAction.setShortcut(Qt.Key_P)
         self.goDownAction.setShortcut("Shift+E")
+
 
     def dispConfigEdit(self):
         super().dispConfigEdit()
@@ -2277,60 +2280,80 @@ class schematic_scene(editor_scene):
         """
         Display the properties of the selected object.
         """
-        if self.selectedItems is not None:
-            for item in self.selectedItems:
-                if isinstance(item, shp.symbolShape):
-                    dlg = pdlg.instanceProperties(self.editorWindow, item)
-                    if dlg.exec() == QDialog.Accepted:
-                        item.instanceName = dlg.instNameEdit.text().strip()
-                        item.angle = float(dlg.angleEdit.text().strip())
+        try:
+            if self.selectedItems is not None:
+                for item in self.selectedItems:
+                    if isinstance(item, shp.symbolShape):
+                        dlg = pdlg.instanceProperties(self.editorWindow, item)
+                        if dlg.exec() == QDialog.Accepted:
+                            item.instanceName = dlg.instNameEdit.text().strip()
+                            item.angle = float(dlg.angleEdit.text().strip())
 
-                        location = self.snapToGrid(
-                            QPoint(float(dlg.xLocationEdit.text().strip()),
-                                   float(dlg.yLocationEdit.text().strip()), ),
-                            self.gridTuple, )
-                        item.setPos(location)
-                        tempDoc = QTextDocument()
-                        for i in range(dlg.instanceLabelsLayout.rowCount()):
-                            # first create label name document with HTML annotations
-                            tempDoc.setHtml(dlg.instanceLabelsLayout.itemAtPosition(i,
-                                                                                    0).widget().text())
-                            # now strip html annotations
-                            tempLabelName = tempDoc.toPlainText().strip()
-                            # check if label name is in label dictionary of item.
-                            if item.labels.get(tempLabelName):
-                                item.labels[tempLabelName].labelValue = (
-                                    dlg.instanceLabelsLayout.itemAtPosition(i,
-                                                                            1).widget().text())
-                                visible = (dlg.instanceLabelsLayout.itemAtPosition(i,
-                                                                                   2).widget().currentText())
-                                if visible == "True":
-                                    item.labels[tempLabelName].labelVisible = True
-                                else:
-                                    item.labels[tempLabelName].labelVisible = False
-                        [labelItem.labelDefs() for labelItem in
-                         item.labels.values()]  # item.update()
-                elif isinstance(item, net.schematicNet):
-                    dlg = pdlg.netProperties(self.parent.parent, item)
-                    if dlg.exec() == QDialog.Accepted:
-                        item.name = dlg.netNameEdit.text().strip()
-                        item.nameSet = True
-                        item.update()
-                elif isinstance(item, shp.text):
-                    dlg = pdlg.noteTextEditProperties(self.parent.parent, item)
-                    if dlg.exec() == QDialog.Accepted:
-                        # item.prepareGeometryChange()
-                        start = item.start
-                        self.removeItem(item)
-                        item = shp.text(start, self.textPen,
-                                        dlg.plainTextEdit.toPlainText(), self.gridTuple,
-                                        dlg.familyCB.currentText(),
-                                        dlg.fontStyleCB.currentText(),
-                                        dlg.fontsizeCB.currentText(),
-                                        dlg.textAlignmCB.currentText(),
-                                        dlg.textOrientCB.currentText(), )
-                        self.rotateAnItem(start, item, float(item.textOrient[1:]))
-                        self.addItem(item)
+                            location = QPoint(float(dlg.xLocationEdit.text().strip()),
+                                    float(dlg.yLocationEdit.text().strip())) - self.origin
+                            item.setPos(self.snaptoGrid(location, self.gridTuple))
+                            tempDoc = QTextDocument()
+                            for i in range(dlg.instanceLabelsLayout.rowCount()):
+                                # first create label name document with HTML annotations
+                                tempDoc.setHtml(dlg.instanceLabelsLayout.itemAtPosition(i,
+                                                                                        0).widget().text())
+                                # now strip html annotations
+                                tempLabelName = tempDoc.toPlainText().strip()
+                                # check if label name is in label dictionary of item.
+                                if item.labels.get(tempLabelName):
+                                    item.labels[tempLabelName].labelValue = (
+                                        dlg.instanceLabelsLayout.itemAtPosition(i,
+                                                                                1).widget().text())
+                                    visible = (dlg.instanceLabelsLayout.itemAtPosition(i,
+                                                                                       2).widget().currentText())
+                                    if visible == "True":
+                                        item.labels[tempLabelName].labelVisible = True
+                                    else:
+                                        item.labels[tempLabelName].labelVisible = False
+                            [labelItem.labelDefs() for labelItem in
+                             item.labels.values()]  # item.update()
+                    elif isinstance(item, net.schematicNet):
+                        dlg = pdlg.netProperties(self.editorWindow, item)
+                        if dlg.exec() == QDialog.Accepted:
+                            item.name = dlg.netNameEdit.text().strip()
+                            if item.name is not "":
+                                item.nameSet = True
+                            item.update()
+                    elif isinstance(item, shp.text):
+                        dlg = pdlg.noteTextEditProperties(self.editorWindow, item)
+                        if dlg.exec() == QDialog.Accepted:
+                            # item.prepareGeometryChange()
+                            start = item.start
+                            self.removeItem(item)
+                            item = shp.text(start, self.textPen,
+                                            dlg.plainTextEdit.toPlainText(), self.gridTuple,
+                                            dlg.familyCB.currentText(),
+                                            dlg.fontStyleCB.currentText(),
+                                            dlg.fontsizeCB.currentText(),
+                                            dlg.textAlignmCB.currentText(),
+                                            dlg.textOrientCB.currentText(), )
+                            self.rotateAnItem(start, item, float(item.textOrient[1:]))
+                            self.addItem(item)
+                    elif isinstance(item, shp.schematicPin):
+                        dlg = pdlg.schematicPinPropertiesDialog(self.editorWindow, item)
+                        dlg.pinName.setText(item.pinName)
+                        dlg.pinDir.setCurrentText(item.pinDir)
+                        dlg.pinType.setCurrentText(item.pinType)
+                        dlg.angleEdit.setText(str(item.angle))
+                        dlg.xlocationEdit.setText(str(item.mapToScene(item.start).x()))
+                        dlg.ylocationEdit.setText(str(item.mapToScene(item.start).y()))
+                        if dlg.exec() == QDialog.Accepted:
+                            item.pinName = dlg.pinName.text().strip()
+                            item.pinDir = dlg.pinDir.currentText()
+                            item.pinType = dlg.pinType.currentText()
+                            itemStartPos = QPoint(float(dlg.xlocationEdit.text().strip(
+                            )), float(dlg.ylocationEdit.text().strip()))
+                            item.start=self.snapToGrid(itemStartPos-self.origin,
+                                                       self.gridTuple)
+                            item.angle = float(dlg.angleEdit.text().strip())
+        except Exception as e:
+            self.logger.error(e)
+
 
     def createSymbol(self):
         """
@@ -2478,11 +2501,12 @@ class schematic_scene(editor_scene):
                         if self.editorWindow.appMainW.openViews[openViewT]:
                             childWindow = self.editorWindow.appMainW.openViews[openViewT]
                             childWindow.parentView = self.editorWindow
+                            childWindow.schematicToolbar.addAction(childWindow.goUpAction)
                             if dlg.buttonId == 2:
                                 childWindow.centralW.scene.readOnly = True
 
     def goUpHier(self):
-        if self.editorWindow.parentView:
+        if self.editorWindow.parentView is not None:
             self.editorWindow.parentView.raise_()
             self.editorWindow.close()
 

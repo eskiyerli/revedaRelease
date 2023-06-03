@@ -23,9 +23,9 @@
 # net class definition.
 from PySide6.QtCore import (QPoint, Qt, QLineF, QRectF, QPointF, QRect)
 from PySide6.QtGui import (QPen, QStaticText, QPainterPath, QColor, QFont,)
-from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem,
+from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsPathItem,
                                QGraphicsEllipseItem, QGraphicsRectItem,
-                               QGraphicsSceneMouseEvent)
+                               QGraphicsSceneMouseEvent, QGraphicsSceneHoverEvent,)
 # import revedaEditor.common.pens as pens
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.undoStack as us
@@ -53,6 +53,7 @@ class schematicNet(QGraphicsLineItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
+        self.setAcceptHoverEvents(True)
         # self._createdNets = dict()
         self._endPoints = [self._start, self._end]
         self._dots = set()
@@ -60,6 +61,8 @@ class schematicNet(QGraphicsLineItem):
         # self._touchingNets = set()
         self._dashedLines = dict()
         self._newWires = list()
+        self._connectedNetsSet = set()
+        self._flightLinesSet = set()
 
     def __repr__(self):
         return f"schematicNet(start={self.mapToScene(self._start)}, " \
@@ -99,6 +102,25 @@ class schematicNet(QGraphicsLineItem):
         except AttributeError:
             return False
 
+    def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
+        super().hoverEnterEvent(event)
+        self._connectedNetsSet = {netItem for netItem in self.scene().items() if ((
+                isinstance(netItem, schematicNet) and (self.nameSet or self.nameAdded) and
+                                                       netItem.name == self.name))}
+        for netItem in self._connectedNetsSet:
+            flightLine = netFlightLine(self.mapToScene(self.line().center()),
+                                       netItem.mapToScene(netItem.line().center()),
+                                       QPen(Qt.darkMagenta, 5, Qt.SolidLine))
+            self._flightLinesSet.add(flightLine)
+            self.scene().addItem(flightLine)
+
+    def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent) -> None:
+        super().hoverLeaveEvent(event)
+        for flightLine in self._flightLinesSet:
+            self.scene().removeItem(flightLine)
+            del flightLine
+        self._flightLinesSet = set()
+        
     @property
     def start(self):
         return self._start
@@ -384,6 +406,21 @@ class schematicNet(QGraphicsLineItem):
             for netItem in nets.difference({self}):
                 self.scene().removeItem(netItem)
                 del netItem
+
+class netFlightLine(QGraphicsPathItem):
+    def __init__(self, start: QPoint, end: QPoint, pen: QPen):
+        self._pen = pen
+        self._path = QPainterPath()
+        self._path.moveTo(start)
+        self._path.quadTo(start, end)
+        super().__init__(self._path)
+        self.setPen(pen)
+
+    def paint(self, painter, option, widget) -> None:
+        painter.setPen(self._pen)
+        painter.setBrush(self._pen.color())
+        painter.drawPath(self._path)
+
 
 
 class crossingDot(QGraphicsEllipseItem):

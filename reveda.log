@@ -309,3 +309,72 @@
 2023-06-02 09:54:55,015 - reveda - INFO - Netlisting finished.
 2023-06-02 09:55:45,980 - reveda - WARNING - No symbol selected
 2023-06-02 09:56:18,261 - reveda - INFO - Netlisting finished.
+2023-06-02 11:33:42,866 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 11:35:58,561 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 11:41:02,359 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 13:01:15,365 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 13:29:21,265 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 13:30:27,094 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 13:31:13,179 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 13:37:13,996 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 17:02:22,311 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 17:03:29,802 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 17:05:26,702 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 17:06:36,927 - reveda - INFO - Netlisting finished.
+2023-06-02 17:07:48,215 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2023-06-02 23:13:06,712 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-02 23:18:00,209 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
+2023-06-02 23:18:09,678 - reveda - INFO - Removed Library Path.
+2023-06-02 23:18:11,521 - reveda - INFO - Removed Library Path.
+2023-06-02 23:18:31,440 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
+2023-06-02 23:20:04,471 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-02 23:22:17,450 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 22:01:47,175 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 22:28:28,786 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 22:30:01,745 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 22:30:38,331 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 22:30:58,591 - reveda - ERROR - 'schematicPin' object has no attribute 'shp'
+2023-06-03 22:30:58,860 - reveda - ERROR - 'schematicPin' object has no attribute 'shp'
+2023-06-03 22:32:59,993 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 22:33:10,799 - reveda - ERROR - 'schematicPin' object has no attribute 'shp'
+2023-06-03 23:05:44,010 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:05:54,337 - reveda - ERROR - module 'revedaEditor.gui.propertyDialogues' has no attribute 'schematicPinProperties'
+2023-06-03 23:06:46,025 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:06:55,708 - reveda - ERROR - 'schematic_scene' object has no attribute 'schematicEditor'
+2023-06-03 23:07:29,465 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:07:53,196 - reveda - ERROR - 'PySide6.QtWidgets.QLineEdit.setText' called with wrong argument types:
+  PySide6.QtWidgets.QLineEdit.setText(float)
+Supported signatures:
+  PySide6.QtWidgets.QLineEdit.setText(str)
+2023-06-03 23:07:57,617 - reveda - ERROR - 'PySide6.QtWidgets.QLineEdit.setText' called with wrong argument types:
+  PySide6.QtWidgets.QLineEdit.setText(float)
+Supported signatures:
+  PySide6.QtWidgets.QLineEdit.setText(str)
+2023-06-03 23:08:55,413 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:09:04,131 - reveda - ERROR - 'schematicPinPropertiesDialog' object has no attribute 'flayout'
+2023-06-03 23:09:37,139 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:11:47,173 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:20:33,554 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:23:11,874 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:24:06,826 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:24:18,086 - reveda - ERROR - 'PySide6.QtWidgets.QGraphicsItem.mapToScene' called with wrong argument types:
+  PySide6.QtWidgets.QGraphicsItem.mapToScene(float)
+Supported signatures:
+  PySide6.QtWidgets.QGraphicsItem.mapToScene(PySide6.QtGui.QPainterPath)
+  PySide6.QtWidgets.QGraphicsItem.mapToScene(Union[PySide6.QtCore.QPointF, PySide6.QtCore.QPoint, PySide6.QtGui.QPainterPath.Element])
+  PySide6.QtWidgets.QGraphicsItem.mapToScene(Union[PySide6.QtGui.QPolygonF, Sequence[PySide6.QtCore.QPointF], PySide6.QtGui.QPolygon, PySide6.QtCore.QRectF])
+  PySide6.QtWidgets.QGraphicsItem.mapToScene(Union[PySide6.QtCore.QRectF, PySide6.QtCore.QRect])
+  PySide6.QtWidgets.QGraphicsItem.mapToScene(float, float)
+  PySide6.QtWidgets.QGraphicsItem.mapToScene(float, float, float, float)
+2023-06-03 23:24:45,141 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:25:25,574 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:25:36,190 - reveda - ERROR - 'PySide6.QtCore.QPoint' object has no attribute 'scenePos'
+2023-06-03 23:26:09,658 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:34:04,675 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:34:20,170 - reveda - ERROR - 'schematicPinPropertiesDialog' object has no attribute 'pinNameEdit'
+2023-06-03 23:35:34,341 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:36:47,023 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:37:08,440 - reveda - ERROR - 'PySide6.QtCore.QPoint' object has no attribute 'setPos'
+2023-06-03 23:38:12,113 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-03 23:58:14,340 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-04 00:15:23,021 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
