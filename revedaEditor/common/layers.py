@@ -22,7 +22,7 @@
 
 # Schematic and symbol editor classes
 # (C) Revolution Semiconductor, 2021
-from PySide6.QtGui import (QColor)
+from PySide6.QtGui import (QColor, QColorConstants)
 
 
 class layer:

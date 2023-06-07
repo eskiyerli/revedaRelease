@@ -392,10 +392,11 @@ class editorWindow(QMainWindow):
         else:
             scd.fullSelection.setChecked(True)
         if scd.exec() == QDialog.Accepted:
-            if scd.partialSelection.isChecked():
-                self.centralW.scene.partialSelection = True
-            else:
-                self.centralW.scene.partialSelection = False
+            self.centralW.scene.partialSelection = scd.partialSelection.isChecked()
+            # if scd.partialSelection.isChecked():
+            #     self.centralW.scene.partialSelection = True
+            # else:
+            #     self.centralW.scene.partialSelection = False
 
     def printClick(self):
         dlg = QPrintDialog(self)
@@ -475,6 +476,14 @@ class schematicEditor(editorWindow):
         self.centralW = schematicContainer(self)
         self.setCentralWidget(self.centralW)
 
+    def _createActions(self):
+
+        super()._createActions()
+        self.netNameAction = QAction("Net Name", self)
+        self.netNameAction.setShortcut("l")
+        self.hilightNetAction = QAction("Highlight Net", self)
+        self.hilightNetAction.setCheckable(True)
+
     def _createTriggers(self):
         super()._createTriggers()
         self.checkCellAction.triggered.connect(self.checkSaveCell)
@@ -494,6 +503,8 @@ class schematicEditor(editorWindow):
         self.ignoreAction.triggered.connect(self.ignoreClick)
         self.goDownAction.triggered.connect(self.goDownClick)
         self.goUpAction.triggered.connect(self.goUpClick)
+        self.hilightNetAction.triggered.connect(self.hilightNetClick)
+        self.netNameAction.triggered.connect(self.netNameClick)
 
     def _createMenuBar(self):
         super()._createMenuBar()
@@ -531,6 +542,12 @@ class schematicEditor(editorWindow):
         # check menu
         self.menuCheck.addAction(self.viewErrorsAction)
         self.menuCheck.addAction(self.deleteErrorsAction)
+
+        # tools menu
+        self.menuTools.addAction(self.hilightNetAction)
+        self.menuTools.addAction(self.netNameAction)
+
+        # help menu
 
         self.menuSimulation.addAction(self.netlistAction)
         if self._app.revedasim_path:
@@ -760,6 +777,12 @@ class schematicEditor(editorWindow):
     def ignoreClick(self, s):
         self.centralW.scene.ignoreSymbol()
 
+    def netNameClick(self, s):
+        self.centralW.scene.netNameEdit()
+
+    def hilightNetClick(self, s):
+        self.centralW.scene.hilightNets()
+
 
 class symbolEditor(editorWindow):
     def __init__(self, viewItem: scb.viewItem, libraryDict: dict, libraryView):
@@ -873,12 +896,12 @@ class symbolEditor(editorWindow):
         self.centralW.scene.rotateItem = args[7]
 
     def createRectClick(self, s):
-        modeList = [False for i in range(8)]
+        modeList = [False for _ in range(8)]
         modeList[3] = True
         self.setDrawMode(*modeList)
 
     def createLineClick(self, s):
-        modeList = [False for i in range(8)]
+        modeList = [False for _ in range(8)]
         modeList[4] = True
         self.setDrawMode(*modeList)
 
@@ -945,7 +968,7 @@ class symbolEditor(editorWindow):
         createLabelDlg = pdlg.createSymbolLabelDialog(self)
         self.messageLine.setText('Place a label')
         if createLabelDlg.exec() == QDialog.Accepted:
-            modeList = [False for i in range(8)]
+            modeList = [False for _ in range(8)]
             modeList[5] = True
             self.setDrawMode(*modeList)
             # directly setting scene class attributes here to pass the information.
@@ -957,10 +980,9 @@ class symbolEditor(editorWindow):
             self.centralW.scene.labelOrient = (
                 createLabelDlg.labelOrientCombo.currentText())
             self.centralW.scene.labelUse = createLabelDlg.labelUseCombo.currentText()
-            if createLabelDlg.labelVisiCombo.currentText() == "Yes":
-                self.centralW.scene.labelOpaque = True
-            else:
-                self.centralW.scene.labelOpaque = False
+            self.centralW.scene.labelOpaque = (
+                createLabelDlg.labelVisiCombo.currentText() == "Yes"
+            )
             self.centralW.scene.labelType = "Normal"  # default button
             if createLabelDlg.normalType.isChecked():
                 self.centralW.scene.labelType = "Normal"
@@ -1055,6 +1077,7 @@ class editor_scene(QGraphicsScene):
         self.pinPen = pens.sPen.returnPen("pinPen")
         self.labelPen = pens.sPen.returnPen("labelPen")
         self.textPen = pens.sPen.returnPen("textPen")
+        self.hilightPen = pens.sPen.returnPen("hilightPen")
         self.otherPen = pens.sPen.returnPen("otherPen")
 
     def defineSceneLayers(self):
@@ -1102,8 +1125,11 @@ class editor_scene(QGraphicsScene):
         '''
         if self.readOnly:  # if read only do not propagate any mouse events
             return True
-        elif (
-                event.type() == QEvent.GraphicsSceneMouseMove or event.type() == QEvent.GraphicsSceneMousePress or event.type() == QEvent.GraphicsSceneMouseRelease):
+        elif event.type() in [
+            QEvent.GraphicsSceneMouseMove,
+            QEvent.GraphicsSceneMousePress,
+            QEvent.GraphicsSceneMouseRelease,
+        ]:
             event.setScenePos(self.snapToGrid(event.scenePos(), self.gridTuple).toPointF())
             return False
         else:
@@ -1271,7 +1297,7 @@ class symbol_scene(editor_scene):
                 self.selectionRectItem.setRect(
                     QRectF(self.mousePressLoc, self.mouseMoveLoc))
         self.statusLine.showMessage(
-            "Cursor Position: " + str((self.mouseMoveLoc - self.origin).toTuple()))
+            f"Cursor Position: {(self.mouseMoveLoc - self.origin).toTuple()}")
 
     def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(mouse_event)
@@ -1628,6 +1654,7 @@ class schematic_scene(editor_scene):
         self.newPin = None
         self.newText = None
         self.snapPointRect = None
+        self.highlightNets = False
 
     def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
 
@@ -1705,7 +1732,8 @@ class schematic_scene(editor_scene):
                         QRectF(self.mousePressLoc, self.mouseMoveLoc))
 
             self.editorWindow.statusLine.showMessage(
-                "Cursor Position: " + str(self.mouseMoveLoc.toTuple()))
+                f"Cursor Position: {str(self.mouseMoveLoc.toTuple())}"
+            )
         except Exception as e:
             self.logger.error(e)
 
@@ -1960,10 +1988,9 @@ class schematic_scene(editor_scene):
         """
         Determine if a pin is connected to a net.
         """
-        if pinItem.sceneBoundingRect().intersects(netItem.sceneBoundingRect()):
-            return True
-        else:
-            return False
+        return bool(
+            pinItem.sceneBoundingRect().intersects(netItem.sceneBoundingRect())
+        )
 
     def checkNetConnect(self, netItem, otherNetItem):
         """
@@ -2291,7 +2318,7 @@ class schematic_scene(editor_scene):
 
                             location = QPoint(float(dlg.xLocationEdit.text().strip()),
                                     float(dlg.yLocationEdit.text().strip())) - self.origin
-                            item.setPos(self.snaptoGrid(location, self.gridTuple))
+                            item.setPos(self.snapToGrid(location, self.gridTuple))
                             tempDoc = QTextDocument()
                             for i in range(dlg.instanceLabelsLayout.rowCount()):
                                 # first create label name document with HTML annotations
@@ -2316,7 +2343,7 @@ class schematic_scene(editor_scene):
                         dlg = pdlg.netProperties(self.editorWindow, item)
                         if dlg.exec() == QDialog.Accepted:
                             item.name = dlg.netNameEdit.text().strip()
-                            if item.name is not "":
+                            if item.name != "":
                                 item.nameSet = True
                             item.update()
                     elif isinstance(item, shp.text):
@@ -2354,6 +2381,35 @@ class schematic_scene(editor_scene):
         except Exception as e:
             self.logger.error(e)
 
+    def netNameEdit(self):
+        """
+        Edit the name of the selected net.
+        """
+        try:
+            if self.selectedItems is not None:
+                for item in self.selectedItems:
+                    if isinstance(item, net.schematicNet):
+                        dlg = pdlg.netProperties(self.editorWindow, item)
+                        if dlg.exec() == QDialog.Accepted:
+                            item.name = dlg.netNameEdit.text().strip()
+                            if item.name != "":
+                                item.nameSet = True
+                            item.update()
+        except Exception as e:
+            self.logger.error(e)
+
+    def hilightNets(self):
+        """
+        Show the connections the selected items.
+        """
+        try:
+            if self.editorWindow.hilightNetAction.isChecked():
+                self.highlightNets = True
+            else:
+                self.highlightNets = False
+
+        except Exception as e:
+            self.logger.error(e)
 
     def createSymbol(self):
         """
@@ -3370,7 +3426,7 @@ class xyceNetlist:
 
     def createItemLine(self, cirFile, item, netlistableViews: list, viewDict: dict):
         for viewName in netlistableViews:
-            if viewName in viewDict.keys():
+            if viewName in viewDict:
                 viewTuple = ddef.viewTuple(item.libraryName, item.cellName, viewName)
                 # print(viewTuple)
                 if viewDict[viewName].viewType == "schematic":

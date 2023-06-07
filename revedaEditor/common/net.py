@@ -22,7 +22,7 @@
 
 # net class definition.
 from PySide6.QtCore import (QPoint, Qt, QLineF, QRectF, QPointF, QRect)
-from PySide6.QtGui import (QPen, QStaticText, QPainterPath, QColor, QFont,)
+from PySide6.QtGui import (QPen, QStaticText, QPainterPath, QColor, QFont,QColorConstants)
 from PySide6.QtWidgets import (QGraphicsLineItem, QGraphicsItem, QGraphicsPathItem,
                                QGraphicsEllipseItem, QGraphicsRectItem,
                                QGraphicsSceneMouseEvent, QGraphicsSceneHoverEvent,)
@@ -63,6 +63,7 @@ class schematicNet(QGraphicsLineItem):
         self._newWires = list()
         self._connectedNetsSet = set()
         self._flightLinesSet = set()
+        self._highlighted = False
 
     def __repr__(self):
         return f"schematicNet(start={self.mapToScene(self._start)}, " \
@@ -83,6 +84,8 @@ class schematicNet(QGraphicsLineItem):
         painter.setPen(self._pen)
         if self.isSelected():
             painter.setPen(QPen(Qt.blue, 2, Qt.SolidLine))
+        elif self._highlighted:
+            painter.setPen(self.scene().hilightPen)
         if self.name is not None:
             if self._nameConflict:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
@@ -104,23 +107,44 @@ class schematicNet(QGraphicsLineItem):
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         super().hoverEnterEvent(event)
-        self._connectedNetsSet = {netItem for netItem in self.scene().items() if ((
-                isinstance(netItem, schematicNet) and (self.nameSet or self.nameAdded) and
-                                                       netItem.name == self.name))}
-        for netItem in self._connectedNetsSet:
-            flightLine = netFlightLine(self.mapToScene(self.line().center()),
-                                       netItem.mapToScene(netItem.line().center()),
-                                       QPen(Qt.darkMagenta, 5, Qt.SolidLine))
-            self._flightLinesSet.add(flightLine)
-            self.scene().addItem(flightLine)
+        if self.scene().highlightNets:
+            self._connectedNetsSet = {netItem for netItem in self.scene().items() if ((
+                    isinstance(netItem, schematicNet) and (self.nameSet or self.nameAdded) and
+                                                           netItem.name == self.name))}
+            [netItem.highlight() for netItem in self._connectedNetsSet]
+            for netItem in self._connectedNetsSet:
+                flightLine = netFlightLine(self.mapToScene(self.line().center()),
+                                           netItem.mapToScene(netItem.line().center()),
+                                           self.scene().hilightPen)
+                self._flightLinesSet.add(flightLine)
+                self.scene().addItem(flightLine)
 
     def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         super().hoverLeaveEvent(event)
-        for flightLine in self._flightLinesSet:
-            self.scene().removeItem(flightLine)
-            del flightLine
-        self._flightLinesSet = set()
-        
+        if self._highlighted:
+            for flightLine in self._flightLinesSet:
+                self.scene().removeItem(flightLine)
+            self._flightLinesSet = set()
+        [netItem.unhighlight() for netItem in self._connectedNetsSet]
+
+    def highlight(self):
+        self._highlighted = True
+        self.update()
+
+    def unhighlight(self):
+        self._highlighted = False
+        self.update()
+
+    @property
+    def highlighted(self):
+        return self._highlighted
+
+    @highlighted.setter
+    def highlighted(self, value: bool):
+        self._highlighted = value
+
+
+
     @property
     def start(self):
         return self._start
@@ -167,6 +191,15 @@ class schematicNet(QGraphicsLineItem):
     @property
     def nameSet(self) -> bool:
         return self._nameSet
+
+    @property
+    def nameAdded(self) -> bool:
+        return self._nameAdded
+
+    @nameAdded.setter
+    def nameAdded(self, value: bool):
+        assert isinstance(value,bool)
+        self._nameAdded = value
 
     @nameSet.setter
     def nameSet(self, value: bool):
@@ -409,17 +442,22 @@ class schematicNet(QGraphicsLineItem):
 
 class netFlightLine(QGraphicsPathItem):
     def __init__(self, start: QPoint, end: QPoint, pen: QPen):
+        self._start = start
+        self._end = end
         self._pen = pen
-        self._path = QPainterPath()
-        self._path.moveTo(start)
-        self._path.quadTo(start, end)
-        super().__init__(self._path)
-        self.setPen(pen)
+        super().__init__()
 
     def paint(self, painter, option, widget) -> None:
+
         painter.setPen(self._pen)
-        painter.setBrush(self._pen.color())
-        painter.drawPath(self._path)
+        line = QLineF(self._start, self._end)
+        perpendicularLine =  QLineF(line.center(), line.center()+QPointF(-line.dy(), line.dx()))
+        perpendicularLine.setLength(100)
+
+        path = QPainterPath()
+        path.moveTo(self._start)
+        path.quadTo(perpendicularLine.p2(), self._end)
+        painter.drawPath(path)
 
 
 

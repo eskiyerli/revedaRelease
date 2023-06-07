@@ -378,3 +378,20 @@ Supported signatures:
 2023-06-03 23:38:12,113 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
 2023-06-03 23:58:14,340 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
 2023-06-04 00:15:23,021 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
+2023-06-05 14:38:56,477 - reveda - INFO - Removed Library Path.
+2023-06-05 14:39:18,554 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-06-05 23:59:54,334 - reveda - INFO - Removed Library Path.
+2023-06-05 23:59:55,550 - reveda - INFO - Removed Library Path.
+2023-06-06 00:00:08,277 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
+2023-06-06 16:07:44,212 - reveda - INFO - Netlisting finished.
+2023-06-06 20:45:02,397 - reveda - ERROR - 'schematic_scene' object has no attribute 'snaptoGrid'
+2023-06-06 20:45:57,463 - reveda - ERROR - 'schematic_scene' object has no attribute 'snaptoGrid'
+2023-06-06 20:50:14,463 - reveda - INFO - Netlisting finished.
+2023-06-06 21:25:03,035 - reveda - ERROR - 'builtin_function_or_method' object is not iterable
+2023-06-07 16:05:34,169 - reveda - INFO - Removed Library Path.
+2023-06-07 16:05:35,088 - reveda - INFO - Removed Library Path.
+2023-06-07 16:05:59,303 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-06-07 16:30:55,769 - reveda - ERROR - 'schematicNet' object has no attribute 'hilight'
+2023-06-07 17:07:04,516 - reveda - ERROR - module 'revedaEditor.gui.propertyDialogues' has no attribute 'netNameEdit'
+2023-06-07 22:38:32,894 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
+2023-06-07 22:38:39,257 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json

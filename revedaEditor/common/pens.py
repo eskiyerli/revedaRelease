@@ -20,7 +20,7 @@
 #   Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
 from PySide6.QtCore import (Qt)
-from PySide6.QtGui import (QPen, QColor)
+from PySide6.QtGui import (QPen, QColor, QColorConstants)
 
 from revedaEditor.common.layers import (wireLayer, symbolLayer,
                                         selectedWireLayer, pinLayer,
@@ -63,6 +63,8 @@ class sPen(QPen):
                 rpen = cls('textPen', textLayer.color, 1)
             case 'draftPen':
                 rpen = cls('draftPen', draftLayer.color, 2, Qt.DashLine)
+            case 'hilightPen':
+                rpen = cls('hilightPen', QColorConstants.DarkMagenta, 5, Qt.SolidLine)
             case other:
                 rpen = cls('otherPen', QColor('darkGray'), 2, Qt.DotLine)
         return rpen
