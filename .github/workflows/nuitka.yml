@@ -1,0 +1,65 @@
+- name: Build EXE from Python Script
+  # You may pin to the exact commit or the version.
+  # uses: Nuitka/Nuitka-Action@c6dcfbdc669bfb7006feeb1b6a9d29c963cb63ea
+  uses: Nuitka/Nuitka-Action@v0.5
+  with:
+    # Version of nuitka to use
+    nuitka-version: # optional, default is main
+    # name or path to python script that is to be built
+    script-name: 
+    # Create an extension module executable instead of a program. Defaults to off.
+    module: # optional
+    # Enable standalone mode for output. This allows you to transfer the created binary to other machines without it using an existing Python installation. This also means it will become big. It implies these option: "-- follow-imports" and "--python-flag=no_site". Defaults to true.
+    standalone: # optional, default is true
+    # On top of standalone mode, enable onefile mode. This means not a folder, but a compressed executable is created and used. Defaults to true.
+    onefile: # optional, default is true
+    # Allow Nuitka to download external code if necessary, e.g. dependency walker, ccache, and even gcc on Windows. To disable, redirect input from nul device, e.g. "</dev/null" or "<NUL:". Default is to prompt.
+    assume-yes-for-downloads: # optional, default is true
+    # Displays the detailed C compilation info from Scons during build process (useful for debugging purposes)
+    show-scons: # optional, default is true
+    # a comma separated list of plugins, such as pyside2, pyside6, tk-inter, etc.
+    enable-plugins: # optional
+    # Include a whole package. Give as a Python namespace, e.g. "some_package.sub_package" and Nuitka will then find it and include it and all the modules found below that disk location in the binary or extension module it creates, and make it available for import by the code. To avoid unwanted sub packages, e.g. tests you can e.g. do this "--nofollow-import-to=*.tests". Default empty.
+    include-package: # optional
+    # Include package data. Detects data files of packages automatically and copies them over. Can be a list. Default empty.
+    include-package-data: # optional
+    # Include a single module. Give as a Python namespace, e.g. "some_package.some_module" and Nuitka will then find it and include it in the binary or extension module it creates, and make it available for import by the code. Default empty.
+    include-module: # optional
+    # Include the content of that directory, no matter if it is used by the given main program in a visible form. Overrides all other inclusion options. Can be given multiple times. Default empty.
+    include-plugin-directory: # optional
+    # Include into files matching the PATTERN. Overrides all other follow options. Can be given multiple times. Default empty.
+    include-plugin-files: # optional
+    # For already compiled extension modules, where there is both a source file and an extension module, normally the extension module is used, but it should be better to compile the module from available source code for best performance. If not desired, there is --no- prefer-source-code to disable warnings about it. Default off.
+    prefer-source-code: # optional
+    # Directory for output builds
+    output-dir: # optional, default is build
+    # Specify how the executable should be named. For extension modules there is no choice, also not for standalone mode and using it will be an error. This may include path information that needs to exist though. Defaults to '<program_name>' on this platform. .exe)
+    output-file: # optional
+    # github personal access token of an account authorized to access the Nuitka/Nuitka-commercial repo
+    access-token: # optional
+    # When compiling for Windows or macOS, enable the console window and create a console application. This disables hints from certain modules, e.g. "PySide" that suggest to disable it. Defaults to true.
+    enable-console: # optional, default is true
+    # When compiling for Windows or macOS, disable the console window and create a GUI application. Defaults to false.
+    disable-console: # optional
+    # Add executable icon. Can be given multiple times for different resolutions or files with multiple icons inside. In the later case, you may also suffix with \#<n> where n is an integer index starting from 1, specifying a specific icon to be included, and all others to be ignored.
+    windows-icon-from-ico: # optional
+    # Request Windows User Control, to grant admin rights on execution. (Windows only). Defaults to off.
+    windows-uac-admin: # optional
+    # Request Windows User Control, to enforce running from a few folders only, remote desktop access. (Windows only). Defaults to off.
+    windows-uac-uiaccess: # optional
+    # Name of the company to use in Windows Version information.  One of file or product version is required, when a version resource needs to be added, e.g. to specify product name, or company name. Defaults to GITHUB_REPOSITORY_OWNER.
+    windows-company-name: # optional, default is ${{ github.repository_owner }}
+    # Name of the product to use in Windows Version information. Defaults to base filename of the binary.
+    windows-product-name: # optional
+    # File version to use in Windows Version information. Must be a sequence of up to 4 numbers, e.g. 1.0.0.0, only this format is allowed. One of file or product version is required, when a version resource needs to be added, e.g. to specify product name, or company name. Defaults to unused.
+    windows-file-version: # optional
+    # Product version to use in Windows Version information. Must be a sequence of up to 4 numbers, e.g. 1.0.0.0, only this format is allowed. One of file or product version is required, when a version resource needs to be added, e.g. to specify product name, or company name. Defaults to unused.
+    windows-product-version: # optional
+    # Description of the file use in Windows Version information.  One of file or product version is required, when a version resource needs to be added, e.g. to specify product name, or company name. Defaults to nonsense.
+    windows-file-description: # optional
+    # Use this as a temporary folder. Defaults to '%TEMP%\onefile_%PID%_%TIME%', i.e. system temporary directory.
+    windows-onefile-tempdir-spec: # optional
+    # allows/enforces building with MinGW64
+    mingw64: # optional
+    # When compiling for macOS, create a bundle rather than a plain binary application. Currently experimental and incomplete. Currently this is the only way to unlock disabling of console. Defaults to false.
+    macos-create-app-bundle: # optional
