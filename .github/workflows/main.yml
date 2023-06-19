@@ -41,6 +41,7 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         with:
           script-name: reveda.py
+          access-token: ${{ secrets.NUITKA_COMMERCIAL_ACCESS_TOKEN }}
           include-package: socket,queue
           onefile: true
           enable-plugins: pyside6
