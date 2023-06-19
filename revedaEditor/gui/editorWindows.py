@@ -33,12 +33,14 @@ import os
 # import numpy as np
 from PySide6.QtCore import (QEvent, QMargins, QPoint, QPointF, QProcess, QRect, QRectF,
                             QRunnable, Qt, Slot)
-from PySide6.QtGui import (QAction, QCloseEvent, QColor, QCursor, QFont, QGuiApplication,
+from PySide6.QtGui import (QAction, QCloseEvent, QColor, QCursor,
+                           QGuiApplication,
                            QIcon, QImage, QKeySequence, QPainter, QPen, QStandardItem,
                            QStandardItemModel, QTextDocument, QUndoStack)
 from PySide6.QtPrintSupport import (QPrintDialog, QPrinter, QPrintPreviewDialog)
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox, QDialog,
-                               QFileDialog, QFormLayout, QGraphicsRectItem, QGraphicsScene,
+                                QGraphicsItem, QFileDialog, QFormLayout,
+                               QGraphicsRectItem, QGraphicsScene,
                                QGraphicsSceneMouseEvent, QGraphicsView, QGridLayout,
                                QGroupBox, QLabel, QMainWindow, QMenu, QMessageBox,
                                QTableView, QToolBar, QTreeView, QVBoxLayout, QWidget,
@@ -119,8 +121,13 @@ class editorWindow(QMainWindow):
         checkCellIcon = QIcon(":/icons/document-task.png")
         self.checkCellAction = QAction(checkCellIcon, "Check-Save", self)
 
+        saveCellIocn = QIcon(":/icons/document--plus.png")
+        self.saveCellAction = QAction(saveCellIocn, "Save", self)
+
         self.readOnlyCellIcon = QIcon(":/icons/lock.png")
-        self.readOnlyCellAction = QAction(self.readOnlyCellIcon, "Make Read Only", self)
+        self.readOnlyCellAction = QAction("Read Only", self)
+        self.readOnlyCellAction.setCheckable(True)
+
 
         printIcon = QIcon(":/icons/printer--arrow.png")
         self.printAction = QAction(printIcon, "Print...", self)
@@ -311,7 +318,7 @@ class editorWindow(QMainWindow):
     def _addActions(self):
         # file menu
         self.menuFile.addAction(self.checkCellAction)
-        self.menuFile.addAction(self.readOnlyCellAction)
+        self.menuFile.addAction(self.saveCellAction)
         self.menuFile.addAction(self.printAction)
         self.menuFile.addAction(self.printPreviewAction)
         self.menuFile.addAction(self.exportImageAction)
@@ -337,10 +344,11 @@ class editorWindow(QMainWindow):
         self.menuEdit.addAction(self.moveOriginAction)
         self.menuEdit.addAction(self.stretchAction)
         self.menuEdit.addAction(self.rotateAction)
-
+        self.menuTools.addAction(self.readOnlyCellAction)
         self.menuCheck.addAction(self.viewCheckAction)
 
     def _createTriggers(self):
+        self.readOnlyCellAction.triggered.connect(self.readOnlyCellClick)
         self.printAction.triggered.connect(self.printClick)
         self.printPreviewAction.triggered.connect(self.printPreviewClick)
         self.exportImageAction.triggered.connect(self.imageExportClick)
@@ -397,6 +405,10 @@ class editorWindow(QMainWindow):
             #     self.centralW.scene.partialSelection = True
             # else:
             #     self.centralW.scene.partialSelection = False
+
+    def readOnlyCellClick(self):
+        self.centralW.scene.readOnly = self.readOnlyCellAction.isChecked()
+
 
     def printClick(self):
         dlg = QPrintDialog(self)
@@ -486,7 +498,8 @@ class schematicEditor(editorWindow):
 
     def _createTriggers(self):
         super()._createTriggers()
-        self.checkCellAction.triggered.connect(self.checkSaveCell)
+        self.checkCellAction.triggered.connect(self.checkSaveCellClick)
+        self.saveCellAction.triggered.connect(self.saveCellClick)
         self.createWireAction.triggered.connect(self.createWireClick)
         self.createInstAction.triggered.connect(self.createInstClick)
         self.createPinAction.triggered.connect(self.createPinClick)
@@ -664,7 +677,11 @@ class schematicEditor(editorWindow):
         simguiw = smw.simMainWindow(self)
         simguiw.show()
 
-    def checkSaveCell(self):
+    def checkSaveCellClick(self):
+        self.centralW.scene.groupAllNets()
+        self.centralW.scene.saveSchematicCell(self.file)
+
+    def saveCellClick(self):
         self.centralW.scene.saveSchematicCell(self.file)
 
     def loadSchematic(self):
@@ -3394,7 +3411,6 @@ class xyceNetlist:
             sceneSymbolSet = schematicScene.findSceneSymbolSet()
             schematicScene.generatePinNetMap(sceneSymbolSet)
             for item in sceneSymbolSet:
-                print(f'{item.instanceName}: {item.netlistIgnore}')
                 if item.attr.get("XyceNetlistLine") and item.attr.get(
                         "XyceNetlistPass") != '1' and (not item.netlistIgnore):
                     self.netlistedViewsSet.add(
