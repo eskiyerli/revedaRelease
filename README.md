@@ -4,7 +4,7 @@
 
 Revolution EDA is a new generation of schematic and symbol editor targeting custom integrated circuit design.
 
-1. Revolution EDA include integrated circuit design oriented schematic, layout and symbol 
+1. Revolution EDA includes integrated circuit design oriented schematic, layout and symbol 
    editors.
 2. Revolution EDA can create schematic symbols with both symbol attributes that are common to 
    all instances as well instance parameters. Instance parameters can be also python 
