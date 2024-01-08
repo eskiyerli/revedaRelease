@@ -1,4 +1,3 @@
-#
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -20,19 +19,181 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
-from collections import namedtuple
+from typing import (NamedTuple, Union)
+from dataclasses import dataclass
 
-viewTuple = namedtuple('viewTuple', ['libraryName', 'cellName', 'viewName'])
-cellTuple = namedtuple('cellTuple', ['libraryName', 'cellName'])
-viewItemTuple = namedtuple('viewItemTuple', ['libraryItem', 'cellItem',
-                                             'viewItem'])
-pinNetTuple = namedtuple('pinNetTuple',  ['pin', 'net', 'start'])
-netTuple = namedtuple('netTuple', ['net', 'start'])
-# this namedtuple is used to collect information on dashed lines.
-# net is the dashed line
-# index is the index of the self (schematicNet) where dashed line ends,
-# 0: start,
-# 1: end
-# orient is True if self is horizontal, otherwise False
-netEndTuple = namedtuple('netEndTuple', ['net', 'index', 'orient'])
+from PySide6.QtCore import (Qt, QPoint, QPointF)
+from PySide6.QtGui import QColor
 
+
+@dataclass
+class edLayer:
+    name: str = ""  # edLayer name
+    purpose: str = "drawing"  # edLayer purpose
+    pcolor: QColor = Qt.black  # pen colour
+    pwidth: int = 1  # pen width
+    pstyle: Qt.PenStyle = Qt.SolidLine  # pen style
+    bcolor: QColor = Qt.transparent  # brush colour
+    bstyle: Qt.BrushStyle = Qt.SolidPattern  # brush texture
+    z: int = 1  # z-index
+    selectable: bool = True  # selectable
+    visible: bool = True  # visible
+    gdsLayer: int = 0  # gds edLayer
+    datatype: int = 0  # gds datatype
+
+
+@dataclass
+class layLayer:
+    name: str = ""  # edLayer name
+    purpose: str = "drawing"  # edLayer purpose
+    pcolor: QColor = Qt.black  # pen colour
+    pwidth: int = 1  # pen width
+    pstyle: Qt.PenStyle = Qt.SolidLine  # pen style
+    bcolor: QColor = Qt.transparent  # brush colour
+    btexture: str = ""  # brush texture
+    z: int = 1  # z-index
+    selectable: bool = True  # selectable
+    visible: bool = True  # visible
+    gdsLayer: int = 0  # gds edLayer
+    datatype: int = 0  # gds datatype
+
+
+@dataclass
+class editModes:
+    selectItem: bool
+    deleteItem: bool
+    moveItem: bool
+    copyItem: bool
+    rotateItem: bool
+    changeOrigin: bool
+    panView: bool
+
+    def setMode(self, attribute):
+        for key in self.__dict__.keys():
+            self.__dict__[key] = False
+        self.__dict__[attribute] = True
+
+
+@dataclass
+class symbolModes(editModes):
+    drawPin: bool
+    drawArc: bool
+    drawRect: bool
+    drawLine: bool
+    addLabel: bool
+    drawCircle: bool
+    drawPolygon: bool
+    stretchItem: bool
+
+
+@dataclass
+class schematicModes(editModes):
+    drawPin: bool
+    drawWire: bool
+    drawText: bool
+    addInstance: bool
+
+
+@dataclass
+class layoutModes(editModes):
+    drawPath: bool
+    drawPin: bool
+    drawArc: bool
+    drawPolygon: bool
+    addLabel: bool
+    addVia: bool
+    drawRect: bool
+    drawLine: bool
+    drawCircle: bool
+    drawRuler: bool
+    stretchItem: bool
+    addInstance: bool
+
+
+# library editor related named tuples
+class viewTuple(NamedTuple):
+    libraryName: str
+    cellName: str
+    viewName: str
+
+
+class cellTuple(NamedTuple):
+    libraryName: str
+    cellName: str
+
+
+class viewItemTuple(NamedTuple):
+    libraryItem: object
+    cellItem: object
+    viewItem: object
+
+
+# layout related tuples
+class layoutPathTuple(NamedTuple):
+    layer: layLayer
+    name: str
+    mode: str
+    width: float
+    startExtend: bool
+    endExtend: bool
+
+
+class layoutPinTuple(NamedTuple):
+    pinName: str
+    pinDir: str
+    pinType: str
+    pinLayer: layLayer
+
+
+class layoutLabelTuple(NamedTuple):
+    labelText: str
+    fontFamily: str
+    fontStyle: str
+    fontHeight: float
+    labelAlign: str
+    labelOrient: str
+    labelLayer: str
+
+
+class rulerTuple(NamedTuple):
+    point: Union[QPoint, QPointF]
+    line: tuple
+    text: str
+
+
+# # pdk related classes and namedtuples
+# # this tuple defines the minimum dimensions of a via
+# # This can be extended to define the maximum dimensions
+
+class viaDefTuple(NamedTuple):
+    name: str
+    layer: layLayer
+    type: str
+    minWidth: float
+    maxWidth: float
+    minHeight: float
+    maxHeight: float
+    minSpacing: float
+    maxSpacing: float
+
+
+class singleViaTuple(NamedTuple):
+    viaDefTuple: viaDefTuple
+    width: float
+    height: float
+
+
+class arrayViaTuple(NamedTuple):
+    singleViaTuple: singleViaTuple
+    spacing: float
+    xnum: int
+    ynum: int
+
+
+# rectangle coordinates tuple
+
+class rectCoords(NamedTuple):
+    left: float
+    top: float
+    w: float
+    h: float

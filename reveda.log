@@ -1,398 +1,1128 @@
-2023-05-23 20:48:45,153 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-23 20:55:10,297 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-23 20:55:19,004 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-23 20:57:10,374 - reveda - WARNING - Created veriloga at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\tb_anotherFilter\veriloga.json
-2023-05-23 20:57:10,386 - reveda - WARNING - Created symbol at C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\tb_anotherFilter\symbol.json
-2023-05-24 19:44:58,499 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-24 19:51:03,604 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-24 20:10:00,551 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-24 20:16:06,130 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-24 20:16:35,484 - reveda - ERROR - '?': not a valid number.
-2023-05-24 20:23:50,489 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-24 20:28:28,244 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-24 20:28:44,410 - reveda - ERROR - replace() argument 2 must be str, not None
-2023-05-24 20:28:44,410 - reveda - ERROR - Netlist line is not defined for I10
-2023-05-24 20:28:44,449 - reveda - INFO - Netlisting finished.
-2023-05-24 21:35:53,812 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 21:36:03,810 - reveda - INFO - Removed Library Path.
-2023-05-24 21:36:06,263 - reveda - INFO - Removed Library Path.
-2023-05-24 21:36:28,434 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
-2023-05-24 21:37:00,740 - reveda - ERROR - replace() argument 2 must be str, not None
-2023-05-24 21:37:00,741 - reveda - ERROR - Netlist line is not defined for I10
-2023-05-24 21:37:00,761 - reveda - INFO - Netlisting finished.
-2023-05-24 21:44:09,268 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 21:44:38,649 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 21:48:48,168 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 21:49:48,468 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 21:51:52,570 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 21:52:32,096 - reveda - INFO - Netlisting finished.
-2023-05-24 22:45:28,575 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 23:26:21,540 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 23:27:34,173 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 23:28:41,413 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 23:31:23,686 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 23:50:01,144 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 23:50:49,458 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 23:55:05,798 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-24 23:56:00,584 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-25 00:02:30,879 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-25 00:05:40,909 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-25 10:01:24,525 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 10:01:31,349 - reveda - INFO - Removed Library Path.
-2023-05-25 10:01:32,345 - reveda - INFO - Removed Library Path.
-2023-05-25 10:01:56,177 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-25 10:03:39,877 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 10:06:22,795 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 10:08:33,645 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 10:10:15,538 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 11:42:31,917 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 11:42:59,244 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 11:43:25,198 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 11:43:53,372 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:05:54,231 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:06:56,532 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:08:12,972 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:10:14,274 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:22:13,144 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:24:31,106 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:26:20,644 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:29:35,688 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:30:57,878 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:31:58,156 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:32:36,576 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:34:52,736 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:35:04,030 - reveda - ERROR - 'PySide6.QtCore.QRectF' object has no attribute 'rect'
-2023-05-25 13:36:10,163 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 13:36:28,377 - reveda - ERROR - 'PySide6.QtCore.QRectF' object has no attribute 'rect'
-2023-05-25 13:37:17,434 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 14:44:38,518 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 14:46:52,179 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 14:49:07,399 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 14:51:42,791 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 14:55:05,679 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 14:57:58,112 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 15:00:16,900 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 15:03:17,941 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 16:47:48,742 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 16:51:42,370 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 17:03:19,976 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 17:04:09,006 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 17:07:56,254 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 17:10:29,038 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 17:26:33,937 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 17:27:07,884 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 17:30:58,311 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-25 17:31:16,153 - reveda - INFO - Printing started
-2023-05-25 17:31:59,814 - reveda - INFO - Printing started
-2023-05-25 23:14:53,810 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-25 23:15:04,076 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
-2023-05-26 21:14:49,567 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-26 21:15:01,853 - reveda - INFO - Removed Library Path.
-2023-05-26 21:15:28,183 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
-2023-05-26 21:17:40,541 - reveda - INFO - Netlisting finished.
-2023-05-26 21:18:59,741 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-26 21:19:24,257 - reveda - INFO - Netlisting finished.
-2023-05-28 00:45:01,052 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 00:46:10,179 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 00:47:03,983 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 00:48:07,958 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 00:49:53,031 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 00:51:45,374 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 00:53:45,521 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 09:50:02,594 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 09:51:03,907 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 09:56:19,409 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:01:47,979 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:03:00,830 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:07:10,378 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:27:37,072 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:28:25,663 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:29:32,210 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:32:00,560 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:37:36,028 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:56:39,006 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:57:13,563 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:57:22,432 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:58:31,258 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 13:59:25,510 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 14:00:11,143 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:34:55,242 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:36:56,117 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:39:10,682 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:39:52,640 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:42:06,270 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:43:07,075 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:46:58,257 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:49:28,161 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:51:38,322 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 18:57:13,593 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 19:31:42,493 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 19:32:49,492 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 19:34:00,147 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 19:35:27,427 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 19:36:11,140 - reveda - INFO - Netlisting finished.
-2023-05-28 19:36:33,055 - reveda - INFO - Netlisting finished.
-2023-05-28 19:37:14,970 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 22:52:17,824 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 22:55:40,728 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 22:56:38,902 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 22:57:17,627 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 22:58:20,609 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 22:59:05,034 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:00:02,923 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:06:01,586 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:07:00,801 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:09:22,843 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:10:01,947 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:10:39,847 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:11:24,882 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:12:56,013 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:13:43,060 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:14:38,857 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:15:23,719 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:52:06,402 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:53:35,021 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:53:50,870 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,882 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,890 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,898 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,907 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,915 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,922 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,929 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,937 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,946 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,953 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,959 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,967 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,975 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,984 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,991 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:50,999 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,008 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,016 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,024 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,031 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,039 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,048 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,055 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,063 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,071 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,077 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,085 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,093 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,101 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,109 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,117 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,125 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,133 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,141 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,149 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,157 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,165 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,173 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,181 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,189 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,197 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,203 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,211 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,219 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,227 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,235 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,243 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,251 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,259 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,267 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,275 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,283 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,291 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,390 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,398 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,405 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,422 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:53:51,574 - reveda - ERROR - 'NoneType' object has no attribute 'setRect'
-2023-05-28 23:54:20,738 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:55:12,815 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-28 23:56:35,686 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-29 22:25:53,156 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-29 22:30:37,727 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-29 22:31:54,958 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-29 22:32:46,681 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-29 22:33:53,043 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-29 22:36:46,081 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-29 22:36:52,629 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:52,630 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:52,631 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:52,632 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:52,633 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:52,634 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:52,635 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:57,116 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:57,116 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:57,116 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:57,117 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:57,117 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:57,117 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:57,118 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:36:59,723 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:37:00,605 - reveda - ERROR - Error in net.findDotPoints: 'schematicNet' object has no attribute '_touchingNets'
-2023-05-29 22:37:25,137 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-05-30 12:00:31,571 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:08:34,975 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:08:40,588 - reveda - INFO - Removed Library Path.
-2023-05-30 12:08:41,725 - reveda - INFO - Removed Library Path.
-2023-05-30 12:08:55,218 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:09:09,388 - reveda - INFO - Removed Library Path.
-2023-05-30 12:09:27,475 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:10:35,879 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:10:55,108 - reveda - WARNING - Created commonGateAmp cell at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\commonGateAmp
-2023-05-30 12:12:59,050 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:13:45,659 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:13:56,248 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:14:06,875 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:17:05,350 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:17:19,609 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:17:41,468 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:19:07,087 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:19:32,394 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:23:37,816 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:24:00,105 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:24:20,600 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:24:45,606 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:26:25,022 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:26:44,204 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:27:43,055 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:28:04,667 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:28:21,169 - reveda - INFO - Removed Library Path.
-2023-05-30 12:28:29,196 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:29:34,091 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:29:58,800 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:32:49,446 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-30 12:33:09,222 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-05-30 12:33:33,954 - reveda - WARNING - Created commonDrainAmplifier cell at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\commonDrainAmplifier
-2023-05-31 10:06:25,228 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-31 14:19:17,471 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-31 14:20:23,976 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-05-31 14:20:34,474 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-06-01 13:46:57,580 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 13:47:08,190 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-06-01 13:47:18,066 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-06-01 17:27:10,411 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 17:28:02,089 - reveda - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\complexFilter\symbol.json
-2023-06-01 17:29:17,183 - reveda - WARNING - Created symbol at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\complexFilter\symbol.json
-2023-06-01 17:31:06,655 - reveda - WARNING - Created schematic2 at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\exampleLibraries\designs\complexFilter\schematic2.json
-2023-06-01 19:46:37,733 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 19:46:51,566 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-06-01 19:46:59,113 - reveda - INFO - Removed Library Path.
-2023-06-01 19:47:08,389 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-06-01 19:48:21,036 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 19:50:18,527 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 19:51:25,898 - reveda - INFO - Netlisting finished.
-2023-06-01 19:52:55,360 - reveda - INFO - Netlisting finished.
-2023-06-01 19:53:18,451 - reveda - INFO - Netlisting finished.
-2023-06-01 19:53:34,957 - reveda - INFO - Netlisting finished.
-2023-06-01 19:55:50,781 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 19:56:17,572 - reveda - INFO - Netlisting finished.
-2023-06-01 21:58:16,074 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 21:58:50,952 - reveda - INFO - Netlisting finished.
-2023-06-01 22:00:08,226 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 22:00:48,652 - reveda - INFO - Netlisting finished.
-2023-06-01 22:20:49,164 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 22:22:29,396 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 22:23:15,681 - reveda - INFO - Netlisting finished.
-2023-06-01 22:25:21,988 - reveda - INFO - Configuration file: C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-01 22:25:37,377 - reveda - INFO - Netlisting finished.
-2023-06-02 09:45:59,240 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 09:46:05,725 - reveda - INFO - Removed Library Path.
-2023-06-02 09:46:06,679 - reveda - INFO - Removed Library Path.
-2023-06-02 09:54:04,563 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-06-02 09:54:55,015 - reveda - INFO - Netlisting finished.
-2023-06-02 09:55:45,980 - reveda - WARNING - No symbol selected
-2023-06-02 09:56:18,261 - reveda - INFO - Netlisting finished.
-2023-06-02 11:33:42,866 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 11:35:58,561 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 11:41:02,359 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 13:01:15,365 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 13:29:21,265 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 13:30:27,094 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 13:31:13,179 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 13:37:13,996 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 17:02:22,311 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 17:03:29,802 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 17:05:26,702 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 17:06:36,927 - reveda - INFO - Netlisting finished.
-2023-06-02 17:07:48,215 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
-2023-06-02 23:13:06,712 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-02 23:18:00,209 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
-2023-06-02 23:18:09,678 - reveda - INFO - Removed Library Path.
-2023-06-02 23:18:11,521 - reveda - INFO - Removed Library Path.
-2023-06-02 23:18:31,440 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
-2023-06-02 23:20:04,471 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-02 23:22:17,450 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 22:01:47,175 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 22:28:28,786 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 22:30:01,745 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 22:30:38,331 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 22:30:58,591 - reveda - ERROR - 'schematicPin' object has no attribute 'shp'
-2023-06-03 22:30:58,860 - reveda - ERROR - 'schematicPin' object has no attribute 'shp'
-2023-06-03 22:32:59,993 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 22:33:10,799 - reveda - ERROR - 'schematicPin' object has no attribute 'shp'
-2023-06-03 23:05:44,010 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:05:54,337 - reveda - ERROR - module 'revedaEditor.gui.propertyDialogues' has no attribute 'schematicPinProperties'
-2023-06-03 23:06:46,025 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:06:55,708 - reveda - ERROR - 'schematic_scene' object has no attribute 'schematicEditor'
-2023-06-03 23:07:29,465 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:07:53,196 - reveda - ERROR - 'PySide6.QtWidgets.QLineEdit.setText' called with wrong argument types:
-  PySide6.QtWidgets.QLineEdit.setText(float)
-Supported signatures:
-  PySide6.QtWidgets.QLineEdit.setText(str)
-2023-06-03 23:07:57,617 - reveda - ERROR - 'PySide6.QtWidgets.QLineEdit.setText' called with wrong argument types:
-  PySide6.QtWidgets.QLineEdit.setText(float)
-Supported signatures:
-  PySide6.QtWidgets.QLineEdit.setText(str)
-2023-06-03 23:08:55,413 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:09:04,131 - reveda - ERROR - 'schematicPinPropertiesDialog' object has no attribute 'flayout'
-2023-06-03 23:09:37,139 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:11:47,173 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:20:33,554 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:23:11,874 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:24:06,826 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:24:18,086 - reveda - ERROR - 'PySide6.QtWidgets.QGraphicsItem.mapToScene' called with wrong argument types:
-  PySide6.QtWidgets.QGraphicsItem.mapToScene(float)
-Supported signatures:
-  PySide6.QtWidgets.QGraphicsItem.mapToScene(PySide6.QtGui.QPainterPath)
-  PySide6.QtWidgets.QGraphicsItem.mapToScene(Union[PySide6.QtCore.QPointF, PySide6.QtCore.QPoint, PySide6.QtGui.QPainterPath.Element])
-  PySide6.QtWidgets.QGraphicsItem.mapToScene(Union[PySide6.QtGui.QPolygonF, Sequence[PySide6.QtCore.QPointF], PySide6.QtGui.QPolygon, PySide6.QtCore.QRectF])
-  PySide6.QtWidgets.QGraphicsItem.mapToScene(Union[PySide6.QtCore.QRectF, PySide6.QtCore.QRect])
-  PySide6.QtWidgets.QGraphicsItem.mapToScene(float, float)
-  PySide6.QtWidgets.QGraphicsItem.mapToScene(float, float, float, float)
-2023-06-03 23:24:45,141 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:25:25,574 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:25:36,190 - reveda - ERROR - 'PySide6.QtCore.QPoint' object has no attribute 'scenePos'
-2023-06-03 23:26:09,658 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:34:04,675 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:34:20,170 - reveda - ERROR - 'schematicPinPropertiesDialog' object has no attribute 'pinNameEdit'
-2023-06-03 23:35:34,341 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:36:47,023 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:37:08,440 - reveda - ERROR - 'PySide6.QtCore.QPoint' object has no attribute 'setPos'
-2023-06-03 23:38:12,113 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-03 23:58:14,340 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-04 00:15:23,021 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/reveda.conf exists
-2023-06-05 14:38:56,477 - reveda - INFO - Removed Library Path.
-2023-06-05 14:39:18,554 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-06-05 23:59:54,334 - reveda - INFO - Removed Library Path.
-2023-06-05 23:59:55,550 - reveda - INFO - Removed Library Path.
-2023-06-06 00:00:08,277 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
-2023-06-06 16:07:44,212 - reveda - INFO - Netlisting finished.
-2023-06-06 20:45:02,397 - reveda - ERROR - 'schematic_scene' object has no attribute 'snaptoGrid'
-2023-06-06 20:45:57,463 - reveda - ERROR - 'schematic_scene' object has no attribute 'snaptoGrid'
-2023-06-06 20:50:14,463 - reveda - INFO - Netlisting finished.
-2023-06-06 21:25:03,035 - reveda - ERROR - 'builtin_function_or_method' object is not iterable
-2023-06-07 16:05:34,169 - reveda - INFO - Removed Library Path.
-2023-06-07 16:05:35,088 - reveda - INFO - Removed Library Path.
-2023-06-07 16:05:59,303 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
-2023-06-07 16:30:55,769 - reveda - ERROR - 'schematicNet' object has no attribute 'hilight'
-2023-06-07 17:07:04,516 - reveda - ERROR - module 'revedaEditor.gui.propertyDialogues' has no attribute 'netNameEdit'
-2023-06-07 22:38:32,894 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
-2023-06-07 22:38:39,257 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/library.json
-2023-06-10 17:52:28,701 - reveda - INFO - Wrote library definition file in C:\Users\eskiy\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2023-12-23 17:23:27,760 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-23 17:24:02,200 - reveda - INFO - Created adc4a cell at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/adc4a
+2023-12-23 17:24:02,201 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/adc4a/veriloga.json
+2023-12-23 17:24:02,206 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/adc4a/symbol.json
+2023-12-23 17:57:30,213 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-23 17:58:02,462 - reveda - WARNING - Replacing the cell view.
+2023-12-23 17:58:02,463 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/adc4a/veriloga.json
+2023-12-23 17:58:02,465 - reveda - WARNING - Replacing the cell view.
+2023-12-23 17:58:02,466 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/adc4a/symbol.json
+2023-12-23 17:58:52,036 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-23 17:59:20,071 - reveda - WARNING - Replacing the cell view.
+2023-12-23 17:59:20,072 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/veriloga.json
+2023-12-23 17:59:20,074 - reveda - WARNING - Replacing the cell view.
+2023-12-23 17:59:20,075 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/symbol.json
+2023-12-24 10:14:35,703 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-24 10:33:12,805 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-24 10:34:14,239 - reveda - WARNING - Created spice at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/spice.json
+2023-12-24 10:34:19,690 - reveda - WARNING - Replacing the cell view.
+2023-12-24 10:34:19,691 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/symbol.json
+2023-12-24 10:35:27,522 - reveda - WARNING - Created spice at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/spice.json
+2023-12-24 10:37:39,045 - reveda - WARNING - Replacing the cell view.
+2023-12-24 10:37:39,046 - reveda - WARNING - Created spice at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/spice.json
+2023-12-24 10:37:48,072 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-24 21:47:22,167 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-24 21:48:30,852 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-24 21:48:55,461 - reveda - WARNING - Replacing the cell view.
+2023-12-24 21:48:55,463 - reveda - WARNING - Created spice at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/spice.json
+2023-12-24 21:48:59,952 - reveda - WARNING - Replacing the cell view.
+2023-12-24 21:48:59,954 - reveda - WARNING - Created symbol_alt at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/symbol_alt.json
+2023-12-25 13:26:55,678 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-26 18:09:38,341 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-26 18:10:43,693 - reveda - WARNING - Replacing the cell view.
+2023-12-26 18:10:43,694 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/veriloga.json
+2023-12-26 18:10:54,537 - reveda - WARNING - Replacing the cell view.
+2023-12-26 18:10:54,538 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/symbol.json
+2023-12-26 18:13:02,452 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-26 18:13:23,744 - reveda - WARNING - Replacing the cell view.
+2023-12-26 18:13:23,745 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/veriloga.json
+2023-12-26 18:13:28,437 - reveda - WARNING - Replacing the cell view.
+2023-12-26 18:13:28,439 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/symbol.json
+2023-12-26 18:14:27,327 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2023-12-26 18:14:47,479 - reveda - WARNING - Replacing the cell view.
+2023-12-26 18:14:47,480 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/veriloga.json
+2023-12-26 18:14:51,331 - reveda - WARNING - Replacing the cell view.
+2023-12-26 18:14:51,333 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_anotherFilter/symbol.json
+2023-12-26 18:32:26,159 - reveda - INFO - Created delayVa cell at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/delayVa
+2023-12-26 18:32:26,160 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/delayVa/veriloga.json
+2023-12-26 18:32:29,787 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/delayVa/symbol.json
+2024-01-01 13:42:37,307 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-01 13:48:57,982 - reveda - INFO - Created circuit3 cell at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/circuit3
+2024-01-01 13:48:57,983 - reveda - WARNING - Created spice at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/circuit3/spice.json
+2024-01-01 13:49:02,868 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/circuit3/symbol.json
+2024-01-01 13:53:45,265 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-01 13:54:15,565 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,588 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,598 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,608 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,629 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,639 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,649 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,658 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,668 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,678 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,699 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,709 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,719 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,728 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,738 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,748 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,757 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,767 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,778 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,791 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,816 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,827 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,836 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,846 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,855 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,865 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,874 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,884 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,893 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,903 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,912 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,922 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,931 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,940 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,950 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,959 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,980 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:15,992 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,005 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,017 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,030 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,042 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,054 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,558 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,586 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,606 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,626 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,636 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,645 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,666 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,675 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,685 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,695 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,704 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,714 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,735 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,744 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,754 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,763 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,775 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,786 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,797 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,808 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,820 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,830 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,853 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,865 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,875 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,885 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,895 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,905 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,915 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,925 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,934 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,944 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,954 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,964 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,974 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,985 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:16,997 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,008 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,019 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,043 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,055 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,066 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,077 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,087 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,097 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,107 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,117 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,126 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,136 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,146 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,155 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,165 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,175 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,186 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,197 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,208 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,218 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,229 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,240 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,251 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,261 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,272 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,283 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,292 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,302 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,312 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,333 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,342 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,352 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,361 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,371 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,382 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,394 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,406 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,419 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,431 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,443 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,455 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,468 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,479 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,489 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,499 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,509 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,518 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,528 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,538 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,547 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,557 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,567 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,577 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,589 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,601 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,614 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,628 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,641 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,655 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,667 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,680 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,692 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,702 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,712 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,722 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,732 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,741 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,751 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,761 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,770 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,795 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,807 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,820 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,833 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,846 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,859 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,872 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,885 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,895 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,905 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,915 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,924 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,934 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,943 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,953 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,962 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,972 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,982 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:17,991 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,001 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,012 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,024 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,037 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,049 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,061 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,074 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,088 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,101 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,113 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,123 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,132 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,142 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,152 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,163 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,173 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,183 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,193 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,202 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,213 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,225 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,239 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,252 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,266 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,279 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,292 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,305 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,317 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,327 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,337 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,346 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,356 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,366 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,375 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,385 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,395 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,404 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,415 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,427 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,441 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,454 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,467 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,479 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,506 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,518 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,528 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,538 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,548 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,557 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,567 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,577 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,586 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,596 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,606 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,615 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,626 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,638 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,652 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,665 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,678 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,691 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,704 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,717 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,729 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,739 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,749 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,758 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,768 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,777 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,787 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,796 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,806 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,815 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,825 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,834 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,847 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,859 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,872 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,885 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,897 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,909 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,921 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,934 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,944 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,954 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,964 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,973 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,983 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:18,992 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,002 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,011 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,021 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,031 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,043 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,055 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,067 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,079 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,091 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,104 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,116 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,128 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,140 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,150 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,160 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,170 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,179 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,189 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,199 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,208 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,218 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,227 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,238 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,250 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,262 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,275 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,287 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,300 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,312 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,324 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,336 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,347 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,357 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,367 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,376 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,386 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,396 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,405 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,415 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,425 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,434 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,444 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,456 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,469 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,481 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,493 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,506 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,518 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,530 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,542 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,553 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,563 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,586 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,596 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,605 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,615 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,625 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,634 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,644 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,655 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,667 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,679 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,692 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,704 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,716 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,728 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,740 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,753 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,764 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,775 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,785 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,794 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,804 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,813 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,823 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,833 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,842 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,852 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,862 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,874 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,887 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,899 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:54:19,912 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-01 13:55:13,368 - reveda - ERROR - 'NoneType' object is not subscriptable
+2024-01-01 13:55:33,036 - reveda - WARNING - left unconnected:dnet0
+2024-01-01 13:55:33,036 - reveda - WARNING - left unconnected:dnet1
+2024-01-01 13:55:33,036 - reveda - WARNING - left unconnected:dnet2
+2024-01-01 13:55:33,037 - reveda - INFO - Netlisting finished.
+2024-01-01 13:56:00,568 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-01 13:56:48,235 - reveda - WARNING - left unconnected:dnet0
+2024-01-01 13:56:48,235 - reveda - WARNING - left unconnected:dnet1
+2024-01-01 13:56:48,235 - reveda - WARNING - left unconnected:dnet2
+2024-01-01 13:56:48,236 - reveda - WARNING - left unconnected:dnet3
+2024-01-01 13:56:48,237 - reveda - INFO - Netlisting finished.
+2024-01-01 23:54:00,094 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-01 23:54:22,970 - reveda - WARNING - left unconnected:dnet0
+2024-01-01 23:54:22,970 - reveda - WARNING - left unconnected:dnet1
+2024-01-01 23:54:22,970 - reveda - INFO - Netlisting finished.
+2024-01-01 23:55:28,687 - reveda - WARNING - left unconnected:dnet0
+2024-01-01 23:55:28,688 - reveda - WARNING - left unconnected:dnet1
+2024-01-01 23:55:28,688 - reveda - WARNING - left unconnected:dnet2
+2024-01-01 23:55:28,688 - reveda - WARNING - left unconnected:dnet3
+2024-01-01 23:55:28,689 - reveda - INFO - Netlisting finished.
+2024-01-01 23:58:23,484 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-01 23:58:45,168 - reveda - WARNING - left unconnected:dnet0
+2024-01-01 23:58:45,168 - reveda - WARNING - left unconnected:dnet1
+2024-01-01 23:58:45,169 - reveda - WARNING - left unconnected:dnet2
+2024-01-01 23:58:45,169 - reveda - WARNING - left unconnected:dnet3
+2024-01-01 23:58:45,170 - reveda - INFO - Netlisting finished.
+2024-01-01 23:59:43,862 - reveda - WARNING - left unconnected:dnet0
+2024-01-01 23:59:43,862 - reveda - WARNING - left unconnected:dnet1
+2024-01-01 23:59:43,862 - reveda - WARNING - left unconnected:dnet2
+2024-01-01 23:59:43,863 - reveda - WARNING - left unconnected:dnet3
+2024-01-01 23:59:43,863 - reveda - INFO - Netlisting finished.
+2024-01-02 00:21:55,816 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:22:27,466 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 00:22:27,467 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 00:22:27,467 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 00:22:27,467 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 00:22:27,468 - reveda - INFO - Netlisting finished.
+2024-01-02 00:24:32,947 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:26:36,224 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:27:05,636 - reveda - WARNING - Created config at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/anotherLayout/config.json
+2024-01-02 00:28:10,054 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:32:06,403 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:32:50,229 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 00:32:50,230 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 00:32:50,230 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 00:32:50,230 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 00:32:50,231 - reveda - INFO - Netlisting finished.
+2024-01-02 00:33:11,030 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 00:33:11,030 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 00:33:11,030 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 00:33:11,031 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 00:33:11,031 - reveda - INFO - Netlisting finished.
+2024-01-02 00:33:31,395 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 00:33:31,395 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 00:33:31,395 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 00:33:31,395 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 00:33:31,396 - reveda - INFO - Netlisting finished.
+2024-01-02 00:34:27,820 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 00:34:27,821 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 00:34:27,821 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 00:34:27,821 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 00:34:27,822 - reveda - INFO - Netlisting finished.
+2024-01-02 00:36:21,837 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:36:59,416 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 00:36:59,417 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 00:36:59,417 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 00:36:59,417 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 00:36:59,418 - reveda - INFO - Netlisting finished.
+2024-01-02 00:37:39,324 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:37:52,986 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 00:37:52,987 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 00:37:52,987 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 00:37:52,987 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 00:37:52,988 - reveda - INFO - Netlisting finished.
+2024-01-02 00:44:26,460 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:45:28,703 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 00:45:43,355 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 00:45:43,355 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 00:45:43,356 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 00:45:43,356 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 00:45:43,357 - reveda - INFO - Netlisting finished.
+2024-01-02 10:03:34,710 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 10:05:23,214 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 10:05:59,644 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 10:05:59,644 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 10:05:59,644 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 10:05:59,645 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 10:05:59,645 - reveda - INFO - Netlisting finished.
+2024-01-02 10:29:28,068 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 10:29:48,806 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 10:29:48,807 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 10:29:48,807 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 10:29:48,807 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 10:29:48,808 - reveda - INFO - Netlisting finished.
+2024-01-02 10:30:37,968 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 10:30:52,035 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 10:30:52,035 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 10:30:52,035 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 10:30:52,036 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 10:30:52,037 - reveda - INFO - Netlisting finished.
+2024-01-02 10:31:44,955 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 10:32:45,565 - reveda - WARNING - Replacing the cell view.
+2024-01-02 10:32:45,565 - reveda - WARNING - Created spice at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/circuit3/spice.json
+2024-01-02 10:32:51,267 - reveda - WARNING - Created circuit3 at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/circuit3/circuit3.json
+2024-01-02 10:33:24,872 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 10:33:24,872 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 10:33:24,872 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 10:33:24,873 - reveda - WARNING - left unconnected:dnet3
+2024-01-02 10:33:24,874 - reveda - INFO - Netlisting finished.
+2024-01-02 10:34:16,549 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 10:34:16,550 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 10:34:16,550 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 10:34:16,551 - reveda - INFO - Netlisting finished.
+2024-01-02 10:35:12,181 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 10:35:28,829 - reveda - WARNING - Created spice at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/spice.json
+2024-01-02 10:35:32,084 - reveda - WARNING - Replacing the cell view.
+2024-01-02 10:35:32,084 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/symbol.json
+2024-01-02 10:36:09,089 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 10:36:09,089 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 10:36:09,090 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 10:36:09,090 - reveda - INFO - Netlisting finished.
+2024-01-02 10:39:45,846 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 10:40:01,943 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 10:40:01,943 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 10:40:01,944 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 10:40:01,944 - reveda - INFO - Netlisting finished.
+2024-01-02 10:41:52,493 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 10:42:25,762 - reveda - INFO - Created circuit3 cell at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/circuit3
+2024-01-02 10:42:25,762 - reveda - WARNING - Created spice at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/circuit3/spice.json
+2024-01-02 10:42:29,641 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/circuit3/symbol.json
+2024-01-02 10:43:03,943 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 10:43:03,943 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 10:43:03,944 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 10:43:03,944 - reveda - INFO - Netlisting finished.
+2024-01-02 14:42:39,006 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2024-01-02 14:42:45,076 - reveda - INFO - Removed Library Path.
+2024-01-02 14:42:46,001 - reveda - INFO - Removed Library Path.
+2024-01-02 14:42:58,595 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\library.json
+2024-01-02 14:43:18,652 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 14:43:18,653 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 14:43:18,654 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 14:43:18,655 - reveda - INFO - Netlisting finished.
+2024-01-02 14:45:22,967 - reveda - ERROR - mouse release error: 'NoneType' object has no attribute 'removeItem'
+2024-01-02 14:55:44,076 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2024-01-02 14:57:35,771 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 14:57:35,772 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 14:57:35,773 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 14:57:35,774 - reveda - INFO - Netlisting finished.
+2024-01-02 18:28:40,818 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2024-01-02 18:29:00,320 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 18:29:00,321 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 18:29:00,321 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 18:29:00,324 - reveda - INFO - Netlisting finished.
+2024-01-02 22:51:16,308 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 23:55:23,597 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-02 23:55:32,813 - reveda - INFO - Removed Library Path.
+2024-01-02 23:55:34,342 - reveda - INFO - Removed Library Path.
+2024-01-02 23:56:02,843 - reveda - INFO - Wrote library definition file in /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/library.json
+2024-01-02 23:56:27,252 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 23:56:27,253 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 23:56:27,253 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 23:56:27,255 - reveda - INFO - Netlisting finished.
+2024-01-02 23:57:38,849 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 23:57:38,850 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 23:57:38,850 - reveda - WARNING - left unconnected:dnet2
+2024-01-02 23:57:38,853 - reveda - INFO - Netlisting finished.
+2024-01-02 23:58:45,672 - reveda - WARNING - left unconnected:dnet0
+2024-01-02 23:58:45,673 - reveda - WARNING - left unconnected:dnet1
+2024-01-02 23:58:45,675 - reveda - INFO - Netlisting finished.
+2024-01-03 09:42:29,145 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-03 09:44:50,214 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,239 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,249 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,275 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,285 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,298 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,321 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,331 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,341 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,351 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,361 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,373 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,384 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,411 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,421 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,432 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,442 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,453 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,464 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,474 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,485 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,496 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,506 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,517 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,528 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,539 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,562 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,574 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,583 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,697 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,720 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,744 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,755 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,765 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,775 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,786 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,809 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,820 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,831 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,842 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,853 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,863 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,873 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,884 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,908 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,919 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,930 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,940 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,952 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,962 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,972 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,983 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:50,993 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,004 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,015 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,025 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,036 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,047 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,070 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,081 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,092 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,103 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,114 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,124 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,135 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,146 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,156 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,167 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,177 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,188 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,198 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,208 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,220 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,231 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,241 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,252 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,263 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,287 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,298 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,308 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,320 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,330 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,340 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,351 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,361 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,371 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,382 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,392 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,403 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,414 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,424 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,435 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,446 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,456 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,467 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,477 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,487 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,498 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,508 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,532 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,556 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,697 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,718 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,742 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:51,767 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:44:53,972 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 09:47:29,542 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-03 09:49:26,731 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-03 09:49:44,223 - reveda - WARNING - Created schematic at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/LCFilter/schematic.json
+2024-01-03 09:58:32,171 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-03 09:59:00,362 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/LCFilter/symbol.json
+2024-01-03 10:01:44,308 - reveda - ERROR - 'schematicSymbol' object has no attribute 'parent'
+2024-01-03 10:01:44,310 - reveda - INFO - Netlisting finished.
+2024-01-03 10:59:17,551 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-03 10:59:36,624 - reveda - ERROR - 'schematicSymbol' object has no attribute 'parent'
+2024-01-03 10:59:36,624 - reveda - INFO - Netlisting finished.
+2024-01-03 22:40:29,602 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-03 22:40:59,428 - reveda - INFO - Netlisting finished.
+2024-01-03 22:42:03,833 - reveda - WARNING - left unconnected:dnet0
+2024-01-03 22:42:03,833 - reveda - WARNING - left unconnected:dnet1
+2024-01-03 22:42:03,833 - reveda - WARNING - left unconnected:dnet2
+2024-01-03 22:42:03,833 - reveda - WARNING - left unconnected:dnet3
+2024-01-03 22:42:03,834 - reveda - INFO - Netlisting finished.
+2024-01-03 22:43:01,549 - reveda - ERROR - 'NoneType' object is not subscriptable
+2024-01-03 22:43:16,370 - reveda - ERROR - 'NoneType' object is not subscriptable
+2024-01-03 22:43:26,684 - reveda - WARNING - left unconnected:dnet0
+2024-01-03 22:43:26,684 - reveda - WARNING - left unconnected:dnet1
+2024-01-03 22:43:26,685 - reveda - WARNING - left unconnected:dnet2
+2024-01-03 22:43:26,685 - reveda - WARNING - left unconnected:dnet3
+2024-01-03 22:43:26,685 - reveda - WARNING - left unconnected:dnet4
+2024-01-03 22:43:26,685 - reveda - WARNING - left unconnected:dnet5
+2024-01-03 22:43:26,686 - reveda - INFO - Netlisting finished.
+2024-01-03 22:44:01,244 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,255 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,266 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,270 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,280 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,284 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,288 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,298 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,302 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,312 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,316 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,320 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,330 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,340 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,344 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,356 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,369 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,373 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,386 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,390 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,401 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,404 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,414 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,418 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,428 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,433 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,436 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,446 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,451 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,461 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,550 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,560 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,564 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,575 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,586 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,589 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,600 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,604 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,615 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,619 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,629 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,634 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,644 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,649 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,659 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,662 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,673 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,684 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,694 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,698 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,708 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,712 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,723 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,727 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,738 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,741 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,752 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,762 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,766 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,776 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,788 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,792 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,803 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,806 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,817 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,821 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,831 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,836 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,846 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,850 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,860 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,864 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,917 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,921 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,931 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,941 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,945 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,978 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,989 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:01,993 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,010 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,014 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,024 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,028 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,040 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,043 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,055 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,065 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,069 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,079 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,084 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,093 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,098 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,314 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,439 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,450 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,454 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,464 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,474 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,478 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,489 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,500 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,511 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,565 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,608 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,624 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,628 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,639 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,662 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,666 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,676 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,680 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,690 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,701 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,705 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,709 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,719 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,723 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,734 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,738 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,801 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,811 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,815 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,825 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,829 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,840 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,844 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:02,856 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,134 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,145 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,158 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,163 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,175 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,180 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,193 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,197 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,201 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,212 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,324 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,351 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,355 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,365 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,375 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,379 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,390 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,401 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,411 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,416 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,426 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,430 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,441 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,600 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,813 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,823 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,834 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,844 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,848 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,858 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:03,960 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,010 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,021 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,033 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,117 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,150 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,242 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,275 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,286 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,301 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,305 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,322 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,343 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,410 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,414 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,424 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:04,450 - reveda - ERROR - mouse move error: 'NoneType' object is not subscriptable
+2024-01-03 22:44:10,083 - reveda - WARNING - left unconnected:dnet0
+2024-01-03 22:44:10,083 - reveda - WARNING - left unconnected:dnet1
+2024-01-03 22:44:10,083 - reveda - WARNING - left unconnected:dnet2
+2024-01-03 22:44:10,084 - reveda - WARNING - left unconnected:dnet3
+2024-01-03 22:44:10,084 - reveda - WARNING - left unconnected:dnet4
+2024-01-03 22:44:10,084 - reveda - WARNING - left unconnected:dnet5
+2024-01-03 22:44:10,085 - reveda - WARNING - left unconnected:dnet6
+2024-01-03 22:44:10,085 - reveda - ERROR - 'schematicSymbol' object has no attribute 'parent'
+2024-01-03 22:44:10,086 - reveda - INFO - Netlisting finished.
+2024-01-03 23:10:25,628 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-03 23:10:47,756 - reveda - WARNING - left unconnected:dnet0
+2024-01-03 23:10:47,757 - reveda - WARNING - left unconnected:dnet1
+2024-01-03 23:10:47,757 - reveda - WARNING - left unconnected:dnet2
+2024-01-03 23:10:47,758 - reveda - WARNING - left unconnected:dnet3
+2024-01-03 23:10:47,758 - reveda - WARNING - left unconnected:dnet4
+2024-01-03 23:10:47,758 - reveda - WARNING - left unconnected:dnet5
+2024-01-03 23:10:47,759 - reveda - INFO - Netlisting finished.
+2024-01-03 23:12:24,770 - reveda - WARNING - left unconnected:dnet0
+2024-01-03 23:12:24,770 - reveda - WARNING - left unconnected:dnet1
+2024-01-03 23:12:24,770 - reveda - WARNING - left unconnected:dnet2
+2024-01-03 23:12:24,771 - reveda - WARNING - left unconnected:dnet3
+2024-01-03 23:12:24,771 - reveda - INFO - Netlisting finished.
+2024-01-04 12:04:07,239 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 12:04:47,434 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 12:10:34,324 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 12:12:08,349 - reveda - INFO - Netlisting finished.
+2024-01-04 12:37:02,444 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 12:37:21,531 - reveda - INFO - Netlisting finished.
+2024-01-04 12:42:35,825 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 12:42:47,810 - reveda - INFO - Netlisting finished.
+2024-01-04 12:43:07,907 - reveda - INFO - Netlisting finished.
+2024-01-04 12:48:01,276 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 12:48:22,991 - reveda - ERROR - 'schematicSymbol' object has no attribute 'parent'
+2024-01-04 12:48:22,992 - reveda - INFO - Netlisting finished.
+2024-01-04 13:32:11,373 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 13:32:29,824 - reveda - ERROR - findViewItem() missing 2 required positional arguments: 'cellName' and 'viewName'
+2024-01-04 13:32:29,824 - reveda - INFO - Netlisting finished.
+2024-01-04 13:33:47,038 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 13:34:08,316 - reveda - ERROR - 'viewItem' object has no attribute 'libraryName'
+2024-01-04 13:34:08,317 - reveda - INFO - Netlisting finished.
+2024-01-04 14:55:46,147 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 14:56:25,763 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 14:56:56,780 - reveda - WARNING - Replacing the cell view.
+2024-01-04 14:56:56,781 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/LCFilter/symbol.json
+2024-01-04 14:57:28,682 - reveda - ERROR - 'NoneType' object has no attribute 'widget'
+2024-01-04 14:58:12,945 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 14:58:51,542 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 14:58:51,553 - reveda - INFO - Netlisting finished.
+2024-01-04 15:03:40,389 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 15:04:02,670 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 15:04:02,684 - reveda - INFO - Netlisting finished.
+2024-01-04 15:05:02,918 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 15:05:02,919 - reveda - WARNING - left unconnected:dnet1
+2024-01-04 15:05:02,919 - reveda - WARNING - left unconnected:dnet2
+2024-01-04 15:05:02,920 - reveda - WARNING - left unconnected:dnet3
+2024-01-04 15:05:02,920 - reveda - WARNING - left unconnected:dnet4
+2024-01-04 15:05:02,943 - reveda - INFO - Netlisting finished.
+2024-01-04 15:06:42,067 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 15:06:42,068 - reveda - WARNING - left unconnected:dnet1
+2024-01-04 15:06:42,093 - reveda - INFO - Netlisting finished.
+2024-01-04 15:07:30,648 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 15:07:30,669 - reveda - INFO - Netlisting finished.
+2024-01-04 15:11:26,603 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 15:12:28,162 - reveda - WARNING - Created schematic at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/highPassFilter/schematic.json
+2024-01-04 15:19:01,547 - reveda - WARNING - Replacing the cell view.
+2024-01-04 15:19:01,548 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/highPassFilter/symbol.json
+2024-01-04 15:21:03,661 - reveda - WARNING - Replacing the cell view.
+2024-01-04 15:21:03,662 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/highPassFilter/symbol.json
+2024-01-04 15:34:52,106 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 15:35:41,917 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 15:35:41,917 - reveda - WARNING - left unconnected:dnet1
+2024-01-04 15:35:41,918 - reveda - WARNING - left unconnected:dnet2
+2024-01-04 15:35:41,918 - reveda - WARNING - left unconnected:dnet3
+2024-01-04 15:35:41,918 - reveda - WARNING - left unconnected:dnet4
+2024-01-04 15:35:41,919 - reveda - WARNING - left unconnected:dnet5
+2024-01-04 15:35:41,964 - reveda - INFO - Netlisting finished.
+2024-01-04 15:36:05,652 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 15:36:05,652 - reveda - WARNING - left unconnected:dnet1
+2024-01-04 15:36:05,652 - reveda - WARNING - left unconnected:dnet2
+2024-01-04 15:36:05,653 - reveda - WARNING - left unconnected:dnet3
+2024-01-04 15:36:05,653 - reveda - WARNING - left unconnected:dnet4
+2024-01-04 15:36:05,653 - reveda - WARNING - left unconnected:dnet5
+2024-01-04 15:36:05,703 - reveda - INFO - Netlisting finished.
+2024-01-04 15:36:46,225 - reveda - WARNING - Created schematic at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/anotherLayout/schematic.json
+2024-01-04 15:37:02,089 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 15:37:02,090 - reveda - WARNING - left unconnected:dnet1
+2024-01-04 15:37:02,112 - reveda - INFO - Netlisting finished.
+2024-01-04 15:38:52,887 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 15:38:52,888 - reveda - WARNING - left unconnected:dnet1
+2024-01-04 15:38:52,929 - reveda - INFO - Netlisting finished.
+2024-01-04 16:22:51,630 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 16:23:46,930 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 16:23:46,931 - reveda - WARNING - left unconnected:dnet1
+2024-01-04 16:23:46,931 - reveda - WARNING - left unconnected:dnet2
+2024-01-04 16:23:46,956 - reveda - ERROR - 'schematicSymbol' object has no attribute 'pinOrder'
+2024-01-04 16:23:46,957 - reveda - ERROR - Netlist line is not defined for I3
+2024-01-04 16:23:46,968 - reveda - INFO - Netlisting finished.
+2024-01-04 16:26:04,025 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 16:26:33,939 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 16:26:33,939 - reveda - WARNING - left unconnected:dnet1
+2024-01-04 16:26:33,940 - reveda - WARNING - left unconnected:dnet2
+2024-01-04 16:26:33,977 - reveda - INFO - Netlisting finished.
+2024-01-04 16:59:25,057 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 17:53:03,457 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 17:53:03,493 - reveda - INFO - Netlisting finished.
+2024-01-04 17:54:38,725 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 17:54:59,193 - reveda - WARNING - analogLib cannot be found.
+2024-01-04 17:55:49,803 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/vsin/veriloga.json
+2024-01-04 17:55:53,122 - reveda - WARNING - Replacing the cell view.
+2024-01-04 17:55:53,123 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/vsin/symbol.json
+2024-01-04 17:57:08,834 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 18:00:48,456 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 18:01:52,076 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/veriloga.json
+2024-01-04 18:01:56,009 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:01:56,009 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/symbol.json
+2024-01-04 18:05:12,171 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 18:05:35,303 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:05:35,304 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/veriloga.json
+2024-01-04 18:05:39,677 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:05:39,678 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/symbol.json
+2024-01-04 18:07:22,838 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 18:07:50,799 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:07:50,800 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/veriloga.json
+2024-01-04 18:07:55,346 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:07:55,347 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/symbol.json
+2024-01-04 18:08:38,654 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 18:09:02,230 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:09:02,231 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/veriloga.json
+2024-01-04 18:09:06,154 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:09:06,155 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/symbol.json
+2024-01-04 18:09:33,488 - reveda - WARNING - analogLib cannot be found.
+2024-01-04 18:09:40,745 - reveda - WARNING - instantiation error: 'NoneType' object has no attribute 'viewPath'
+2024-01-04 18:09:40,746 - reveda - ERROR - mouse press error: 'NoneType' object has no attribute 'setSelected'
+2024-01-04 18:11:22,973 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 18:12:02,439 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:12:02,440 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/veriloga.json
+2024-01-04 18:12:06,040 - reveda - WARNING - Replacing the cell view.
+2024-01-04 18:12:06,041 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/symbol.json
+2024-01-04 18:13:05,706 - reveda - INFO - Created resVa cell at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/resVa
+2024-01-04 18:13:05,707 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/resVa/veriloga.json
+2024-01-04 18:13:09,267 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/resVa/symbol.json
+2024-01-04 18:14:28,821 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 18:14:28,858 - reveda - INFO - Netlisting finished.
+2024-01-04 18:15:39,121 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 18:15:58,581 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 18:15:58,619 - reveda - INFO - Netlisting finished.
+2024-01-04 18:17:01,226 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 18:17:01,263 - reveda - INFO - Netlisting finished.
+2024-01-04 18:17:41,029 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 18:17:41,068 - reveda - INFO - Netlisting finished.
+2024-01-04 18:18:43,264 - reveda - WARNING - left unconnected:dnet0
+2024-01-04 18:18:43,301 - reveda - INFO - Netlisting finished.
+2024-01-04 23:54:34,365 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-04 23:58:06,027 - reveda - INFO - Created diodeVa cell at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa
+2024-01-04 23:58:06,028 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa/veriloga.json
+2024-01-04 23:58:09,270 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa/symbol.json
+2024-01-05 00:00:58,587 - reveda - WARNING - Replacing the cell view.
+2024-01-05 00:00:58,588 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa/veriloga.json
+2024-01-05 00:01:01,727 - reveda - WARNING - Replacing the cell view.
+2024-01-05 00:01:01,728 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa/symbol.json
+2024-01-05 00:05:22,527 - reveda - WARNING - Replacing the cell view.
+2024-01-05 00:05:22,528 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa/veriloga.json
+2024-01-05 00:05:25,443 - reveda - WARNING - Replacing the cell view.
+2024-01-05 00:05:25,444 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa/symbol.json
+2024-01-05 12:23:00,543 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2024-01-05 21:09:48,072 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-06 12:52:52,522 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-06 12:53:25,969 - reveda - WARNING - Replacing the cell view.
+2024-01-06 12:53:25,971 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/veriloga.json
+2024-01-06 12:53:27,698 - reveda - WARNING - Replacing the cell view.
+2024-01-06 12:53:27,699 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/higherOrderFilter/symbol.json
+2024-01-06 12:53:56,941 - reveda - ERROR - Error in mousePressEvent: 'NoneType' object has no attribute 'setSelected'
+2024-01-06 13:45:27,225 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-06 13:45:51,360 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-06 13:46:37,981 - reveda - WARNING - Replacing the cell view.
+2024-01-06 13:46:37,982 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa/veriloga.json
+2024-01-06 13:46:39,663 - reveda - WARNING - Replacing the cell view.
+2024-01-06 13:46:39,664 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/diodeVa/symbol.json
+2024-01-06 13:47:05,572 - reveda - ERROR - Error in mousePressEvent: 'NoneType' object has no attribute 'setSelected'
+2024-01-06 13:50:06,445 - reveda - WARNING - left unconnected:dnet0
+2024-01-06 13:50:06,481 - reveda - INFO - Netlisting finished.
+2024-01-06 13:52:46,848 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-06 13:53:32,904 - reveda - WARNING - left unconnected:dnet0
+2024-01-06 13:53:32,938 - reveda - INFO - Netlisting finished.
+2024-01-06 13:53:59,153 - reveda - WARNING - left unconnected:dnet0
+2024-01-06 13:53:59,195 - reveda - INFO - Netlisting finished.
+2024-01-06 22:01:13,029 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-06 22:08:45,151 - reveda - ERROR - Error in mousePressEvent: 'NoneType' object has no attribute 'setSelected'
+2024-01-07 00:28:40,556 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 00:31:05,445 - reveda - ERROR - Error in mousePressEvent: 'NoneType' object has no attribute 'setSelected'
+2024-01-07 00:38:13,772 - reveda - INFO - Created tb_isin cell at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_isin
+2024-01-07 00:38:20,344 - reveda - WARNING - Created schematic at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_isin/schematic.json
+2024-01-07 00:38:47,862 - reveda - WARNING - left unconnected:dnet0
+2024-01-07 00:38:47,862 - reveda - WARNING - left unconnected:dnet1
+2024-01-07 00:38:47,863 - reveda - INFO - Netlisting finished.
+2024-01-07 13:25:06,474 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 13:25:54,987 - reveda - WARNING - left unconnected:dnet0
+2024-01-07 13:25:54,987 - reveda - WARNING - left unconnected:dnet1
+2024-01-07 13:25:54,987 - reveda - INFO - Netlisting finished.
+2024-01-07 13:40:25,419 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 21:30:41,548 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 21:33:43,873 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 21:35:34,294 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 21:39:01,820 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 21:39:31,121 - reveda - ERROR - Error in mousePressEvent: 'symbolLabel' object has no attribute 'angle'
+2024-01-07 21:41:55,946 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 22:11:14,073 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 23:13:17,531 - reveda - WARNING - Replacing the cell view.
+2024-01-07 23:13:17,532 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/resVa/veriloga.json
+2024-01-07 23:13:19,505 - reveda - WARNING - Replacing the cell view.
+2024-01-07 23:13:19,506 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/resVa/symbol.json
+2024-01-07 23:38:53,939 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 23:39:32,048 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/res/veriloga.json
+2024-01-07 23:41:18,434 - reveda - WARNING - Replacing the cell view.
+2024-01-07 23:41:18,435 - reveda - WARNING - Created veriloga at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/resVa/veriloga.json
+2024-01-07 23:41:20,684 - reveda - WARNING - Replacing the cell view.
+2024-01-07 23:41:20,685 - reveda - WARNING - Created symbol at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/analogLib/resVa/symbol.json
+2024-01-07 23:46:16,239 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-07 23:46:29,120 - reveda - INFO - Created tb_res cell at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_res
+2024-01-07 23:46:37,307 - reveda - WARNING - Created schematic at /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/exampleLibraries/designs/tb_res/schematic.json
+2024-01-07 23:47:55,972 - reveda - INFO - Netlisting finished.
+2024-01-07 23:50:28,053 - reveda - INFO - Netlisting finished.
+2024-01-07 23:52:13,531 - reveda - INFO - Netlisting finished.
+2024-01-08 00:05:14,853 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-08 00:07:09,567 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-08 00:07:53,087 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-08 00:14:35,261 - reveda - INFO - Configuration file: /home/eskiyerli/OneDrive_reveda/Projects/RevEDA/reveda.conf exists
+2024-01-08 14:53:50,757 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2024-01-08 14:54:11,743 - reveda - INFO - Removed Library Path.
+2024-01-08 14:54:13,173 - reveda - INFO - Removed Library Path.
+2024-01-08 14:54:33,456 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\library.json
+2024-01-08 14:56:39,166 - reveda - INFO - Netlisting finished.
+2024-01-08 14:58:28,826 - reveda - WARNING - Created config at C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\exampleLibraries\designs\tb_res\config.json
+2024-01-08 15:00:20,188 - reveda - INFO - Netlisting finished.
+2024-01-08 15:00:49,236 - reveda - INFO - Netlisting finished.
+2024-01-08 15:47:14,996 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\RevEDA\reveda.conf exists
+2024-01-08 15:49:44,559 - reveda - ERROR - 'XyceSymbolNetlistLine'
+2024-01-08 15:49:44,568 - reveda - ERROR - Netlist line is not defined for I2
+2024-01-08 15:49:44,661 - reveda - ERROR - 'XyceSymbolNetlistLine'
+2024-01-08 15:49:44,661 - reveda - ERROR - Netlist line is not defined for I2
+2024-01-08 15:49:44,697 - reveda - ERROR - 'XyceSymbolNetlistLine'
+2024-01-08 15:49:44,697 - reveda - ERROR - Netlist line is not defined for I0
+2024-01-08 15:49:44,738 - reveda - ERROR - Spice subckt netlist error: 'XyceSpiceNetlistLine'
+2024-01-08 15:49:44,742 - reveda - ERROR - Netlist line is not defined for I3
+2024-01-08 15:49:44,742 - reveda - INFO - Netlisting finished.
+2024-01-08 15:52:37,255 - reveda - ERROR - Spice subckt netlist error: 'XyceSpiceNetlistLine'
+2024-01-08 15:52:37,255 - reveda - ERROR - Netlist line is not defined for I3
+2024-01-08 15:52:37,398 - reveda - INFO - Netlisting finished.
+2024-01-08 15:54:15,665 - reveda - ERROR - Spice subckt netlist error: 'XyceSpiceNetlistLine'
+2024-01-08 15:54:15,665 - reveda - ERROR - Netlist line is not defined for I3
+2024-01-08 15:54:15,745 - reveda - INFO - Netlisting finished.
+2024-01-08 15:55:18,978 - reveda - INFO - Netlisting finished.
+2024-01-08 16:20:27,917 - reveda - INFO - Configuration file: C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\reveda.conf exists
+2024-01-08 16:20:54,107 - reveda - INFO - Removed Library Path.
+2024-01-08 16:20:56,614 - reveda - INFO - Removed Library Path.
+2024-01-08 16:21:17,062 - reveda - INFO - Wrote library definition file in C:\Users\eskiye50\OneDrive - Revolution Semiconductor\Projects\revedaRelease\library.json
+2024-01-08 16:21:41,522 - reveda - INFO - Netlisting finished.

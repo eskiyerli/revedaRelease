@@ -1,13 +1,12 @@
-#
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
 #    below, subject to the following condition.
-#   #
+#
 #    Without limiting other conditions in the License, the grant of rights under the
 #    License will not include, and the License does not grant to you, the right to
 #    Sell the Software.
-#   #
+#
 #    For purposes of the foregoing, “Sell” means practicing any or all of the rights
 #    granted to you under the License to provide to third parties, for a fee or other
 #    consideration (including without limitation fees for hosting or consulting/
@@ -15,27 +14,38 @@
 #    derives, entirely or substantially, from the functionality of the Software. Any
 #    license notice or attribution required by the License must also include this
 #    Commons Clause License Condition notice.
-#   #
+#
+#   Add-ons and extensions developed for this software may be distributed
+#   under their own separate licenses.
+#
 #    Software: Revolution EDA
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
-
-
+#
 import json
 import logging
 import logging.config
 import pathlib
+import os
 
 from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QAction, QFont, QIcon
-from PySide6.QtWidgets import (QApplication, QDialog, QMainWindow, QMessageBox,
-                               QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QMainWindow,
+    QMessageBox,
+    QVBoxLayout,
+    QWidget,
+)
 
 import revedaEditor.backend.hdlBackEnd as hdl
 import revedaEditor.backend.importViews as imv
 import revedaEditor.gui.editorWindows as edw
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.pythonConsole as pcon
+import revedaEditor.gui.stippleEditor as stip
+import revedaEditor.gui.helpBrowser as hlp
 import revinit
 
 
@@ -54,8 +64,9 @@ class mainwContainer(QWidget):
         # treeView = designLibrariesView(self)
         self.console.setfont(QFont("Fira Mono Regular", 12))
         self.console.writeoutput(
-            f"Welcome to Revolution EDA version" f" {revinit.__version__}")
-        self.console.writeoutput("Revolution Semiconductor (C) 2023.")
+            f"Welcome to Revolution EDA version" f" {revinit.__version__}"
+        )
+        self.console.writeoutput("Revolution Semiconductor (C) 2024.")
         # layout statements, using a grid layout
         gLayout = QVBoxLayout()
         gLayout.setSpacing(10)
@@ -71,8 +82,15 @@ class MainWindow(QMainWindow):
         self._createActions()
         self._createMenuBar()
         self._createTriggers()
-        self.cellViews = ["schematic", "symbol", "layout", "veriloga", "config",
-            "spice", ]
+        self.cellViews = [
+            "schematic",
+            "symbol",
+            "layout",
+            "veriloga",
+            "config",
+            "spice",
+            "pcell",
+        ]
         self.switchViewList = ["schematic", "veriloga", "spice", "symbol"]
         self.stopViewList = ["symbol"]
         self.simulationPath = pathlib.Path.cwd().parent
@@ -83,6 +101,7 @@ class MainWindow(QMainWindow):
         self.mainW_statusbar = self.statusBar()
         self.mainW_statusbar.showMessage("Ready")
         self.app = QApplication.instance()
+        # print(self.app.reveda_runpathObj)
         # logger name is 'reveda'
         self.logger = logging.getLogger("reveda")
         # library definition file path
@@ -98,7 +117,7 @@ class MainWindow(QMainWindow):
         # look for library.json file where the script is invoked
         self.libraryPathObj = self.runPath.joinpath("library.json")
         self.libraryDict = self.readLibDefFile(self.libraryPathObj)
-        self.textEditorPath = str(self.runPath)
+        self.textEditorPath: pathlib.Path = self.runPath
         self.threadPool = QThreadPool.globalInstance()
         self.confFilePath = self.runPath.joinpath("reveda.conf")
         self.loadState()
@@ -114,10 +133,12 @@ class MainWindow(QMainWindow):
         self.menuHelp = self.mainW_menubar.addMenu("&Help")
         self.menuFile.addAction(self.exitAction)
         self.menuTools.addAction(self.libraryBrowserAction)
+        self.menuTools.addAction(self.createStippleAction)
         self.importTools.addAction(self.importVerilogaAction)
+        self.importTools.addAction(self.importSpiceAction)
         self.menuOptions.addAction(self.optionsAction)
-        # self.menuHelp.addAction(self.helpAction)
-        # self.menuHelp.addAction(self.aboutAction)
+        self.menuHelp.addAction(self.helpAction)
+        self.menuHelp.addAction(self.aboutAction)
         self.menuOptions.addAction(self.optionsAction)
 
     def _createActions(self):
@@ -125,18 +146,29 @@ class MainWindow(QMainWindow):
         self.exitAction = QAction(exitIcon, "Exit", self)
         self.exitAction.setShortcut("Ctrl+Q")
         importVerilogaIcon = QIcon(":/icons/document-import.png")
-        self.importVerilogaAction = QAction(importVerilogaIcon,
-            "Import Verilog-a file...")
+        self.importVerilogaAction = QAction(
+            importVerilogaIcon, "Import Verilog-a file..."
+        )
+        self.importSpiceAction = QAction(importVerilogaIcon, "Import Spice file...", self)
         openLibIcon = QIcon(":/icons/database--pencil.png")
         self.libraryBrowserAction = QAction(openLibIcon, "Library Browser", self)
         optionsIcon = QIcon(":/icons/resource-monitor.png")
         self.optionsAction = QAction(optionsIcon, "Options...", self)
+        self.createStippleAction = QAction("Create Stipple...", self)
+        helpIcon = QIcon(":/icons/document-arrow.png")
+        self.helpAction = QAction(helpIcon, "Help...", self)
+        self.aboutIcon = QIcon(":/icons/information.png")
+        self.aboutAction = QAction(self.aboutIcon, "About", self)
 
     def _createTriggers(self):
         self.exitAction.triggered.connect(self.exitApp)  # type: ignore
         self.libraryBrowserAction.triggered.connect(self.libraryBrowserClick)
         self.importVerilogaAction.triggered.connect(self.importVerilogaClick)
+        self.importSpiceAction.triggered.connect(self.importSpiceClick)
         self.optionsAction.triggered.connect(self.optionsClick)
+        self.createStippleAction.triggered.connect(self.createStippleClick)
+        self.helpAction.triggered.connect(self.helpClick)
+        self.aboutAction.triggered.connect(self.aboutClick)
 
     def readLibDefFile(self, libPath: pathlib.Path):
         libraryDict = dict()
@@ -167,16 +199,20 @@ class MainWindow(QMainWindow):
         f_handler = logging.FileHandler("reveda.log")
         f_handler.setLevel(logging.INFO)
         f_format = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
         f_handler.setFormatter(f_format)
         self.logger.addHandler(c_handler)
         self.logger.addHandler(f_handler)
 
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Confirm Exit',
-                                     'Are you sure you want to exit?',
-                                     QMessageBox.Yes | QMessageBox.No,
-                                     QMessageBox.No)
+        reply = QMessageBox.question(
+            self,
+            "Confirm Exit",
+            "Are you sure you want to exit?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
         if reply == QMessageBox.Yes:
             self.app.closeAllWindows()
         else:
@@ -184,56 +220,145 @@ class MainWindow(QMainWindow):
 
     def optionsClick(self):
         dlg = fd.appProperties(self)
-        dlg.editorPathEdit.setText(self.textEditorPath)
+        dlg.editorPathEdit.setText(str(self.textEditorPath))
         dlg.simPathEdit.setText(str(self.simulationPath))
         dlg.switchViewsEdit.setText(", ".join(self.switchViewList))
         dlg.stopViewsEdit.setText(", ".join(self.stopViewList))
 
         if dlg.exec() == QDialog.Accepted:
-            self.textEditorPath = dlg.editorPathEdit.text()
+            self.textEditorPath = pathlib.Path(dlg.editorPathEdit.text())
             self.simulationPath = pathlib.Path(dlg.simPathEdit.text())
-            self.switchViewList = [switchView.strip() for switchView in
-                dlg.switchViewsEdit.text().split(",")]
-            self.stopViewList = [stopView.strip() for stopView in
-                dlg.stopViewsEdit.text().split(",")]
+            self.switchViewList = [
+                switchView.strip()
+                for switchView in dlg.switchViewsEdit.text().split(",")
+            ]
+            self.stopViewList = [
+                stopView.strip() for stopView in
+                dlg.stopViewsEdit.text().split(",")
+            ]
             if dlg.optionSaveBox.isChecked():
                 self.saveState()
 
     def importVerilogaClick(self):
         """
-        Import a verilog-a view and add it to a design library
+        Import a Verilog-A view and add it to a design library.
+
+        Args:
+            self: The instance of the class.
+
+        Returns:
+            None
         """
-        libraryModel = self.libraryBrowser.libraryModel
-        importDlg = fd.importVerilogaCellDialogue(libraryModel, self)
+        # Get the library model
+        self.importVerilogaModule('')
+
+    def importVerilogaModule(self, filePath: str):
+        library_model = self.libraryBrowser.libraryModel
+        # Open the import dialog
+        importDlg = fd.importVerilogaCellDialogue(library_model, self)
+        importDlg.vaFileEdit.setText(filePath)
+        # Set the default view name in the dialog
         importDlg.vaViewName.setText("veriloga")
+        # Execute the import dialog and check if it was accepted
         if importDlg.exec() == QDialog.Accepted:
-            importedVaObj = hdl.verilogaC(
+            # Create the Verilog-A object from the file path
+            imported_va_obj = hdl.verilogaC(
                 pathlib.Path(importDlg.vaFileEdit.text()))
-            vaViewItemTuple = imv.createVaView(self, importDlg, libraryModel,
-                                               importedVaObj)
+
+            # Create the Verilog-A view item tuple
+            vaViewItemTuple = imv.createVaView(
+                self, importDlg, library_model, imported_va_obj
+            )
+
+            # Check if the symbol checkbox is checked
             if importDlg.symbolCheckBox.isChecked():
-                imv.createVaSymbol(self, vaViewItemTuple, self.libraryDict,
-                                   self.libraryBrowser, importedVaObj)
+                # Create the Verilog-A symbol
+                imv.createVaSymbol(
+                    self,
+                    vaViewItemTuple,
+                    self.libraryDict,
+                    self.libraryBrowser,
+                    imported_va_obj,
+                )
+
+    def importSpiceClick(self):
+        """
+        Import a Spice view and add it to a design library.
+
+        Args:
+            self: The instance of the class.
+
+        Returns:
+            None
+        """
+        self.importSpiceSubckt('')
+
+    def importSpiceSubckt(self, filePath: str):
+        # Get the library model
+        library_model = self.libraryBrowser.libraryModel
+        # Open the import dialog
+        importDlg = fd.importSpiceCellDialogue(library_model, self)
+        importDlg.spiceFileEdit.setText(filePath)
+        # Set the default view name in the dialog
+        importDlg.spiceViewName.setText("spice")
+        # Execute the import dialog and check if it was accepted
+        if importDlg.exec() == QDialog.Accepted:
+            # Create the Verilog-A object from the file path
+            importedSpiceObj = hdl.spiceC(
+                pathlib.Path(importDlg.spiceFileEdit.text()))
+
+            # Create the Verilog-A view item tuple
+            spiceViewItemTuple = imv.createSpiceView(
+                self, importDlg, library_model, importedSpiceObj
+            )
+
+            # Check if the symbol checkbox is checked
+            if importDlg.symbolCheckBox.isChecked():
+                # Create the spice symbol
+                imv.createSpiceSymbol(self, spiceViewItemTuple, self.libraryDict,
+                                      self.libraryBrowser, importedSpiceObj)
+
+    def createStippleClick(self):
+        stippleWindow = stip.stippleEditor(self)
+        stippleWindow.show()
+
+    def helpClick(self):
+        helpBrowser = hlp.helpBrowser(self)
+        helpBrowser.show()
+
+    def aboutClick(self):
+        abtDlg = hlp.aboutDialog(self)
+        abtDlg.show()
 
     def loadState(self):
+        """
+        Load the state of the object from a configuration file.
+
+        This function reads the contents of the configuration file and updates the state of the object based on the values found in the file. 
+        It checks if the configuration file exists and then opens it for reading. If the file exists, it loads the contents of the file as a 
+        JSON object and assigns the values to the corresponding attributes of the object. The attributes updated include `textEditorPath`, 
+        `simulationPath`, `switchViewList`, and `stopViewList`. If the `switchViewList` or `stopViewList` in the configuration file is not 
+        empty, it updates the corresponding attributes with the values from the file.
+
+        """
 
         if self.confFilePath.exists():
-            self.logger.info(f'Configuration file: {self.confFilePath} exists')
+            self.logger.info(f"Configuration file: {self.confFilePath} exists")
             with self.confFilePath.open(mode="r") as f:
                 items = json.load(f)
-            self.textEditorPath = items.get("textEditorPath")
+            self.textEditorPath = pathlib.Path(items.get("textEditorPath"))
             self.simulationPath = pathlib.Path(items.get("simulationPath"))
-            if items.get("switchViewList")[0] != '':
+            if items.get("switchViewList")[0] != "":
                 self.switchViewList = items.get("switchViewList")
-            if items.get("stopViewList")[0] != '':
+            if items.get("stopViewList")[0] != "":
                 self.stopViewList = items.get("stopViewList")
 
     def saveState(self):
-        items = {"textEditorPath": self.textEditorPath,
+        items = {
+            "textEditorPath": str(self.textEditorPath),
             "simulationPath": str(self.simulationPath),
             "switchViewList": self.switchViewList,
             "stopViewList": self.stopViewList,
-
         }
         with self.confFilePath.open(mode="w", encoding="utf") as f:
             json.dump(items, f, indent=4)

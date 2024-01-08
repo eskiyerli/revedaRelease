@@ -1,0 +1,10 @@
+
+`include "disciplines.vams"
+
+module res(PLUS, MINUS);
+electrical PLUS, MINUS;
+inout PLUS, MINUS;
+parameter real R = 1 (*type = "instance", xyceAlsoModel = "yes" *);
+analog
+        V(PLUS, MINUS) < + R* I(PLUS, MINUS);
+endmodule
