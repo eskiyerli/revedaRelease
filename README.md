@@ -1,10 +1,10 @@
-# Revolution EDA Schematic/Symbol Editors
+# Revolution EDA Schematic/Symbol/Layout Editors
 
 ## Introduction
 
 Revolution EDA is a new generation of schematic and symbol editor targeting custom integrated circuit design.
 
-1. Revolution EDA include integrated circuit design oriented schematic, layout and symbol 
+1. Revolution EDA includes integrated circuit design oriented schematic, layout and symbol 
    editors.
 2. Revolution EDA can create schematic symbols with both symbol attributes that are common to 
    all instances as well instance parameters. Instance parameters can be also python 
@@ -29,7 +29,7 @@ Revolution EDA is a new generation of schematic and symbol editor targeting cust
 11. There is a familiar library browser allowing creation, renaming, copying, and deleting of 
    libraries, cells and cell views.
 12. Configuration parameters can be saved in a configuration file.
-1Log file logs error, warning and info messages.
+13. A log file logs error, warning and info messages.
 
 When downloading the package from pypi repository, you may want to download to source package as well to download *exampleLibraries*.
 
