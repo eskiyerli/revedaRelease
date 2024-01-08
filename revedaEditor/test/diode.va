@@ -1,5 +1,5 @@
 /*
-IMPORTANT NOTICE: 
+IMPORTANT NOTICE:
 THIS SOFTWARE IS LICENSED TO YOU UNDER THE TERMS OF THE SYNOPSYS END-USER LICENSE
 AGREEMENT FOR SAMPLE VERILOG-A MODELS. YOU CAN VIEW THE LICENSE AT:
       http://www.synopsys.com/cgi-bin/hspice/models/license.cgi
@@ -9,22 +9,18 @@ BY DOWNLOADING, INSTALLING OR USING THIS SOFTWARE. IF YOU ARE UNWILLING TO ACCEP
 TERMS OF THE LICENSE AGREEMENT, THEN  DO NOT DOWNLOAD, INSTALL OR USE THE SOFTWARE.
 */
 // Version 1.0   September 2006
-`include "constants.vams"
 `include "disciplines.vams"
-
-module amp2(out, in);
-inout out, in;
-electrical out, in;
-parameter real Gain = 1 (* type="instance" xyceAlsoModel="yes" *) ;
-parameter real , Rin = 1, Cin = 1, Rout = 1, Lout = 1 ;
+module diode(a, c);
+electrical a, c;
+inout a, c;
+parameter real IS = 1.0e-14 ;
+real idio;
+(*desc = "small-signal conductance" *)
+    real gdio;
 analog begin
-// gain of amplifier
-V(out) <+ Gain*V(in);
-// model input admittance
-I(in) <+ V(in)/Rin;
-I(in) <+ Cin*ddt(V(in));
-// model output impedance
-V(out) <+ Rout*I(out);
-V(out) <+ Lout*ddt(I(out));
+    idio
+    = IS * (limexp(V(a, c) / $vt) - 1);
+// gdio = ddx(idio, V(a));
+I(a, c) < +idio;
 end
 endmodule

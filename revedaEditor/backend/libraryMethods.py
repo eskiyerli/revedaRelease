@@ -36,20 +36,14 @@ def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> scb.cellItem:
                  libItem.child(i).cellName == cellNameInp]
     if cellItems:
         return cellItems[0]
-    else:
-        return None
 
 
 def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
     if cellItem is not None:
         viewItems = [cellItem.child(i) for i in range(cellItem.rowCount()) if
                      cellItem.child(i).text() == viewNameInp]
-    else:
-        return None
     if viewItems:
         return viewItems[0]
-    else:
-        return None
 
 def findViewItem(libraryModel, libName:str,cellName:str,viewName:str):
     libItem = getLibItem(libraryModel,libName)

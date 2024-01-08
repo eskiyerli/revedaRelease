@@ -1,223 +1,404 @@
-#   “Commons Clause” License Condition v1.0
-#  #
-#   The Software is provided to you by the Licensor under the License, as defined
-#   below, subject to the following condition.
-#  #
-#   Without limiting other conditions in the License, the grant of rights under the
-#   License will not include, and the License does not grant to you, the right to
-#   Sell the Software.
-#  #
-#   For purposes of the foregoing, “Sell” means practicing any or all of the rights
-#   granted to you under the License to provide to third parties, for a fee or other
-#   consideration (including without limitation fees for hosting or consulting/
-#   support services related to the Software), a product or service whose value
-#   derives, entirely or substantially, from the functionality of the Software. Any
-#   license notice or attribution required by the License must also include this
-#   Commons Clause License Condition notice.
-#  #
-#   Software: Revolution EDA
-#   License: Mozilla Public License 2.0
-#   Licensor: Revolution Semiconductor (Registered in the Netherlands)
+#    “Commons Clause” License Condition v1.0
+#   #
+#    The Software is provided to you by the Licensor under the License, as defined
+#    below, subject to the following condition.
+#
+#    Without limiting other conditions in the License, the grant of rights under the
+#    License will not include, and the License does not grant to you, the right to
+#    Sell the Software.
+#
+#    For purposes of the foregoing, “Sell” means practicing any or all of the rights
+#    granted to you under the License to provide to third parties, for a fee or other
+#    consideration (including without limitation fees for hosting or consulting/
+#    support services related to the Software), a product or service whose value
+#    derives, entirely or substantially, from the functionality of the Software. Any
+#    license notice or attribution required by the License must also include this
+#    Commons Clause License Condition notice.
+#
+#   Add-ons and extensions developed for this software may be distributed
+#   under their own separate licenses.
+#
+#    Software: Revolution EDA
+#    License: Mozilla Public License 2.0
+#    Licensor: Revolution Semiconductor (Registered in the Netherlands)
+#
 
 # Load symbol and maybe later schematic from json file.
 # import pathlib
 
 import json
+import pdk.process as fabproc
+from PySide6.QtCore import (QPoint, QLineF, QRect, )
+from PySide6.QtWidgets import (QGraphicsScene, QGraphicsSimpleTextItem, QGraphicsRectItem,
+                               QGraphicsItem, )
 
-from PySide6.QtCore import (QPoint, )  # QtCore
-
-import revedaEditor.common.net as net
-import revedaEditor.common.pens as pens
-import revedaEditor.common.shape as shp
+from revedaEditor.common.net import schematicNet, crossingDot
+import revedaEditor.common.shapes as shp
+import revedaEditor.common.labels as lbl
+import revedaEditor.common.layoutShapes as lshp
 import revedaEditor.fileio.symbolEncoder as se
+import pdk.layoutLayers as laylyr
+import pdk.pcells as pcells
+import pathlib
 
 
-def createSymbolItems(item, gridTuple):
-    """
-    Create symbol items from json file.
-    """
-    if item["type"] == "rect":
-        return createRectItem(item, gridTuple)
-    elif item["type"] == "circle":
-        return createCircleItem(item, gridTuple)
-    elif item["type"] == "arc":
-        return createArcItem(item, gridTuple)
-    elif item["type"] == "line":
-        return createLineItem(item, gridTuple)
-    elif item["type"] == "pin":
-        return createPinItem(item, gridTuple)
-    elif item["type"] == "label":
-        return createLabelItem(item, gridTuple)
+class symbolItems:
+    def __init__(self, scene: QGraphicsScene):
+        """
+        Initializes the class instance.
 
+        Args:
+            scene (QGraphicsScene): The QGraphicsScene object.
 
-def createRectItem(item, gridTuple):
-    """
-    Create symbol items from json file.
-    """
-    start = QPoint(item["rect"][0], item["rect"][1])
-    end = QPoint(item["rect"][2], item["rect"][3])
-    pen = pens.sPen.returnPen(item['pen'])
-    rect = shp.rectangle(start, end, pen,
-                         gridTuple)  # note that we are using grid values for scene
-    rect.setPos(QPoint(item["loc"][0], item["loc"][1]), )
-    rect.angle = item["ang"]
-    return rect
+        """
+        self.scene = scene
+        self.snapTuple = scene.snapTuple
 
+    def create(self, item: dict):
+        """
+        Create symbol items from json file.
+        """
+        match item["type"]:
+            case "rect":
+                return self.createRectItem(item)
+            case "circle":
+                return self.createCircleItem(item)
+            case "arc":
+                return self.createArcItem(item)
+            case "line":
+                return self.createLineItem(item)
+            case "pin":
+                return self.createPinItem(item)
+            case "label":
+                return self.createLabelItem(item)
+            case "text":
+                return self.createTextItem(item)
+            case "polygon":
+                return self.createPolygonItem(item)
 
-def createCircleItem(item, gridTuple):
-    centre = QPoint(item["cen"][0], item["cen"][1])
-    end = QPoint(item["end"][0], item["end"][1])
-    pen = pens.sPen.returnPen(item['pen'])
-    circle = shp.circle(centre, end, pen,
-                        gridTuple)  # note that we are using grid values for scene
-    circle.setPos(QPoint(item["loc"][0], item["loc"][1]), )
-    circle.angle = item["ang"]
-    return circle
+    def createRectItem(self, item: dict):
+        """
+        Create symbol items from json file.
+        """
+        start = QPoint(item["rect"][0], item["rect"][1])
+        end = QPoint(item["rect"][2], item["rect"][3])
+        rect = shp.symbolRectangle(start, end)
+        rect.setPos(QPoint(item["loc"][0], item["loc"][1]), )
+        rect.angle = item["ang"]
+        return rect
 
+    def createCircleItem(self, item: dict):
+        centre = QPoint(item["cen"][0], item["cen"][1])
+        end = QPoint(item["end"][0], item["end"][1])
+        circle = shp.symbolCircle(centre, end)  # note that we are using grid
+        # values for
+        # scene
+        circle.setPos(QPoint(item["loc"][0], item["loc"][1]), )
+        circle.angle = item["ang"]
+        return circle
 
-def createArcItem(item, gridTuple):
-    start = QPoint(item["st"][0], item["st"][1])
-    end = QPoint(item["end"][0], item["end"][1])
-    pen = pens.sPen.returnPen(item['pen'])
-    arc = shp.arc(start, end, pen,
-                  gridTuple)  # note that we are using grid values for scene
-    arc.setPos(QPoint(item["loc"][0], item["loc"][1]))
-    arc.angle = item["ang"]
-    return arc
+    def createArcItem(self, item: dict):
+        start = QPoint(item["st"][0], item["st"][1])
+        end = QPoint(item["end"][0], item["end"][1])
 
+        arc = shp.symbolArc(start, end)  # note that we are using grid values
+        # for scene
+        arc.setPos(QPoint(item["loc"][0], item["loc"][1]))
+        arc.angle = item["ang"]
+        return arc
 
-def createLineItem(item, gridTuple):
-    start = QPoint(item["st"][0], item["st"][1])
-    end = QPoint(item["end"][0], item["end"][1])
-    pen = pens.sPen.returnPen(item['pen'])
-    line = shp.line(start, end, pen, gridTuple)
-    line.setPos(QPoint(item["loc"][0], item["loc"][1]))
-    line.angle = item["ang"]
-    return line
+    def createLineItem(self, item: dict):
+        start = QPoint(item["st"][0], item["st"][1])
+        end = QPoint(item["end"][0], item["end"][1])
 
+        line = shp.symbolLine(start, end)
+        line.setPos(QPoint(item["loc"][0], item["loc"][1]))
+        line.angle = item["ang"]
+        return line
 
-def createPinItem(item, gridTuple):
-    start = QPoint(item["st"][0], item["st"][1])
-    pen = pens.sPen.returnPen(item['pen'])
-    pin = shp.pin(start, pen, item["nam"], item["pd"], item["pt"], gridTuple, )
-    pin.setPos(QPoint(item["loc"][0], item["loc"][1]))
-    pin.angle = item["ang"]
-    return pin
+    def createPinItem(self, item: dict):
+        start = QPoint(item["st"][0], item["st"][1])
+        pin = shp.symbolPin(start, item["nam"], item["pd"], item["pt"])
+        pin.setPos(QPoint(item["loc"][0], item["loc"][1]))
+        pin.angle = item["ang"]
+        return pin
 
+    def createLabelItem(self, item: dict):
+        start = QPoint(item["st"][0], item["st"][1])
+        label = lbl.symbolLabel(start, item["def"], item["lt"], item["ht"], item["al"],
+                                item["or"], item["use"])
+        label.setPos(QPoint(item["loc"][0], item["loc"][1]))
+        label.labelName = item["nam"]
+        label.labelText = item["txt"]
+        label.labelVisible = item["vis"]
+        label.labelValue = item["val"]
+        return label
 
-def createLabelItem(item, gridTuple):
-    start = QPoint(item["st"][0], item["st"][1])
-    pen = pens.sPen.returnPen(item['pen'])
-    label = shp.label(start, pen, item["def"], gridTuple, item["lt"], item["ht"],
-                      item["al"], item["or"], item["use"], )
-    label.setPos(QPoint(item["loc"][0], item["loc"][1]))
-    label.angle = item["ang"]
-    label.labelName = item["nam"]
-    label.labelText = item["txt"]
-    label.labelVisible = item["vis"]
-    label.labelValue = item["val"]
-    return label
+    def createTextItem(self, item: dict):
+        start = QPoint(item["st"][0], item["st"][1])
+        text = shp.text(start, item["tc"], item["ff"], item["fs"], item["th"], item["ta"],
+                        item["to"])
+        text.setPos(QPoint(item["loc"][0], item["loc"][1]))
+        return text
 
+    def createPolygonItem(self, item: dict):
+        pointsList = [QPoint(point[0], point[1]) for point in item["ps"]]
+        return shp.symbolPolygon(pointsList)
 
-def createTextItem(item, gridTuple: (int, int)):
-    start = QPoint(item["st"][0], item["st"][1])
-    pen = pens.sPen.returnPen(item['pen'])
-    text = shp.text(start, pen, item['tc'], gridTuple, item['ff'], item['fs'],
-                    item['th'], item['ta'], item['to'])
-    text.setPos(QPoint(item["loc"][0], item["loc"][1]))
-    return text
-
-
-def createSymbolAttribute(item):
-    if item["type"] == "attr":
+    @staticmethod
+    def createSymbolAttribute(item: dict):
         return se.symbolAttribute(item["nam"], item["def"])
 
 
-def createSchematicItems(item, libraryDict, viewName: str, gridTuple: (int, int)):
-    """
-    Create schematic items from json file.
-    """
-    if item["type"] == "symbolShape":
-        libraryPath = libraryDict.get(item["lib"])
+class schematicItems:
+    def __init__(self, scene: QGraphicsScene):
+        self.scene = scene
+        self.libraryDict = scene.libraryDict
+        self.snapTuple = scene.snapTuple
+
+    def create(self, item: dict):
+        match item["type"]:
+            case "sys":
+                itemShapes = list()
+                symbolAttributes = dict()
+                symbolInstance = shp.schematicSymbol(itemShapes, symbolAttributes)
+                symbolInstance.libraryName = item["lib"]
+                symbolInstance.cellName = item["cell"]
+                symbolInstance.viewName = item["view"]
+                symbolInstance.counter = item["ic"]
+                symbolInstance.instanceName = item["nam"]
+                symbolInstance.angle = item.get("ang", 0)
+                symbolInstance.netlistIgnore = bool(item.get("ign", 0))
+                symbolInstance.labelDict = item["ld"]
+                symbolInstance.setPos(*item["loc"])
+                [labelItem.labelDefs() for labelItem in
+                 symbolInstance.labels.values()]
+                libraryPath = self.libraryDict.get(item["lib"])
+
+                if libraryPath is None:
+                    self.createDraftSymbol(item, symbolInstance)
+                    self.scene.logger.warning(f"{item['lib']} cannot be found.")
+                    return symbolInstance
+                else:
+                    # find the symbol file
+                    file = libraryPath.joinpath(item["cell"], f'{item["view"]}.json')
+                    if not file.exists():
+                        self.createDraftSymbol(item, symbolInstance)
+                        self.scene.logger.warning(f"{item['lib']} cannot be found.")
+                        return symbolInstance
+                    else:
+
+                        # load json file and create shapes
+                        with file.open(mode="r", encoding="utf-8") as temp:
+                            try:
+                                jsonItems = json.load(temp)
+                                assert jsonItems[0]["cellView"] == "symbol"
+                                symbolSnapTuple = jsonItems[1]["snapGrid"]
+                                # we snap to scene grid values. Need to test further.
+                                symbolShape = symbolItems(self.scene)
+                                symbolShape.snapTuple = symbolSnapTuple
+                                for jsonItem in jsonItems[2:]:  # skip first two entries.
+                                    if jsonItem["type"] == "attr":
+                                        symbolAttributes[jsonItem["nam"]] = jsonItem["def"]
+                                    else:
+                                        itemShapes.append(symbolShape.create(jsonItem))
+                                symbolInstance.shapes = itemShapes
+                                for labelItem in symbolInstance.labels.values():
+                                    if labelItem.labelName in symbolInstance.labelDict.keys():
+                                        labelItem.labelValue = \
+                                            symbolInstance.labelDict[labelItem.labelName][0]
+                                        labelItem.labelVisible = \
+                                            symbolInstance.labelDict[labelItem.labelName][1]
+                                symbolInstance.symattrs = symbolAttributes
+                                [
+                                    labelItem.labelDefs()
+                                    for labelItem in symbolInstance.labels.values()
+                                ]
+                                return symbolInstance
+                            except json.decoder.JSONDecodeError:
+                                self.scene.logger.error("Error: Invalid Symbol file")
+
+            case "scn":
+                start = QPoint(item["st"][0], item["st"][1])
+                end = QPoint(item["end"][0], item["end"][1])
+                netItem = schematicNet(start, end)
+                netItem.name = item["nam"]
+                netItem.nameSet = item["ns"]
+                return netItem
+            case "scp":
+                start = QPoint(item["st"][0], item["st"][1])
+                pinName = item["pn"]
+                pinDir = item["pd"]
+                pinType = item["pt"]
+                pinItem = shp.schematicPin(start, pinName, pinDir, pinType, )
+                pinItem.angle = item["ang"]
+                return pinItem
+            case "txt":
+                start = QPoint(item["st"][0], item["st"][1])
+                text = shp.text(start, item["tc"], item["ff"], item["fs"], item["th"],
+                                item["ta"],
+                                item["to"])
+                return text
+            case "dot":
+                start = QPoint(item["pt"][0], item["pt"][1])
+                dot = crossingDot(start)
+                return dot
+
+    def createDraftSymbol(self, item: dict, symbolInstance: shp.schematicSymbol):
+        rectItem = shp.symbolRectangle(QPoint(item["br"][0], item["br"][1]),
+                                       QPoint(item["br"][2], item["br"][3]))
+        fixedFont = self.scene.fixedFont
+        textItem = shp.text(rectItem.start, f'{item["lib"]}'
+                                            f'/{item["cell"]}/'
+                                            f'{item["view"]}',
+                            fixedFont.family(), fixedFont.styleName(),
+                            fixedFont.pointSize(), shp.text.textAlignments[0],
+                            shp.text.textOrients[0])
+        symbolInstance.shapes = [rectItem, textItem]
+        symbolInstance.draft = True
+
+
+class layoutItems:
+    def __init__(self, scene: QGraphicsScene):
+        """
+        Create layout items from json file.
+        """
+        self.scene = scene
+        self.libraryDict = scene.libraryDict
+        self.rulerFont = scene.rulerFont
+        self.rulerTickLength = scene.rulerTickLength
+        self.snapTuple = scene.snapTuple
+        self.rulerWidth = scene.rulerWidth
+        self.rulerTickGap = scene.rulerTickGap
+
+    def create(self, item: dict):
+        match item["type"]:
+            case "Inst":
+                return self.createLayoutInstance(item)
+            case "Pcell":
+                libraryPath = pathlib.Path(self.libraryDict.get(item["lib"]))
+                if libraryPath is None:
+                    self.scene.logger.error(f'{item["lib"]} cannot be found.')
+                    return None
+                cell = item["cell"]
+                viewName = item["view"]
+                # open pcell json file with reference to pcell class name
+                file = libraryPath.joinpath(cell, f"{viewName}.json")
+                with file.open("r") as temp:  # open pcell view item
+                    try:
+                        pcellDef = json.load(temp)
+                        if pcellDef[0]["cellView"] != "pcell":
+                            self.scene.logger.error("Not a pcell cell")
+                        else:
+                            pcellInstance = eval(
+                                f'pcells.{pcellDef[1]["reference"]}()')
+                            pcellInstance(**item["params"])
+                            pcellInstance.libraryName = item["lib"]
+                            pcellInstance.cellName = item["cell"]
+                            pcellInstance.viewName = item["view"]
+                            pcellInstance.counter = item["ic"]
+                            pcellInstance.instanceName = item["nam"]
+                            pcellInstance.setPos(QPoint(item["loc"][0], item["loc"][1]))
+                            return pcellInstance
+                    except json.decoder.JSONDecodeError:
+                        print("Error: Invalid PCell file")
+            case "Rect":
+                return self.createRectShape(item)
+            case "Path":
+                return self.createPathShape(item)
+            case "Label":
+                return self.createLabelShape(item, )
+            case "Pin":
+                return self.createPinShape(item)
+            case "Polygon":
+                return self.createPolygonShape(item)
+            case "Via":
+                return self.createViaArrayShape(item)
+            case "Ruler":
+                return self.createRulerShape(item)
+
+    def createLayoutInstance(self, item):
+        libraryPath = pathlib.Path(self.libraryDict.get(item["lib"]))
         if libraryPath is None:
             print(f'{item["lib"]} cannot be found.')
             return None
         cell = item["cell"]
+        viewName = item["view"]
         instCounter = item["ic"]
+        file = libraryPath.joinpath(cell, f"{viewName}.json")
         itemShapes = list()
-        symbolAttributes = dict()
-        labelDict = item["ld"]
-        draftPen = pens.sPen.returnPen('draftPen')
-        # find the symbol file
-        file = libraryPath.joinpath(cell, viewName + ".json")
-        # load json file and create shapes
         with open(file, "r") as temp:
             try:
                 shapes = json.load(temp)
                 for shape in shapes[1:]:
-                    if shape["type"] == "rect":
-                        itemShapes.append(createRectItem(shape, gridTuple))
-                    elif shape["type"] == "circle":
-                        itemShapes.append(createCircleItem(shape, gridTuple))
-                    elif shape["type"] == "arc":
-                        itemShapes.append(createArcItem(shape, gridTuple))
-                    elif shape["type"] == "line":
-                        itemShapes.append(createLineItem(shape, gridTuple))
-                    elif shape["type"] == "pin":
-                        itemShapes.append(createPinItem(shape, gridTuple))
-                    elif shape["type"] == "label":
-                        itemShapes.append(createLabelItem(shape, gridTuple))
-                    # just recreate attributes dictionary
-                    elif shape["type"] == "attr":
-                        symbolAttributes[shape["nam"]] = shape["def"]
+                    itemShapes.append(layoutItems(self.scene, shape))
             except json.decoder.JSONDecodeError:
-                print("Error: Invalid Symbol file")
-        symbolInstance = shp.symbolShape(draftPen, gridTuple, itemShapes,
-                                         symbolAttributes)
-        symbolInstance.libraryName = item["lib"]
-        symbolInstance.cellName = item["cell"]
-        symbolInstance.counter = instCounter
-        symbolInstance.instanceName = item["nam"]
-        symbolInstance.angle = item.get("ang", 0)
-        symbolInstance.netlistIgnore = bool(item.get("ign",0))
-        symbolInstance.viewName = viewName
-        symbolInstance.attributes = symbolAttributes
-        for labelItem in symbolInstance.labels.values():
-            if labelItem.labelName in labelDict.keys():
-                labelItem.labelValue = labelDict[labelItem.labelName][0]
-                labelItem.labelVisible = labelDict[labelItem.labelName][1]
-        symbolInstance.setPos(item["loc"][0], item["loc"][1])
-        return symbolInstance
+                print("Error: Invalid Layout file")
+        layoutInstance = lshp.layoutInstance(itemShapes)
+        layoutInstance.libraryName = item["lib"]
+        layoutInstance.cellName = item["cell"]
+        layoutInstance.counter = instCounter
+        layoutInstance.instanceName = item.get("nam", "")
+        layoutInstance.setPos(item["loc"][0], item["loc"][1])
+        layoutInstance.angle = item.get("ang", 0)
+        layoutInstance.viewName = viewName
+        return layoutInstance
 
+    def createRectShape(self, item):
+        start = QPoint(item["tl"][0], item["tl"][1])
+        end = QPoint(item["br"][0], item["br"][1])
+        layoutLayer = laylyr.pdkDrawingLayers[item["ln"]]
+        rect = lshp.layoutRect(start, end, layoutLayer)
+        # rect.setPos(QPoint(item["loc"][0], item["loc"][1]))
+        rect.angle = item.get("ang", 0)
+        return rect
 
-def createSchematicNets(item):
-    """
-    Create schematic items from json file.
-    """
-    if item["type"] == "schematicNet":
-        start = QPoint(item["st"][0], item["st"][1])
-        end = QPoint(item["end"][0], item["end"][1])
-        position = QPoint(item["loc"][0], item["loc"][1])
-        pen = pens.sPen.returnPen(item['pen'])
-        netItem = net.schematicNet(start, end, pen)
-        netItem.name = item["nam"]
-        netItem.nameSet = item["ns"]
-        netItem.setPos(position)
-        return netItem
+    def createPathShape(self, item):
+        path = lshp.layoutPath(QLineF(QPoint(item["dfl1"][0], item["dfl1"][1]),
+                                      QPoint(item["dfl2"][0], item["dfl2"][1]), ),
+                               laylyr.pdkDrawingLayers[item["ln"]], item["w"], item["se"],
+                               item["ee"], item["md"], )
+        path.name = item.get("nam", "")
+        path.angle = item.get("ang", 0)
+        return path
 
+    def createRulerShape(self, item):
+        ruler = lshp.layoutRuler(QLineF(QPoint(item["dfl1"][0], item["dfl1"][1]),
+                                        QPoint(item["dfl2"][0], item["dfl2"][1]), ),
+                                 self.rulerWidth, self.rulerTickGap,
+                                 self.rulerTickLength, self.rulerFont, item["md"], )
+        ruler.angle = item.get("ang", 0)
+        return ruler
 
-def createSchematicPins(item, gridTuple):
-    """
-    Create schematic items from json file.
-    """
-    if item["type"] == "schematicPin":
-        start = QPoint(item["st"][0], item["st"][1])
-        pen = pens.sPen.returnPen(item['pen'])
-        pinName = item["pn"]
-        pinDir = item["pd"]
-        pinType = item["pt"]
-        pinItem = shp.schematicPin(start, pen, pinName, pinDir, pinType,
-                                   gridTuple)
-        pinItem.setPos(QPoint(item["loc"][0], item["loc"][1]))
-        pinItem.angle = item["ang"]
-        return pinItem
+    def createLabelShape(self, item):
+        layoutLayer = laylyr.pdkTextLayers[item["ln"]]
+        label = lshp.layoutLabel(QPoint(item["st"][0], item["st"][1]), item["lt"],
+                                 item["ff"], item["fs"], item["fh"], item["la"], item["lo"],
+                                 layoutLayer, )
+        label.angle = item.get("ang", 0)
+        return label
+
+    def createPinShape(self, item):
+        layoutLayer = laylyr.pdkPinLayers[item["ln"]]
+        pin = lshp.layoutPin(QPoint(item["tl"][0], item["tl"][1]),
+                             QPoint(item["br"][0], item["br"][1]), item["pn"], item["pd"],
+                             item["pt"],
+                             layoutLayer, )
+        pin.angle = item.get("ang", 0)
+        return pin
+
+    def createPolygonShape(self, item):
+        layoutLayer = laylyr.pdkDrawingLayers[item["ln"]]
+        pointsList = [QPoint(point[0], point[1]) for point in item["ps"]]
+        polygon = lshp.layoutPolygon(pointsList, layoutLayer)
+        polygon.angle = item.get("ang", 0)
+        return polygon
+
+    def createViaArrayShape(self, item):
+        viaDefTuple = fabproc.processVias[fabproc.processViaNames.index(item["via"]["vdt"])]
+        via = lshp.layoutVia(QPoint(item["via"]["st"][0], item["via"]["st"][1]),
+                             viaDefTuple, item["via"]["w"], item["via"]["h"], )
+        viaArray = lshp.layoutViaArray(QPoint(item["st"][0], item["st"][1]), via, item["sp"],
+                                       item["xn"], item["yn"])
+        viaArray.angle = item.get("ang", 0)
+        return viaArray

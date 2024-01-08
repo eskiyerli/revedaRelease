@@ -1,0 +1,31 @@
+/*
+IMPORTANT NOTICE: 
+THIS SOFTWARE IS LICENSED TO YOU UNDER THE TERMS OF THE SYNOPSYS END-USER LICENSE
+AGREEMENT FOR SAMPLE VERILOG-A MODELS. YOU CAN VIEW THE LICENSE AT:
+      http://www.synopsys.com/cgi-bin/hspice/models/license.cgi
+SYNOPSYS, INC. WILL ONLY PERMIT YOU TO USE THIS SOFTWARE ON THE CONDITION THAT YOU
+ACCEPT ALL OF THE TERMS CONTAINED IN THIS LICENSE AGREEMENT.  YOU ACCEPT THESE TERMS
+BY DOWNLOADING, INSTALLING OR USING THIS SOFTWARE. IF YOU ARE UNWILLING TO ACCEPT THE
+TERMS OF THE LICENSE AGREEMENT, THEN  DO NOT DOWNLOAD, INSTALL OR USE THE SOFTWARE.
+*/
+// Version 1.0   September 2006
+`include "constants.vams"
+`include "disciplines.vams"
+
+// out1 is a fixed parameterized delay of in
+// out2 is a variable delay of in increasing with time
+
+module sig_delay(in, out1, out2);
+parameter real td = 3e-6;
+output out1, out2;
+input in;
+electrical in, out1, out2;
+
+analog begin
+   V(out1) <+ absdelay(V(in), td);
+   V(out2) <+ absdelay(V(in), $abstime/50, 100e-6);
+
+end
+/* another comment
+*/
+endmodule
