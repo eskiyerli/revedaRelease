@@ -1,4 +1,4 @@
-no# Revolution EDA Schematic/Symbol Editors
+# Revolution EDA Schematic/Symbol Editors
 
 ## Introduction
 
