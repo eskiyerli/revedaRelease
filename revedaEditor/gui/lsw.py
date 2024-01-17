@@ -26,7 +26,7 @@
 from PySide6.QtWidgets import (QTableView)
 from PySide6.QtGui import (QStandardItemModel, QStandardItem, QBrush, QColor,
                            QPixmap, QBitmap)
-from PySide6.QtCore import (Signal, Qt)
+from PySide6.QtCore import (Signal, Qt, QModelIndex)
 
 
 class layerDataModel(QStandardItemModel):
@@ -63,13 +63,15 @@ class layerDataModel(QStandardItemModel):
             item.setCheckState(Qt.Checked if layer.visible else Qt.Unchecked)
             self.setItem(row, 4, item)
 
-    def createData(self, layerlist: list):
+    def createData(self, layerlist: list) -> list:
         [self._data.append((layer.name, layer.visible, layer.selectable,
                             layer.btexture, layer.bcolor)) for layer in layerlist]
 
 
 class layerViewTable(QTableView):
-    dataSelected = Signal(str)
+    dataSelected = Signal(str, str)
+    layerSelectable = Signal(str, str, bool)
+    layerVisible = Signal(str, str, bool)
 
     def __init__(self, parent=None, model: layerDataModel = None):
         super().__init__(parent)
@@ -82,15 +84,37 @@ class layerViewTable(QTableView):
         self.verticalHeader().setVisible(False)
         selection_model = self.selectionModel()
         selection_model.selectionChanged.connect(self.onSelectionChanged)
+        self._model.dataChanged.connect(self.onDataChanged)
 
     def onSelectionChanged(self, selected, deselected):
         if selected.indexes():
             # Get the first selected index
-            index = selected.indexes()[1]
+            layerNameIndex = selected.indexes()[1]
+            layerPurposeIndex = selected.indexes()[2]
             # Get the row and column of the selected index
-            row = index.row()
-            column = index.column()
             # Get the data from the model at the selected index
-            model = index.model()
-            layerName = model.data(index)
-            self.dataSelected.emit(layerName)
+            layerName = self._model.data(layerNameIndex)
+            layerPurpose = self._model.data(layerPurposeIndex)
+            self.dataSelected.emit(layerName, layerPurpose)
+
+    def onDataChanged(self, topLeft: QModelIndex, bottomRight: QModelIndex, roles: list):
+        # Check if the changed data involves the check state
+        if Qt.CheckStateRole in roles:
+            row = topLeft.row()
+            column = topLeft.column()
+            item = self._model.item(row, column)
+            # if item and item.isCheckable():
+            if column == 4:
+                if item.checkState() == Qt.Checked:
+                    self.layerSelectable.emit(self._model.item(row, 1).text(),
+                                              self._model.item(row, 2).text(), True)
+                else:
+                    self.layerSelectable.emit(self._model.item(row, 1).text(),
+                                              self._model.item(row, 2).text(), False)
+            elif column == 3:
+                if item.checkState() == Qt.Checked:
+                    self.layerVisible.emit(self._model.item(row, 1).text(),
+                                           self._model.item(row, 2).text(), True)
+                else:
+                    self.layerVisible.emit(self._model.item(row, 1).text(),
+                                           self._model.item(row, 2).text(), False)

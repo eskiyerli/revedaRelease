@@ -97,7 +97,10 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QGraphicsLineItem,
+    QGraphicsItem,
 )
+
+import pdk.layoutLayers
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.backend.schBackEnd as scb
@@ -473,7 +476,7 @@ class libraryBrowser(QMainWindow):
         self.openCellView(viewItem, cellItem, libItem)
 
     def openCellView(
-        self, viewItem: scb.viewItem, cellItem: scb.cellItem, libItem: scb.libraryItem
+            self, viewItem: scb.viewItem, cellItem: scb.cellItem, libItem: scb.libraryItem
     ):
         viewName = viewItem.viewName
         cellName = cellItem.cellName
@@ -640,7 +643,6 @@ class designLibrariesView(QTreeView):
             shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
             self.selectedItem.parent().removeRow(self.selectedItem.row())
         except OSError as e:
-            # print(f"Error:{e.strerror}")
             self.logger.warning(f"Error:{e}")
 
     def createCellView(self):
@@ -673,7 +675,7 @@ class designLibrariesView(QTreeView):
                     for row in range(selectedLibItem.rowCount())
                 ]
                 if (
-                    cellName in libCellNames
+                        cellName in libCellNames
                 ):  # check if there is the cell in the library
                     cellItem = libm.getCellItem(
                         selectedLibItem, dlg.cellCB.currentText()
@@ -722,7 +724,6 @@ class designLibrariesView(QTreeView):
             parent = self.selectedItem.parent()
             parent.removeRow(itemRow)
         except OSError as e:
-            # print(f"Error:{e.strerror}")
             self.logger.warning(f"Error:{e.strerror}")
 
     def reworkDesignLibrariesView(self, libraryDict: dict):
@@ -874,7 +875,7 @@ class symbolViewsModel(designLibrariesModel):
                     view.name
                     for view in designPath.joinpath(cell).iterdir()
                     if view.suffix == ".json"
-                    and any(x in view.name for x in self.symbolViews)
+                       and any(x in view.name for x in self.symbolViews)
                 ]
                 for view in viewList:
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
@@ -898,7 +899,7 @@ class layoutViewsModel(designLibrariesModel):
                     view.name
                     for view in designPath.joinpath(cell).iterdir()
                     if view.suffix == ".json"
-                    and any(x in view.name for x in self.layoutViews)
+                       and any(x in view.name for x in self.layoutViews)
                 ]
                 for view in viewList:
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
@@ -910,10 +911,10 @@ class editorWindow(QMainWindow):
     """
 
     def __init__(
-        self,
-        viewItem: scb.viewItem,
-        libraryDict: dict,
-        libraryView: designLibrariesView,
+            self,
+            viewItem: scb.viewItem,
+            libraryDict: dict,
+            libraryView: designLibrariesView,
     ):  # file is a pathlib.Path object
         super().__init__()
         self.centralW = None
@@ -1991,11 +1992,11 @@ class schematicEditor(editorWindow):
         # because we do not save dot points, it is necessary to recreate them.
 
     def createConfigView(
-        self,
-        configItem: scb.viewItem,
-        configDict: dict,
-        newConfigDict: dict,
-        processedCells: set,
+            self,
+            configItem: scb.viewItem,
+            configDict: dict,
+            newConfigDict: dict,
+            processedCells: set,
     ):
         sceneSymbolSet = self.centralW.scene.findSceneSymbolSet()
         for item in sceneSymbolSet:
@@ -2122,10 +2123,10 @@ class schematicEditor(editorWindow):
 
 class symbolEditor(editorWindow):
     def __init__(
-        self,
-        viewItem: scb.viewItem,
-        libraryDict: dict,
-        libraryView: designLibrariesView,
+            self,
+            viewItem: scb.viewItem,
+            libraryDict: dict,
+            libraryView: designLibrariesView,
     ):
         super().__init__(viewItem, libraryDict, libraryView)
         self.setWindowTitle(f"Symbol Editor - {self.cellName} - {self.viewName}")
@@ -2279,7 +2280,7 @@ class symbolEditor(editorWindow):
             )
             self.centralW.scene.labelUse = createLabelDlg.labelUseCombo.currentText()
             self.centralW.scene.labelOpaque = (
-                createLabelDlg.labelVisiCombo.currentText() == "Yes"
+                    createLabelDlg.labelVisiCombo.currentText() == "Yes"
             )
             self.centralW.scene.labelType = "Normal"  # default button
             if createLabelDlg.normalType.isChecked():
@@ -2344,7 +2345,9 @@ class layoutContainer(QWidget):
         self.parent = parent
         self.lswModel = lsw.layerDataModel(laylyr.pdkAllLayers)
         self.lswWidget = lsw.layerViewTable(self, self.lswModel)
-        self.lswWidget.dataSelected.connect(self.layerSelected)
+        self.lswWidget.dataSelected.connect(self.selectLayer)
+        self.lswWidget.layerSelectable.connect(self.layerSelectableChange)
+        self.lswWidget.layerVisible.connect(self.layerVisibleChange)
         self.scene = layout_scene(self)
         self.view = layout_view(self.scene, self)
         self.init_UI()
@@ -2364,10 +2367,32 @@ class layoutContainer(QWidget):
 
         self.setLayout(vLayout)
 
-    def layerSelected(self, layerName):
-        self.scene.selectEdLayer = [
-            item for item in laylyr.pdkDrawingLayers if item.name == layerName
-        ][0]
+    def selectLayer(self, layerName: str, layerPurpose :str):
+        self.scene.selectEdLayer = self.findSelectedLayer(layerName,layerPurpose)
+    def findSelectedLayer(self, layerName: str, layerPurpose :str):
+        for layer in pdk.layoutLayers.pdkAllLayers:
+            if layer.name == layerName and layer.purpose == layerPurpose:
+                return layer
+        return pdk.layoutLayers.pdkAllLayers[0]
+    def layerSelectableChange(self, layerName: str, layerPurpose: str, layerSelectable: bool):
+        selectedLayer = self.findSelectedLayer(layerName, layerPurpose)
+        if selectedLayer:
+            selectedLayer.selectable = layerSelectable
+
+    def layerVisibleChange(self, layerName: str, layerPurpose: str, layerVisible: bool):
+        selectedLayer = self.findSelectedLayer(layerName, layerPurpose)
+        if selectedLayer:
+            if layerVisible:
+                selectedLayer.visible = True
+            else:
+                selectedLayer.visible = False
+
+            for item in self.scene.items():
+                if hasattr(item, 'layer') and item.layer == selectedLayer:
+                    item.setVisible(layerVisible)
+                    item.update()
+
+
 
 
 class editor_scene(QGraphicsScene):
@@ -2745,9 +2770,9 @@ class symbol_scene(editor_scene):
             elif self.editModes.drawCircle:
                 self.editorWindow.messageLine.setText("Extend Circle")
                 radius = (
-                    (self.mouseMoveLoc.x() - self.mousePressLoc.x()) ** 2
-                    + (self.mouseMoveLoc.y() - self.mousePressLoc.y()) ** 2
-                ) ** 0.5
+                                 (self.mouseMoveLoc.x() - self.mousePressLoc.x()) ** 2
+                                 + (self.mouseMoveLoc.y() - self.mousePressLoc.y()) ** 2
+                         ) ** 0.5
                 self.newCircle.radius = radius
             elif self.editModes.drawArc:
                 self.editorWindow.messageLine.setText("Extend Arc")
@@ -2859,14 +2884,14 @@ class symbol_scene(editor_scene):
         return pin
 
     def labelDraw(
-        self,
-        current,
-        labelDefinition,
-        labelType,
-        labelHeight,
-        labelAlignment,
-        labelOrient,
-        labelUse,
+            self,
+            current,
+            labelDefinition,
+            labelType,
+            labelHeight,
+            labelAlignment,
+            labelOrient,
+            labelUse,
     ):
         label = lbl.symbolLabel(
             current,
@@ -3497,16 +3522,15 @@ class schematic_scene(editor_scene):
                             points.append(item.draftLine.p1().toPoint())
                             lengths.append(
                                 (
-                                    item.mapToScene(item.draftLine.p1()) - eventLoc
+                                        item.mapToScene(item.draftLine.p1()) - eventLoc
                                 ).manhattanLength()
                             )
                         elif snapRect.contains(item.draftLine.p2().toPoint()):
                             items.append(item)
                             points.append(item.draftLine.p2().toPoint())
-                            # print(f'net end:{item.end}')
                             lengths.append(
                                 (
-                                    item.mapToScene(item.draftLine.p2()) - eventLoc
+                                        item.mapToScene(item.draftLine.p2()) - eventLoc
                                 ).manhattanLength()
                             )
                 if len(lengths) > 0:
@@ -3682,9 +3706,9 @@ class schematic_scene(editor_scene):
             for netItem2 in otherNetsSet:
                 if self.checkNetConnect(netItem, netItem2):
                     if (
-                        (netItem2.nameSet or netItem2.nameAdded)
-                        and (netItem.nameSet or netItem.nameAdded)
-                        and (netItem.name != netItem2.name)
+                            (netItem2.nameSet or netItem2.nameAdded)
+                            and (netItem.nameSet or netItem.nameAdded)
+                            and (netItem.name != netItem2.name)
                     ):
                         self.editorWindow.messageLine.setText(
                             "Error: multiple names assigned to same net"
@@ -3716,7 +3740,7 @@ class schematic_scene(editor_scene):
 
         if otherNetItem is not netItem:
             for netItemEnd, otherEnd in itt.product(
-                netItem.sceneEndPoints, otherNetItem.sceneEndPoints
+                    netItem.sceneEndPoints, otherNetItem.sceneEndPoints
             ):
                 # not a very elegant solution to mistakes in net end points.
                 if (netItemEnd - otherEnd).manhattanLength() <= 1:
@@ -3816,7 +3840,7 @@ class schematic_scene(editor_scene):
         """
         try:
             if (
-                start.y() == end.y() or start.x() == end.x()
+                    start.y() == end.y() or start.x() == end.x()
             ):  # horizontal or verticalline
                 lines = [net.schematicNet(start, end)]
             else:
@@ -3955,8 +3979,8 @@ class schematic_scene(editor_scene):
         for item in itemsList[2:]:
             itemShape = lj.schematicItems(self).create(item)
             if (
-                type(itemShape) == shp.schematicSymbol
-                and itemShape.counter > self.itemCounter
+                    type(itemShape) == shp.schematicSymbol
+                    and itemShape.counter > self.itemCounter
             ):
                 self.itemCounter = itemShape.counter
                 # increment item counter for next symbol
@@ -3964,7 +3988,6 @@ class schematic_scene(editor_scene):
             shapesList.append(itemShape)
 
         self.undoStack.push(us.loadShapesUndo(self, shapesList))
-        print(f"snap tuple: {self.snapTuple}")
 
     def reloadScene(self):
         topLevelItems = [item for item in self.items() if item.parentItem() is None]
@@ -4266,11 +4289,11 @@ class schematic_scene(editor_scene):
                 stubLength = int(float(dlg.stubLengthEdit.text().strip()))
                 pinDistance = int(float(dlg.pinDistanceEdit.text().strip()))
                 rectXDim = (
-                    max(len(topPinNames), len(bottomPinNames)) + 1
-                ) * pinDistance
+                                   max(len(topPinNames), len(bottomPinNames)) + 1
+                           ) * pinDistance
                 rectYDim = (
-                    max(len(leftPinNames), len(rightPinNames)) + 1
-                ) * pinDistance
+                                   max(len(leftPinNames), len(rightPinNames)) + 1
+                           ) * pinDistance
             except ValueError:
                 self.logger.error("Enter valid value")
 
@@ -4371,7 +4394,7 @@ class schematic_scene(editor_scene):
                         for i in range(cellItem.rowCount())
                         # if cellItem.child(i).text() != item.viewName
                         if "schematic" in cellItem.child(i).text()
-                        or "symbol" in cellItem.child(i).text()
+                           or "symbol" in cellItem.child(i).text()
                     ]
                     dlg.viewListCB.addItems(viewNames)
                     if dlg.exec() == QDialog.Accepted:
@@ -4424,7 +4447,7 @@ class schematic_scene(editor_scene):
 class layout_scene(editor_scene):
     def __init__(self, parent):
         super().__init__(parent)
-        self.selectEdLayer = laylyr.pdkDrawingLayers[0]
+        self.selectEdLayer = pdk.layoutLayers.pdkAllLayers[0]
         self.layoutShapes = [
             "Inst",
             "Rect",
@@ -4472,6 +4495,7 @@ class layout_scene(editor_scene):
         self.newPinTuple = None
         self.newLabelTuple = None
         self.newLabel = None
+        self._newRect = None
         self._newPolygon = None
         self.arrayViaTuple = None
         self.singleVia = None
@@ -4628,7 +4652,7 @@ class layout_scene(editor_scene):
                     QRectF(self.mousePressLoc, self.mouseMoveLoc)
                 )
         else:
-            if self.editModes.drawRect:
+            if self.editModes.drawRect and self._newRect:
                 if self._newRect.scene() is None:
                     self.addUndoStack(self._newRect)
                 self._newRect.end = self.mouseMoveLoc
@@ -4749,7 +4773,7 @@ class layout_scene(editor_scene):
                     )
 
                 elif (
-                    self.editModes.drawPin
+                        self.editModes.drawPin
                 ):  # finish pin editing and start label editing
                     if self.newPin is not None and self.newLabel is None:
                         self.newLabel = lshp.layoutLabel(
@@ -4840,7 +4864,7 @@ class layout_scene(editor_scene):
                             self.logger.error("Not a layout cell")
                         else:
                             instanceShapes = [
-                                lj.layoutItems(self).create(decodedData)
+                                lj.layoutItems(self).create(item)
                                 for item in decodedData[2:]
                                 if item.get("type") in self.layoutShapes
                             ]
@@ -4860,7 +4884,6 @@ class layout_scene(editor_scene):
                             # For each instance assign a counter number from the scene
                             return layoutInstance
                     except json.JSONDecodeError:
-                        # print("Invalid JSON file")
                         self.logger.warning("Invalid JSON File")
             case "pcell":
                 with open(self.layoutInstanceTuple.viewItem.viewPath, "r") as temp:
@@ -5653,10 +5676,10 @@ class layout_view(editor_view):
 
 class xyceNetlist:
     def __init__(
-        self,
-        schematic: schematicEditor,
-        filePathObj: pathlib.Path,
-        use_config: bool = False,
+            self,
+            schematic: schematicEditor,
+            filePathObj: pathlib.Path,
+            use_config: bool = False,
     ):
         self.filePathObj = filePathObj
         self.schematic = schematic
@@ -5730,8 +5753,8 @@ class xyceNetlist:
             schematicScene.generatePinNetMap(sceneSymbolSet)
             for elementSymbol in sceneSymbolSet:
                 if (
-                    elementSymbol.symattrs.get("XyceNetlistPass") != "1"
-                    and (not elementSymbol.netlistIgnore)
+                        elementSymbol.symattrs.get("XyceNetlistPass") != "1"
+                        and (not elementSymbol.netlistIgnore)
                 ):
                     libItem = libm.getLibItem(
                         schematic.libraryView.libraryModel, elementSymbol.libraryName
@@ -5753,9 +5776,7 @@ class xyceNetlist:
                     # these are qstandarditem in library browser.
                     viewItem = libm.getViewItem(cellItem, netlistView)
 
-
                     # now create the netlist line for that item.
-                    print(f"{elementSymbol.cellName}, {netlistView}")
                     self.createItemLine(cirFile, elementSymbol, cellItem, netlistView)
                 elif elementSymbol.netlistIgnore:
                     cirFile.write(
@@ -5770,11 +5791,11 @@ class xyceNetlist:
             self.schematic.logger.error(f'Netlisting error: {e}')
 
     def createItemLine(
-        self,
-        cirFile,
-        elementSymbol: shp.schematicSymbol,
-        cellItem: scb.cellItem,
-        netlistView: str,
+            self,
+            cirFile,
+            elementSymbol: shp.schematicSymbol,
+            cellItem: scb.cellItem,
+            netlistView: str,
     ):
         pass
         if "schematic" in netlistView:
@@ -5827,7 +5848,7 @@ class xyceNetlist:
                     )
             pinList = " ".join(elementSymbol.pinNetMap.values())
             xyceNetlistFormatLine = (
-                xyceNetlistFormatLine.replace("[@pinList]", pinList) + "\n"
+                    xyceNetlistFormatLine.replace("[@pinList]", pinList) + "\n"
             )
             return xyceNetlistFormatLine
         except Exception as e:
@@ -5857,7 +5878,7 @@ class xyceNetlist:
                     )
             pinList = elementSymbol.symattrs.get("pinOrder", ", ").replace(",", " ")
             spiceNetlistFormatLine = (
-                spiceNetlistFormatLine.replace("[@pinList]", pinList) + "\n"
+                    spiceNetlistFormatLine.replace("[@pinList]", pinList) + "\n"
             )
             self.includeLines.add(
                 elementSymbol.symattrs.get(
@@ -5894,7 +5915,7 @@ class xyceNetlist:
                     )
             pinList = " ".join(elementSymbol.pinNetMap.values())
             verilogaNetlistFormatLine = (
-                verilogaNetlistFormatLine.replace("[@pinList]", pinList) + "\n"
+                    verilogaNetlistFormatLine.replace("[@pinList]", pinList) + "\n"
             )
             self.vamodelLines.add(
                 elementSymbol.symattrs.get(

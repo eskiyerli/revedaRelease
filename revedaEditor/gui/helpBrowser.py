@@ -133,7 +133,7 @@ class aboutDialog(QDialog):
         about_label = QLabel(
             "<h2>Revolution EDA</h2>"
             "<p><strong>Version:</strong> 0.6</p>"
-            "<p><strong>Copyright: Revolution Semiconductor</strong> © 2023</p>"
+            "<p><strong>Copyright: Revolution Semiconductor</strong> © 2024</p>"
             "<p><strong>License:</strong> Mozilla Public License 2.0 amended with Commons Clause</p>"
             "<p><strong> Website:</strong> <a href='https://www.reveda.eu'>Revolution EDA</a></p>"
             "<p><strong> GitHub:</strong> <a href='https://github.com/eskiyerli/revedaRelease'>Revolution EDA GitHub Repository</a></p>"
