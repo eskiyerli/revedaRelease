@@ -1,24 +1,51 @@
-#
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
-[tool.setuptools]
-packages = ['revedaEditor.gui','revedaEditor.common','revedaEditor.fileio','revedaEditor.backend','revedaEditor.resources','pdk']
-py-modules = ['revinit', 'reveda']
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "revolution-eda"
-version = "0.5.1"
+dynamic = ["version"]
 description = 'Revolution EDA is a new generation integrated circuit design environment.'
 readme = "README.md"
-classifiers = ["Development Status :: 3 - Alpha",
-    "Programming Language :: Python :: 3",
-]
-keywords = ["electronic", "design", "schematic"]
-dependencies = ["PySide6>=6.4.2",
-    "quantiphy>=2.19",
-]
 requires-python = ">=3.10"
+license-files = { paths = ["LICENSE.txt"] }
+# keywords = []
+authors = [
+  { name = "Revolution EDA", email = "48187772+eskiyerli@users.noreply.github.com" },
+]
+dependencies = [
+  "PySide6~=6.6.1",
+"quantiphy~=2.19",
+"python-dotenv~=1.0.0",
+"gdstk~=0.9.46",
+]
+keywords = ["electronic", "design", "schematic", "layout", ]
+classifiers = ["Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+]
+
+
 [project.urls]
-Homepage = "https://github.com/eskiyerli/revedaRelease"
+Documentation = "https://github.com/unknown/revolution-eda#readme"
+Issues = "https://github.com/unknown/revolution-eda/issues"
+Source = "https://github.com/unknown/revolution-eda"
+Website = "https://reveda.eu"
+
 [project.scripts]
 reveda = "reveda:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ['revedaEditor','pdk']
+modules = ['revinit', 'reveda']
+
+[tool.hatch.version]
+path = "revedaEditor/gui/revinit.py"
+
+[tool.hatch.build.targets.wheel.force-include]
+"./exampleLibraries" = "exampleLibraries"
+"./reveda.py" = "reveda.py"
+"./reveda.conf" = "reveda.conf"
+"./library.json" = "library.json"
+

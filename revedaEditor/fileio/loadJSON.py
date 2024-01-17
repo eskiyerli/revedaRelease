@@ -330,8 +330,8 @@ class layoutItems:
         with open(file, "r") as temp:
             try:
                 shapes = json.load(temp)
-                for shape in shapes[1:]:
-                    itemShapes.append(layoutItems(self.scene, shape))
+                for shape in shapes[2:]:
+                    itemShapes.append(layoutItems(self.scene).create(shape))
             except json.decoder.JSONDecodeError:
                 print("Error: Invalid Layout file")
         layoutInstance = lshp.layoutInstance(itemShapes)

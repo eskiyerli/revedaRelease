@@ -55,26 +55,6 @@ class layoutShape(QGraphicsItem):
         return "layoutShape()"
 
     def itemChange(self, change, value):
-        # if change == QGraphicsItem.ItemPositionChange and self.scene():
-        #     newPos = value.toPoint()
-        #     sceneRect = self.scene().sceneRect()
-        #     viewRect = self.scene().views()[0].viewport().rect()
-        #
-        #     if not sceneRect.contains(newPos):
-        #         # Keep the item inside the scene rect.
-        #         if newPos.x() > sceneRect.right():
-        #             sceneRect.setRight(newPos.x())
-        #             viewRect.setRight(newPos.x())
-        #         elif newPos.x() < sceneRect.left():
-        #             sceneRect.setLeft(newPos.x())
-        #             viewRect.setLeft(newPos.x())
-        #         if newPos.y() > sceneRect.bottom():
-        #             sceneRect.setBottom(newPos.y())
-        #             viewRect.setBottom(newPos.y())
-        #         elif newPos.y() < sceneRect.top():
-        #             sceneRect.setTop(newPos.y())
-        #             viewRect.setTop(newPos.y())
-        #     return newPos
         return super().itemChange(change, value)
 
     @property
@@ -102,7 +82,6 @@ class layoutShape(QGraphicsItem):
     @angle.setter
     def angle(self, value):
         self._angle = value
-        print(self._angle)
         self.prepareGeometryChange()
         self.setRotation(value)  # self.update(self.boundingRect())
 
@@ -164,6 +143,12 @@ class layoutRect(layoutShape):
         self._start = self._rect.topLeft()
         self._end = self._rect.bottomRight()
         self._layer = layer
+        if self._layer.selectable:
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+            self.setFlag(QGraphicsItem.ItemIsFocusable, True)
+        else:
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
+            self.setFlag(QGraphicsItem.ItemIsFocusable, False)
         self._stretch = False
         self._stretchSide = None
         self._stretchPen = QPen(QColor("red"), self._layer.pwidth, Qt.SolidLine)
@@ -202,10 +187,6 @@ class layoutRect(layoutShape):
         return self._rect.normalized().adjusted(-2, -2, 2, 2)
 
     @property
-    def layer(self):
-        return self._layer
-
-    @property
     def rect(self):
         return self._rect
 
@@ -237,7 +218,7 @@ class layoutRect(layoutShape):
     @property
     def centre(self):
         return QPoint(int(self._rect.x() + self._rect.width() / 2),
-            int(self._rect.y() + self._rect.height() / 2), )
+                      int(self._rect.y() + self._rect.height() / 2), )
 
     @property
     def height(self):
@@ -317,25 +298,31 @@ class layoutRect(layoutShape):
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
-        eventPos = event.pos().toPoint()
-        if self._stretch:
+        if self._layer.selectable:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+            eventPos = event.pos().toPoint()
+            if self._stretch:
+                self.setFlag(QGraphicsItem.ItemIsMovable, False)
+                if eventPos.x() == self._rect.left():
+                    if self._rect.top() <= eventPos.y() <= self._rect.bottom():
+                        self.setCursor(Qt.SizeHorCursor)
+                        self._stretchSide = layoutRect.sides[0]
+                elif eventPos.x() == self._rect.right():
+                    if self._rect.top() <= eventPos.y() <= self._rect.bottom():
+                        self.setCursor(Qt.SizeHorCursor)
+                        self._stretchSide = layoutRect.sides[1]
+                elif eventPos.y() == self._rect.top():
+                    if self._rect.left() <= eventPos.x() <= self._rect.right():
+                        self.setCursor(Qt.SizeVerCursor)
+                        self._stretchSide = layoutRect.sides[2]
+                elif eventPos.y() == self._rect.bottom():
+                    if self._rect.left() <= eventPos.x() <= self._rect.right():
+                        self.setCursor(Qt.SizeVerCursor)
+                        self._stretchSide = layoutRect.sides[3]
+        else:
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
-            if eventPos.x() == self._rect.left():
-                if self._rect.top() <= eventPos.y() <= self._rect.bottom():
-                    self.setCursor(Qt.SizeHorCursor)
-                    self._stretchSide = layoutRect.sides[0]
-            elif eventPos.x() == self._rect.right():
-                if self._rect.top() <= eventPos.y() <= self._rect.bottom():
-                    self.setCursor(Qt.SizeHorCursor)
-                    self._stretchSide = layoutRect.sides[1]
-            elif eventPos.y() == self._rect.top():
-                if self._rect.left() <= eventPos.x() <= self._rect.right():
-                    self.setCursor(Qt.SizeVerCursor)
-                    self._stretchSide = layoutRect.sides[2]
-            elif eventPos.y() == self._rect.bottom():
-                if self._rect.left() <= eventPos.x() <= self._rect.right():
-                    self.setCursor(Qt.SizeVerCursor)
-                    self._stretchSide = layoutRect.sides[3]
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         eventPos = event.pos().toPoint()
@@ -508,7 +495,7 @@ class layoutLine(layoutShape):
 
 class layoutPath(layoutShape):
     def __init__(self, draftLine: QLineF, layer: ddef.layLayer, width: float = 1.0,
-            startExtend: int = 0, endExtend: int = 0, mode: int = 0, ):
+                 startExtend: int = 0, endExtend: int = 0, mode: int = 0, ):
         """
         Initialize the class instance.
 
@@ -531,7 +518,6 @@ class layoutPath(layoutShape):
         self._name = ""
         self._stretch = False
         self._stretchSide = None
-        self._layer = layer
         self._definePensBrushes()
         self._rect = QRectF(0, 0, 0, 0)
         self._angle = 0
@@ -720,18 +706,23 @@ class layoutPath(layoutShape):
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
-        eventPos = event.pos().toPoint()
-        if self._stretch:
+        if self._layer.selectable:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+            eventPos = event.pos().toPoint()
+            if self._stretch:
+                self.setFlag(QGraphicsItem.ItemIsMovable, False)
+                if (
+                        eventPos - self._draftLine.p1().toPoint()).manhattanLength() <= self.scene().snapDistance:
+                    self._stretchSide = "p1"
+                    self.setCursor(Qt.SizeHorCursor)
+                elif (
+                        eventPos - self._draftLine.p2().toPoint()).manhattanLength() <= self.scene().snapDistance:
+                    self._stretchSide = "p2"
+                    self.setCursor(Qt.SizeHorCursor)
+        else:
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
-            if (
-                    eventPos - self._draftLine.p1().toPoint()).manhattanLength() <= self.scene().snapDistance:
-                self._stretchSide = "p1"
-                self.setCursor(Qt.SizeHorCursor)
-            elif (
-                    eventPos - self._draftLine.p2().toPoint()).manhattanLength() <= self.scene().snapDistance:
-                print("p2")
-                self._stretchSide = "p2"
-                self.setCursor(Qt.SizeHorCursor)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         eventPos = event.pos().toPoint()
@@ -756,7 +747,7 @@ class layoutPath(layoutShape):
 
 class layoutRuler(layoutShape):
     def __init__(self, draftLine: QLineF, width: float, tickGap: float, tickLength: int,
-            tickFont: QFont, mode: int = 0, ):
+                 tickFont: QFont, mode: int = 0, ):
         """
         Initialize the TickLine object.
 
@@ -793,7 +784,6 @@ class layoutRuler(layoutShape):
         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
         self._createRulerTicks()
         # self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
-
         self.update(self.boundingRect())
 
     def __repr__(self):
@@ -860,16 +850,18 @@ class layoutRuler(layoutShape):
                                self._draftLine.p1() + i * self._tickGap * direction + perpendicular * self._tickLength, ),
                         str(float(i)), ))
         self._tickTuples.append(ddef.rulerTuple(self.draftLine.p2() + direction * 2,
-            QLineF(self._draftLine.p2(),
-                self.draftLine.p2() + +perpendicular * self._tickLength, ),
-            str(round(self._draftLine.length() / self._tickGap, 3)), ))
+                                                QLineF(self._draftLine.p2(),
+                                                       self.draftLine.p2() + +perpendicular * self._tickLength, ),
+                                                str(round(
+                                                    self._draftLine.length() / self._tickGap,
+                                                    3)), ))
         point1 = self._draftLine.p1().toPoint()
         point2 = (self._draftLine.p2() + perpendicular * (self._tickLength + len(
             self._tickTuples[-1].text) * self._fm.maxWidth())).toPoint()
         self._rect = QRectF(point1, point2).normalized()
 
     def boundingRect(self) -> QRectF:
-        return self._rect.adjusted(-4, -4, 4, 4)
+        return self._rect.adjusted(-30, -10, 30, 10)
 
     def paint(self, painter, option, widget):
         if self.isSelected():
@@ -930,7 +922,7 @@ class layoutLabel(layoutShape):
     labelOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
 
     def __init__(self, start: QPoint, labelText: str, fontFamily: str, fontStyle: str,
-            fontHeight: str, labelAlign: str, labelOrient: str, layer: ddef.layLayer, ):
+                 fontHeight: str, labelAlign: str, labelOrient: str, layer: ddef.layLayer, ):
         super().__init__()
         self._start = start
         self._labelText = labelText
@@ -994,7 +986,7 @@ class layoutLabel(layoutShape):
 
     def boundingRect(self):
         return (QRect(self._start.x(), self._start.y(), self._rect.width(),
-            self._rect.height(), ).normalized().adjusted(-2, -2, 2, 2))  #
+                      self._rect.height(), ).normalized().adjusted(-2, -2, 2, 2))  #
 
     def shape(self) -> QPainterPath:
         path = QPainterPath()
@@ -1012,8 +1004,17 @@ class layoutLabel(layoutShape):
             painter.setPen(self._pen)
             self.setZValue(self._layer.z)
         painter.drawText(QPoint(self._start.x(), self._start.y() + self._rect.height()),
-            self._labelText, )
+                         self._labelText, )
         painter.drawPoint(self._start)
+
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if self._layer.selectable:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        else:
+            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
 
     def flip(self, direction: str):
         currentTransform = self.transform()
@@ -1055,7 +1056,7 @@ class layoutLabel(layoutShape):
     def fontFamily(self, familyName):
         fontFamilies = QFontDatabase.families(QFontDatabase.Latin)
         fixedFamilies = [family for family in fontFamilies if
-            QFontDatabase.isFixedPitch(family)]
+                         QFontDatabase.isFixedPitch(family)]
         if familyName in fixedFamilies:
             self._labelFont.setFamily(familyName)
         else:
@@ -1118,7 +1119,7 @@ class layoutPin(layoutShape):
     pinTypes = ["Signal", "Ground", "Power", "Clock", "Digital", "Analog"]
 
     def __init__(self, start, end, pinName: str, pinDir: str, pinType: str,
-            layer: ddef.layLayer, ):
+                 layer: ddef.layLayer, ):
         super().__init__()
 
         self._pinName = pinName
@@ -1243,29 +1244,35 @@ class layoutPin(layoutShape):
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
-        eventPos = event.pos().toPoint()
-        if self._stretch:
+        if self._layer.selectable:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+            eventPos = event.pos().toPoint()
+            if self._stretch:
+                self.setFlag(QGraphicsItem.ItemIsMovable, False)
+                if eventPos.x() == self._rect.left():
+                    if self._rect.top() <= eventPos.y() <= self._rect.bottom():
+                        self.setCursor(Qt.SizeHorCursor)
+                        self._stretchSide = layoutRect.sides[0]
+                elif eventPos.x() == self._rect.right():
+                    if self._rect.top() <= eventPos.y() <= self._rect.bottom():
+                        self.setCursor(Qt.SizeHorCursor)
+                        self._stretchSide = layoutRect.sides[1]
+                elif eventPos.y() == self._rect.top():
+                    if self._rect.left() <= eventPos.x() <= self._rect.right():
+                        self.setCursor(Qt.SizeVerCursor)
+                        self._stretchSide = layoutRect.sides[2]
+                elif eventPos.y() == self._rect.bottom():
+                    if self._rect.left() <= eventPos.x() <= self._rect.right():
+                        self.setCursor(Qt.SizeVerCursor)
+                        self._stretchSide = layoutRect.sides[3]
+        else:
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
-            if eventPos.x() == self._rect.left():
-                if self._rect.top() <= eventPos.y() <= self._rect.bottom():
-                    self.setCursor(Qt.SizeHorCursor)
-                    self._stretchSide = layoutRect.sides[0]
-            elif eventPos.x() == self._rect.right():
-                if self._rect.top() <= eventPos.y() <= self._rect.bottom():
-                    self.setCursor(Qt.SizeHorCursor)
-                    self._stretchSide = layoutRect.sides[1]
-            elif eventPos.y() == self._rect.top():
-                if self._rect.left() <= eventPos.x() <= self._rect.right():
-                    self.setCursor(Qt.SizeVerCursor)
-                    self._stretchSide = layoutRect.sides[2]
-            elif eventPos.y() == self._rect.bottom():
-                if self._rect.left() <= eventPos.x() <= self._rect.right():
-                    self.setCursor(Qt.SizeVerCursor)
-                    self._stretchSide = layoutRect.sides[3]
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         eventPos = event.pos().toPoint()
-        if self.stretch:
+        if self._stretch and self._stretchSide:
             self.prepareGeometryChange()
             if self.stretchSide == layoutRect.sides[0]:
                 self.setCursor(Qt.SizeHorCursor)
@@ -1326,6 +1333,15 @@ class layoutVia(layoutShape):
         painter.drawRect(self._rect)
         painter.drawLine(self._rect.bottomLeft(), self._rect.topRight())
         painter.drawLine(self._rect.topLeft(), self._rect.bottomRight())
+
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if self._layer.selectable:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        else:
+            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
 
     def boundingRect(self):
         return self._rect.normalized().adjusted(-2, -2, 2, 2)
@@ -1414,7 +1430,7 @@ class layoutViaArray(layoutShape):
         for i, j in itertools.product(range(xnum), range(ynum)):
             item = layoutVia(QPoint(self._start.x() + i * (self._spacing + via.width),
                                     self._start.y() + j * (self._spacing + via.height), ),
-                self._via.viaDefTuple, via.width, via.height, )
+                             self._via.viaDefTuple, via.width, via.height, )
             item.setFlag(QGraphicsItem.ItemIsSelectable, False)
             item.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
             item.setParentItem(self)
@@ -1429,6 +1445,7 @@ class layoutViaArray(layoutShape):
         if self.isSelected():
             painter.setPen(self._selectedPen)
             painter.drawRect(self._rect)
+
 
     def shape(self) -> QPainterPath:
         path = QPainterPath()
@@ -1615,21 +1632,25 @@ class layoutPolygon(layoutShape):
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
-        eventPos = event.pos().toPoint()
-        if self._stretch:
+        if self._layer.selectable:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+            eventPos = event.pos().toPoint()
+            if self._stretch:
+                self.setFlag(QGraphicsItem.ItemIsMovable, False)
+                for point in self._points:
+                    if (eventPos - point).manhattanLength() <= self.scene().snapDistance:
+                        self._selectedCorner = point
+                        self._selectedCornerIndex = self._points.index(point)
+        else:
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
-            for point in self._points:
-                if (eventPos - point).manhattanLength() <= self.scene().snapDistance:
-                    self._selectedCorner = point
-                    self._selectedCornerIndex = self._points.index(point)
-            print(self._selectedCorner)
+            self.setFlag(QGraphicsItem.ItemIsSelectable, False)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         eventPos = event.pos().toPoint()
-        if self._stretch:
-            if self._selectedCorner is not None:
-                self._points[self._selectedCornerIndex] = eventPos
-                self.points = self._points
+        if self._stretch and self._selectedCorner:
+            self._points[self._selectedCornerIndex] = eventPos
+            self.points = self._points
         else:
             super().mouseMoveEvent(event)
 

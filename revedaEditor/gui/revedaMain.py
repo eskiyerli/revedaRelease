@@ -15,8 +15,7 @@
 #    license notice or attribution required by the License must also include this
 #    Commons Clause License Condition notice.
 #
-#   Add-ons and extensions developed for this software may be distributed
-#   under their own separate licenses.
+
 #
 #    Software: Revolution EDA
 #    License: Mozilla Public License 2.0
@@ -46,7 +45,7 @@ import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.pythonConsole as pcon
 import revedaEditor.gui.stippleEditor as stip
 import revedaEditor.gui.helpBrowser as hlp
-import revinit
+import revedaEditor.gui.revinit as revinit
 
 
 class mainwContainer(QWidget):
@@ -61,12 +60,13 @@ class mainwContainer(QWidget):
         self.init_UI()
 
     def init_UI(self):
-        # treeView = designLibrariesView(self)
+
         self.console.setfont(QFont("Fira Mono Regular", 12))
         self.console.writeoutput(
-            f"Welcome to Revolution EDA version" f" {revinit.__version__}"
+            f"Welcome to Revolution EDA version {revinit.__version__}"
         )
         self.console.writeoutput("Revolution Semiconductor (C) 2024.")
+        self.console.writeoutput("Mozilla Public License v2.0 modiified with Commons Clause")
         # layout statements, using a grid layout
         gLayout = QVBoxLayout()
         gLayout.setSpacing(10)
