@@ -37,6 +37,12 @@ When downloading the package from pypi repository, you may want to download to s
 You could also use pypi repository to install Revolution EDA:
 `pip install revolution-eda`
 
+
+Then just type: 
+
+`reveda`
+
+at Python aware terminal.
 ## Attribution
 
 - Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). Licensed under a [Creative Commons Attribution 3.0 License](http://creativecommons.org/licenses/by/3.0/).
