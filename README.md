@@ -4,7 +4,7 @@
 
 Revolution EDA is a new generation of schematic and symbol editor targeting custom integrated circuit design.
 
-1. Revolution EDA uses PySide6, a modern GUI toolkit assuring that the same code base can be used on Linux, MacOS and Windows platforms.
+1. Revolution EDA uses Qt6, a modern GUI toolkit assuring that the same code base can be used on Linux, MacOS and Windows platforms.
 2. Revolution EDA includes integrated circuit design oriented schematic, layout and symbol 
    editors.
 3. Revolution EDA can create schematic symbols with both symbol attributes that are common to 
@@ -17,7 +17,7 @@ Revolution EDA is a new generation of schematic and symbol editor targeting cust
    EDA systems, layout and netlist export processes *do not block* Revolution EDA. The user 
    can continue working as usual.
 7. Symbols can be created automatically from schematics, Verilog-A modules and Spice subcircuits. Symbols can 
-   include circles, lines, rectangles and arches. Notes can be entered on symbols using *Normal* labels.
+   include circles, lines, rectangles, polygons and arches. Notes can be entered on symbols using *Normal* labels.
 8. Verilog-A symbols have a clear separation between model and instance parameters.
 9. File formats are JSON-based allowing easy inspection and editing with a text editor if 
    needed.
@@ -31,9 +31,19 @@ Revolution EDA is a new generation of schematic and symbol editor targeting cust
    libraries, cells and cell views.
 14. Configuration parameters can be saved in a configuration file to be reused.
 15. A log file logs error, warning and info messages.
+16. Netlisting and GDS export processes are run in separate threads not blocking the user interaction with the software.
 
 When downloading the package from pypi repository, you may want to download to source package as well to download *exampleLibraries*.
 
+You could also use pypi repository to install Revolution EDA:
+`pip install revolution-eda`
+
+
+Then just type: 
+
+`reveda`
+
+at Python aware terminal.
 ## Attribution
 
 - Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). Licensed under a [Creative Commons Attribution 3.0 License](http://creativecommons.org/licenses/by/3.0/).
