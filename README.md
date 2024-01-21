@@ -34,6 +34,9 @@ Revolution EDA is a new generation of schematic and symbol editor targeting cust
 
 When downloading the package from pypi repository, you may want to download to source package as well to download *exampleLibraries*.
 
+You could also use pypi repository to install Revolution EDA:
+`pip install revolution-eda`
+
 ## Attribution
 
 - Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). Licensed under a [Creative Commons Attribution 3.0 License](http://creativecommons.org/licenses/by/3.0/).
