@@ -31,6 +31,7 @@ Revolution EDA is a new generation of schematic and symbol editor targeting cust
    libraries, cells and cell views.
 14. Configuration parameters can be saved in a configuration file to be reused.
 15. A log file logs error, warning and info messages.
+16. Netlisting and GDS export processes are run in separate threads not blocking the user interaction with the software.
 
 When downloading the package from pypi repository, you may want to download to source package as well to download *exampleLibraries*.
 
