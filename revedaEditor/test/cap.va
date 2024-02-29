@@ -1,0 +1,22 @@
+/*
+IMPORTANT NOTICE: 
+THIS SOFTWARE IS LICENSED TO YOU UNDER THE TERMS OF THE SYNOPSYS END-USER LICENSE
+AGREEMENT FOR SAMPLE VERILOG-A MODELS. YOU CAN VIEW THE LICENSE AT:
+      http://www.synopsys.com/cgi-bin/hspice/models/license.cgi
+SYNOPSYS, INC. WILL ONLY PERMIT YOU TO USE THIS SOFTWARE ON THE CONDITION THAT YOU
+ACCEPT ALL OF THE TERMS CONTAINED IN THIS LICENSE AGREEMENT.  YOU ACCEPT THESE TERMS
+BY DOWNLOADING, INSTALLING OR USING THIS SOFTWARE. IF YOU ARE UNWILLING TO ACCEPT THE
+TERMS OF THE LICENSE AGREEMENT, THEN  DO NOT DOWNLOAD, INSTALL OR USE THE SOFTWARE.
+*/
+// Version 1.0   September 2006
+`include "disciplines.vams"
+`include "constants.vams"
+// another comment
+
+module capacitor(p, n);
+electrical p, n;
+inout p, n;
+parameter real c = 0 (* type="instance" xyceAlsoModel="yes" *) ;
+analog
+I(p,n) <+ c*ddt(V(p, n));
+endmodule

@@ -27,4 +27,4 @@
 #
 
 #python -m nuitka --standalone reveda.py --enable-plugin=pyside6 --include-package=socket,queue  --include-data-dir=./docs=docs/ --include-data-files=.env=. --include-data-files=revinit.py=. --include-data-files=README.md=. --include-data-files=LICENSE.txt=. --include-package=pdk --include-data-dir=exampleLibraries=./exampleLibraries
-python -m nuitka --onefile reveda.py --enable-plugin=pyside6 --include-package=socket,queue,pdk,numpy
+python -m nuitka --onefile reveda.py --enable-plugin=pyside6 --include-package=socket,queue,pdk,gdstk

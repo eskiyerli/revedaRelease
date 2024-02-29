@@ -1,4 +1,3 @@
-
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -16,39 +15,10 @@
 #    license notice or attribution required by the License must also include this
 #    Commons Clause License Condition notice.
 #
-#   Add-ons and extensions developed for this software may be distributed
-#   under their own separate licenses.
+#    Add-ons and extensions developed for this software may be distributed
+#    under their own separate licenses.
 #
 #    Software: Revolution EDA
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
-
-from quantiphy import Quantity
-
-class baseInst():
-    def __init__(self, labels_dict: dict):
-        self._labelsDict = labels_dict
-
-class res(baseInst):
-    def __init__(self,labels_dict:dict):
-        super().__init__(labels_dict)
-
-    def doubleR(self):
-        Rvalue = self._labelsDict.get('R').labelValue
-        if Rvalue.isalnum():
-            return str(2*Quantity(Rvalue))
-        return '?'
-
-class nmos(baseInst):
-    def __init__(self,labels_dict:dict):
-        super().__init__(labels_dict)
-        self.w = Quantity(self._labelsDict['@w'].labelValue)
-        self.l = Quantity(self._labelsDict['@l'].labelValue)
-        self.nf= Quantity(self._labelsDict['@nf'].labelValue)
-        self.sd1p8v = 0.28
-        self.sa1p8v = sb1p8v = 0.265
-        self.sourceDiffs = lambda nf: int(int(nf) / 2 + 1)
-
-    def asparm(self):
-        return self.sourceDiffs(self.nf)*(self.w/self.nf)*self.sd1p8v
