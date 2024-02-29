@@ -45,7 +45,7 @@ jobs:
           onefile: true
           enable-plugins: pyside6
           disable-console: true
-          include-package: socket, gdstk
+          include-package: socket
           include-data-dir: ./pdk=./pdk
           #include-data-dir: ./exampleLibraries=./exampleLibraries
           #windows-icon-from-ico: resources/app.ico
