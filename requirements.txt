@@ -2,4 +2,4 @@ PySide6~=6.6.1
 quantiphy~=2.19
 setuptools~=67.8.0
 python-dotenv~=1.0.0
-gdstk~=0.9.46
+gdstk~=0.9.50

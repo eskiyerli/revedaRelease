@@ -47,7 +47,7 @@ jobs:
           disable-console: true
           include-package: socket, gdstk
           include-data-dir: ./pdk=./pdk
-          #include-data-dir: ./exampleLibraries
+          #include-data-dir: ./exampleLibraries=./exampleLibraries
           #windows-icon-from-ico: resources/app.ico
           
       # Uploads artifact
