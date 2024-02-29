@@ -38,16 +38,16 @@ class verilogaC:
             pathObj (pathlib.Path): The path object representing the file to be processed.
         """
         self._pathObj = pathObj
-        self._vaModule = ''
+        self._vaModule = ""
         self.instanceParams = dict()
         self.modelParams = dict()
         self.pins = list()
         self.inPins = list()
         self.inoutPins = list()
         self.outPins = list()
-        self._netlistLine = ''
+        self._netlistLine = ""
         self.statementLines = list()
-        self._pinOrder = ''
+        self._pinOrder = ""
 
         with open(self._pathObj) as f:
             self.fileLines = f.readlines()
@@ -65,12 +65,12 @@ class verilogaC:
             # Concatenate the lines until it reaches a ';'
             stripLine = line.strip()
 
-            if stripLine.startswith('/*'):
+            if stripLine.startswith("/*"):
                 # Set comment to True if the line starts with '/*'
                 comment = True
 
             if not comment:
-                doubleSlashLoc = stripLine.find('//')
+                doubleSlashLoc = stripLine.find("//")
                 if doubleSlashLoc > -1:
                     # Remove single-line comments starting from '//'
                     stripLine = stripLine[:doubleSlashLoc]
@@ -79,7 +79,7 @@ class verilogaC:
                     # Add non-empty lines to statementLines list
                     statementLines.append(stripLine)
 
-            if comment and stripLine.endswith('*/'):
+            if comment and stripLine.endswith("*/"):
                 # Set comment to False if the line ends with '*/'
                 comment = False
 
@@ -89,51 +89,52 @@ class verilogaC:
         """
         Convert the statement lines into one-liners.
         """
-        tempLine = ''
+        tempLine = ""
         oneLiners = list()
         for line in statementLines:
             stripLine = line.strip()
-            if not stripLine.startswith('`include'):
-                tempLine = f'{tempLine} {stripLine}'
-                if tempLine.endswith(';'):
+            if not stripLine.startswith("`include"):
+                tempLine = f"{tempLine} {stripLine}"
+                if tempLine.endswith(";"):
                     oneLiners.append(tempLine.strip())
-                    tempLine = ''
+                    tempLine = ""
         return oneLiners
 
     def findPinsParams(self, filteredLines: list):
         for line in filteredLines:
-            splitLine = line.strip().split(' ', 1)
+            splitLine = line.strip().split(" ", 1)
             match splitLine[0].lower():
-                case 'module':
-                    if '(' in splitLine[1]:
-                        self._vaModule = splitLine[1].split('(')[0]
+                case "module":
+                    if "(" in splitLine[1]:
+                        self._vaModule = splitLine[1].split("(")[0]
                     else:
-                        self._vaModule = splitLine[1].replace(';', '').strip()
-                    if '(' in splitLine[1] and ')' in splitLine[1]:
-                        pinList = line.split('(')[1].split(')')[0].split(',')
+                        self._vaModule = splitLine[1].replace(";", "").strip()
+                    if "(" in splitLine[1] and ")" in splitLine[1]:
+                        pinList = line.split("(")[1].split(")")[0].split(",")
                         self.pins = [pin.strip() for pin in pinList]
                     else:
                         self.pins = []
-                case 'in':
-                    rawPins = line.replace('in ', '').replace(';', '').split(',')
+                case "in":
+                    rawPins = line.replace("in ", "").replace(";", "").split(",")
                     self.inPins.extend([pin.strip() for pin in rawPins])
-                case 'input':
-                    rawPins = line.replace('input ', '').replace(';', '').split(',')
+                case "input":
+                    rawPins = line.replace("input ", "").replace(";", "").split(",")
                     self.inPins.extend([pin.strip() for pin in rawPins])
-                case 'out':
-                    rawPins = line.replace('out ', '').replace(';', '').split(',')
+                case "out":
+                    rawPins = line.replace("out ", "").replace(";", "").split(",")
                     self.outPins.extend([pin.strip() for pin in rawPins])
-                case 'output':
-                    rawPins = line.replace('output ', '').replace(';', '').split(',')
+                case "output":
+                    rawPins = line.replace("output ", "").replace(";", "").split(",")
                     self.outPins.extend([pin.strip() for pin in rawPins])
-                case 'inout':
-                    rawPins = line.replace('inout ', '').replace(';', '').split(',')
+                case "inout":
+                    rawPins = line.replace("inout ", "").replace(";", "").split(",")
                     self.inoutPins.extend([pin.strip() for pin in rawPins])
-                case 'parameter':
-                    paramDefPart = \
-                        line.replace('parameter', '').replace(';', '').split('*(')[0]
-                    paramName = paramDefPart.split('=')[0].split()[-1].strip()
-                    paramValue = paramDefPart.split('=')[1].split()[0].strip()
+                case "parameter":
+                    paramDefPart = (
+                        line.replace("parameter", "").replace(";", "").split("*(")[0]
+                    )
+                    paramName = paramDefPart.split("=")[0].split()[-1].strip()
+                    paramValue = paramDefPart.split("=")[1].split()[0].strip()
                     if "(*" in line:
                         paramAttr = line.strip().split("(*")[1]
                     else:
@@ -167,14 +168,18 @@ class verilogaC:
     @property
     def netlistLine(self):
         # Join the pins with commas
-        self._pinOrder = ','.join(self.pins)
+        self._pinOrder = ",".join(self.pins)
 
         # Create a string of instance parameters in the format [@key:key=%:key=item]
-        instParamString = ' '.join(
-            [f'[@{key}:{key}=%:{key}={item}]' for key, item in self.instanceParams.items()])
+        instParamString = " ".join(
+            [
+                f"[@{key}:{key}=%:{key}={item}]"
+                for key, item in self.instanceParams.items()
+            ]
+        )
 
         # Create the netlist line string with the formatted values
-        self._netlistLine = f'Y{self._vaModule} [@instName] [@pinList]  {self._vaModule}Model {instParamString}'
+        self._netlistLine = f"Y{self._vaModule} [@instName] [@pinList]  {self._vaModule}Model {instParamString}"
 
         # Return the netlist line
         return self._netlistLine
@@ -188,11 +193,11 @@ class spiceC:
     def __init__(self, pathObj: pathlib.Path):
         self._pathObj = pathObj
         self._statementLines = list()
-        self._pinOrder = ''
-        with self._pathObj.open('r') as f:
+        self._pinOrder = ""
+        with self._pathObj.open("r") as f:
             self._fileLines = f.readlines()
         self.subcktParams = self.extractSubcktParams()
-        self._netlistLine: str = ''
+        self._netlistLine: str = ""
 
     @property
     def pathObj(self):
@@ -216,9 +221,12 @@ class spiceC:
     def netlistLine(self):
 
         # Create a string of instance parameters in the format [@key:key=%:key=item]
-        instParamString = ' '.join(
-            [f'[@{key}:{key}=%:{key}={item}]' for key, item in
-             self.subcktParams['params'].items()])
+        instParamString = " ".join(
+            [
+                f"[@{key}:{key}=%:{key}={item}]"
+                for key, item in self.subcktParams["params"].items()
+            ]
+        )
         if instParamString.strip():
             # Create the netlist line string with the formatted values
             self._netlistLine = f'X[@instName] [@pinList] {self.subcktParams["name"]} PARAM: {instParamString}'
@@ -229,9 +237,8 @@ class spiceC:
         return self._netlistLine
 
     def subcktLineExtract(self):
-        """
-        """
-        subcktLines = ''
+        """ """
+        subcktLines = ""
         subcktStart = None
         increment = 1
 
@@ -239,34 +246,37 @@ class spiceC:
         for linenumber, line in enumerate(self._fileLines):
 
             # Check if the line starts with '.SUBCKT'
-            if line.startswith('.SUBCKT'):
+            if line.startswith(".SUBCKT"):
                 subcktStart = linenumber
-                subcktLines = f'{line.strip()}'
+                subcktLines = f"{line.strip()}"
 
             # Check if the line starts with '+' and is the next line after the subcircuit start line
-            if subcktLines and linenumber == subcktStart + increment and line.startswith(
-                    '+'):
-                subcktLines = f'{subcktLines} {line[1:].strip()}'
+            if (
+                subcktLines
+                and linenumber == subcktStart + increment
+                and line.startswith("+")
+            ):
+                subcktLines = f"{subcktLines} {line[1:].strip()}"
                 increment += 1
         return subcktLines
 
     def extractSubcktParams(self):
-        """
-        """
+        """ """
         subcktDict = dict()
-        subcktDict.setdefault('params', dict())
+        subcktDict.setdefault("params", dict())
         subcktLine = self.subcktLineExtract()
         tokens = subcktLine.split()
-        subcktDict['name'] = tokens[1]
+        subcktDict["name"] = tokens[1]
         capSubcktLine = subcktLine.upper()
-        if 'PARAM:' in capSubcktLine:
-            subcktDict['pins'] = tokens[2:capSubcktLine.split().index('PARAM:')]
-            paramsStringList = tokens[capSubcktLine.split().index('PARAM:') + 1:]
+        if "PARAM:" in capSubcktLine:
+            subcktDict["pins"] = tokens[2 : capSubcktLine.split().index("PARAM:")]
+            paramsStringList = tokens[capSubcktLine.split().index("PARAM:") + 1 :]
             for index, paramString in enumerate(paramsStringList):
-                if paramString.strip() == '=':
-                    subcktDict['params'][paramsStringList[index - 1].strip()] = \
+                if paramString.strip() == "=":
+                    subcktDict["params"][paramsStringList[index - 1].strip()] = (
                         paramsStringList[index + 1].strip()
+                    )
         else:
-            subcktDict['pins'] = tokens[2:]
-        self._pinOrder = ','.join(subcktDict['pins'])
+            subcktDict["pins"] = tokens[2:]
+        self._pinOrder = ",".join(subcktDict["pins"])
         return subcktDict

@@ -1,5 +1,5 @@
 #    “Commons Clause” License Condition v1.0
-#   #
+#   
 #    The Software is provided to you by the Licensor under the License, as defined
 #    below, subject to the following condition.
 #
@@ -83,6 +83,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
         self._labelFont.setPointSize(int(float(self._labelHeight)))
         self._labelFont.setKerning(False)
         self._labelVisible: bool = False
+
         self._angle: float = 0.0  # rotation angle
         self.setBrush(symlyr.labelBrush)
         self.setPos(self._start)
@@ -262,7 +263,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
 
         if self._labelType == symbolLabel.labelTypes[0]:  # normal label
             # Set label name, value, and text to label definition
-            self._labelName = self._labelDefinition
+            self._labelName = f'@{self._labelDefinition}'
             self._labelValue = self._labelDefinition
             self._labelText = self._labelDefinition
         elif self._labelType == symbolLabel.labelTypes[1]:  # NLPLabel
@@ -274,93 +275,102 @@ class symbolLabel(QGraphicsSimpleTextItem):
 
     def createNLPLabel(self):
         try:
-            if self.parentItem() is None: #symbol editor
-                self._labelText = self._labelDefinition
-            else:
-                if self._labelDefinition in symbolLabel.predefinedLabels:
-                    match self._labelDefinition:
-                        case "[@cellName]":
-                            # Set label name to "cellName" and value and text to parent item's cell name
-                            self._labelName = "cellName"
-                            self._labelValue = self.parentItem().cellName
-                            self._labelText = self._labelValue
-                        case "[@instName]":
-                            # Set label name to "instName" and value and text to parent item's counter with prefix "I"
-                            self._labelName = "instName"
-                            self._labelValue = f"I{self.parentItem().counter}"
-                            self._labelText = self._labelValue
-
-                        case "[@libName]":
-                            # Set label name to "libName" and value and text to parent item's library name
-                            self._labelName = "libName"
-                            self._labelValue = self.parentItem().libraryName
-                            self._labelText = self._labelValue
-                        case "[@viewName]":
-                            # Set label name to "viewName" and value and text to parent item's view name
-                            self._labelName = "viewName"
-                            self._labelValue = self.parentItem().viewName
-                            self._labelText = self._labelValue
-                        case "[@modelName]":
-                            # Set label name to "modelName" and value and text to parent item's "modelName" attribute
-                            self._labelName = "modelName"
-                            self._labelValue = self.parentItem().attr.get("modelName", "")
-                            self._labelText = self._labelValue
-                        case "[@elementNum]":
-                            # Set label name to "elementNum" and value and text to parent item's counter
-                            self._labelName = "elementNum"
-                            self._labelValue = f"{self.parentItem().counter}"
-                            self._labelText = self._labelValue
+            if self._labelDefinition.strip().startswith('[@'):
+                # Find the end of the expression
+                end_index = self._labelDefinition.find(']')
+                expression = self._labelDefinition[1:end_index]
+                parts = expression.split(':')
+                self._labelName = parts[0].strip()
+                if self.parentItem() is None: #symbol editor
+                    self._labelText = self._labelDefinition
+                    self._labelValue = ''
                 else:
-                    labelFields = (
-                        self._labelDefinition.lstrip("[@")
-                        .rstrip("]")
-                        .rstrip(":")
-                        .split(":")
-                    )
-                    self._labelName = labelFields[0].strip()
-                    match len(labelFields):
-                        case 1:
-                            if not self._labelValue:
-                                self._labelValue = "?"
-                            else:
+                    if self._labelDefinition in symbolLabel.predefinedLabels:
+                        match self._labelDefinition:
+                            case "[@cellName]":
+                                # Set label name to "cellName" and value and text to parent item's cell name
+                                self._labelValue = self.parentItem().cellName
                                 self._labelText = self._labelValue
-                        case 2:
-                            if self._labelValue:
-                                # Set label text to the second field of label definition with "%" replaced by label value
-                                self._labelText = (
-                                    labelFields[1].strip().replace("%", self._labelValue)
-                                )
-                            else:
-                                self._labelValue = "?"
-                        case 3:
-                            tempLabelValue = (
-                                labelFields[2].strip().split("=")[-1].split()[-1]
-                            )
-                            if self._labelValue:
-                                # Set label text to the third field of label definition with temp label value replaced by label value
-                                self._labelText = labelFields[2].replace(
-                                    tempLabelValue, self._labelValue
-                                )
-                            else:
-                                self._labelText = labelFields[2]
-                                self._labelValue = tempLabelValue
+                            case "[@instName]":
+                                # Set label name to "instName" and value and text to parent item's counter with prefix "I"
+                                self._labelValue = f"I{self.parentItem().counter}"
+                                self._labelText = self._labelValue
+                            case "[@libName]":
+                                # Set label name to "libName" and value and text to parent item's library name
+                                self._labelValue = self.parentItem().libraryName
+                                self._labelText = self._labelValue
+                            case "[@viewName]":
+                                # Set label name to "viewName" and value and text to parent item's view name
+                                self._labelValue = self.parentItem().viewName
+                                self._labelText = self._labelValue
+                            case "[@modelName]":
+                                # Set label name to "modelName" and value and text to parent item's "modelName" attribute
+                                self._labelValue = self.parentItem().attr.get("modelName", "")
+                                self._labelText = self._labelValue
+                            case "[@elementNum]":
+                                # Set label name to "elementNum" and value and text to parent item's counter
+                                self._labelValue = f"{self.parentItem().counter}"
+                                self._labelText = self._labelValue
+                    else:
+                        if len(parts) > 1:
+                            formatString = parts[1]
+                            defaultValue = parts[2] if len(parts) > 2 else ''
+                        else:
+                            formatString = ''
+                            defaultValue = ''
 
+                        if formatString:
+                            prefix, suffix = formatString.split('%')
+                            if self._labelValue:
+                                self._labelText = f"{prefix}{self._labelValue}{suffix}"
+                            elif defaultValue:
+                                self._labelValue = defaultValue.replace(prefix, '')
+                                self._labelText = defaultValue
+                            else:
+                                self._labelValue = '?'
+                                self._labelText = f"{prefix}{self._labelValue}{suffix}"
         except Exception as e:
             self.scene().logger.error(
                 f"Error parsing label definition: {self._labelDefinition}, {e}"
             )
 
+    # def createPyLabel(self):
+    #     try:
+    #         labelFields = self._labelDefinition.strip().split("=")
+    #         self._labelName = labelFields[0].strip()
+    #         labelFunction = labelFields[1].strip()
+    #         if self.parentItem() and hasattr(self.parentItem(), "cellName"):
+    #             expression = f"cb.{self.parentItem().cellName}(self.parentItem().labels).{labelFunction}"
+    #             self._labelValue = Quantity(eval(expression)).render(prec=3)
+    #             self._labelText = f"{self._labelName}={self._labelValue}"
+    #         else:
+    #             self._labelText = f"{self._labelName} = {labelFunction}"
+    #     except Exception as e:
+    #         if self.scene():
+    #             self.scene().logger.error(f"PyLabel Error:{e}")
+
+
     def createPyLabel(self):
+        """
+        Create a PyLabel using the label definition and parent item information.
+        """
         try:
-            labelFields = self._labelDefinition.strip().split("=")
-            self._labelName = labelFields[0].strip()
-            labelFunction = labelFields[1].strip()
+            # Split the label definition into name and function
+            labelName, labelFunction = map(str.strip, self._labelDefinition.split("="))
+
+            # Check if parent item exists and has 'cellName' attribute
             if self.parentItem() and hasattr(self.parentItem(), "cellName"):
+                # Construct the expression to evaluate
                 expression = f"cb.{self.parentItem().cellName}(self.parentItem().labels).{labelFunction}"
+                # Evaluate the expression and render the result
                 self._labelValue = Quantity(eval(expression)).render(prec=3)
-                self._labelText = f"{self._labelName}={self._labelValue}"
+                # Set the label text with the name and value
+                self._labelText = f"{labelName}={self._labelValue}"
             else:
-                self._labelText = f"{self._labelName} = {labelFunction}"
+                # Set the label text with the name and function
+                self._labelText = f"{labelName} = {labelFunction}"
+            self._labelName = f'@{labelName}'
         except Exception as e:
+            # Log the error if scene exists
             if self.scene():
                 self.scene().logger.error(f"PyLabel Error:{e}")

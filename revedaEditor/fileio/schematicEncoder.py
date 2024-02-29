@@ -88,9 +88,9 @@ class schematicEncoder(json.JSONEncoder):
                 "ang": item.angle,
             }
             return itemDict
-        elif isinstance(item, net.crossingDot):
-            itemDict = {
-                "type": "dot",
-                "pt": (item.mapToScene(item.point) - item.scene().origin).toTuple(),
-            }
-            return itemDict
+        # elif isinstance(item, net.crossingDot):
+        #     itemDict = {
+        #         "type": "dot",
+        #         "pt": (item.mapToScene(item.point) - item.scene().origin).toTuple(),
+        #     }
+        #     return itemDict

@@ -60,13 +60,14 @@ class mainwContainer(QWidget):
         self.init_UI()
 
     def init_UI(self):
-
         self.console.setfont(QFont("Fira Mono Regular", 12))
         self.console.writeoutput(
             f"Welcome to Revolution EDA version {revinit.__version__}"
         )
         self.console.writeoutput("Revolution Semiconductor (C) 2024.")
-        self.console.writeoutput("Mozilla Public License v2.0 modiified with Commons Clause")
+        self.console.writeoutput(
+            "Mozilla Public License v2.0 modified with Commons Clause"
+        )
         # layout statements, using a grid layout
         gLayout = QVBoxLayout()
         gLayout.setSpacing(10)
@@ -149,7 +150,9 @@ class MainWindow(QMainWindow):
         self.importVerilogaAction = QAction(
             importVerilogaIcon, "Import Verilog-a file..."
         )
-        self.importSpiceAction = QAction(importVerilogaIcon, "Import Spice file...", self)
+        self.importSpiceAction = QAction(
+            importVerilogaIcon, "Import Spice file...", self
+        )
         openLibIcon = QIcon(":/icons/database--pencil.png")
         self.libraryBrowserAction = QAction(openLibIcon, "Library Browser", self)
         optionsIcon = QIcon(":/icons/resource-monitor.png")
@@ -233,8 +236,7 @@ class MainWindow(QMainWindow):
                 for switchView in dlg.switchViewsEdit.text().split(",")
             ]
             self.stopViewList = [
-                stopView.strip() for stopView in
-                dlg.stopViewsEdit.text().split(",")
+                stopView.strip() for stopView in dlg.stopViewsEdit.text().split(",")
             ]
             if dlg.optionSaveBox.isChecked():
                 self.saveState()
@@ -250,9 +252,13 @@ class MainWindow(QMainWindow):
             None
         """
         # Get the library model
-        self.importVerilogaModule('')
+        self.importVerilogaModule("")
 
     def importVerilogaModule(self, filePath: str):
+        """
+
+        @param filePath:
+        """
         library_model = self.libraryBrowser.libraryModel
         # Open the import dialog
         importDlg = fd.importVerilogaCellDialogue(library_model, self)
@@ -262,8 +268,7 @@ class MainWindow(QMainWindow):
         # Execute the import dialog and check if it was accepted
         if importDlg.exec() == QDialog.Accepted:
             # Create the Verilog-A object from the file path
-            imported_va_obj = hdl.verilogaC(
-                pathlib.Path(importDlg.vaFileEdit.text()))
+            imported_va_obj = hdl.verilogaC(pathlib.Path(importDlg.vaFileEdit.text()))
 
             # Create the Verilog-A view item tuple
             vaViewItemTuple = imv.createVaView(
@@ -291,7 +296,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
-        self.importSpiceSubckt('')
+        self.importSpiceSubckt("")
 
     def importSpiceSubckt(self, filePath: str):
         # Get the library model
@@ -304,8 +309,7 @@ class MainWindow(QMainWindow):
         # Execute the import dialog and check if it was accepted
         if importDlg.exec() == QDialog.Accepted:
             # Create the Verilog-A object from the file path
-            importedSpiceObj = hdl.spiceC(
-                pathlib.Path(importDlg.spiceFileEdit.text()))
+            importedSpiceObj = hdl.spiceC(pathlib.Path(importDlg.spiceFileEdit.text()))
 
             # Create the Verilog-A view item tuple
             spiceViewItemTuple = imv.createSpiceView(
@@ -315,8 +319,13 @@ class MainWindow(QMainWindow):
             # Check if the symbol checkbox is checked
             if importDlg.symbolCheckBox.isChecked():
                 # Create the spice symbol
-                imv.createSpiceSymbol(self, spiceViewItemTuple, self.libraryDict,
-                                      self.libraryBrowser, importedSpiceObj)
+                imv.createSpiceSymbol(
+                    self,
+                    spiceViewItemTuple,
+                    self.libraryDict,
+                    self.libraryBrowser,
+                    importedSpiceObj,
+                )
 
     def createStippleClick(self):
         stippleWindow = stip.stippleEditor(self)
@@ -334,12 +343,15 @@ class MainWindow(QMainWindow):
         """
         Load the state of the object from a configuration file.
 
-        This function reads the contents of the configuration file and updates the state of the object based on the values found in the file. 
-        It checks if the configuration file exists and then opens it for reading. If the file exists, it loads the contents of the file as a 
-        JSON object and assigns the values to the corresponding attributes of the object. The attributes updated include `textEditorPath`, 
-        `simulationPath`, `switchViewList`, and `stopViewList`. If the `switchViewList` or `stopViewList` in the configuration file is not 
+        This function reads the contents of the configuration file and updates the
+         state of the object based on the values found in the file.
+        It checks if the configuration file exists and then opens it for reading.
+        If the file exists, it loads the contents of the file as a
+        JSON object and assigns the values to the corresponding attributes of the
+        object. The attributes updated include `textEditorPath`,
+        `simulationPath`, `switchViewList`, and `stopViewList`. If the `switchViewList`
+        or `stopViewList` in the configuration file is not
         empty, it updates the corresponding attributes with the values from the file.
-
         """
 
         if self.confFilePath.exists():

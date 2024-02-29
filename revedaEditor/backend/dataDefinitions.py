@@ -67,6 +67,7 @@ class editModes:
     rotateItem: bool
     changeOrigin: bool
     panView: bool
+    stretchItem: bool
 
     def setMode(self, attribute):
         for key in self.__dict__.keys():
@@ -83,7 +84,6 @@ class symbolModes(editModes):
     addLabel: bool
     drawCircle: bool
     drawPolygon: bool
-    stretchItem: bool
 
 
 @dataclass
@@ -106,7 +106,6 @@ class layoutModes(editModes):
     drawLine: bool
     drawCircle: bool
     drawRuler: bool
-    stretchItem: bool
     addInstance: bool
 
 

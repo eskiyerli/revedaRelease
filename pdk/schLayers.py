@@ -102,4 +102,4 @@ otherBrush = QBrush(otherLayer.bcolor, otherLayer.bstyle)
 draftBrush = QBrush(draftLayer.bcolor, draftLayer.bstyle)
 
 # crossing dot diameter
-crossingDotDiameter = 5
+crossingDotDiameter = 2
