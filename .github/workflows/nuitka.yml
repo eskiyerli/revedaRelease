@@ -45,7 +45,7 @@ jobs:
           onefile: true
           enable-plugins: pyside6
           disable-console: true
-          include-package: socket, queue, pdk, gdstk
+          include-package: socket, pdk, gdstk
           #windows-icon-from-ico: resources/app.ico
           
       # Uploads artifact
