@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, ubuntu-latest]
       
     runs-on: ${{ matrix.os }}
 
@@ -46,8 +46,7 @@ jobs:
           enable-plugins: pyside6
           disable-console: true
           include-package: socket
-          include-data-dir: ./pdk=./pdk
-          #include-data-dir: ./exampleLibraries=./exampleLibraries
+          include-data-dir: ./pdk=./pdk, ./exampleLibraries=./exampleLibraries
           #windows-icon-from-ico: resources/app.ico
           
       # Uploads artifact
