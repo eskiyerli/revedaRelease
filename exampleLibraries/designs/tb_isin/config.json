@@ -1,0 +1,61 @@
+[
+    {
+        "viewName": "config"
+    },
+    {
+        "reference": "schematic"
+    },
+    {
+        "gnd": [
+            "analogLib",
+            "symbol",
+            [
+                "symbol"
+            ]
+        ],
+        "cap": [
+            "analogLib",
+            "symbol",
+            [
+                "symbol"
+            ]
+        ],
+        "sourceFollower": [
+            "anotherLibrary",
+            "schematic",
+            [
+                "schematic",
+                "symbol"
+            ]
+        ],
+        "res": [
+            "analogLib",
+            "symbol",
+            [
+                "veriloga",
+                "symbol"
+            ]
+        ],
+        "nmos": [
+            "analogLib",
+            "symbol",
+            [
+                "symbol"
+            ]
+        ],
+        "vdc": [
+            "analogLib",
+            "symbol",
+            [
+                "symbol"
+            ]
+        ],
+        "isin": [
+            "analogLib",
+            "symbol",
+            [
+                "symbol"
+            ]
+        ]
+    }
+]

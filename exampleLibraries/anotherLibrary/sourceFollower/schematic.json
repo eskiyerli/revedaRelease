@@ -1,0 +1,265 @@
+[
+    {
+        "cellView": "schematic"
+    },
+    {
+        "snapGrid": [
+            5,
+            5
+        ]
+    },
+    {
+        "type": "scp",
+        "st": [
+            130.0,
+            130.0
+        ],
+        "pn": "OUT",
+        "pd": "Output",
+        "pt": "Signal",
+        "ang": 0.0
+    },
+    {
+        "type": "scp",
+        "st": [
+            -265.0,
+            -265.0
+        ],
+        "pn": "VDD",
+        "pd": "Inout",
+        "pt": "Power",
+        "ang": 0.0
+    },
+    {
+        "type": "scp",
+        "st": [
+            -290.0,
+            405.0
+        ],
+        "pn": "VSS",
+        "pd": "Inout",
+        "pt": "Ground",
+        "ang": 0.0
+    },
+    {
+        "type": "scp",
+        "st": [
+            -280.0,
+            30.0
+        ],
+        "pn": "INP",
+        "pd": "Input",
+        "pt": "Signal",
+        "ang": 0.0
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "res",
+        "view": "symbol",
+        "nam": "I3",
+        "ic": 3,
+        "ld": {
+            "@cellName": [
+                "res",
+                true
+            ],
+            "@instName": [
+                "I3",
+                true
+            ],
+            "@R": [
+                "1k",
+                true
+            ]
+        },
+        "loc": [
+            20.0,
+            340.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -12.0,
+            -170.0,
+            41.796875,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "nmos",
+        "view": "symbol",
+        "nam": "I1",
+        "ic": 1,
+        "ld": {
+            "@as": [
+                "560n",
+                true
+            ],
+            "@m": [
+                "1",
+                true
+            ],
+            "@nf": [
+                "2",
+                true
+            ],
+            "@w": [
+                "2u",
+                true
+            ],
+            "@l": [
+                "0.18u",
+                true
+            ],
+            "@instName": [
+                "I1",
+                true
+            ]
+        },
+        "loc": [
+            -30.0,
+            -40.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -65.0,
+            -5.0,
+            105.5625,
+            145.0
+        ]
+    },
+    {
+        "type": "scn",
+        "st": [
+            20,
+            340
+        ],
+        "end": [
+            20,
+            405
+        ],
+        "nam": "VSS",
+        "ns": true
+    },
+    {
+        "type": "scn",
+        "st": [
+            20,
+            405
+        ],
+        "end": [
+            -290,
+            405
+        ],
+        "nam": "VSS",
+        "ns": true
+    },
+    {
+        "type": "scn",
+        "st": [
+            -265,
+            -265
+        ],
+        "end": [
+            20,
+            -265
+        ],
+        "nam": "VDD",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            20,
+            -40
+        ],
+        "end": [
+            20,
+            -265
+        ],
+        "nam": "VDD",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            -280,
+            30
+        ],
+        "end": [
+            -90,
+            30
+        ],
+        "nam": "INP",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            -290,
+            30
+        ],
+        "end": [
+            -280,
+            30
+        ],
+        "nam": "INP",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            20,
+            130
+        ],
+        "end": [
+            120,
+            130
+        ],
+        "nam": "OUT",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            20,
+            130
+        ],
+        "end": [
+            20,
+            180
+        ],
+        "nam": "OUT",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            20,
+            100
+        ],
+        "end": [
+            20,
+            130
+        ],
+        "nam": "OUT",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            20,
+            30
+        ],
+        "end": [
+            155,
+            30
+        ],
+        "nam": "VSS",
+        "ns": true
+    }
+]

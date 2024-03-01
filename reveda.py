@@ -37,7 +37,7 @@
 #     nuitka-project: --disable-console
 # pyside6 plugin
 # nuitka-project: --enable-plugin=pyside6
-# nuitka-project: --include-datafiles=./.env=.env
+# nuitka-project: --include-data-files=./.env=.env
 
 
 import os
@@ -103,7 +103,6 @@ class revedaApp(QApplication):
 def main():
     # Start Main application window
     app = revedaApp(sys.argv)
-    app.setStyle("Fusion")
 
     mainW = rvm.MainWindow()
     mainW.setWindowTitle("Revolution EDA")

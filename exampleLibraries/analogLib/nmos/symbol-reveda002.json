@@ -1,0 +1,372 @@
+[
+    {
+        "cellView": "symbol"
+    },
+    {
+        "snapGrid": [
+            2,
+            2
+        ]
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            70
+        ],
+        "end": [
+            0,
+            70
+        ],
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            0,
+            10
+        ],
+        "end": [
+            0,
+            130
+        ],
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -20,
+            20
+        ],
+        "end": [
+            -20,
+            120
+        ],
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -60,
+            70
+        ],
+        "end": [
+            -20,
+            70
+        ],
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            20
+        ],
+        "end": [
+            0,
+            20
+        ],
+        "loc": [
+            0.0,
+            10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            120
+        ],
+        "end": [
+            0,
+            120
+        ],
+        "loc": [
+            0.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            40,
+            110
+        ],
+        "end": [
+            50,
+            120
+        ],
+        "loc": [
+            0.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            40,
+            130
+        ],
+        "end": [
+            50,
+            120
+        ],
+        "loc": [
+            0.0,
+            -10.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            30
+        ],
+        "end": [
+            50,
+            0
+        ],
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            50,
+            140
+        ],
+        "end": [
+            50,
+            110
+        ],
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            76,
+            120
+        ],
+        "nam": "as",
+        "def": "as = asparm()",
+        "txt": "as = asparm()",
+        "val": "as = asparm()",
+        "vis": true,
+        "lt": "PyLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            60.0,
+            104.0
+        ]
+    },
+    {
+        "type": "pin",
+        "st": [
+            50,
+            70
+        ],
+        "nam": "B",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            120
+        ],
+        "nam": "m",
+        "def": "[@m:m=%:m=1]",
+        "txt": "[@m:m=%:m=1]",
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            62.0,
+            62.0
+        ]
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            100
+        ],
+        "nam": "nf",
+        "def": "[@nf:nf=%:nf=2]",
+        "txt": "[@nf:nf=%:nf=2]",
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            62.0,
+            82.0
+        ]
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            60
+        ],
+        "nam": "w",
+        "def": "[@w:w=%:w=2u]",
+        "txt": "[@w:w=%:w=2u]",
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            62.0,
+            20.0
+        ]
+    },
+    {
+        "type": "label",
+        "st": [
+            70,
+            30
+        ],
+        "nam": "l",
+        "def": "[@l:l=%:l=0.18u]",
+        "txt": "[@l:l=%:l=0.18u]",
+        "val": "?",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            64.0,
+            42.0
+        ]
+    },
+    {
+        "type": "pin",
+        "st": [
+            50,
+            140
+        ],
+        "nam": "S",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            50,
+            0
+        ],
+        "nam": "D",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            -60,
+            70
+        ],
+        "nam": "G",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            0.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            100,
+            10
+        ],
+        "nam": "instName",
+        "def": "[@instName]",
+        "txt": "[@instName]",
+        "val": "[@instName]",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            62.0,
+            -2.0
+        ]
+    },
+    {
+        "type": "attr",
+        "nam": "modelName",
+        "def": "nmos"
+    },
+    {
+        "type": "attr",
+        "nam": "XyceSymbolNetlistLine",
+        "def": "M[@instName] [@pinList] [%modelName] [@w:w=%:w=2u] [@l:l=%:l=0.18u] [@nf:nf=%:nf=2] as = asparm() [@m:m=%:m=1]"
+    },
+    {
+        "type": "attr",
+        "nam": "pinOrder",
+        "def": "D, G, B, S"
+    }
+]

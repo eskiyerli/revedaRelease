@@ -1,0 +1,47 @@
+[
+    {
+        "cellView": "layout"
+    },
+    {
+        "snapGrid": [
+            5,
+            5
+        ]
+    },
+    {
+        "type": "Pcell",
+        "lib": "analogLib",
+        "cell": "nmos",
+        "view": "pcell",
+        "nam": "I1",
+        "ic": 1,
+        "loc": [
+            -710.0,
+            -250.0
+        ],
+        "ang": 0,
+        "params": {
+            "width": 4.0,
+            "length": 0.13,
+            "nf": 1
+        }
+    },
+    {
+        "type": "Path",
+        "dfl1": [
+            -260.0,
+            -10.0
+        ],
+        "dfl2": [
+            -766.0,
+            -10.0
+        ],
+        "ln": 0,
+        "w": 100.0,
+        "se": 50.0,
+        "ee": 50.0,
+        "md": 0,
+        "nam": "",
+        "ang": 180
+    }
+]

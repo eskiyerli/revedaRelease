@@ -1,0 +1,865 @@
+[
+    {
+        "cellView": "schematic"
+    },
+    {
+        "snapGrid": [
+            5,
+            5
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "vdc",
+        "view": "symbol",
+        "nam": "I10",
+        "ic": 10,
+        "ld": {
+            "@instName": [
+                "I10",
+                true
+            ],
+            "@AC": [
+                "0",
+                true
+            ],
+            "@DC": [
+                "1",
+                true
+            ],
+            "@cellName": [
+                "vdc",
+                true
+            ]
+        },
+        "loc": [
+            1650.0,
+            -135.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -32.0,
+            -172.0,
+            56.59375,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "cap",
+        "view": "symbol",
+        "nam": "I11",
+        "ic": 11,
+        "ld": {
+            "@IC": [
+                "0",
+                false
+            ],
+            "@cellName": [
+                "cap",
+                true
+            ],
+            "@instName": [
+                "I11",
+                true
+            ],
+            "@C": [
+                "100f",
+                true
+            ]
+        },
+        "loc": [
+            1470.0,
+            -40.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -42.0,
+            -170.0,
+            73.953125,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "idc",
+        "view": "symbol",
+        "nam": "I15",
+        "ic": 15,
+        "ld": {
+            "@cellName": [
+                "idc",
+                true
+            ],
+            "@DC": [
+                "0",
+                true
+            ],
+            "@AC": [
+                "0",
+                true
+            ],
+            "@instName": [
+                "I15",
+                true
+            ]
+        },
+        "loc": [
+            -335.0,
+            -65.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -32.0,
+            -172.0,
+            56.59375,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "anotherLibrary",
+        "cell": "sourceFollower",
+        "view": "symbol",
+        "nam": "I9",
+        "ic": 9,
+        "ld": {
+            "@instName": [
+                "I9",
+                true
+            ],
+            "@cellName": [
+                "sourceFollower",
+                true
+            ]
+        },
+        "loc": [
+            1175.0,
+            -395.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -65.0,
+            -65.0,
+            225.0,
+            225.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "res",
+        "view": "symbol",
+        "nam": "I1",
+        "ic": 1,
+        "ld": {
+            "@cellName": [
+                "res",
+                true
+            ],
+            "@instName": [
+                "I1",
+                true
+            ],
+            "@R": [
+                "4k",
+                true
+            ]
+        },
+        "loc": [
+            650.0,
+            -50.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -12.0,
+            -170.0,
+            41.796875,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "cap",
+        "view": "symbol",
+        "nam": "I8",
+        "ic": 8,
+        "ld": {
+            "@IC": [
+                "0",
+                false
+            ],
+            "@cellName": [
+                "cap",
+                true
+            ],
+            "@instName": [
+                "I8",
+                true
+            ],
+            "@C": [
+                "1p",
+                true
+            ]
+        },
+        "loc": [
+            145.0,
+            -50.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -42.0,
+            -170.0,
+            64.140625,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "res",
+        "view": "symbol",
+        "nam": "I7",
+        "ic": 7,
+        "ld": {
+            "@cellName": [
+                "res",
+                true
+            ],
+            "@instName": [
+                "I7",
+                true
+            ],
+            "@R": [
+                "2k",
+                true
+            ]
+        },
+        "loc": [
+            1000.0,
+            -50.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -12.0,
+            -170.0,
+            41.796875,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "gnd",
+        "view": "symbol",
+        "nam": "I2",
+        "ic": 2,
+        "ld": {
+            "@instName": [
+                "I2",
+                false
+            ]
+        },
+        "loc": [
+            50.0,
+            100.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -32.0,
+            -5.0,
+            89.65625,
+            73.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "res",
+        "view": "symbol",
+        "nam": "I4",
+        "ic": 4,
+        "ld": {
+            "@cellName": [
+                "res",
+                true
+            ],
+            "@instName": [
+                "I4",
+                true
+            ],
+            "@R": [
+                "1k",
+                true
+            ]
+        },
+        "loc": [
+            320.0,
+            -50.0
+        ],
+        "ang": 0.0,
+        "ign": 0,
+        "br": [
+            -12.0,
+            -170.0,
+            41.796875,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "cap",
+        "view": "symbol",
+        "nam": "I5",
+        "ic": 5,
+        "ld": {
+            "@IC": [
+                "0",
+                false
+            ],
+            "@cellName": [
+                "cap",
+                true
+            ],
+            "@instName": [
+                "I5",
+                true
+            ],
+            "@C": [
+                "0.5p",
+                true
+            ]
+        },
+        "loc": [
+            755.0,
+            -315.0
+        ],
+        "ang": 90.0,
+        "ign": 0,
+        "br": [
+            -42.0,
+            -170.0,
+            73.203125,
+            5.0
+        ]
+    },
+    {
+        "type": "sys",
+        "lib": "analogLib",
+        "cell": "cap",
+        "view": "symbol",
+        "nam": "I4",
+        "ic": 4,
+        "ld": {
+            "@IC": [
+                "1",
+                true
+            ],
+            "@cellName": [
+                "cap",
+                true
+            ],
+            "@instName": [
+                "I4",
+                true
+            ],
+            "@C": [
+                "3n",
+                true
+            ]
+        },
+        "loc": [
+            410.0,
+            -315.0
+        ],
+        "ang": 90.0,
+        "ign": 0,
+        "br": [
+            -42.0,
+            -170.0,
+            63.875,
+            5.0
+        ]
+    },
+    {
+        "type": "scn",
+        "st": [
+            320,
+            -315
+        ],
+        "end": [
+            405,
+            -315
+        ],
+        "nam": "net2",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            145,
+            -315
+        ],
+        "end": [
+            320,
+            -315
+        ],
+        "nam": "net2",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            -335,
+            -315
+        ],
+        "end": [
+            145,
+            -315
+        ],
+        "nam": "net2",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            320,
+            -210
+        ],
+        "end": [
+            320,
+            -315
+        ],
+        "nam": "net2",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            -335,
+            -230
+        ],
+        "end": [
+            -335,
+            -315
+        ],
+        "nam": "net2",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            145,
+            -210
+        ],
+        "end": [
+            145,
+            -315
+        ],
+        "nam": "net2",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1650,
+            -295
+        ],
+        "end": [
+            1650,
+            -545
+        ],
+        "nam": "net3",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1255,
+            -545
+        ],
+        "end": [
+            1650,
+            -545
+        ],
+        "nam": "net3",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1650,
+            -135
+        ],
+        "end": [
+            1650,
+            35
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1470,
+            35
+        ],
+        "end": [
+            1650,
+            35
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1470,
+            -40
+        ],
+        "end": [
+            1470,
+            35
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1255,
+            35
+        ],
+        "end": [
+            1470,
+            35
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            650,
+            -315
+        ],
+        "end": [
+            755,
+            -315
+        ],
+        "nam": "net0",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            570,
+            -315
+        ],
+        "end": [
+            650,
+            -315
+        ],
+        "nam": "net0",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            565,
+            -315
+        ],
+        "end": [
+            570,
+            -315
+        ],
+        "nam": "net0",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            650,
+            -210
+        ],
+        "end": [
+            650,
+            -315
+        ],
+        "nam": "net0",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1255,
+            35
+        ],
+        "end": [
+            1255,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1255,
+            -175
+        ],
+        "end": [
+            1255,
+            35
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1000,
+            40
+        ],
+        "end": [
+            1255,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1000,
+            -315
+        ],
+        "end": [
+            1115,
+            -315
+        ],
+        "nam": "net1",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            915,
+            -315
+        ],
+        "end": [
+            1000,
+            -315
+        ],
+        "nam": "net1",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1000,
+            -210
+        ],
+        "end": [
+            1000,
+            -315
+        ],
+        "nam": "net1",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1470,
+            -315
+        ],
+        "end": [
+            1395,
+            -315
+        ],
+        "nam": "OUT",
+        "ns": true
+    },
+    {
+        "type": "scn",
+        "st": [
+            1470,
+            -200
+        ],
+        "end": [
+            1470,
+            -315
+        ],
+        "nam": "OUT",
+        "ns": true
+    },
+    {
+        "type": "scn",
+        "st": [
+            1255,
+            -455
+        ],
+        "end": [
+            1255,
+            -545
+        ],
+        "nam": "net3",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            650,
+            40
+        ],
+        "end": [
+            1000,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            320,
+            40
+        ],
+        "end": [
+            650,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            145,
+            40
+        ],
+        "end": [
+            320,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            50,
+            40
+        ],
+        "end": [
+            145,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            -335,
+            40
+        ],
+        "end": [
+            50,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            50,
+            100
+        ],
+        "end": [
+            50,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            650,
+            -50
+        ],
+        "end": [
+            650,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            320,
+            -50
+        ],
+        "end": [
+            320,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            145,
+            -50
+        ],
+        "end": [
+            145,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            1000,
+            -50
+        ],
+        "end": [
+            1000,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    },
+    {
+        "type": "scn",
+        "st": [
+            -335,
+            -60
+        ],
+        "end": [
+            -335,
+            40
+        ],
+        "nam": "gnd!",
+        "ns": false
+    }
+]
