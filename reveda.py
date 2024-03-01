@@ -103,7 +103,6 @@ class revedaApp(QApplication):
 def main():
     # Start Main application window
     app = revedaApp(sys.argv)
-    app.setStyle("Fusion")
 
     mainW = rvm.MainWindow()
     mainW.setWindowTitle("Revolution EDA")

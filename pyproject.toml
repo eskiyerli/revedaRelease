@@ -14,10 +14,10 @@ authors = [
   { name = "Revolution EDA", email = "48187772+eskiyerli@users.noreply.github.com" },
 ]
 dependencies = [
-  "PySide6~=6.6.1",
+  "PySide6==6.6.2",
 "quantiphy~=2.19",
-"python-dotenv~=1.0.0",
-"gdstk~=0.9.46",
+"python-dotenv==1.0.0",
+"gdstk==0.9.50"
 ]
 keywords = ["electronic", "design", "schematic", "layout", ]
 classifiers = ["Development Status :: 4 - Beta",
@@ -37,7 +37,7 @@ Website = "https://reveda.eu"
 reveda = "reveda:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ['revedaEditor','pdk']
+packages = ['revedaEditor', 'pdk']
 modules = ['revinit', 'reveda']
 
 [tool.hatch.version]
@@ -48,4 +48,7 @@ path = "revedaEditor/gui/revinit.py"
 "./reveda.py" = "reveda.py"
 "./reveda.conf" = "reveda.conf"
 "./library.json" = "library.json"
+"./.env" = ".env"
+"./README.md" = "README.md"
+"./LICENSE.txt" = "LICENSE.txt"
 
