@@ -35,6 +35,10 @@
 #     nuitka-project: --enable-console
 # nuitka-project-else:
 #     nuitka-project: --disable-console
+# pyside6 plugin
+# nuitka-project: --enable-plugin=pyside6
+# nuitka-project: --include-datafiles=./.env=.env
+
 
 import os
 import sys
