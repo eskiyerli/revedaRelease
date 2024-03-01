@@ -23,6 +23,23 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
+# Compilation mode, standalone everywhere, except on macOS there app bundle
+# nuitka-project-if: {OS} in ("Windows", "Linux", "FreeBSD"):
+#    nuitka-project: --onefile
+# nuitka-project-if: {OS} == "Darwin":
+#    nuitka-project: --standalone
+#    nuitka-project: --macos-create-app-bundle
+#
+# Debugging options, controlled via environment variable at compile time.
+# nuitka-project-if: os.getenv("DEBUG_COMPILATION", "no") == "yes"
+#     nuitka-project: --enable-console
+# nuitka-project-else:
+#     nuitka-project: --disable-console
+# pyside6 plugin
+# nuitka-project: --enable-plugin=pyside6
+# nuitka-project: --include-datafiles=./.env=.env
+
+
 import os
 import sys
 from PySide6.QtWidgets import QApplication
