@@ -1,4 +1,3 @@
-
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -27,12 +26,14 @@
 import time
 import logging
 
+
 def debug_decorator(func):
     def wrapper(*args, **kwargs):
         print(f"Calling {func.__name__} called with {args} and kwargs: {kwargs}")
         return func(*args, **kwargs)
 
     return wrapper
+
 
 def timer(func):
     def wrapper(*args, **kwargs):
@@ -42,4 +43,5 @@ def timer(func):
         duration = (end_time - start_time) * 1000
         logging.debug(f"  Took {duration:0.4f} ms")
         return result
+
     return wrapper

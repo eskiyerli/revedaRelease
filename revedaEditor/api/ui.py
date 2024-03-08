@@ -1,4 +1,3 @@
-
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -47,7 +46,7 @@
 
 # TODO: fix these functions.
 import gui.editorWindows as edw
-from PySide6.QtWidgets import (QWidget)
+from PySide6.QtWidgets import QWidget
 import pathlib
 
 
@@ -64,29 +63,37 @@ def getLibraryView():
         return app.mainW.libraryBrowser.libBrowserCont.designView
 
 
-def exportSpiceNetlist(libraryName: str, cellName: str, viewName: str,
-                       netlistPath: str):
+def exportSpiceNetlist(
+    libraryName: str, cellName: str, viewName: str, netlistPath: str
+):
     libraryDict = getLibraryDict()
     libraryPath = libraryDict.get(libraryName)
     libraryView = getLibraryView()
     if libraryPath is not None:
-        viewPath = pathlib.Path(libraryPath).joinpath(cellName).joinpath(
-            viewName).with_suffix(".json")
-        schematicEditor = edw.schematicEditor(viewPath, libraryDict,
-                                              libraryView)
+        viewPath = (
+            pathlib.Path(libraryPath)
+            .joinpath(cellName)
+            .joinpath(viewName)
+            .with_suffix(".json")
+        )
+        schematicEditor = edw.schematicEditor(viewPath, libraryDict, libraryView)
         schematicScene = schematicEditor.centralW.scene
         schematicScene.loadSchematicItems(viewPath)
         schematicScene.createNetlist(pathlib.Path(netlistPath), True)
 
-def createSymbol(libraryName:str, cellName:str, viewName:str):
+
+def createSymbol(libraryName: str, cellName: str, viewName: str):
     libraryDict = getLibraryDict()
     libraryPath = libraryDict.get(libraryName)
     libraryView = getLibraryView()
     if libraryPath is not None:
-        viewPath = pathlib.Path(libraryPath).joinpath(cellName).joinpath(
-            viewName).with_suffix(".json")
-        schematicEditor = edw.schematicEditor(viewPath, libraryDict,
-                                              libraryView)
+        viewPath = (
+            pathlib.Path(libraryPath)
+            .joinpath(cellName)
+            .joinpath(viewName)
+            .with_suffix(".json")
+        )
+        schematicEditor = edw.schematicEditor(viewPath, libraryDict, libraryView)
         schematicScene = schematicEditor.centralW.scene
 
         schematicScene.loadSchematicItems(viewPath)

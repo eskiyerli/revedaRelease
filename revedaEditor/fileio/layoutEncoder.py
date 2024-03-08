@@ -1,4 +1,3 @@
-
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -22,7 +21,7 @@
 #    Software: Revolution EDA
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
-# 
+#
 
 import json
 import inspect
@@ -121,17 +120,13 @@ class layoutEncoder(json.JSONEncoder):
                     "md": item.mode,
                     "ang": item.angle,
                 }
-            case _ :  # now check super class types:
+            case _:  # now check super class types:
                 match item.__class__.__bases__[0]:
                     case lshp.layoutPcell:
                         init_args = inspect.signature(
                             item.__class__.__init__
                         ).parameters
-                        args_used = [
-                            param
-                            for param in init_args
-                            if (param != "self")
-                        ]
+                        args_used = [param for param in init_args if (param != "self")]
 
                         argDict = {arg: getattr(item, arg) for arg in args_used}
                         # print(argDict)

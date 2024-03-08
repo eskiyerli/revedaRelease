@@ -45,9 +45,17 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 from PySide6.QtCore import Qt
-from PySide6.QtGui import (QImage, QPainter, QPen, QAction, QIcon)
-from PySide6.QtWidgets import (QGraphicsScene, QGraphicsView, QMainWindow, QToolBar,
-                               QFileDialog, QComboBox, QLabel, QMessageBox)
+from PySide6.QtGui import QImage, QPainter, QPen, QAction, QIcon
+from PySide6.QtWidgets import (
+    QGraphicsScene,
+    QGraphicsView,
+    QMainWindow,
+    QToolBar,
+    QFileDialog,
+    QComboBox,
+    QLabel,
+    QMessageBox,
+)
 
 
 class stippleView(QGraphicsView):
@@ -59,13 +67,14 @@ class stippleView(QGraphicsView):
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setCursor(Qt.CrossCursor)
 
-        self.setSceneRect(0, 0, self._size * self._gridStep, self._size * self._gridStep)
+        self.setSceneRect(
+            0, 0, self._size * self._gridStep, self._size * self._gridStep
+        )
         self.drawGrid()
 
         self.gridSquares = [[None] * self._size for _ in range(self._size)]
 
     def drawGrid(self):
-
         pen = QPen(Qt.lightGray)
         for x in range(0, self._size * self._gridStep + 1, self._gridStep):
             self.scene().addLine(x, 0, x, self._size * self._gridStep, pen)
@@ -74,14 +83,20 @@ class stippleView(QGraphicsView):
 
     def drawDot(self, row, col):
         try:
-            square = self.scene().addRect(col * self._gridStep, row * self._gridStep,
-                                          self._gridStep, self._gridStep, Qt.NoPen, Qt.black)
+            square = self.scene().addRect(
+                col * self._gridStep,
+                row * self._gridStep,
+                self._gridStep,
+                self._gridStep,
+                Qt.NoPen,
+                Qt.black,
+            )
             self.gridSquares[row][col] = square
         except IndexError:
             msgBox = QMessageBox()
             msgBox.setIcon(QMessageBox.Critical)
-            msgBox.setWindowTitle('Error')
-            msgBox.setText('Please select a square inside the grid.')
+            msgBox.setWindowTitle("Error")
+            msgBox.setText("Please select a square inside the grid.")
             msgBox.setStandardButtons(QMessageBox.Ok)
             msgBox.exec()
             self.scene().removeItem(square)
@@ -138,22 +153,22 @@ class stippleEditor(QMainWindow):
         clearIcon = QIcon(":/icons/node-delete.png")
         self.clearAction = QAction(clearIcon, "Clear", self)
         self.clearAction.triggered.connect(self.clearPattern)
-        self.clearAction.setToolTip('Clear Pattern')
+        self.clearAction.setToolTip("Clear Pattern")
 
         exportImageIcon = QIcon(":/icons/image-export.png")
         self.exportImageAction = QAction(exportImageIcon, "Export as Image", self)
         self.exportImageAction.triggered.connect(self.exportPatternAsImage)
-        self.exportImageAction.setToolTip('Export Pattern as Image')
+        self.exportImageAction.setToolTip("Export Pattern as Image")
 
         exportTextIcon = QIcon(":/icons/script-text.png")
         self.exportTextAction = QAction(exportTextIcon, "Save Pattern", self)
         self.exportTextAction.triggered.connect(self.exportPatternAsText)
-        self.exportTextAction.setToolTip('Save Pattern as Text File')
+        self.exportTextAction.setToolTip("Save Pattern as Text File")
 
         loadTextIcon = QIcon(":/icons/property-blue.png")
         self.loadTextAction = QAction(loadTextIcon, "Load...", self)
         self.loadTextAction.triggered.connect(self.loadPatternFromText)
-        self.loadTextAction.setToolTip('Load Pattern from File')
+        self.loadTextAction.setToolTip("Load Pattern from File")
 
         exitIcon = QIcon(":/icons/external.png")
         self.exitAction = QAction(exitIcon, "Close Window", self)
@@ -177,10 +192,10 @@ class stippleEditor(QMainWindow):
         toolbar.addAction(self.exportTextAction)
         toolbar.addAction(self.loadTextAction)
 
-        self.sizeCB.addItems(['8x8', '16x16', '32x32'])
+        self.sizeCB.addItems(["8x8", "16x16", "32x32"])
         self.sizeCB.setCurrentIndex(2)
         self.sizeCB.currentIndexChanged.connect(self.matrixSizeChanged)
-        toolbar.addWidget(QLabel('Stipple Matrix Size: '))
+        toolbar.addWidget(QLabel("Stipple Matrix Size: "))
         toolbar.addWidget(self.sizeCB)
         self.addToolBar(toolbar)
 
@@ -196,9 +211,11 @@ class stippleEditor(QMainWindow):
         file_dialog.setNameFilter("PNG Image (*.png)")
         if file_dialog.exec():
             file_path = file_dialog.selectedFiles()[0]
-            image = QImage(self.view.size * self.view.gridStep, self.view.size *
-                           self.view.gridStep,
-                           QImage.Format_RGB32)
+            image = QImage(
+                self.view.size * self.view.gridStep,
+                self.view.size * self.view.gridStep,
+                QImage.Format_RGB32,
+            )
             image.fill(Qt.white)
 
             painter = QPainter(image)

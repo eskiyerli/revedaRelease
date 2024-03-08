@@ -28,8 +28,8 @@
 
 import json
 import pdk.process as fabproc
-from PySide6.QtCore import (QPoint, QLineF )
-from PySide6.QtWidgets import (QGraphicsScene )
+from PySide6.QtCore import QPoint, QLineF
+from PySide6.QtWidgets import QGraphicsScene
 
 from revedaEditor.common.net import schematicNet
 import revedaEditor.common.shapes as shp
@@ -82,7 +82,9 @@ class symbolItems:
         start = QPoint(item["rect"][0], item["rect"][1])
         end = QPoint(item["rect"][2], item["rect"][3])
         rect = shp.symbolRectangle(start, end)
-        rect.setPos(QPoint(item["loc"][0], item["loc"][1]), )
+        rect.setPos(
+            QPoint(item["loc"][0], item["loc"][1]),
+        )
         rect.angle = item["ang"]
         return rect
 
@@ -92,7 +94,9 @@ class symbolItems:
         circle = shp.symbolCircle(centre, end)  # note that we are using grid
         # values for
         # scene
-        circle.setPos(QPoint(item["loc"][0], item["loc"][1]), )
+        circle.setPos(
+            QPoint(item["loc"][0], item["loc"][1]),
+        )
         circle.angle = item["ang"]
         return circle
 
@@ -124,8 +128,15 @@ class symbolItems:
 
     def createLabelItem(self, item: dict):
         start = QPoint(item["st"][0], item["st"][1])
-        label = lbl.symbolLabel(start, item["def"], item["lt"], item["ht"], item["al"],
-                                item["or"], item["use"])
+        label = lbl.symbolLabel(
+            start,
+            item["def"],
+            item["lt"],
+            item["ht"],
+            item["al"],
+            item["or"],
+            item["use"],
+        )
         label.setPos(QPoint(item["loc"][0], item["loc"][1]))
         label.labelName = item["nam"]
         label.labelText = item["txt"]
@@ -135,8 +146,15 @@ class symbolItems:
 
     def createTextItem(self, item: dict):
         start = QPoint(item["st"][0], item["st"][1])
-        text = shp.text(start, item["tc"], item["ff"], item["fs"], item["th"], item["ta"],
-                        item["to"])
+        text = shp.text(
+            start,
+            item["tc"],
+            item["ff"],
+            item["fs"],
+            item["th"],
+            item["ta"],
+            item["to"],
+        )
         text.setPos(QPoint(item["loc"][0], item["loc"][1]))
         return text
 
@@ -170,8 +188,7 @@ class schematicItems:
                 symbolInstance.netlistIgnore = bool(item.get("ign", 0))
                 symbolInstance.labelDict = item["ld"]
                 symbolInstance.setPos(*item["loc"])
-                [labelItem.labelDefs() for labelItem in
-                 symbolInstance.labels.values()]
+                [labelItem.labelDefs() for labelItem in symbolInstance.labels.values()]
                 libraryPath = self.libraryDict.get(item["lib"])
 
                 if libraryPath is None:
@@ -186,7 +203,6 @@ class schematicItems:
                         self.scene.logger.warning(f"{item['lib']} cannot be found.")
                         return symbolInstance
                     else:
-
                         # load json file and create shapes
                         with file.open(mode="r", encoding="utf-8") as temp:
                             try:
@@ -196,18 +212,29 @@ class schematicItems:
                                 # we snap to scene grid values. Need to test further.
                                 symbolShape = symbolItems(self.scene)
                                 symbolShape.snapTuple = symbolSnapTuple
-                                for jsonItem in jsonItems[2:]:  # skip first two entries.
+                                for jsonItem in jsonItems[
+                                    2:
+                                ]:  # skip first two entries.
                                     if jsonItem["type"] == "attr":
-                                        symbolAttributes[jsonItem["nam"]] = jsonItem["def"]
+                                        symbolAttributes[jsonItem["nam"]] = jsonItem[
+                                            "def"
+                                        ]
                                     else:
                                         itemShapes.append(symbolShape.create(jsonItem))
                                 symbolInstance.shapes = itemShapes
                                 for labelItem in symbolInstance.labels.values():
-                                    if labelItem.labelName in symbolInstance.labelDict.keys():
-                                        labelItem.labelValue = \
-                                            symbolInstance.labelDict[labelItem.labelName][0]
-                                        labelItem.labelVisible = \
-                                            symbolInstance.labelDict[labelItem.labelName][1]
+                                    if (
+                                        labelItem.labelName
+                                        in symbolInstance.labelDict.keys()
+                                    ):
+                                        labelItem.labelValue = symbolInstance.labelDict[
+                                            labelItem.labelName
+                                        ][0]
+                                        labelItem.labelVisible = (
+                                            symbolInstance.labelDict[
+                                                labelItem.labelName
+                                            ][1]
+                                        )
                                 symbolInstance.symattrs = symbolAttributes
                                 [
                                     labelItem.labelDefs()
@@ -229,14 +256,25 @@ class schematicItems:
                 pinName = item["pn"]
                 pinDir = item["pd"]
                 pinType = item["pt"]
-                pinItem = shp.schematicPin(start, pinName, pinDir, pinType, )
+                pinItem = shp.schematicPin(
+                    start,
+                    pinName,
+                    pinDir,
+                    pinType,
+                )
                 pinItem.angle = item["ang"]
                 return pinItem
             case "txt":
                 start = QPoint(item["st"][0], item["st"][1])
-                text = shp.text(start, item["tc"], item["ff"], item["fs"], item["th"],
-                                item["ta"],
-                                item["to"])
+                text = shp.text(
+                    start,
+                    item["tc"],
+                    item["ff"],
+                    item["fs"],
+                    item["th"],
+                    item["ta"],
+                    item["to"],
+                )
                 return text
             case "dot":
                 start = QPoint(item["pt"][0], item["pt"][1])
@@ -244,15 +282,19 @@ class schematicItems:
                 return dot
 
     def createDraftSymbol(self, item: dict, symbolInstance: shp.schematicSymbol):
-        rectItem = shp.symbolRectangle(QPoint(item["br"][0], item["br"][1]),
-                                       QPoint(item["br"][2], item["br"][3]))
+        rectItem = shp.symbolRectangle(
+            QPoint(item["br"][0], item["br"][1]), QPoint(item["br"][2], item["br"][3])
+        )
         fixedFont = self.scene.fixedFont
-        textItem = shp.text(rectItem.start, f'{item["lib"]}'
-                                            f'/{item["cell"]}/'
-                                            f'{item["view"]}',
-                            fixedFont.family(), fixedFont.styleName(),
-                            fixedFont.pointSize(), shp.text.textAlignments[0],
-                            shp.text.textOrients[0])
+        textItem = shp.text(
+            rectItem.start,
+            f'{item["lib"]}' f'/{item["cell"]}/' f'{item["view"]}',
+            fixedFont.family(),
+            fixedFont.styleName(),
+            fixedFont.pointSize(),
+            shp.text.textAlignments[0],
+            shp.text.textOrients[0],
+        )
         symbolInstance.shapes = [rectItem, textItem]
         symbolInstance.draft = True
 
@@ -289,8 +331,7 @@ class layoutItems:
                         if pcellDef[0]["cellView"] != "pcell":
                             self.scene.logger.error("Not a pcell cell")
                         else:
-                            pcellInstance = eval(
-                                f'pcells.{pcellDef[1]["reference"]}()')
+                            pcellInstance = eval(f'pcells.{pcellDef[1]["reference"]}()')
                             pcellInstance(**item["params"])
                             pcellInstance.libraryName = item["lib"]
                             pcellInstance.cellName = item["cell"]
@@ -306,7 +347,9 @@ class layoutItems:
             case "Path":
                 return self.createPathShape(item)
             case "Label":
-                return self.createLabelShape(item, )
+                return self.createLabelShape(
+                    item,
+                )
             case "Pin":
                 return self.createPinShape(item)
             case "Polygon":
@@ -353,36 +396,61 @@ class layoutItems:
         return rect
 
     def createPathShape(self, item):
-        path = lshp.layoutPath(QLineF(QPoint(item["dfl1"][0], item["dfl1"][1]),
-                                      QPoint(item["dfl2"][0], item["dfl2"][1]), ),
-                               laylyr.pdkDrawingLayers[item["ln"]], item["w"], item["se"],
-                               item["ee"], item["md"], )
+        path = lshp.layoutPath(
+            QLineF(
+                QPoint(item["dfl1"][0], item["dfl1"][1]),
+                QPoint(item["dfl2"][0], item["dfl2"][1]),
+            ),
+            laylyr.pdkDrawingLayers[item["ln"]],
+            item["w"],
+            item["se"],
+            item["ee"],
+            item["md"],
+        )
         path.name = item.get("nam", "")
         path.angle = item.get("ang", 0)
         return path
 
     def createRulerShape(self, item):
-        ruler = lshp.layoutRuler(QLineF(QPoint(item["dfl1"][0], item["dfl1"][1]),
-                                        QPoint(item["dfl2"][0], item["dfl2"][1]), ),
-                                 self.rulerWidth, self.rulerTickGap,
-                                 self.rulerTickLength, self.rulerFont, item["md"], )
+        ruler = lshp.layoutRuler(
+            QLineF(
+                QPoint(item["dfl1"][0], item["dfl1"][1]),
+                QPoint(item["dfl2"][0], item["dfl2"][1]),
+            ),
+            self.rulerWidth,
+            self.rulerTickGap,
+            self.rulerTickLength,
+            self.rulerFont,
+            item["md"],
+        )
         ruler.angle = item.get("ang", 0)
         return ruler
 
     def createLabelShape(self, item):
         layoutLayer = laylyr.pdkTextLayers[item["ln"]]
-        label = lshp.layoutLabel(QPoint(item["st"][0], item["st"][1]), item["lt"],
-                                 item["ff"], item["fs"], item["fh"], item["la"], item["lo"],
-                                 layoutLayer, )
+        label = lshp.layoutLabel(
+            QPoint(item["st"][0], item["st"][1]),
+            item["lt"],
+            item["ff"],
+            item["fs"],
+            item["fh"],
+            item["la"],
+            item["lo"],
+            layoutLayer,
+        )
         label.angle = item.get("ang", 0)
         return label
 
     def createPinShape(self, item):
         layoutLayer = laylyr.pdkPinLayers[item["ln"]]
-        pin = lshp.layoutPin(QPoint(item["tl"][0], item["tl"][1]),
-                             QPoint(item["br"][0], item["br"][1]), item["pn"], item["pd"],
-                             item["pt"],
-                             layoutLayer, )
+        pin = lshp.layoutPin(
+            QPoint(item["tl"][0], item["tl"][1]),
+            QPoint(item["br"][0], item["br"][1]),
+            item["pn"],
+            item["pd"],
+            item["pt"],
+            layoutLayer,
+        )
         pin.angle = item.get("ang", 0)
         return pin
 
@@ -394,10 +462,21 @@ class layoutItems:
         return polygon
 
     def createViaArrayShape(self, item):
-        viaDefTuple = fabproc.processVias[fabproc.processViaNames.index(item["via"]["vdt"])]
-        via = lshp.layoutVia(QPoint(item["via"]["st"][0], item["via"]["st"][1]),
-                             viaDefTuple, item["via"]["w"], item["via"]["h"], )
-        viaArray = lshp.layoutViaArray(QPoint(item["st"][0], item["st"][1]), via, item["sp"],
-                                       item["xn"], item["yn"])
+        viaDefTuple = fabproc.processVias[
+            fabproc.processViaNames.index(item["via"]["vdt"])
+        ]
+        via = lshp.layoutVia(
+            QPoint(item["via"]["st"][0], item["via"]["st"][1]),
+            viaDefTuple,
+            item["via"]["w"],
+            item["via"]["h"],
+        )
+        viaArray = lshp.layoutViaArray(
+            QPoint(item["st"][0], item["st"][1]),
+            via,
+            item["sp"],
+            item["xn"],
+            item["yn"],
+        )
         viaArray.angle = item.get("ang", 0)
         return viaArray

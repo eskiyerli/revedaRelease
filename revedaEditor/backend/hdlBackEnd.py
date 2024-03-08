@@ -179,7 +179,7 @@ class verilogaC:
         )
 
         # Create the netlist line string with the formatted values
-        self._netlistLine = f"Y{self._vaModule} [@instName] [@pinList]  {self._vaModule}Model {instParamString}"
+        self._netlistLine = f"Y{self._vaModule} @instName @pinList  {self._vaModule}Model {instParamString}"
 
         # Return the netlist line
         return self._netlistLine
@@ -219,7 +219,6 @@ class spiceC:
 
     @property
     def netlistLine(self):
-
         # Create a string of instance parameters in the format [@key:key=%:key=item]
         instParamString = " ".join(
             [
@@ -229,9 +228,9 @@ class spiceC:
         )
         if instParamString.strip():
             # Create the netlist line string with the formatted values
-            self._netlistLine = f'X[@instName] [@pinList] {self.subcktParams["name"]} PARAM: {instParamString}'
+            self._netlistLine = f'X@instName @pinList {self.subcktParams["name"]} PARAM: {instParamString}'
         else:
-            self._netlistLine = f'X[@instName] [@pinList] {self.subcktParams["name"]}'
+            self._netlistLine = f'X@instName @pinList {self.subcktParams["name"]}'
 
         # Return the netlist line
         return self._netlistLine
@@ -244,9 +243,8 @@ class spiceC:
 
         # Iterate over each line in the file
         for linenumber, line in enumerate(self._fileLines):
-
             # Check if the line starts with '.SUBCKT'
-            if line.startswith(".SUBCKT"):
+            if line.upper().startswith(".SUBCKT"):
                 subcktStart = linenumber
                 subcktLines = f"{line.strip()}"
 
@@ -269,13 +267,13 @@ class spiceC:
         subcktDict["name"] = tokens[1]
         capSubcktLine = subcktLine.upper()
         if "PARAM:" in capSubcktLine:
-            subcktDict["pins"] = tokens[2 : capSubcktLine.split().index("PARAM:")]
+            subcktDict["pins"] = tokens[2: capSubcktLine.split().index("PARAM:")]
             paramsStringList = tokens[capSubcktLine.split().index("PARAM:") + 1 :]
             for index, paramString in enumerate(paramsStringList):
                 if paramString.strip() == "=":
-                    subcktDict["params"][paramsStringList[index - 1].strip()] = (
-                        paramsStringList[index + 1].strip()
-                    )
+                    subcktDict["params"][
+                        paramsStringList[index - 1].strip()
+                    ] = paramsStringList[index + 1].strip()
         else:
             subcktDict["pins"] = tokens[2:]
         self._pinOrder = ",".join(subcktDict["pins"])
