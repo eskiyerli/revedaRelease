@@ -1,5 +1,3 @@
-
-
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -26,12 +24,14 @@
 #
 
 
-from PySide6.QtCore import (Qt, )
-from PySide6.QtWidgets import (QLineEdit, QLabel, QWidget)
+from PySide6.QtCore import (
+    Qt,
+)
+from PySide6.QtWidgets import QLineEdit, QLabel, QWidget
 
 
 class shortLineEdit(QLineEdit):
-    def __init__(self, value: str = ''):
+    def __init__(self, value: str = ""):
         super().__init__(None)
         self.setMaximumWidth(90)
         if isinstance(value, str):
@@ -48,7 +48,7 @@ class boldLabel(QLabel):
 
 
 class longLineEdit(QLineEdit):
-    def __init__(self, value: str = ''):
+    def __init__(self, value: str = ""):
         super().__init__(None)
         self.setMaximumWidth(500)
         if isinstance(value, str):

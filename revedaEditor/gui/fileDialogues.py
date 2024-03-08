@@ -26,13 +26,26 @@
 
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.gui.editFunctions as edf
-from PySide6.QtCore import (Qt, QDir)
-from PySide6.QtGui import (QStandardItemModel, QStandardItem)
-from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog,
-                               QFormLayout, QHBoxLayout, QLabel, QLineEdit,
-                               QVBoxLayout, QRadioButton, QButtonGroup,
-                               QPushButton, QGroupBox, QTableView, QMenu,
-                               QCheckBox)
+from PySide6.QtCore import Qt, QDir
+from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QVBoxLayout,
+    QRadioButton,
+    QButtonGroup,
+    QPushButton,
+    QGroupBox,
+    QTableView,
+    QMenu,
+    QCheckBox,
+)
 import pathlib
 
 
@@ -77,35 +90,36 @@ class deleteCellDialog(createCellDialog):
     def __init__(self, parent, model):
         super().__init__(parent, model)
         self.cellCB.setEditable(False)
-        self.setWindowTitle('Delete Cell')
+        self.setWindowTitle("Delete Cell")
 
 
 class newCellViewDialog(createCellDialog):
     def __init__(self, parent, model):
         super().__init__(parent, model)
         self.cellCB.setEditable(False)
-        self.setWindowTitle('Create Cell View')
+        self.setWindowTitle("Create Cell View")
         self.viewType = QComboBox()
         self.layout.addRow(edf.boldLabel("View Type:"), self.viewType)
         self.viewName = edf.longLineEdit()
-        self.layout.addRow(edf.boldLabel('View Name:'), self.viewName)
+        self.layout.addRow(edf.boldLabel("View Name:"), self.viewName)
         self.layout.setSpacing(10)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
 
-class selectCellViewDialog(deleteCellDialog):
+class selectCellViewDialog(createCellDialog):
     def __init__(self, parent, model):
         super().__init__(parent=parent, model=model)
         libItem = libm.getLibItem(self.model, self.libNamesCB.currentText())
         self.setWindowTitle("Select CellView")
+        self.cellCB.setEditable(False)
         self.cellCB.currentTextChanged.connect(self.cellNameChanged)
         self.viewCB = QComboBox()
         cellItem = libm.getCellItem(libItem, self.cellCB.currentText())
         self.viewCB.addItems(
-            [cellItem.child(i).text() for i in range(cellItem.rowCount())])
-
-        self.layout.addRow(edf.boldLabel('View Name:'), self.viewCB)
+            [cellItem.child(i).text() for i in range(cellItem.rowCount())]
+        )
+        self.layout.addRow(edf.boldLabel("View Name:"), self.viewCB)
         self.layout.setSpacing(10)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
@@ -207,17 +221,18 @@ class copyCellDialog(QDialog):
 
     def selectLibrary(self):
         self.selectedLibPath = self.libraryComboBox.itemData(
-            self.libraryComboBox.currentIndex(), Qt.UserRole + 2)
+            self.libraryComboBox.currentIndex(), Qt.UserRole + 2
+        )
 
 
 class copyViewDialog(createCellDialog):
     def __init__(self, parent, model):
         super().__init__(parent=parent, model=model)
-        self.setWindowTitle('Copy View')
+        self.setWindowTitle("Copy View")
         self.cellCB.setEditable(True)
         self.cellCB.InsertPolicy = QComboBox.InsertAfterCurrent
         self.viewName = edf.longLineEdit()
-        self.layout.addRow(edf.boldLabel('View Name:'), self.viewName)
+        self.layout.addRow(edf.boldLabel("View Name:"), self.viewName)
         self.layout.setSpacing(10)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
@@ -227,7 +242,7 @@ class closeLibDialog(QDialog):
     def __init__(self, libraryDict, parent, *args):
         super().__init__(parent, *args)
         self.libraryDict = libraryDict
-        self.setWindowTitle('Select Library to close')
+        self.setWindowTitle("Select Library to close")
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -238,7 +253,7 @@ class closeLibDialog(QDialog):
         formLayout = QFormLayout()
         self.libNamesCB = QComboBox()
         self.libNamesCB.addItems(self.libraryDict.keys())
-        formLayout.addRow(edf.boldLabel('Select Library', self), self.libNamesCB)
+        formLayout.addRow(edf.boldLabel("Select Library", self), self.libNamesCB)
         layout.addLayout(formLayout)
         layout.addSpacing(40)
         layout.addWidget(self.buttonBox)
@@ -249,17 +264,17 @@ class renameLibDialog(QDialog):
     def __init__(self, parent, oldLibraryName, *args):
         super().__init__(parent, *args)
         self.oldLibraryName = oldLibraryName
-        self.setWindowTitle(f'Change {oldLibraryName} to:')
+        self.setWindowTitle(f"Change {oldLibraryName} to:")
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
 
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-        formBox = QGroupBox('Rename Library')
+        formBox = QGroupBox("Rename Library")
         layout = QVBoxLayout()
         formLayout = QFormLayout()
         self.newLibraryName = edf.longLineEdit()
-        formLayout.addRow(edf.boldLabel('New Library Name:', self), self.newLibraryName)
+        formLayout.addRow(edf.boldLabel("New Library Name:", self), self.newLibraryName)
         formBox.setLayout(formLayout)
         layout.addWidget(formBox)
         layout.addSpacing(40)
@@ -271,15 +286,15 @@ class renameViewDialog(QDialog):
     def __init__(self, parent, oldViewName):
         super().__init__(parent)
         self.oldViewName = oldViewName
-        self.setWindowTitle(f'Rename {oldViewName} ')
+        self.setWindowTitle(f"Rename {oldViewName} ")
         self.layout = QVBoxLayout()
         formLayout = QFormLayout()
         oldViewNameEdit = edf.longLineEdit()
         oldViewNameEdit.setText(self.oldViewName)
         oldViewNameEdit.setEnabled(False)
-        formLayout.addRow(edf.boldLabel('Old View Name:'), oldViewNameEdit)
+        formLayout.addRow(edf.boldLabel("Old View Name:"), oldViewNameEdit)
         self.newViewNameEdit = edf.longLineEdit()
-        formLayout.addRow(edf.boldLabel('New View Name:'), self.newViewNameEdit)
+        formLayout.addRow(edf.boldLabel("New View Name:"), self.newViewNameEdit)
         self.layout.addLayout(formLayout)
         self.layout.setSpacing(10)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -294,7 +309,7 @@ class renameViewDialog(QDialog):
 class deleteSymbolDialog(QDialog):
     def __init__(self, cellName, viewName, *args):
         super().__init__(*args)
-        self.setWindowTitle(f'Delete {cellName}-{viewName} CellView?')
+        self.setWindowTitle(f"Delete {cellName}-{viewName} CellView?")
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -312,7 +327,7 @@ class netlistExportDialogue(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setWindowTitle(f'Export Netlist for {parent.cellName}-{parent.viewName}')
+        self.setWindowTitle(f"Export Netlist for {parent.cellName}-{parent.viewName}")
         # self.setMinimumSize(500, 100)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -321,34 +336,34 @@ class netlistExportDialogue(QDialog):
 
         self.mainLayout = QVBoxLayout()
         self.mainLayout.addStretch(2)
-        viewBox = QGroupBox('Select a view to Netlist')
+        viewBox = QGroupBox("Select a view to Netlist")
         viewBoxLayout = QFormLayout()
         self.libNameEdit = edf.longLineEdit()
         self.libNameEdit.setDisabled(True)
-        viewBoxLayout.addRow(edf.boldLabel('Library:'), self.libNameEdit)
+        viewBoxLayout.addRow(edf.boldLabel("Library:"), self.libNameEdit)
         self.cellNameEdit = edf.longLineEdit()
         self.cellNameEdit.setDisabled(True)
-        viewBoxLayout.addRow(edf.boldLabel('Cell:'), self.cellNameEdit)
+        viewBoxLayout.addRow(edf.boldLabel("Cell:"), self.cellNameEdit)
         self.viewNameCombo = QComboBox()
-        viewBoxLayout.addRow(edf.boldLabel('View:'), self.viewNameCombo)
+        viewBoxLayout.addRow(edf.boldLabel("View:"), self.viewNameCombo)
         viewBox.setLayout(viewBoxLayout)
         self.mainLayout.addWidget(viewBox)
-        self.switchBox = QGroupBox('Switch and Stop View Lists')
+        self.switchBox = QGroupBox("Switch and Stop View Lists")
         self.formLayout = QFormLayout()
         self.switchViewEdit = edf.longLineEdit()
-        self.switchViewEdit.setText((', ').join(self.parent.switchViewList))
-        self.formLayout.addRow(edf.boldLabel('Switch View List:'), self.switchViewEdit)
+        self.switchViewEdit.setText((", ").join(self.parent.switchViewList))
+        self.formLayout.addRow(edf.boldLabel("Switch View List:"), self.switchViewEdit)
         self.stopViewEdit = edf.longLineEdit()
-        self.stopViewEdit.setText((', ').join(self.parent.stopViewList))
-        self.formLayout.addRow((edf.boldLabel('Stop View: ')), self.stopViewEdit)
+        self.stopViewEdit.setText((", ").join(self.parent.stopViewList))
+        self.formLayout.addRow((edf.boldLabel("Stop View: ")), self.stopViewEdit)
         self.switchBox.setLayout(self.formLayout)
         self.mainLayout.addWidget(self.switchBox)
-        fileBox = QGroupBox('Select Simulation Directory')
+        fileBox = QGroupBox("Select Simulation Directory")
         fileDialogLayout = QHBoxLayout()
-        fileDialogLayout.addWidget(edf.boldLabel('Export Directory:'))
+        fileDialogLayout.addWidget(edf.boldLabel("Export Directory:"))
         self.netlistDirEdit = edf.longLineEdit()
         fileDialogLayout.addWidget(self.netlistDirEdit)
-        self.netListDirButton = QPushButton('...')
+        self.netListDirButton = QPushButton("...")
         self.netListDirButton.clicked.connect(self.onDirButtonClicked)
         fileDialogLayout.addWidget(self.netListDirButton)
         fileBox.setLayout(fileDialogLayout)
@@ -367,7 +382,7 @@ class gdsExportDialogue(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setWindowTitle(f'Export GDS for {parent.cellName}-{parent.viewName}')
+        self.setWindowTitle(f"Export GDS for {parent.cellName}-{parent.viewName}")
         self.setMinimumWidth(500)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -376,20 +391,20 @@ class gdsExportDialogue(QDialog):
 
         self.mainLayout = QVBoxLayout()
         self.mainLayout.addStretch(2)
-        settingsBox = QGroupBox('Settings')
+        settingsBox = QGroupBox("Settings")
         settingsBoxLayout = QFormLayout()
         settingsBox.setLayout(settingsBoxLayout)
         self.unitEdit = edf.shortLineEdit()
-        settingsBoxLayout.addRow(edf.boldLabel('Unit:'), self.unitEdit)
+        settingsBoxLayout.addRow(edf.boldLabel("Unit:"), self.unitEdit)
         self.precisionEdit = edf.shortLineEdit()
-        settingsBoxLayout.addRow(edf.boldLabel('Precision:'), self.precisionEdit)
+        settingsBoxLayout.addRow(edf.boldLabel("Precision:"), self.precisionEdit)
         self.mainLayout.addWidget(settingsBox)
-        fileBox = QGroupBox('GDS Export Directory')
+        fileBox = QGroupBox("GDS Export Directory")
         fileDialogLayout = QHBoxLayout()
-        fileDialogLayout.addWidget(edf.boldLabel('Export Directory/File:'))
+        fileDialogLayout.addWidget(edf.boldLabel("Export Directory/File:"))
         self.exportPathEdit = edf.longLineEdit()
         fileDialogLayout.addWidget(self.exportPathEdit)
-        self.gdsExportButton = QPushButton('...')
+        self.gdsExportButton = QPushButton("...")
         self.gdsExportButton.clicked.connect(self.onDirButtonClicked)
         fileDialogLayout.addWidget(self.gdsExportButton)
         fileBox.setLayout(fileDialogLayout)
@@ -402,29 +417,33 @@ class gdsExportDialogue(QDialog):
         self.dirName = QFileDialog.getExistingDirectory()
         if self.dirName:
             self.exportPathEdit.setText(
-                f'{self.dirName}/{self.parent.cellName}-{self.parent.viewName}.gds')
+                f"{self.dirName}/{self.parent.cellName}-{self.parent.viewName}.gds"
+            )
 
 
 class goDownHierDialogue(QDialog):
-    def __init__(self, parent, ):
+    def __init__(
+        self,
+        parent,
+    ):
         super().__init__(parent=parent)
         self._parent = parent
-        self.setWindowTitle('Go Down Hierarchy')
+        self.setWindowTitle("Go Down Hierarchy")
         self.setMinimumWidth(250)
         self.buttonId = 1
         _mainLayout = QVBoxLayout()
-        viewGroup = QGroupBox('Select a cellview')
+        viewGroup = QGroupBox("Select a cellview")
         viewGroupLayout = QVBoxLayout()
         viewGroup.setLayout(viewGroupLayout)
         self.viewListCB = QComboBox()
         viewGroupLayout.addWidget(self.viewListCB)
         _mainLayout.addWidget(viewGroup)
-        buttonGroupBox = QGroupBox('Open')
+        buttonGroupBox = QGroupBox("Open")
         buttonGroupLayout = QHBoxLayout()
         buttonGroupBox.setLayout(buttonGroupLayout)
-        self.openButton = QRadioButton('Edit')
+        self.openButton = QRadioButton("Edit")
         self.openButton.setChecked(True)
-        self.readOnlyButton = QRadioButton('Read Only')
+        self.readOnlyButton = QRadioButton("Read Only")
         buttonGroupLayout.addWidget(self.openButton)
         buttonGroupLayout.addWidget(self.readOnlyButton)
         _mainLayout.addWidget(buttonGroupBox)
@@ -449,15 +468,15 @@ class importVerilogaCellDialogue(QDialog):
     def __init__(self, model, parent):
         super().__init__(parent)
         self._parent = parent
-        self.setWindowTitle('Import a Verilog-a Module File')
+        self.setWindowTitle("Import a Verilog-a Module File")
         self._model = model
         self.setMinimumSize(500, 200)
         mainLayout = QVBoxLayout()
         fileDialogLayout = QHBoxLayout()
-        fileDialogLayout.addWidget(edf.boldLabel('Select Verilog-A file:'), 1)
+        fileDialogLayout.addWidget(edf.boldLabel("Select Verilog-A file:"), 1)
         self.vaFileEdit = edf.longLineEdit()
         fileDialogLayout.addWidget(self.vaFileEdit, 4)
-        self.vaFileButton = QPushButton('...')
+        self.vaFileButton = QPushButton("...")
         self.vaFileButton.clicked.connect(self.onFileButtonClicked)
         fileDialogLayout.addWidget(self.vaFileButton, 1)
         mainLayout.addLayout(fileDialogLayout)
@@ -467,19 +486,21 @@ class importVerilogaCellDialogue(QDialog):
         self.libNamesCB = QComboBox()
         self.libNamesCB.setModel(self._model)
         self.libNamesCB.currentTextChanged.connect(self.changeCells)
-        layout.addRow(edf.boldLabel('Library:'), self.libNamesCB)
+        layout.addRow(edf.boldLabel("Library:"), self.libNamesCB)
         self.cellNamesCB = QComboBox()
         self.cellNamesCB.setEditable(True)
-        initialCellNames = [self._model.item(0).child(i).cellName for i in
-                            range(self._model.item(0).rowCount())]
+        initialCellNames = [
+            self._model.item(0).child(i).cellName
+            for i in range(self._model.item(0).rowCount())
+        ]
         self.cellNamesCB.addItems(initialCellNames)
-        layout.addRow(edf.boldLabel('Cell:'), self.cellNamesCB)
+        layout.addRow(edf.boldLabel("Cell:"), self.cellNamesCB)
         self.vaViewName = edf.longLineEdit()
-        layout.addRow(edf.boldLabel('Verilog-A view:'), self.vaViewName)
+        layout.addRow(edf.boldLabel("Verilog-A view:"), self.vaViewName)
         mainLayout.addLayout(layout)
-        symbolGroupBox = QGroupBox('Symbol Creation')
+        symbolGroupBox = QGroupBox("Symbol Creation")
         symbolGBLayout = QVBoxLayout()
-        self.symbolCheckBox = QCheckBox('Create a new symbol?')
+        self.symbolCheckBox = QCheckBox("Create a new symbol?")
         symbolGBLayout.addWidget(self.symbolCheckBox)
         symbolGroupBox.setLayout(symbolGBLayout)
         mainLayout.addWidget(symbolGroupBox)
@@ -493,20 +514,25 @@ class importVerilogaCellDialogue(QDialog):
         self.show()
 
     def changeCells(self):
-        selectedLibItemRow = self._model.findItems(self.libNamesCB.currentText())[0].row()
-        libCellNames = [self._model.item(selectedLibItemRow).child(i).cellName for i in
-                        range(self._model.item(selectedLibItemRow).rowCount())]
+        selectedLibItemRow = self._model.findItems(self.libNamesCB.currentText())[
+            0
+        ].row()
+        libCellNames = [
+            self._model.item(selectedLibItemRow).child(i).cellName
+            for i in range(self._model.item(selectedLibItemRow).rowCount())
+        ]
         self.cellNamesCB.clear()
         self.cellNamesCB.addItems(libCellNames)
 
     def onFileButtonClicked(self):
         vaFilePathObj = pathlib.Path(self.vaFileEdit.text())
         fileDialog = QFileDialog()
-        fileDialog.setNameFilter('Verilog-A files (*.va)')
+        fileDialog.setNameFilter("Verilog-A files (*.va)")
         fileDialog.setDirectory(str(vaFilePathObj.parent))
         fileDialog.selectFile(vaFilePathObj.name)
-        self.vaFileName = fileDialog.getOpenFileName(self, caption='Select Verilog-A '
-                                                                   'file.')[0]
+        self.vaFileName = fileDialog.getOpenFileName(
+            self, caption="Select Verilog-A " "file."
+        )[0]
         if self.vaFileName:
             self.vaFileEdit.setText(self.vaFileName)
 
@@ -515,15 +541,15 @@ class importSpiceCellDialogue(QDialog):
     def __init__(self, model, parent):
         super().__init__(parent)
         self._parent = parent
-        self.setWindowTitle('Import a Spice Subcircuit File')
+        self.setWindowTitle("Import a Spice Subcircuit File")
         self._model = model
         self.setMinimumSize(500, 200)
         mainLayout = QVBoxLayout()
         fileDialogLayout = QHBoxLayout()
-        fileDialogLayout.addWidget(edf.boldLabel('Select Spice file:'), 1)
+        fileDialogLayout.addWidget(edf.boldLabel("Select Spice file:"), 1)
         self.spiceFileEdit = edf.longLineEdit()
         fileDialogLayout.addWidget(self.spiceFileEdit, 4)
-        self.vaFileButton = QPushButton('...')
+        self.vaFileButton = QPushButton("...")
         self.vaFileButton.clicked.connect(self.onFileButtonClicked)
         fileDialogLayout.addWidget(self.vaFileButton, 1)
         mainLayout.addLayout(fileDialogLayout)
@@ -533,19 +559,21 @@ class importSpiceCellDialogue(QDialog):
         self.libNamesCB = QComboBox()
         self.libNamesCB.setModel(self._model)
         self.libNamesCB.currentTextChanged.connect(self.changeCells)
-        layout.addRow(edf.boldLabel('Library:'), self.libNamesCB)
+        layout.addRow(edf.boldLabel("Library:"), self.libNamesCB)
         self.cellNamesCB = QComboBox()
         self.cellNamesCB.setEditable(True)
-        initialCellNames = [self._model.item(0).child(i).cellName for i in
-                            range(self._model.item(0).rowCount())]
+        initialCellNames = [
+            self._model.item(0).child(i).cellName
+            for i in range(self._model.item(0).rowCount())
+        ]
         self.cellNamesCB.addItems(initialCellNames)
-        layout.addRow(edf.boldLabel('Cell:'), self.cellNamesCB)
+        layout.addRow(edf.boldLabel("Cell:"), self.cellNamesCB)
         self.spiceViewName = edf.longLineEdit()
-        layout.addRow(edf.boldLabel('Spice  cellview:'), self.spiceViewName)
+        layout.addRow(edf.boldLabel("Spice  cellview:"), self.spiceViewName)
         mainLayout.addLayout(layout)
-        symbolGroupBox = QGroupBox('Symbol Creation')
+        symbolGroupBox = QGroupBox("Symbol Creation")
         symbolGBLayout = QVBoxLayout()
-        self.symbolCheckBox = QCheckBox('Create a new symbol?')
+        self.symbolCheckBox = QCheckBox("Create a new symbol?")
         symbolGBLayout.addWidget(self.symbolCheckBox)
         symbolGroupBox.setLayout(symbolGBLayout)
         mainLayout.addWidget(symbolGroupBox)
@@ -559,20 +587,25 @@ class importSpiceCellDialogue(QDialog):
         self.show()
 
     def changeCells(self):
-        selectedLibItemRow = self._model.findItems(self.libNamesCB.currentText())[0].row()
-        libCellNames = [self._model.item(selectedLibItemRow).child(i).cellName for i in
-                        range(self._model.item(selectedLibItemRow).rowCount())]
+        selectedLibItemRow = self._model.findItems(self.libNamesCB.currentText())[
+            0
+        ].row()
+        libCellNames = [
+            self._model.item(selectedLibItemRow).child(i).cellName
+            for i in range(self._model.item(selectedLibItemRow).rowCount())
+        ]
         self.cellNamesCB.clear()
         self.cellNamesCB.addItems(libCellNames)
 
     def onFileButtonClicked(self):
         spiceFilePathObj = pathlib.Path(self.spiceFileEdit.text())
         fileDialog = QFileDialog()
-        fileDialog.setNameFilter('Spice files (*.sp, *.cir)')
+        fileDialog.setNameFilter("Spice files (*.sp, *.cir)")
         fileDialog.setDirectory(str(spiceFilePathObj.parent))
         fileDialog.selectFile(spiceFilePathObj.name)
-        self.spiceFileName = fileDialog.getOpenFileName(self, caption='Select Spice '
-                                                                      'file.')[0]
+        self.spiceFileName = fileDialog.getOpenFileName(
+            self, caption="Select Spice " "file."
+        )[0]
         if self.spiceFileName:
             self.spiceFileEdit.setText(self.spiceFileName)
 
@@ -584,23 +617,23 @@ class createConfigViewDialogue(QDialog):
         self.mainLayout = QVBoxLayout()
         self.setWindowTitle("Create New Config View")
         self.setMinimumSize(360, 400)
-        topCellGroup = QGroupBox('Top Cell')
+        topCellGroup = QGroupBox("Top Cell")
         topCellLayout = QFormLayout()
         self.libraryNameEdit = edf.longLineEdit()
-        topCellLayout.addRow(edf.boldLabel('Library:'), self.libraryNameEdit)
+        topCellLayout.addRow(edf.boldLabel("Library:"), self.libraryNameEdit)
         self.cellNameEdit = edf.longLineEdit()
-        topCellLayout.addRow(edf.boldLabel('Cell:'), self.cellNameEdit)
+        topCellLayout.addRow(edf.boldLabel("Cell:"), self.cellNameEdit)
         self.viewNameCB = QComboBox()
-        topCellLayout.addRow(edf.boldLabel('View:'), self.viewNameCB)
+        topCellLayout.addRow(edf.boldLabel("View:"), self.viewNameCB)
         topCellGroup.setLayout(topCellLayout)
         self.mainLayout.addWidget(topCellGroup)
-        viewGroup = QGroupBox('Switch/Stop Views')
+        viewGroup = QGroupBox("Switch/Stop Views")
         viewGroupLayout = QFormLayout()
         viewGroup.setLayout(viewGroupLayout)
         self.switchViews = edf.longLineEdit()
-        viewGroupLayout.addRow(edf.boldLabel('View List:'), self.switchViews)
+        viewGroupLayout.addRow(edf.boldLabel("View List:"), self.switchViews)
         self.stopViews = edf.longLineEdit()
-        viewGroupLayout.addRow(edf.boldLabel('Stop List:'), self.stopViews)
+        viewGroupLayout.addRow(edf.boldLabel("Stop List:"), self.stopViews)
         self.mainLayout.addWidget(viewGroup)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -615,39 +648,39 @@ class appProperties(QDialog):
         self.parent = parent
         super().__init__(parent)
         self.setMinimumSize(550, 200)
-        self.setWindowTitle('Revolution EDA Options')
+        self.setWindowTitle("Revolution EDA Options")
         mainLayout = QVBoxLayout()
-        filePathsGroup = QGroupBox('Paths')
+        filePathsGroup = QGroupBox("Paths")
         filePathsLayout = QVBoxLayout()
         fileDialogLayout = QHBoxLayout()
-        fileDialogLayout.addWidget(edf.boldLabel('Text Editor Path:'), 2)
+        fileDialogLayout.addWidget(edf.boldLabel("Text Editor Path:"), 2)
         self.editorPathEdit = edf.longLineEdit()
         fileDialogLayout.addWidget(self.editorPathEdit, 5)
-        self.editFileButton = QPushButton('...')
+        self.editFileButton = QPushButton("...")
         self.editFileButton.clicked.connect(self.onFileButtonClicked)
         fileDialogLayout.addWidget(self.editFileButton, 1)
         filePathsLayout.addLayout(fileDialogLayout)
         simPathDialogLayout = QHBoxLayout()
-        simPathDialogLayout.addWidget(edf.boldLabel('Simulation Path:'), 2)
+        simPathDialogLayout.addWidget(edf.boldLabel("Simulation Path:"), 2)
         self.simPathEdit = edf.longLineEdit()
         simPathDialogLayout.addWidget(self.simPathEdit, 5)
-        self.simPathButton = QPushButton('...')
+        self.simPathButton = QPushButton("...")
         self.simPathButton.clicked.connect(self.onSimPathButtonClicked)
         simPathDialogLayout.addWidget(self.simPathButton, 1)
         filePathsLayout.addLayout(simPathDialogLayout)
         filePathsGroup.setLayout(filePathsLayout)
         mainLayout.addWidget(filePathsGroup)
-        switchViewsGroup = QGroupBox('Switch and Stop Views')
+        switchViewsGroup = QGroupBox("Switch and Stop Views")
         switchViewsLayout = QFormLayout()
         self.switchViewsEdit = edf.longLineEdit()
-        switchViewsLayout.addRow(edf.boldLabel('Switch Views:'), self.switchViewsEdit)
+        switchViewsLayout.addRow(edf.boldLabel("Switch Views:"), self.switchViewsEdit)
         self.stopViewsEdit = edf.longLineEdit()
-        switchViewsLayout.addRow(edf.boldLabel('Stop Views:'), self.stopViewsEdit)
+        switchViewsLayout.addRow(edf.boldLabel("Stop Views:"), self.stopViewsEdit)
         switchViewsGroup.setLayout(switchViewsLayout)
         mainLayout.addWidget(switchViewsGroup)
-        saveGroupBox = QGroupBox('Save Options')
+        saveGroupBox = QGroupBox("Save Options")
         saveGBLayout = QVBoxLayout()
-        self.optionSaveBox = QCheckBox('Save options to configuration file?')
+        self.optionSaveBox = QCheckBox("Save options to configuration file?")
         saveGBLayout.addWidget(self.optionSaveBox)
         saveGroupBox.setLayout(saveGBLayout)
         mainLayout.addWidget(saveGroupBox)
@@ -660,25 +693,26 @@ class appProperties(QDialog):
         self.setLayout(mainLayout)
 
     def onFileButtonClicked(self):
-        self.editorPathEdit.setText(QFileDialog.getOpenFileName(self, caption='Select text '
-                                                                              'editor path.')[
-                                        0])
+        self.editorPathEdit.setText(
+            QFileDialog.getOpenFileName(self, caption="Select text " "editor path.")[0]
+        )
 
     def onSimPathButtonClicked(self):
-        self.simPathEdit.setText(QFileDialog.getExistingDirectory(self, caption=
-        'Simulation path:'))
+        self.simPathEdit.setText(
+            QFileDialog.getExistingDirectory(self, caption="Simulation path:")
+        )
 
 
 class libraryPathsModel(QStandardItemModel):
     def __init__(self, libraryDict):
         super().__init__()
         self.libraryDict = libraryDict
-        self.setHorizontalHeaderLabels(['Library Name', 'Library Path'])
+        self.setHorizontalHeaderLabels(["Library Name", "Library Path"])
         for key, value in self.libraryDict.items():
             libName = QStandardItem(key)
             libPath = QStandardItem(str(value))
             self.appendRow([libName, libPath])
-        self.appendRow([QStandardItem('Right click here...'), QStandardItem('')])
+        self.appendRow([QStandardItem("Right click here..."), QStandardItem("")])
 
 
 class libraryPathsTableView(QTableView):
@@ -704,17 +738,19 @@ class libraryPathsTableView(QTableView):
         try:
             selectedIndex = self.selectedIndexes()[0]
         except IndexError:
-            self.model.appendRow([QStandardItem('Click here...'), QStandardItem('')])
+            self.model.appendRow([QStandardItem("Click here..."), QStandardItem("")])
             selectedIndex = self.model.index(0, 0)
-        removePathAction = self.menu.addAction('Remove Path')
-        removePathAction.triggered.connect(lambda: self.removeLibraryPath(selectedIndex))
-        addPathAction = self.menu.addAction('Add Library Path')
+        removePathAction = self.menu.addAction("Remove Path")
+        removePathAction.triggered.connect(
+            lambda: self.removeLibraryPath(selectedIndex)
+        )
+        addPathAction = self.menu.addAction("Add Library Path")
         addPathAction.triggered.connect(lambda: self.addLibraryPath(selectedIndex))
         self.menu.exec(event.globalPos())
 
     def removeLibraryPath(self, index):
         self.model.takeRow(index.row())
-        self.logger.info('Removed Library Path.')
+        self.logger.info("Removed Library Path.")
 
     def addLibraryPath(self, index):
         row = index.row()
@@ -722,8 +758,13 @@ class libraryPathsTableView(QTableView):
         self.fileDialog.exec()
         if self.fileDialog.selectedFiles():
             self.selectedDirectory = QDir(self.fileDialog.selectedFiles()[0])
-        self.model.insertRow(row, [QStandardItem(self.selectedDirectory.dirName()),
-                                   QStandardItem(self.selectedDirectory.absolutePath())])
+        self.model.insertRow(
+            row,
+            [
+                QStandardItem(self.selectedDirectory.dirName()),
+                QStandardItem(self.selectedDirectory.absolutePath()),
+            ],
+        )
 
 
 class libraryPathEditorDialog(QDialog):
@@ -732,7 +773,7 @@ class libraryPathEditorDialog(QDialog):
         self.parent = parent
         self.logger = self.parent.logger
         self.libraryDict = libraryDict
-        self.setWindowTitle('Library Paths Dialogue')
+        self.setWindowTitle("Library Paths Dialogue")
         self.setMinimumSize(700, 300)
         self.mainLayout = QVBoxLayout()
         self.pathsBox = QGroupBox()

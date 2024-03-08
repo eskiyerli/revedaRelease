@@ -32,22 +32,28 @@ import code
 import re
 from typing import Callable
 
-from PySide6.QtCore import (Qt, Signal, QEvent, QSize, )
-from PySide6.QtGui import (QTextCharFormat, QBrush, QColor, QFont)
-from PySide6.QtWidgets import (QLineEdit, QWidget, QGridLayout, QPlainTextEdit)
+from PySide6.QtCore import (
+    Qt,
+    Signal,
+    QEvent,
+    QSize,
+)
+from PySide6.QtGui import QTextCharFormat, QBrush, QColor, QFont
+from PySide6.QtWidgets import QLineEdit, QWidget, QGridLayout, QPlainTextEdit
 
 
 class LineEdit(QLineEdit):
     """QLIneEdit with a history buffer for recalling previous lines.
     I also accept tab as input (4 spaces).
     """
+
     newline = Signal(str)  # Signal when return key pressed
 
-    def __init__(self, history: int = 100) -> 'LineEdit':
+    def __init__(self, history: int = 100) -> "LineEdit":
         super().__init__()
         self.historymax = history
         self.clearhistory()
-        self.promptpattern = re.compile('^[>\.]')
+        self.promptpattern = re.compile("^[>\.]")
 
     def clearhistory(self) -> None:
         """Clear history buffer"""
@@ -62,7 +68,7 @@ class LineEdit(QLineEdit):
         """
         if ev.type() == QEvent.KeyPress:
             if ev.key() == int(Qt.Key_Tab):
-                self.insert('    ')
+                self.insert("    ")
                 return True
             elif ev.key() == int(Qt.Key_Up):
                 self.recall(self.historyindex - 1)
@@ -88,12 +94,12 @@ class LineEdit(QLineEdit):
         text = self.text().rstrip()
         self.record(text)
         self.newline.emit(text)
-        self.setText('')
+        self.setText("")
 
     def recall(self, index: int) -> None:
         """Select a line from the history list"""
         length = len(self.historylist)
-        if (length > 0):
+        if length > 0:
             index = max(0, min(index, length - 1))
             self.setText(self.historylist[index])
             self.historyindex = index
@@ -107,10 +113,10 @@ class LineEdit(QLineEdit):
         self.historyindex = min(self.historyindex, len(self.historylist))
 
 
-class Redirect():
+class Redirect:
     """Map self.write to a function"""
 
-    def __init__(self, func: Callable) -> 'Redirect':
+    def __init__(self, func: Callable) -> "Redirect":
         self.func = func
 
     def write(self, line: str) -> None:
@@ -120,10 +126,12 @@ class Redirect():
 class pythonConsole(QWidget):
     """A GUI version of code.InteractiveConsole."""
 
-    def __init__(self, context=locals(),  # context for interpreter
-            history: int = 200,  # max lines in history buffer
-            blockcount: int = 500  # max lines in output buffer
-    ) -> 'pythonConsole':
+    def __init__(
+        self,
+        context=locals(),  # context for interpreter
+        history: int = 200,  # max lines in history buffer
+        blockcount: int = 500,  # max lines in output buffer
+    ) -> "pythonConsole":
         super().__init__()
         self.setcontext(context)
         self.buffer = []
@@ -151,7 +159,7 @@ class pythonConsole(QWidget):
         self.promptdisp.setFixedWidth(15)
         self.promptdisp.setFrame(False)
         self.content.addWidget(self.promptdisp, 1, 0)
-        self.setprompt('> ')
+        self.setprompt("> ")
 
         # Enter commands here
         self.inpedit = LineEdit(history=history)
@@ -173,22 +181,22 @@ class pythonConsole(QWidget):
 
     def push(self, line: str) -> None:
         """Execute entered command.  Command may span multiple lines"""
-        if line == 'clear':
+        if line == "clear":
             self.inpedit.clearhistory()
             self.outdisplay.clear()
         else:
-            lines = line.split('\n')
+            lines = line.split("\n")
             for line in lines:
-                if re.match('^[\>\.] ', line):
+                if re.match("^[\>\.] ", line):
                     line = line[2:]
                 self.writeoutput(self.prompt + line, self.inpfmt)
-                self.setprompt('. ')
+                self.setprompt(". ")
                 self.buffer.append(line)
             # Built a command string from lines in the buffer
             source = "\n".join(self.buffer)
-            more = self.interp.runsource(source, '<input>', 'exec')
+            more = self.interp.runsource(source, "<input>", "exec")
             if not more:
-                self.setprompt('> ')
+                self.setprompt("> ")
                 self.resetbuffer()
 
     def setfont(self, font: QFont) -> None:
@@ -198,7 +206,7 @@ class pythonConsole(QWidget):
 
     def write(self, line: str) -> None:
         """Capture stdout and display in outdisplay"""
-        if (len(line) != 1 or ord(line[0]) != 10):
+        if len(line) != 1 or ord(line[0]) != 10:
             self.writeoutput(line.rstrip(), self.outfmt)
 
     def errorwrite(self, line: str) -> None:
@@ -213,6 +221,3 @@ class pythonConsole(QWidget):
 
     def sizeHint(self):
         return QSize(500, 200)
-
-
-

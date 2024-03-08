@@ -763,8 +763,10 @@ class layoutPath(layoutShape):
 
     @property
     def sceneEndPoints(self):
-        return [self.mapToScene(self._draftLine.p1()).toPoint(),
-                self.mapToScene(self._draftLine.p2()).toPoint(), ]
+        return [
+            self.mapToScene(self._draftLine.p1()).toPoint(),
+            self.mapToScene(self._draftLine.p2()).toPoint(),
+        ]
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
@@ -801,8 +803,9 @@ class layoutPath(layoutShape):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-    #     self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        #     self.setFlag(QGraphicsItem.ItemIsMovable, True)
         super().mouseReleaseEvent(event)
+
     #     if self.stretch:
     #         self._stretch = False
     #         self._stretchSide = None

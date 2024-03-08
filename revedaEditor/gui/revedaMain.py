@@ -46,6 +46,7 @@ import revedaEditor.gui.pythonConsole as pcon
 import revedaEditor.gui.stippleEditor as stip
 import revedaEditor.gui.helpBrowser as hlp
 import revedaEditor.gui.revinit as revinit
+import revedaEditor.backend.dataDefinitions as ddef
 
 
 class mainwContainer(QWidget):
@@ -251,10 +252,9 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
-        # Get the library model
-        self.importVerilogaModule("")
+        self.importVerilogaModule(ddef.viewTuple('', '', ''), '')
 
-    def importVerilogaModule(self, filePath: str):
+    def importVerilogaModule(self, viewT: ddef.viewTuple, filePath: str):
         """
 
         @param filePath:
@@ -263,8 +263,15 @@ class MainWindow(QMainWindow):
         # Open the import dialog
         importDlg = fd.importVerilogaCellDialogue(library_model, self)
         importDlg.vaFileEdit.setText(filePath)
-        # Set the default view name in the dialog
-        importDlg.vaViewName.setText("veriloga")
+        if viewT.libraryName:
+            importDlg.libNamesCB.setCurrentText(viewT.libraryName)
+        if viewT.cellName:
+            importDlg.cellNamesCB.setCurrentText(viewT.cellName)
+        if viewT.viewName:
+            importDlg.vaViewName.setText(viewT.viewName)
+        else:
+            # Set the default view name in the dialog
+            importDlg.vaViewName.setText("veriloga")
         # Execute the import dialog and check if it was accepted
         if importDlg.exec() == QDialog.Accepted:
             # Create the Verilog-A object from the file path
@@ -296,16 +303,23 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
-        self.importSpiceSubckt("")
+        self.importSpiceSubckt("", ddef.viewTuple('', '', ''))
 
-    def importSpiceSubckt(self, filePath: str):
+    def importSpiceSubckt(self, viewT:ddef.viewTuple, filePath: str):
         # Get the library model
         library_model = self.libraryBrowser.libraryModel
         # Open the import dialog
         importDlg = fd.importSpiceCellDialogue(library_model, self)
         importDlg.spiceFileEdit.setText(filePath)
         # Set the default view name in the dialog
-        importDlg.spiceViewName.setText("spice")
+        if viewT.libraryName:
+            importDlg.libNamesCB.setCurrentText(viewT.libraryName)
+        if viewT.cellName:
+            importDlg.cellNamesCB.setCurrentText(viewT.cellName)
+        if viewT.viewName:
+            importDlg.spiceViewName.setText(viewT.viewName)
+        else:
+            importDlg.spiceViewName.setText("spice")
         # Execute the import dialog and check if it was accepted
         if importDlg.exec() == QDialog.Accepted:
             # Create the Verilog-A object from the file path

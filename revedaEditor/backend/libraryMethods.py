@@ -19,33 +19,45 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
-from PySide6.QtCore import (Qt, )
-from PySide6.QtGui import (QStandardItemModel)
+from PySide6.QtCore import (
+    Qt,
+)
+from PySide6.QtGui import QStandardItemModel
 
 import revedaEditor.backend.schBackEnd as scb
 
 
 def getLibItem(libraryModel: QStandardItemModel, libName: str) -> scb.libraryItem:
-    libItem = [item for item in libraryModel.findItems(libName) if
-               item.data(Qt.UserRole + 1) == 'library'][0]
+    libItem = [
+        item
+        for item in libraryModel.findItems(libName)
+        if item.data(Qt.UserRole + 1) == "library"
+    ][0]
     return libItem
 
 
 def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> scb.cellItem:
-    cellItems = [libItem.child(i) for i in range(libItem.rowCount()) if
-                 libItem.child(i).cellName == cellNameInp]
+    cellItems = [
+        libItem.child(i)
+        for i in range(libItem.rowCount())
+        if libItem.child(i).cellName == cellNameInp
+    ]
     if cellItems:
         return cellItems[0]
 
 
 def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> scb.viewItem:
     if cellItem is not None:
-        viewItems = [cellItem.child(i) for i in range(cellItem.rowCount()) if
-                     cellItem.child(i).text() == viewNameInp]
+        viewItems = [
+            cellItem.child(i)
+            for i in range(cellItem.rowCount())
+            if cellItem.child(i).text() == viewNameInp
+        ]
     if viewItems:
         return viewItems[0]
 
-def findViewItem(libraryModel, libName:str,cellName:str,viewName:str):
-    libItem = getLibItem(libraryModel,libName)
+
+def findViewItem(libraryModel, libName: str, cellName: str, viewName: str):
+    libItem = getLibItem(libraryModel, libName)
     cellItem = getCellItem(libItem, cellName)
-    return getViewItem(cellItem,viewName)
+    return getViewItem(cellItem, viewName)

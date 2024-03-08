@@ -127,6 +127,7 @@ import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.propertyDialogues as pdlg
 import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.lsw as lsw
+import revedaEditor.gui.textEditor as ted
 import revedaEditor.fileio.gdsExport as gdse
 import revedaEditor.gui.helpBrowser as hlp
 import revedaEditor.resources.resources
@@ -515,20 +516,33 @@ class libraryBrowser(QMainWindow):
                     with open(viewItem.viewPath) as tempFile:
                         items = json.load(tempFile)
                     if items[1]["filePath"]:
-                        if self.editProcess is None:
-                            self.editProcess = QProcess()
-                            VerilogafilePathObj = (
+                        VerilogafilePathObj = (
                                 viewItem.parent()
                                 .data(Qt.UserRole + 2)
                                 .joinpath(items[1]["filePath"])
                             )
-                            self.editProcess.finished.connect(self.editProcessFinished)
-                            self.editProcess.start(
-                                str(self.appMainW.textEditorPath),
-                                [str(VerilogafilePathObj)],
-                            )
+                        verilogaEditor = ted.verilogaEditor(str(VerilogafilePathObj))
+                        self.appMainW.openViews[openCellViewTuple] = verilogaEditor
+                        verilogaEditor.cellViewTuple = openCellViewTuple
+                        verilogaEditor.closedSignal.connect(self.verilogaEditFinished)
+                        verilogaEditor.show()
                     else:
                         self.logger.warning("File path not defined.")
+                case "spice":
+                    with open(viewItem.viewPath) as tempFile:
+                        items = json.load(tempFile)
+                    if items[1]["filePath"]:
+                        spicefilePathObj = (
+                            viewItem.parent()
+                            .data(Qt.UserRole + 2)
+                            .joinpath(items[1]["filePath"])
+                        )
+                        xyceEditor = ted.xyceEditor(str(spicefilePathObj))
+                        self.appMainW.openViews[openCellViewTuple] = xyceEditor
+                        xyceEditor.cellViewTuple = openCellViewTuple
+                        xyceEditor.closedSignal.connect(self.spiceEditFinished)
+                        xyceEditor.show()
+
                 case "pcell":
                     with open(viewItem.viewPath) as tempFile:
                         items = json.load(tempFile)
@@ -547,9 +561,13 @@ class libraryBrowser(QMainWindow):
 
         return openCellViewTuple
 
-    def editProcessFinished(self):
-        self.appMainW.importVerilogaClick()
-        self.editProcess = None
+    def verilogaEditFinished(self, editorViewTuple:ddef.viewTuple, fileName:str):
+        self.appMainW.importVerilogaModule(editorViewTuple, fileName)
+        self.appMainW.openViews.pop(editorViewTuple)
+
+    def spiceEditFinished(self, editorViewTuple:ddef.viewTuple, fileName:str):
+        self.appMainW.importSpiceSubckt(editorViewTuple, fileName)
+        self.appMainW.openViews.pop(editorViewTuple)
 
     def deleteCellViewClick(self, s):
         viewItem = self.selectCellView(self.libraryModel)
@@ -4343,8 +4361,9 @@ class schematicScene(editorScene):
         symbolWindow = None
         libName = self.editorWindow.libName
         cellName = self.editorWindow.cellName
-        libItem: scb.libraryItem = libm.getLibItem(self.editorWindow.libraryView.libraryModel,
-                                             libName)
+        libItem: scb.libraryItem = libm.getLibItem(
+            self.editorWindow.libraryView.libraryModel, libName
+        )
         cellItem: scb.cellItem = libm.getCellItem(libItem, cellName)
         libraryView = self.editorWindow.libraryView
         schematicPins: list[shp.schematicPin] = list(self.findSceneSchemPinsSet())
@@ -4453,7 +4472,8 @@ class schematicScene(editorScene):
                 "Instance",
             )
             leftPinLocs = [
-                QPoint(-stubLength, (i + 1) * pinDistance) for i in range(len(leftPinNames))
+                QPoint(-stubLength, (i + 1) * pinDistance)
+                for i in range(len(leftPinNames))
             ]
             rightPinLocs = [
                 QPoint(rectXDim + stubLength, (i + 1) * pinDistance)
@@ -4464,10 +4484,13 @@ class schematicScene(editorScene):
                 for i in range(len(bottomPinNames))
             ]
             topPinLocs = [
-                QPoint((i + 1) * pinDistance, -stubLength) for i in range(len(topPinNames))
+                QPoint((i + 1) * pinDistance, -stubLength)
+                for i in range(len(topPinNames))
             ]
             for i in range(len(leftPinNames)):
-                symbolScene.lineDraw(leftPinLocs[i], leftPinLocs[i] + QPoint(stubLength, 0))
+                symbolScene.lineDraw(
+                    leftPinLocs[i], leftPinLocs[i] + QPoint(stubLength, 0)
+                )
                 symbolScene.addItem(
                     schematicPins[schematicPinNames.index(leftPinNames[i])].toSymbolPin(
                         leftPinLocs[i]
@@ -4478,12 +4501,14 @@ class schematicScene(editorScene):
                     rightPinLocs[i], rightPinLocs[i] + QPoint(-stubLength, 0)
                 )
                 symbolScene.addItem(
-                    schematicPins[schematicPinNames.index(rightPinNames[i])].toSymbolPin(
-                        rightPinLocs[i]
-                    )
+                    schematicPins[
+                        schematicPinNames.index(rightPinNames[i])
+                    ].toSymbolPin(rightPinLocs[i])
                 )
             for i in range(len(topPinNames)):
-                symbolScene.lineDraw(topPinLocs[i], topPinLocs[i] + QPoint(0, stubLength))
+                symbolScene.lineDraw(
+                    topPinLocs[i], topPinLocs[i] + QPoint(0, stubLength)
+                )
                 symbolScene.addItem(
                     schematicPins[schematicPinNames.index(topPinNames[i])].toSymbolPin(
                         topPinLocs[i]
@@ -4494,9 +4519,9 @@ class schematicScene(editorScene):
                     bottomPinLocs[i], bottomPinLocs[i] + QPoint(0, -stubLength)
                 )
                 symbolScene.addItem(
-                    schematicPins[schematicPinNames.index(bottomPinNames[i])].toSymbolPin(
-                        bottomPinLocs[i]
-                    )
+                    schematicPins[
+                        schematicPinNames.index(bottomPinNames[i])
+                    ].toSymbolPin(bottomPinLocs[i])
                 )  # symbol attribute generation for netlisting.
             symbolScene.attributeList = list()  # empty attribute list
 
@@ -5546,19 +5571,27 @@ class layoutScene(editorScene):
     def stretchPath(self, pathItem: lshp.layoutPath, stretchEnd: str):
         match stretchEnd:
             case "p2":
-                self._stretchPath = lshp.layoutPath(QLineF(
-                    pathItem.sceneEndPoints[0], pathItem.sceneEndPoints[1]
-                ), pathItem.layer, pathItem.width, pathItem.startExtend, pathItem.endExtend,
-                    pathItem.mode)
+                self._stretchPath = lshp.layoutPath(
+                    QLineF(pathItem.sceneEndPoints[0], pathItem.sceneEndPoints[1]),
+                    pathItem.layer,
+                    pathItem.width,
+                    pathItem.startExtend,
+                    pathItem.endExtend,
+                    pathItem.mode,
+                )
             case "p1":
-                self._stretchPath = lshp.layoutPath(QLineF(
-                    pathItem.sceneEndPoints[1], pathItem.sceneEndPoints[0]
-                ), pathItem.layer, pathItem.width, pathItem.startExtend, pathItem.endExtend,
-                    pathItem.mode)
+                self._stretchPath = lshp.layoutPath(
+                    QLineF(pathItem.sceneEndPoints[1], pathItem.sceneEndPoints[0]),
+                    pathItem.layer,
+                    pathItem.width,
+                    pathItem.startExtend,
+                    pathItem.endExtend,
+                    pathItem.mode,
+                )
         self._stretchPath.stretch = True
         self._stretchPath.name = pathItem.name
-            # self._stretchNet.nameSet = pathItem.nameSet
-            # self._stretchNet.nameAdded = pathItem.nameSet
+        # self._stretchNet.nameSet = pathItem.nameSet
+        # self._stretchNet.nameAdded = pathItem.nameSet
         addDeleteStretchNetCommand = us.addDeleteShapeUndo(
             self, self._stretchPath, pathItem
         )
@@ -5797,7 +5830,7 @@ class symbolView(editorView):
 
 
 class schematicView(editorView):
-    # zoomChanged = Signal()
+
     def __init__(self, scene, parent):
         self.scene = scene
         self.parent = parent

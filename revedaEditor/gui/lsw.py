@@ -23,10 +23,16 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
-from PySide6.QtWidgets import (QTableView)
-from PySide6.QtGui import (QStandardItemModel, QStandardItem, QBrush, QColor,
-                           QPixmap, QBitmap)
-from PySide6.QtCore import (Signal, Qt, QModelIndex)
+from PySide6.QtWidgets import QTableView
+from PySide6.QtGui import (
+    QStandardItemModel,
+    QStandardItem,
+    QBrush,
+    QColor,
+    QPixmap,
+    QBitmap,
+)
+from PySide6.QtCore import Signal, Qt, QModelIndex
 
 
 class layerDataModel(QStandardItemModel):
@@ -44,8 +50,7 @@ class layerDataModel(QStandardItemModel):
 
         for row, layer in enumerate(self._data):
             self.insertRow(row)
-            bitmap = QBitmap.fromImage(QPixmap(layer.btexture).scaled(
-                5, 5).toImage())
+            bitmap = QBitmap.fromImage(QPixmap(layer.btexture).scaled(5, 5).toImage())
             brush = QBrush(bitmap)
             brush.setColor(QColor(layer.bcolor))
             item = QStandardItem()
@@ -64,8 +69,18 @@ class layerDataModel(QStandardItemModel):
             self.setItem(row, 4, item)
 
     def createData(self, layerlist: list) -> list:
-        [self._data.append((layer.name, layer.visible, layer.selectable,
-                            layer.btexture, layer.bcolor)) for layer in layerlist]
+        [
+            self._data.append(
+                (
+                    layer.name,
+                    layer.visible,
+                    layer.selectable,
+                    layer.btexture,
+                    layer.bcolor,
+                )
+            )
+            for layer in layerlist
+        ]
 
 
 class layerViewTable(QTableView):
@@ -97,7 +112,9 @@ class layerViewTable(QTableView):
             layerPurpose = self._model.data(layerPurposeIndex)
             self.dataSelected.emit(layerName, layerPurpose)
 
-    def onDataChanged(self, topLeft: QModelIndex, bottomRight: QModelIndex, roles: list):
+    def onDataChanged(
+        self, topLeft: QModelIndex, bottomRight: QModelIndex, roles: list
+    ):
         # Check if the changed data involves the check state
         if Qt.CheckStateRole in roles:
             row = topLeft.row()
@@ -106,15 +123,27 @@ class layerViewTable(QTableView):
             # if item and item.isCheckable():
             if column == 4:
                 if item.checkState() == Qt.Checked:
-                    self.layerSelectable.emit(self._model.item(row, 1).text(),
-                                              self._model.item(row, 2).text(), True)
+                    self.layerSelectable.emit(
+                        self._model.item(row, 1).text(),
+                        self._model.item(row, 2).text(),
+                        True,
+                    )
                 else:
-                    self.layerSelectable.emit(self._model.item(row, 1).text(),
-                                              self._model.item(row, 2).text(), False)
+                    self.layerSelectable.emit(
+                        self._model.item(row, 1).text(),
+                        self._model.item(row, 2).text(),
+                        False,
+                    )
             elif column == 3:
                 if item.checkState() == Qt.Checked:
-                    self.layerVisible.emit(self._model.item(row, 1).text(),
-                                           self._model.item(row, 2).text(), True)
+                    self.layerVisible.emit(
+                        self._model.item(row, 1).text(),
+                        self._model.item(row, 2).text(),
+                        True,
+                    )
                 else:
-                    self.layerVisible.emit(self._model.item(row, 1).text(),
-                                           self._model.item(row, 2).text(), False)
+                    self.layerVisible.emit(
+                        self._model.item(row, 1).text(),
+                        self._model.item(row, 2).text(),
+                        False,
+                    )

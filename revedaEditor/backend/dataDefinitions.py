@@ -19,10 +19,10 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
-from typing import (NamedTuple, Union)
+from typing import NamedTuple, Union
 from dataclasses import dataclass
 
-from PySide6.QtCore import (Qt, QPoint, QPointF)
+from PySide6.QtCore import Qt, QPoint, QPointF
 from PySide6.QtGui import QColor
 
 
@@ -164,6 +164,7 @@ class rulerTuple(NamedTuple):
 # # this tuple defines the minimum dimensions of a via
 # # This can be extended to define the maximum dimensions
 
+
 class viaDefTuple(NamedTuple):
     name: str
     layer: layLayer
@@ -190,6 +191,7 @@ class arrayViaTuple(NamedTuple):
 
 
 # rectangle coordinates tuple
+
 
 class rectCoords(NamedTuple):
     left: float

@@ -1,5 +1,5 @@
 #    “Commons Clause” License Condition v1.0
-#   
+#
 #    The Software is provided to you by the Licensor under the License, as defined
 #    below, subject to the following condition.
 #
@@ -235,7 +235,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
     def angle(self, value):
         self._angle = value
         self.prepareGeometryChange()
-        self.setRotation(value) 
+        self.setRotation(value)
 
     @property
     def labelVisible(self) -> bool:
@@ -263,7 +263,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
 
         if self._labelType == symbolLabel.labelTypes[0]:  # normal label
             # Set label name, value, and text to label definition
-            self._labelName = f'@{self._labelDefinition}'
+            self._labelName = f"@{self._labelDefinition}"
             self._labelValue = self._labelDefinition
             self._labelText = self._labelDefinition
         elif self._labelType == symbolLabel.labelTypes[1]:  # NLPLabel
@@ -275,15 +275,15 @@ class symbolLabel(QGraphicsSimpleTextItem):
 
     def createNLPLabel(self):
         try:
-            if self._labelDefinition.strip().startswith('[@'):
+            if self._labelDefinition.strip().startswith("[@"):
                 # Find the end of the expression
-                end_index = self._labelDefinition.find(']')
+                end_index = self._labelDefinition.find("]")
                 expression = self._labelDefinition[1:end_index]
-                parts = expression.split(':')
+                parts = expression.split(":")
                 self._labelName = parts[0].strip()
-                if self.parentItem() is None: #symbol editor
+                if self.parentItem() is None:  # symbol editor
                     self._labelText = self._labelDefinition
-                    self._labelValue = ''
+                    self._labelValue = ""
                 else:
                     if self._labelDefinition in symbolLabel.predefinedLabels:
                         match self._labelDefinition:
@@ -305,7 +305,9 @@ class symbolLabel(QGraphicsSimpleTextItem):
                                 self._labelText = self._labelValue
                             case "[@modelName]":
                                 # Set label name to "modelName" and value and text to parent item's "modelName" attribute
-                                self._labelValue = self.parentItem().attr.get("modelName", "")
+                                self._labelValue = self.parentItem().attr.get(
+                                    "modelName", ""
+                                )
                                 self._labelText = self._labelValue
                             case "[@elementNum]":
                                 # Set label name to "elementNum" and value and text to parent item's counter
@@ -314,20 +316,20 @@ class symbolLabel(QGraphicsSimpleTextItem):
                     else:
                         if len(parts) > 1:
                             formatString = parts[1]
-                            defaultValue = parts[2] if len(parts) > 2 else ''
+                            defaultValue = parts[2] if len(parts) > 2 else ""
                         else:
-                            formatString = ''
-                            defaultValue = ''
+                            formatString = ""
+                            defaultValue = ""
 
                         if formatString:
-                            prefix, suffix = formatString.split('%')
+                            prefix, suffix = formatString.split("%")
                             if self._labelValue:
                                 self._labelText = f"{prefix}{self._labelValue}{suffix}"
                             elif defaultValue:
-                                self._labelValue = defaultValue.replace(prefix, '')
+                                self._labelValue = defaultValue.replace(prefix, "")
                                 self._labelText = defaultValue
                             else:
-                                self._labelValue = '?'
+                                self._labelValue = "?"
                                 self._labelText = f"{prefix}{self._labelValue}{suffix}"
         except Exception as e:
             self.scene().logger.error(
@@ -349,7 +351,6 @@ class symbolLabel(QGraphicsSimpleTextItem):
     #         if self.scene():
     #             self.scene().logger.error(f"PyLabel Error:{e}")
 
-
     def createPyLabel(self):
         """
         Create a PyLabel using the label definition and parent item information.
@@ -369,7 +370,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
             else:
                 # Set the label text with the name and function
                 self._labelText = f"{labelName} = {labelFunction}"
-            self._labelName = f'@{labelName}'
+            self._labelName = f"@{labelName}"
         except Exception as e:
             # Log the error if scene exists
             if self.scene():

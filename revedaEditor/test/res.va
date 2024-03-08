@@ -11,7 +11,7 @@ TERMS OF THE LICENSE AGREEMENT, THEN  DO NOT DOWNLOAD, INSTALL OR USE THE SOFTWA
 // Version 1.0   September 2006
 `include "disciplines.vams"
 
-    module resistor(p, n);
+module resistor(p, n);
 electrical p, n;
 inout p, n;
 parameter real r = 0 (*type = "instance", xyceAlsoModel = "yes" *);
