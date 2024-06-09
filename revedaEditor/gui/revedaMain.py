@@ -47,6 +47,8 @@ import revedaEditor.gui.stippleEditor as stip
 import revedaEditor.gui.helpBrowser as hlp
 import revedaEditor.gui.revinit as revinit
 import revedaEditor.backend.dataDefinitions as ddef
+import revedaEditor.fileio.importLayp as imlyp
+import revedaEditor.fileio.importXschemSym as impxsym
 
 
 class mainwContainer(QWidget):
@@ -138,6 +140,8 @@ class MainWindow(QMainWindow):
         self.menuTools.addAction(self.createStippleAction)
         self.importTools.addAction(self.importVerilogaAction)
         self.importTools.addAction(self.importSpiceAction)
+        self.importTools.addAction(self.importLaypFileAction)
+        self.importTools.addAction((self.importXschSymAction))
         self.menuOptions.addAction(self.optionsAction)
         self.menuHelp.addAction(self.helpAction)
         self.menuHelp.addAction(self.aboutAction)
@@ -154,6 +158,12 @@ class MainWindow(QMainWindow):
         self.importSpiceAction = QAction(
             importVerilogaIcon, "Import Spice file...", self
         )
+        self.importLaypFileAction = QAction(
+            importVerilogaIcon, "Import KLayout Layer Prop. " "File...", self
+        )
+        self.importXschSymAction = QAction(
+            importVerilogaIcon, "Import Xschem Symbols...", self
+        )
         openLibIcon = QIcon(":/icons/database--pencil.png")
         self.libraryBrowserAction = QAction(openLibIcon, "Library Browser", self)
         optionsIcon = QIcon(":/icons/resource-monitor.png")
@@ -169,6 +179,8 @@ class MainWindow(QMainWindow):
         self.libraryBrowserAction.triggered.connect(self.libraryBrowserClick)
         self.importVerilogaAction.triggered.connect(self.importVerilogaClick)
         self.importSpiceAction.triggered.connect(self.importSpiceClick)
+        self.importLaypFileAction.triggered.connect(self.importLaypClick)
+        self.importXschSymAction.triggered.connect(self.importXschSymClick)
         self.optionsAction.triggered.connect(self.optionsClick)
         self.createStippleAction.triggered.connect(self.createStippleClick)
         self.helpAction.triggered.connect(self.helpClick)
@@ -252,7 +264,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
-        self.importVerilogaModule(ddef.viewTuple('', '', ''), '')
+        self.importVerilogaModule(ddef.viewTuple("", "", ""), "")
 
     def importVerilogaModule(self, viewT: ddef.viewTuple, filePath: str):
         """
@@ -303,9 +315,35 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
-        self.importSpiceSubckt("", ddef.viewTuple('', '', ''))
+        self.importSpiceSubckt("", ddef.viewTuple("", "", ""))
 
-    def importSpiceSubckt(self, viewT:ddef.viewTuple, filePath: str):
+    def importLaypClick(self):
+
+        importDlg = fd.klayoutLaypImportDialogue(self)
+        if importDlg.exec() == QDialog.Accepted:
+            imlyp.parseLyp(importDlg.laypFileEdit.text())
+
+    def importXschSymClick(self):
+        importDlg = fd.xschemSymIimportDialogue(self, self.libraryBrowser.libraryModel)
+
+        if importDlg.exec() == QDialog.Accepted:
+            symbolFiles = importDlg.symFileEdit.text().split(",")
+            importLibraryName = importDlg.libNamesCB.currentText()
+            scaleFactor = float(importDlg.scaleEdit.text().strip())
+            symbolFileObjList = []
+            for symbolFile in symbolFiles:
+                symbolFileObjList.append(pathlib.Path(symbolFile.strip()))
+            for symbolFileObj in symbolFileObjList:
+                importObj = impxsym.importXschemSym(
+                    self,
+                    symbolFileObj,
+                    self.libraryBrowser.designView,
+                    importLibraryName,
+                )
+                importObj.scaleFactor = scaleFactor
+                importObj.importSymFile()
+
+    def importSpiceSubckt(self, viewT: ddef.viewTuple, filePath: str):
         # Get the library model
         library_model = self.libraryBrowser.libraryModel
         # Open the import dialog

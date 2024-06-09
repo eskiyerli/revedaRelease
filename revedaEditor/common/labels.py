@@ -57,7 +57,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
         start: QPoint,
         labelDefinition: str,
         labelType: str,
-        labelHeight: str,
+        labelHeight: int,
         labelAlign: str,
         labelOrient: str,
         labelUse: str,
@@ -84,7 +84,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
         self._labelFont.setKerning(False)
         self._labelVisible: bool = False
 
-        self._angle: float = 0.0  # rotation angle
+        self._angle = 0.0  # rotation angle
         self.setBrush(symlyr.labelBrush)
         self.setPos(self._start)
 
@@ -194,7 +194,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
     def labelHeight(self, labelHeight):
         self.prepareGeometryChange()
         self._labelHeight = labelHeight
-        self._labelFont.setPointSize(int(float(labelHeight)))
+        self._labelFont.setPointSize(labelHeight)
         self.setFont(self._labelFont)
 
     @property
@@ -374,4 +374,4 @@ class symbolLabel(QGraphicsSimpleTextItem):
         except Exception as e:
             # Log the error if scene exists
             if self.scene():
-                self.scene().logger.error(f"PyLabel Error:{e}")
+                self.scene().logger.error(f"PyLabel Error: {e}")

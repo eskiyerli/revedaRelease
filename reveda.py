@@ -23,28 +23,28 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
-# Compilation mode, standalone everywhere, except on macOS there app bundle
-# nuitka-project-if: {OS} in ("Windows", "Linux", "FreeBSD"):
+# Compilation mode, support OS-specific options
+# nuitka-project-if: {OS} in ("Windows", "Linux", "Darwin", "FreeBSD"):
 #    nuitka-project: --onefile
-# nuitka-project-if: {OS} == "Darwin":
-#    nuitka-project: --standalone
-#    nuitka-project: --macos-create-app-bundle
-#
-# Debugging options, controlled via environment variable at compile time.
-# nuitka-project-if: os.getenv("DEBUG_COMPILATION", "no") == "yes":
-#     nuitka-project: --enable-console
 # nuitka-project-else:
-#     nuitka-project: --disable-console
-# pyside6 plugin
+#    nuitka-project: --standalone
+
+# The PySide6 plugin covers qt-plugins
 # nuitka-project: --enable-plugin=pyside6
-# nuitka-project: --include-data-files=./.env=.env
+# nuitka-project: --windows-console-mode=force
+# nuitka-project: --include-package=pdk,numpy,revedaEditor
+# nuitka-project: --include-package-data=pdk
+# nuitka-project: --include-data-files=.env=./.
+# nuitka-project --include-onefile-external-data=.
+# nuitka-project --product-version=0.7.0
 
 
 import os
+import platform
 import sys
 from PySide6.QtWidgets import QApplication
 
-# from PySide6.QtGui import QScreen, QGuiApplication
+
 import revedaEditor.gui.revedaMain as rvm
 import revedaEditor.gui.pythonConsole as pcon
 from contextlib import redirect_stdout, redirect_stderr
@@ -96,13 +96,23 @@ class revedaApp(QApplication):
             if Path(self.reveda_pdk_path).is_absolute():
                 self.reveda_pdk_pathObj = Path(self.reveda_pdk_path)
             else:
-                self.reveda_pdk_pathObj = reveda_runpathObj.joinpath(self.reveda_pdk_path)
+                self.reveda_pdk_pathObj = reveda_runpathObj.joinpath(
+                    self.reveda_pdk_path
+                )
             sys.path.append(str(self.reveda_pdk_pathObj))
 
 
 def main():
     # Start Main application window
     app = revedaApp(sys.argv)
+    os_name = platform.system()
+
+    if os_name == "Windows":
+        app.setStyle("Windows")
+    elif os_name == "Linux":
+        app.setStyle("Breeze")
+    elif os_name == "Darwin":  # macOS
+        app.setStyle("macOS")
 
     mainW = rvm.MainWindow()
     mainW.setWindowTitle("Revolution EDA")

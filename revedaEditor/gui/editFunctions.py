@@ -25,7 +25,7 @@
 
 
 from PySide6.QtCore import (
-    Qt,
+    Qt, Signal,
 )
 from PySide6.QtWidgets import QLineEdit, QLabel, QWidget
 
@@ -48,6 +48,7 @@ class boldLabel(QLabel):
 
 
 class longLineEdit(QLineEdit):
+    cursorPlaced = Signal()
     def __init__(self, value: str = ""):
         super().__init__(None)
         self.setMaximumWidth(500)
@@ -55,3 +56,7 @@ class longLineEdit(QLineEdit):
             self.setText(value)
         else:
             self.setText(str(value))
+
+    def focusInEvent(self, event):
+        super().focusInEvent(event)
+        self.cursorPlaced.emit()

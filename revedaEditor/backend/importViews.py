@@ -27,6 +27,7 @@ import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.hdlBackEnd as hdl
 import revedaEditor.backend.libraryMethods as libm  # library view functions
 import revedaEditor.backend.schBackEnd as scb  # import the backend
+import revedaEditor.backend.libraryModelView as lmview
 import revedaEditor.common.shapes as shp
 import revedaEditor.fileio.symbolEncoder as se
 import revedaEditor.gui.editorWindows as edw
@@ -43,7 +44,7 @@ import json
 def createSpiceView(
     parent: QMainWindow,
     importDlg: QDialog,
-    libraryModel: edw.designLibrariesModel,
+    libraryModel: lmview.designLibrariesModel,
     importedSpiceObj: hdl.spiceC,
 ):
     """
@@ -109,7 +110,7 @@ def createSpiceView(
 def createVaView(
     parent: QMainWindow,
     importDlg: QDialog,
-    libraryModel: edw.designLibrariesModel,
+    libraryModel: lmview.designLibrariesModel,
     importedVaObj: hdl.verilogaC,
 ) -> ddef.viewItemTuple:
     """

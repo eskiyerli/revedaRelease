@@ -11,54 +11,6 @@
     {
         "type": "line",
         "st": [
-            -40,
-            -20
-        ],
-        "end": [
-            40,
-            -20
-        ],
-        "loc": [
-            0.0,
-            -50.0
-        ],
-        "ang": 0
-    },
-    {
-        "type": "line",
-        "st": [
-            -40,
-            -20
-        ],
-        "end": [
-            40,
-            -20
-        ],
-        "loc": [
-            0.0,
-            -70.0
-        ],
-        "ang": 0
-    },
-    {
-        "type": "line",
-        "st": [
-            0,
-            0
-        ],
-        "end": [
-            0,
-            70
-        ],
-        "loc": [
-            0.0,
-            -70.0
-        ],
-        "ang": 0
-    },
-    {
-        "type": "line",
-        "st": [
             0,
             0
         ],
@@ -73,24 +25,123 @@
         "ang": 0
     },
     {
+        "type": "line",
+        "st": [
+            0,
+            0
+        ],
+        "end": [
+            0,
+            70
+        ],
+        "loc": [
+            0.0,
+            -70.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -40,
+            -20
+        ],
+        "end": [
+            40,
+            -20
+        ],
+        "loc": [
+            0.0,
+            -70.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "line",
+        "st": [
+            -40,
+            -20
+        ],
+        "end": [
+            40,
+            -20
+        ],
+        "loc": [
+            0.0,
+            -50.0
+        ],
+        "ang": 0
+    },
+    {
         "type": "label",
         "st": [
-            45,
-            -50
+            60,
+            -40
         ],
-        "nam": "@IC",
-        "def": "[@IC:IC=%:IC=0]",
-        "txt": "[@IC:IC=%:IC=0]",
+        "nam": "@C",
+        "def": "[@C:C=%:C=1p]",
+        "txt": "[@C:C=%:C=1p]",
         "val": "",
-        "vis": false,
+        "vis": true,
         "lt": "NLPLabel",
         "ht": "12",
         "al": "Left",
         "or": "R0",
         "use": "Normal",
         "loc": [
-            30.0,
-            -65.0
+            35.0,
+            -90.0
+        ]
+    },
+    {
+        "type": "pin",
+        "st": [
+            0,
+            -100
+        ],
+        "nam": "PLUS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            -60.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "pin",
+        "st": [
+            0,
+            90
+        ],
+        "nam": "MINUS",
+        "pd": "Inout",
+        "pt": "Signal",
+        "loc": [
+            0.0,
+            -90.0
+        ],
+        "ang": 0
+    },
+    {
+        "type": "label",
+        "st": [
+            40,
+            -70
+        ],
+        "nam": "@instName",
+        "def": "[@instName]",
+        "txt": "[@instName]",
+        "val": "",
+        "vis": true,
+        "lt": "NLPLabel",
+        "ht": "12",
+        "al": "Left",
+        "or": "R0",
+        "use": "Normal",
+        "loc": [
+            10.0,
+            -170.0
         ]
     },
     {
@@ -117,65 +168,14 @@
     {
         "type": "label",
         "st": [
-            40,
-            -70
+            45,
+            -50
         ],
-        "nam": "@instName",
-        "def": "[@instName]",
-        "txt": "[@instName]",
+        "nam": "@IC",
+        "def": "[@IC:IC=%:IC=0]",
+        "txt": "[@IC:IC=%:IC=0]",
         "val": "",
-        "vis": true,
-        "lt": "NLPLabel",
-        "ht": "12",
-        "al": "Left",
-        "or": "R0",
-        "use": "Normal",
-        "loc": [
-            10.0,
-            -170.0
-        ]
-    },
-    {
-        "type": "pin",
-        "st": [
-            0,
-            90
-        ],
-        "nam": "MINUS",
-        "pd": "Inout",
-        "pt": "Signal",
-        "loc": [
-            0.0,
-            -90.0
-        ],
-        "ang": 0
-    },
-    {
-        "type": "pin",
-        "st": [
-            0,
-            -100
-        ],
-        "nam": "PLUS",
-        "pd": "Inout",
-        "pt": "Signal",
-        "loc": [
-            0.0,
-            -60.0
-        ],
-        "ang": 0
-    },
-    {
-        "type": "label",
-        "st": [
-            60,
-            -40
-        ],
-        "nam": "@C",
-        "def": "[@C:C=%:C=1p]",
-        "txt": "[@C:C=%:C=1p]",
-        "val": "",
-        "vis": true,
+        "vis": false,
         "lt": "NLPLabel",
         "ht": "12",
         "al": "Left",
@@ -183,7 +183,7 @@
         "use": "Normal",
         "loc": [
             35.0,
-            -90.0
+            -65.0
         ]
     },
     {

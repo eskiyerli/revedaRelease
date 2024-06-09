@@ -26,6 +26,7 @@
 
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.gui.editFunctions as edf
+
 from PySide6.QtCore import Qt, QDir
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import (
@@ -789,3 +790,126 @@ class libraryPathEditorDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
         self.mainLayout.addWidget(self.buttonBox)
         self.setLayout(self.mainLayout)
+
+
+class klayoutLaypImportDialogue(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.logger = self.parent.logger
+
+        self.setWindowTitle("KLayout Layout Layers File Importer")
+        self.setMinimumSize(500, 100)
+        mainLayout = QVBoxLayout()
+        fileBox = QGroupBox("Import KLayout Layer Properties File")
+        fileDialogLayout = QHBoxLayout()
+        fileDialogLayout.addWidget(edf.boldLabel("Layer Properties File:"))
+        self.laypFileEdit = edf.longLineEdit()
+        fileDialogLayout.addWidget(self.laypFileEdit)
+        self.laypFileButton = QPushButton("...")
+        self.laypFileButton.clicked.connect(self.onFileButtonClicked)
+        fileDialogLayout.addWidget(self.laypFileButton)
+        fileBox.setLayout(fileDialogLayout)
+        mainLayout.addWidget(fileBox)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
+
+    def onFileButtonClicked(self):
+        fileDialog = QFileDialog()
+        fileDialog.setNameFilter("Layout Properties files (*.lyp)")
+        laypFileName = fileDialog.getOpenFileName(
+            self, caption="Select LayoutProperties file.", dir=str(pathlib.Path.cwd()),
+        filter="Layout Properties files (*.lyp)")[0]
+        if laypFileName:
+            self.laypFileEdit.setText(laypFileName)
+
+class klayoutLaytImportDialogue(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.logger = self.parent.logger
+
+        self.setWindowTitle("KLayout Layout Technology File Importer")
+        self.setMinimumSize(500, 100)
+        mainLayout = QVBoxLayout()
+        fileBox = QGroupBox("Import KLayout Technology File")
+        fileDialogLayout = QHBoxLayout()
+        fileDialogLayout.addWidget(edf.boldLabel("Technology Properties File:"))
+        self.laytFileEdit = edf.longLineEdit()
+        fileDialogLayout.addWidget(self.laytFileEdit)
+        self.laytFileButton = QPushButton("...")
+        self.laytFileButton.clicked.connect(self.onFileButtonClicked)
+        fileDialogLayout.addWidget(self.laytFileButton)
+        fileBox.setLayout(fileDialogLayout)
+        mainLayout.addWidget(fileBox)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
+
+    def onFileButtonClicked(self):
+        fileDialog = QFileDialog()
+        fileDialog.setNameFilter("Layout Properties files (*.lyt)")
+        laytFileName = fileDialog.getOpenFileName(
+            self, caption="Select LayoutProperties file.", dir=str(pathlib.Path.cwd()),
+        filter="Layout Properties files (*.lyt)")[0]
+        if laytFileName:
+            self.laytFileEdit.setText(laytFileName)
+
+class xschemSymIimportDialogue(QDialog):
+    def __init__(self, parent, model):
+        super().__init__(parent)
+        self.parent = parent
+        self.logger = self.parent.logger
+        self.model = model
+        print(self.model)
+        self.setWindowTitle("Xschem Symbol File Importer")
+        self.setMinimumSize(500, 300)
+        mainLayout = QVBoxLayout()
+        fileBox = QGroupBox("Import Xschem Symbol Files")
+        fileDialogLayout = QHBoxLayout()
+        fileDialogLayout.addWidget(edf.boldLabel("Xschem Symbol Files:"))
+        self.symFileEdit = edf.longLineEdit()
+        fileDialogLayout.addWidget(self.symFileEdit)
+        self.symFileButton = QPushButton("...")
+        self.symFileButton.clicked.connect(self.onFileButtonClicked)
+        fileDialogLayout.addWidget(self.symFileButton)
+        fileBox.setLayout(fileDialogLayout)
+        mainLayout.addWidget(fileBox)
+        libraryBox = QGroupBox('Select Library')
+        libraryBoxLayout = QFormLayout()
+        self.libNamesCB = QComboBox()
+        self.libNamesCB.setModel(self.model)
+        self.libNamesCB.setModelColumn(0)
+        self.libNamesCB.setCurrentIndex(0)
+        libraryBoxLayout.addRow(edf.boldLabel("Library:"), self.libNamesCB)
+        libraryBox.setLayout(libraryBoxLayout)
+        mainLayout.addWidget(libraryBox)
+        parameterBox = QGroupBox('Import Parameters')
+        parameterBoxLayout = QFormLayout()
+        self.scaleEdit = edf.longLineEdit()
+        self.scaleEdit.setText('4')
+        parameterBoxLayout.addRow(edf.boldLabel("Scale Factor"), self.scaleEdit)
+        parameterBox.setLayout(parameterBoxLayout)
+        mainLayout.addWidget(parameterBox)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
+
+    def onFileButtonClicked(self):
+        fileDialog = QFileDialog()
+        fileDialog.setNameFilter("Xschem Symbol Files (*.sym)")
+        fileDialog.setFileMode(QFileDialog.ExistingFiles)
+        if fileDialog.exec():
+            symFileNames = fileDialog.selectedFiles()
+            if symFileNames:
+                self.symFileEdit.setText(', '.join(symFileNames))

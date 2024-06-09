@@ -64,7 +64,7 @@ class schematicEncoder(json.JSONEncoder):
                 .toPoint()
                 .toTuple(),
                 "nam": item.name,
-                "ns": item.nameSet,
+                "ns": item.nameStrength.value
             }
             return itemDict
         elif isinstance(item, shp.schematicPin):

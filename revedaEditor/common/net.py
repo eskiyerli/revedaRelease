@@ -47,42 +47,14 @@ from PySide6.QtWidgets import (
 import pdk.schLayers as schlyr
 import math
 import itertools as itt
-from typing import Union, Optional, NamedTuple
+from typing import Union, Optional, NamedTuple, Type
+from enum import Enum
 
 
-# class crossingDot(QGraphicsEllipseItem):
-#     dotDiameter = schlyr.crossingDotDiameter
-#
-#     def __init__(self, point: QPoint):
-#
-#         self.point = point
-#         self._radius = crossingDot.dotDiameter
-#         super().__init__(point.x() - self._radius, point.y() - self._radius,
-#                          2 * self._radius, 2 * self._radius)
-#         self.setPen(schlyr.wirePen)
-#         self.setBrush(schlyr.wireBrush)
-#         self._name = None
-#
-#     def paint(self, painter, option, widget) -> None:
-#         if self.isSelected():
-#             painter.setPen(schlyr.selectedWirePen)
-#             painter.setBrush(schlyr.selectedWireBrush)
-#         else:
-#             painter.setPen(schlyr.wirePen)
-#             painter.setBrush(schlyr.wireBrush)
-#         painter.drawEllipse(self.point, self._radius, self._radius)
-#
-#     def __repr__(self):
-#         return f"crossingDot({self.point},{self._radius})"
-#
-#     def findNets(self) -> set["schematicNet"]:
-#         if self.scene():
-#             return {netItem for netItem in self.scene().items(self.sceneBoundingRect()) if
-#                     isinstance(netItem, schematicNet)}
-#         else:
-#             return set()
-#
-#
+class netNameStrengthEnum(Enum):
+    NONAME = 1
+    INHERIT = 2
+    SET = 3
 
 
 class pointSelfIndex(NamedTuple):
@@ -96,13 +68,13 @@ class schematicNet(QGraphicsItem):
         "_mode",
         "_name",
         "_nameConflict",
-        "_nameAdded",
-        "_nameSet",
+        "_netNameStrength",
         "_highlighted",
         "_flightLinesSet",
         "_connectedNetsSet",
         "_netIndexTupleSet",
-        "_scene" "_netSnapLines",
+        "_scene",
+        "_netSnapLines",
         "_stretch",
         "_stretchSide",
         "_nameFont",
@@ -127,6 +99,7 @@ class schematicNet(QGraphicsItem):
         self._nameConflict: bool = False
         self._nameAdded: bool = False
         self._nameSet: bool = False
+        self._nameStrength: netNameStrengthEnum = netNameStrengthEnum.NONAME
         self._highlighted: bool = False
         self._flightLinesSet: set[schematicNet] = set()
         self._connectedNetsSet: set[schematicNet] = set()
@@ -205,13 +178,15 @@ class schematicNet(QGraphicsItem):
             pen = schlyr.stretchWirePen
         elif self._highlighted:
             pen = schlyr.hilightPen
+        elif self._nameConflict:
+            pen = schlyr.errorWirePen
         else:
             pen = schlyr.wirePen
 
         painter.setPen(pen)
         painter.drawLine(self._draftLine)
         # painter.drawEllipse(self._draftLine.p1(), 2, 2)
-        if self._nameSet:
+        if self._nameStrength.value == 3:
             painter.save()
             painter.translate(
                 self._draftLine.center().x(), self._draftLine.center().y()
@@ -220,31 +195,18 @@ class schematicNet(QGraphicsItem):
             painter.drawStaticText(0, 0, self._nameItem)
             painter.restore()
 
-    def sceneEvent(self, event):
-        """
-        Handle events related to the scene.
-
-        Args:
-            event: The event to handle.
-
-        Returns:
-            True if the event was handled successfully, False otherwise.
-        """
-        # Check if the current scene has the drawWire edit mode enabled
-        if self.scene() and self.scene().editModes.drawWire:
-            return False
-        else:
-            # Call the parent class's sceneEvent method to handle the event
-            super().sceneEvent(event)
-        return True
-
     def __repr__(self):
         return f"schematicNet({self.sceneEndPoints})"
 
     def itemChange(self, change, value):
+        if self.scene():
+            if change == QGraphicsItem.ItemSelectedHasChanged:
+                if value:
+                    self.scene().selectedNet= self
+                else:
+                    self.scene().selectedNet = None
         return super().itemChange(change, value)
 
-    #
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         super().mousePressEvent(event)
         if self._stretch:
@@ -261,17 +223,6 @@ class schematicNet(QGraphicsItem):
                 self.setCursor(Qt.SizeHorCursor)
                 self._stretchSide = "p2"
             self.scene().stretchNet(self, self._stretchSide)
-        # else:
-        #     orthoNets = list(filter(self.isOrthogonal, self.findOverlapNets()))
-        #     for otherNet in orthoNets:
-        #         for selfEnd, otherEnd in itt.product(self.sceneEndPoints, otherNet.sceneEndPoints):
-        #             if selfEnd == otherEnd:
-        #                 if otherNet.sceneEndPoints.index(otherEnd) == 0:
-        #                     otherNet._stretchSide = 'p1'
-        #                 else:
-        #                     otherNet._stretchSide = 'p2'
-        #                 self.scene().stretchNet(otherNet, otherNet._stretchSide)
-        #                 break
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         """
@@ -286,13 +237,11 @@ class schematicNet(QGraphicsItem):
         super().hoverEnterEvent(event)
         # Check if highlightNets flag is set in the scene
         if self.scene().highlightNets:
-            sceneNetsSet = self.scene().findSceneNetsSet() - {self}
-            self._connectedNetsSet, _ = self.scene().traverseNets({self}, sceneNetsSet)
+            self._highlighted = True
+            self._connectedNetsSet = self.scene().findConnectedNetSet(self)
+
             # Highlight the connected netItems
             for netItem in self._connectedNetsSet:
-                if not (netItem.nameAdded or netItem.nameSet):
-                    netItem.nameAdded = True
-                    netItem.name = self._name
                 netItem.highlight()
 
             # Create flight lines and add them to the scene
@@ -307,10 +256,18 @@ class schematicNet(QGraphicsItem):
     def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         super().hoverLeaveEvent(event)
         if self._highlighted:
-            for flightLine in self._flightLinesSet:
-                self.scene().removeItem(flightLine)
-            self._flightLinesSet = set()
-        [netItem.unhighlight() for netItem in self._connectedNetsSet]
+            self._highlighted = False
+            self._clearFlightLines()
+            self._unhighlightConnectedNets()
+
+    def _clearFlightLines(self) -> None:
+        for flight_line in self._flightLinesSet:
+            self.scene().removeItem(flight_line)
+        self._flightLinesSet.clear()
+
+    def _unhighlightConnectedNets(self) -> None:
+        for net_item in self._connectedNetsSet:
+            net_item.unhighlight()
 
     def isParallel(self, otherNet: "schematicNet") -> bool:
         return abs((self.angle - otherNet.angle) % 180) < 1
@@ -328,20 +285,15 @@ class schematicNet(QGraphicsItem):
         Returns:
             set: A set of netItems that overlap with self.sceneShapeRect.
         """
+        overlapNets = set()
         if self.scene():
-            overlapNets = {
-                netItem
-                for netItem in self.scene().items(self.sceneShapeRect)
-                if isinstance(netItem, schematicNet) and netItem is not self
-            }
-            if self._nameSet or self._nameAdded:
-                for netItem in overlapNets:
-                    netItem.name = self._name
-                    netItem.nameSet = self._nameSet
-                    netItem.nameAdded = self._nameAdded
-        else:
-            overlapNets = set()
-        return overlapNets
+            # overlapNets = {
+            #     netItem
+            #     for netItem in self.scene().items(self.sceneShapeRect)
+            #     if isinstance(netItem, schematicNet)
+            # }
+            overlapNets = {netItem for netItem in self.collidingItems() if isinstance(netItem, schematicNet)}
+            return overlapNets - {self}
 
     def mergeNets(self) -> tuple["schematicNet", "schematicNet"]:
         """
@@ -352,7 +304,6 @@ class schematicNet(QGraphicsItem):
         """
         # Find other nets that overlap with self
         otherNets = self.findOverlapNets()
-
         # If there are other nets
         if otherNets:
             # Filter the other nets to find the parallel ones
@@ -369,30 +320,28 @@ class schematicNet(QGraphicsItem):
                 for netItem in parallelNets:
                     # Update the initialRect by uniting it with each parallel net's
                     # sceneShapeRect
-                    initialRect = initialRect.united(netItem.sceneShapeRect)
+                    self.inherit(netItem)
+                    if not self.nameConflict:
+                        initialRect = initialRect.united(netItem.sceneShapeRect)
+                        if self.scene():
+                            self.scene().removeItem(netItem)
+                    else:
+                        break  # break out of the for loop
+                if not self.nameConflict:
+                    # Adjust the initialRect by 2 pixels on each side
+                    newNetPoints = initialRect.adjusted(2, 2, -2, -2)
 
-                    # Remove each parallel net from the scene
-                    if netItem.scene():
-                        netItem.scene().removeItem(netItem)
+                    # Get the coordinates of the adjusted rectangle
+                    x1, y1, x2, y2 = newNetPoints.getCoords()
 
-                # Adjust the initialRect by 2 pixels on each side
-                newNetPoints = initialRect.adjusted(2, 2, -2, -2)
-
-                # Get the coordinates of the adjusted rectangle
-                x1, y1, x2, y2 = newNetPoints.getCoords()
-
-                # Create a new schematicNet with the snapped coordinates
-                newNet = schematicNet(
-                    self.snapToGrid(QPoint(x1, y1)), self.snapToGrid(QPoint(x2, y2))
-                )
-
-                # If self has a name, set the name and nameSet of the newNet
-                if self._nameSet or self._nameAdded:
-                    newNet.name = self._name
-                    newNet.nameSet = self._nameSet
-                    newNet.nameAdded = self._nameAdded
-
-                return self, newNet  # original net, new net
+                    # Create a new schematicNet with the snapped coordinates
+                    newNet = schematicNet(
+                        self.snapToGrid(QPoint(x1, y1)), self.snapToGrid(QPoint(x2, y2))
+                    )
+                    newNet.inherit(self)
+                    return self, newNet  # original net, new net
+                else:
+                    return self, self
 
         # If there are no other nets or no parallel nets, return self
         return self, self
@@ -402,6 +351,23 @@ class schematicNet(QGraphicsItem):
             return self.scene().snapToGrid(point, self.scene().snapTuple)
         else:
             return point
+
+    def inherit(self, otherNet: Type["schematicNet"]):
+        """
+        Inherit the name of the other net if self name strength is less than SET.
+        """
+        assert isinstance(otherNet, schematicNet)
+        if self.nameStrength.value == 3:
+            if otherNet.nameStrength.value == 3 and self.name != otherNet.name:
+                self.nameConflict = True
+                otherNet.nameConflict = True
+        elif otherNet.nameStrength.value > 1:  # INHERIT or SET
+            self.name = otherNet.name
+            self.nameStrength = netNameStrengthEnum.INHERIT
+
+    def inheritGuideLine(self, otherNet: Type["guideLine"]):
+        self.name = otherNet.name
+        self.nameStrength = otherNet.nameStrength
 
     @property
     def name(self):
@@ -415,40 +381,13 @@ class schematicNet(QGraphicsItem):
             self._nameItem = QStaticText(self._name)
 
     @property
-    def nameSet(self) -> bool:
-        """
-        Check if the name of the net is explicitly set.
+    def nameStrength(self) -> netNameStrengthEnum:
+        return self._nameStrength
 
-        Returns:
-            bool: The value of the 'nameSet' attribute.
-        """
-        return self._nameSet
-
-    @nameSet.setter
-    def nameSet(self, value: bool):
-        """
-        If the name of the net is explicitly set, set this attribute to True.
-
-        Args:
-            value (bool): The value to set for the 'nameSet' attribute.
-
-        Raises:
-            AssertionError: If the input value is not a boolean.
-        """
-        assert isinstance(value, bool)
-        self._nameSet = value
-
-    @property
-    def nameAdded(self) -> bool:
-        """
-        Name added is true if net name is set due to a connected net or pin.
-        """
-        return self._nameAdded
-
-    @nameAdded.setter
-    def nameAdded(self, value: bool):
-        assert isinstance(value, bool)
-        self._nameAdded = value
+    @nameStrength.setter
+    def nameStrength(self, value: netNameStrengthEnum):
+        assert isinstance(value, netNameStrengthEnum)
+        self._nameStrength = value
 
     @property
     def nameConflict(self) -> bool:
@@ -462,6 +401,10 @@ class schematicNet(QGraphicsItem):
         assert isinstance(value, bool)
         self._nameConflict = value
 
+    @property
+    def endPoints(self):
+        return [self._draftLine.p1().toPoint(), self._draftLine.p2().toPoint()]
+    
     @property
     def sceneEndPoints(self):
         return [
@@ -561,11 +504,18 @@ class guideLine(QGraphicsLineItem):
         self._end = end
         super().__init__(QLineF(self._start, self._end))
         self.setPen(schlyr.guideLinePen)
+        self.pen().setCosmetic(True)
         self._name: str = ""
-        self._nameSet: bool = False
+        self._nameStrength: netNameStrengthEnum = netNameStrengthEnum.NONAME
 
     @property
     def sceneEndPoints(self) -> list[QPoint]:
+        """
+        Returns a list of the end points of the net in scene coordinates.
+
+        Returns:
+            list[QPoint]: A list of the end points of the net in scene coordinates.
+        """
         return [
             self.mapToScene(self.line().p1()).toPoint(),
             self.mapToScene(self.line().p2()).toPoint(),
@@ -584,10 +534,19 @@ class guideLine(QGraphicsLineItem):
             self._name = name
 
     @property
-    def nameSet(self) -> bool:
-        return self._nameSet
+    def nameStrength(self) -> netNameStrengthEnum:
+        return self._nameStrength
 
-    @nameSet.setter
-    def nameSet(self, value: bool):
-        assert isinstance(value, bool)
-        self._nameSet = value
+    @nameStrength.setter
+    def nameStrength(self, value: netNameStrengthEnum):
+        assert isinstance(value, netNameStrengthEnum)
+        self._nameStrength = value
+
+    def inherit(self, otherNet: [schematicNet]):
+        """
+        This method is used to carry the name information of the original net
+        to stretch net.
+        """
+        assert isinstance(otherNet, schematicNet)
+        self.name = otherNet.name
+        self.nameStrength = otherNet.nameStrength

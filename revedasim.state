@@ -1,0 +1,136 @@
+[
+    [
+        "anotherExampleLibrary",
+        "aschematic",
+        "schematic"
+    ],
+    {
+        "simulatorName": "Xyce",
+        "simPathPrefix": ".",
+        "simPath": ".",
+        "textEditorPath": "C:\\Program Files\\Notepad++\\notepad++.exe",
+        "simulatorPath": ".",
+        "includeFilePath": "."
+    },
+    [
+        [
+            true,
+            "/home/eskiyerli/OneDrive_reveda/Projects/res.lib",
+            "nom"
+        ]
+    ],
+    {
+        "temp": "27"
+    },
+    {},
+    {
+        "tran": [
+            false,
+            {
+                "tInitStep": "1u",
+                "tstop": "1m",
+                "tstart": "0",
+                "tMaxStep": "",
+                "tSchedule": "",
+                "uiuc": 0
+            }
+        ],
+        "ac": [
+            false,
+            {
+                "linlog": 2,
+                "fstart": "1k",
+                "fstop": "100k",
+                "fstep": "100"
+            }
+        ],
+        "noise": [
+            false,
+            {
+                "outnode": "",
+                "refnode": "0",
+                "inputSource": "",
+                "sourceResistance": "",
+                "linlog": 0,
+                "fstart": "1k",
+                "fstop": "1Meg",
+                "fstep": "100 "
+            }
+        ],
+        "dc": [
+            false,
+            {
+                "sweepType": 0,
+                "inputSource": "",
+                "linlog": 0,
+                "start": "0",
+                "stop": "1",
+                "step": "10"
+            }
+        ],
+        "hb": [
+            false,
+            {
+                "frequency": "1e9",
+                "numfreq": "10",
+                "intmodmax": "3",
+                "tahb": false,
+                "startupperiods": "2",
+                "numpts": "101",
+                "voltlim": true,
+                "saveicdata": false
+            }
+        ]
+    },
+    [],
+    [],
+    {},
+    {
+        "timeintOptions": {
+            "method": 0,
+            "newlte": 1,
+            "abstol": "1e-12",
+            "reltol": "1e-3",
+            "delmax": "1e1"
+        },
+        "nonlinOptions": {
+            "nox": 1,
+            "nlstrat": 0,
+            "abstol": "1e-12",
+            "reltol": "1e-3",
+            "delmax": "1e1",
+            "maxstep": "200",
+            "maxsearchstep": "2"
+        },
+        "temperOptions": {
+            "temp": "25",
+            "tnom": "25"
+        },
+        "deviceOptions": {
+            "gmin": "1e-12",
+            "voltlim": 1,
+            "minres": "0",
+            "mincap": "0"
+        },
+        "parserOptions": {
+            "binning": 1,
+            "scale": "1.0"
+        }
+    },
+    {},
+    {},
+    {
+        "saveNodes": 1,
+        "saveCurrents": 1,
+        "saveExpressions": 1
+    },
+    [
+        "schematic",
+        "veriloga",
+        "spice",
+        "symbol"
+    ],
+    [
+        "symbol"
+    ]
+]

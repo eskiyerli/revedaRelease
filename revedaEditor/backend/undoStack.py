@@ -92,6 +92,18 @@ class deleteShapeUndo(QUndoCommand):
     def redo(self):
         self._scene.removeItem(self._shape)
 
+class deleteShapesUndo(QUndoCommand):
+    def __init__(self, scene: QGraphicsScene, shapes: list[QGraphicsItem]):
+        super().__init__()
+        self._scene = scene
+        self._shapes = shapes
+        self.setText("Delete Shapes")
+
+    def undo(self):
+        [self._scene.addItem(item) for item in self._shapes]
+
+    def redo(self):
+        [self._scene.removeItem(item) for item in self._shapes]
 
 class addDeleteShapeUndo(QUndoCommand):
     def __init__(
@@ -260,3 +272,21 @@ class undoRotateShape(QUndoCommand):
     def redo(self) -> None:
         # self.angle += 90
         self._shape.setRotation(self._angle)
+
+
+class undoMoveShapesCommand(QUndoCommand):
+    def __init__(self, shapes: list[QGraphicsItem], shapesOffsetList: list[int], startPos, endPos):
+        super().__init__()
+        self._shapes = shapes
+        self._shapesOffsetList = shapesOffsetList
+        self._startPos = startPos
+        self._endPos = endPos
+
+
+    def undo(self):
+        for index, item in enumerate(self._shapes):
+            item.setPos(self._startPos + self._shapesOffsetList[index])
+
+    def redo(self):
+        for index, item in enumerate(self._shapes):
+            item.setPos(self._endPos + self._shapesOffsetList[index])
