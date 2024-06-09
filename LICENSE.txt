@@ -14,10 +14,7 @@
 #   derives, entirely or substantially, from the functionality of the Software. Any
 #   license notice or attribution required by the License must also include this
 #   Commons Clause License Condition notice.
-#
-#   Add-ons and extensions developed for this software may be distributed
-#   under their own separate licenses.
-#  
+#  #
 #   Software: Revolution EDA
 #   License: Mozilla Public License 2.0
 #   Licensor: Revolution Semiconductor (Registered in the Netherlands)

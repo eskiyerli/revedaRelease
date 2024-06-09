@@ -1,4 +1,3 @@
-
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -24,6 +23,10 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
+import pathlib
 
-
-from revedaEditor.gui.revinit import __version__
+print(pathlib.Path.cwd())
+if pathlib.Path.cwd().joinpath("revinit.py").exists():
+    import revinit
+else:
+    print("no revinit file.")

@@ -124,6 +124,7 @@ class aboutDialog(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle("About Revolution EDA")
+        self.setGeometry(100, 100, 400, 200)
         self.setWindowFlags(Qt.Dialog | Qt.WindowStaysOnTopHint)
         self.setMinimumWidth(300)
 
@@ -132,12 +133,11 @@ class aboutDialog(QDialog):
         # Add information about your application using rich text
         about_label = QLabel(
             "<h2>Revolution EDA</h2>"
-            "<p><strong>Version:</strong> 0.6</p>"
+            "<p><strong>Version:</strong> 0.6.3</p>"
             "<p><strong>Copyright: Revolution Semiconductor</strong> © 2024</p>"
             "<p><strong>License:</strong> Mozilla Public License 2.0 amended with Commons Clause</p>"
             "<p><strong> Website:</strong> <a href='https://www.reveda.eu'>Revolution EDA</a></p>"
             "<p><strong> GitHub:</strong> <a href='https://github.com/eskiyerli/revedaRelease'>Revolution EDA GitHub Repository</a></p>"
-            "<p><strong> Inquiries:</strong> <a href='mailto:info@revsemi.com'>info@revsemi.com</a></p>"
         )
         about_label.setOpenExternalLinks(True)  # Allow clickable links
         layout.addWidget(about_label)

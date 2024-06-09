@@ -26,5 +26,5 @@
 #
 #
 
-# python -m nuitka --standalone reveda.py --enable-plugin=pyside6 --include-package=socket,queue  --include-data-dir=./docs=docs/ --include-data-files=.env=. --include-data-files=README.md=. --include-data-files=LICENSE.txt=. --include-package=pdk --include-data-dir=exampleLibraries=./exampleLibraries
-python -m nuitka --enable-plugin=pyside6 --include-data-files=./.env=.env --disable-console --onefile reveda.py
+#python -m nuitka --standalone reveda.py --enable-plugin=pyside6 --include-package=socket,queue  --include-data-dir=./docs=docs/ --include-data-files=.env=. --include-data-files=revinit.py=. --include-data-files=README.md=. --include-data-files=LICENSE.txt=. --include-package=pdk --include-data-dir=exampleLibraries=./exampleLibraries
+python -m nuitka reveda.py --standalone --enable-plugin=pyside6 --include-package=socket,queue,pdk,numpy --include-data-files=./pdk/sg13g2_tech.json=./pdk/sg13g2_tech.json

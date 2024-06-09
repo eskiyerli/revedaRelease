@@ -25,6 +25,7 @@
 
 import importlib
 import inspect
+import pathlib
 
 from PySide6.QtGui import (
     QStandardItem,
@@ -32,6 +33,9 @@ from PySide6.QtGui import (
     QDoubleValidator,
     QValidator,
 )
+
+from PySide6.QtCore import (Qt,)
+
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -47,7 +51,12 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QWidget,
     QCheckBox,
+    QPushButton,
+    QFileDialog,
+    QTableWidget,
+    QTableWidgetItem,
 )
+
 import revedaEditor.common.layoutShapes as lshp
 import revedaEditor.gui.editFunctions as edf
 import pdk.process as fabproc
@@ -103,21 +112,23 @@ class pcellInstancePropertiesDialog(pcellInstanceDialog):
 
 
 class pcellLinkDialogue(QDialog):
-    def __init__(self, parent, viewItem: QStandardItem, module: str):
+    def __init__(self, parent, viewItem: QStandardItem):
         super().__init__(parent)
         # self.logger = parent.logger
         self.viewItem = viewItem
-        self.module = module
+        # TODO: A more elegant solution
+        self.pcells = self.getClasses("pdk.pcells")
         self.setWindowTitle("PCell Settings")
-        self.setMinimumSize(600, 300)
+        self.setMinimumSize(400, 200)
         self.mainLayout = QVBoxLayout()
         groupBox = QGroupBox()
+        groupLayout = QVBoxLayout()
         formLayout = QFormLayout()
-        groupBox.setLayout(formLayout)
-        pcells = self.getClasses(self.module)
+        groupBox.setLayout(groupLayout)
         self.pcellCB = QComboBox()
-        self.pcellCB.addItems(pcells)
+        self.pcellCB.addItems(self.pcells)
         formLayout.addRow(edf.boldLabel("PCell:"), self.pcellCB)
+        groupLayout.addLayout(formLayout)
         self.mainLayout.addWidget(groupBox)
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -128,11 +139,11 @@ class pcellLinkDialogue(QDialog):
         self.show()
 
     @staticmethod
-    def getClasses(module_name):
-        module = importlib.import_module(module_name)
+    def getClasses(moduleName: str):
+        module = importlib.import_module(moduleName)
         classes = []
         for name, obj in inspect.getmembers(module):
-            if inspect.isclass(obj):
+            if inspect.isclass(obj) and issubclass(obj, lshp.layoutPcell):
                 classes.append(name)
         return classes
 
@@ -143,9 +154,9 @@ class createPathDialogue(QDialog):
         self.setWindowTitle("Create Path")
         # self.setMinimumSize(300, 300)
         mainLayout = QVBoxLayout()
-        pathOrientBox = QGroupBox("Path Orientation")
-        horizontalLayout = QHBoxLayout(pathOrientBox)
-        pathOrientBox.setLayout(horizontalLayout)
+        self.pathOrientBox = QGroupBox("Path Orientation")
+        horizontalLayout = QHBoxLayout(self.pathOrientBox)
+        self.pathOrientBox.setLayout(horizontalLayout)
         pathOrientGroup = QButtonGroup()
         self.manhattanButton = QRadioButton("Manhattan")
         pathOrientGroup.addButton(self.manhattanButton)
@@ -164,7 +175,7 @@ class createPathDialogue(QDialog):
         horizontalLayout.addWidget(self.verticalButton)
         self.manhattanButton.setChecked(True)
         pathOrientGroup.setExclusive(True)
-        mainLayout.addWidget(pathOrientBox)
+        mainLayout.addWidget(self.pathOrientBox)
         groupBox = QGroupBox()
         self.formLayout = QFormLayout()
         groupBox.setLayout(self.formLayout)
@@ -193,6 +204,7 @@ class layoutPathPropertiesDialog(createPathDialogue):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.setWindowTitle("Path Properties")
+        # self.mainLayout.removeWidget(self.pathOrientBox)
         self.p1PointEditX = edf.shortLineEdit()
         self.p1PointEditY = edf.shortLineEdit()
         self.p2PointEditX = edf.shortLineEdit()
@@ -630,77 +642,187 @@ class layoutRectProperties(QDialog):
         self.show()
 
 
-class layoutPolygonProperties(QDialog):
-    def __init__(self, parent: QWidget, points: int):
+class pointsTableWidget(QTableWidget):
+    def __init__(self,parent=None):
         super().__init__(parent)
+        self.setColumnCount(3)
+        self.setHorizontalHeaderLabels(["Del.", 'X', "Y"])
+        self.setColumnWidth(0,8)
+        self.setShowGrid(True)
+        self.setGridStyle(Qt.SolidLine)
+
+
+class layoutPolygonProperties(QDialog):
+    def __init__(self, parent: QWidget, tupleList: list):
+        super().__init__(parent)
+        self.tupleList = tupleList
         self.setWindowTitle("Layout Polygon Properties")
         self.setMinimumWidth(300)
-        self._points = points
-        self._i = 0
-        self._checkBoxList = []
-        self.pointXEdits = []
-        self.pointYEdits = []
-        self.mainLayout = QVBoxLayout()
-        self.polygonGroup = QGroupBox("Polygon Properties")
-        self.polygonGroupLayout = QGridLayout()
-        self.polygonGroup.setLayout(self.polygonGroupLayout)
-        self.polygonLayerCB = QComboBox()
-        self.polygonGroupLayout.addWidget(edf.boldLabel("Layer:"), 0, 0)
-        self.polygonGroupLayout.addWidget(self.polygonLayerCB, 0, 1, 1, 2)
-        self.polygonGroupLayout.addWidget(edf.boldLabel("Points:"), 1, 0)
-        self.polygonGroupLayout.addWidget(edf.boldLabel("X:"), 1, 1)
-        self.polygonGroupLayout.addWidget(edf.boldLabel("Y:"), 1, 2)
-        self.polygonGroupLayout.addWidget(edf.boldLabel("Delete:"), 1, 3)
-        for self._i in range(points + 1):
-            self.polygonGroupLayout.addWidget(
-                edf.boldLabel(f"Point {self._i + 1}"), self._i + 2, 0
-            )
-            self.pointXEdits.append(edf.shortLineEdit())
-            self.polygonGroupLayout.addWidget(self.pointXEdits[-1], self._i + 2, 1)
-            self.pointYEdits.append(edf.shortLineEdit())
-            self.polygonGroupLayout.addWidget(self.pointYEdits[-1], self._i + 2, 2)
-            self._checkBoxList.append(QCheckBox())
-            self.polygonGroupLayout.addWidget(
-                self._checkBoxList[self._i], self._i + 2, 3
-            )
-            self._checkBoxList[self._i].stateChanged.connect(self._deleteRow)
-        # now add an empty row and when it is edited add a new row.
-        self.polygonGroupLayout.itemAtPosition(
-            self._i + 1, 2
-        ).widget().editingFinished.connect(self._newPointYChanged)
-        self.mainLayout.addWidget(self.polygonGroup)
-
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-        self.mainLayout.addWidget(self.buttonBox)
-        self.setLayout(self.mainLayout)
-        self.show()
+        mainLayout = QVBoxLayout()
+        self.setLayout(mainLayout)
+        polygonLayerGroup = QGroupBox("Polygon Layer")
+        polygonLayerGroupLayout = QFormLayout()
+        self.polygonLayerCB = QComboBox()
+        polygonLayerGroupLayout.addRow(edf.boldLabel("Layer:"),self.polygonLayerCB)
+        mainLayout.addLayout(polygonLayerGroupLayout)
+        self.tableWidget = pointsTableWidget(self)
+        mainLayout.addWidget(self.tableWidget)
+        mainLayout.addWidget(self.buttonBox)
 
-    def _newPointYChanged(self):
-        self._i += 1
-        self.polygonGroupLayout.addWidget(
-            edf.boldLabel(f"Point {self._i + 1}"), self._i + 2, 0
+        self.populateTable()
+
+
+    def populateTable(self):
+        self.tableWidget.setRowCount(len(self.tupleList) + 1)  # Add one extra row
+
+        for row, item in enumerate(self.tupleList):
+            self.addRow(row, item)
+
+        # Add an empty row at the end
+        self.addEmptyRow(len(self.tupleList))
+
+        # Connect cellChanged signal to handle when the last row is edited
+        self.tableWidget.cellChanged.connect(self.handleCellChange)
+
+    def addRow(self, row, item):
+
+        delete_checkbox = QCheckBox()
+        self.tableWidget.setCellWidget(row, 0, delete_checkbox)
+
+        self.tableWidget.setItem(row, 1, QTableWidgetItem(str(item[0])))
+        self.tableWidget.setItem(row, 2, QTableWidgetItem(str(item[1])))
+        delete_checkbox.stateChanged.connect(
+            lambda state, r=row: self.deleteRow(r, state)
         )
-        self.pointXEdits.append(edf.shortLineEdit())
-        self.polygonGroupLayout.addWidget(self.pointXEdits[-1], self._i + 2, 1)
-        self.pointYEdits.append(edf.shortLineEdit())
-        self.polygonGroupLayout.addWidget(self.pointYEdits[-1], self._i + 2, 2)
-        self._checkBoxList.append(QCheckBox())
-        self.polygonGroupLayout.addWidget(self._checkBoxList[self._i], self._i + 2, 3)
-        self._checkBoxList[self._i].stateChanged.connect(self._deleteRow)
 
-    def _deleteRow(self, state):
-        if state == 2:
-            sender = self.sender()
-            row = self._checkBoxList.index(sender) + 1
-            for i in range(4):
-                widget = self.polygonGroupLayout.itemAtPosition(row, i).widget()
-                self.polygonGroupLayout.removeWidget(widget)
-                widget.deleteLater()
-            self.adjustSize()
+    def addEmptyRow(self, row):
 
+        # self.table_widget.insertRow(row)
+        delete_checkbox = QCheckBox()
+        self.tableWidget.setCellWidget(row, 0, delete_checkbox)
+        delete_checkbox.stateChanged.connect(
+            lambda state, r=row: self.deleteRow(r, state))
+
+        self.tableWidget.setItem(row, 1, QTableWidgetItem(""))
+        self.tableWidget.setItem(row, 2, QTableWidgetItem(""))
+
+    def handleCellChange(self, row, column):
+        if (
+            row == self.tableWidget.rowCount() - 1
+        ):  # Check if last row and tuple text column
+            if self.tableWidget.item(row,2) is not None:
+                text1 = self.tableWidget.item(row, 1).text()
+                text2 = self.tableWidget.item(row, 2).text()
+                if text1 != "" and text2 != "":
+                    self.tableWidget.insertRow(row + 1)
+                    self.addEmptyRow(row + 1)
+
+    def deleteRow(self, row, state):
+        print("delete")
+        if state == 2:  # Checked state
+            self.tableWidget.removeRow(row)
+
+
+
+#
+# class layoutPolygonProperties(QDialog):
+#     def __init__(self, parent: QWidget, numPoints: int):
+#         super().__init__(parent)
+#         self.setWindowTitle("Layout Polygon Properties")
+#         self.setMinimumWidth(300)
+#         self._numPoints = numPoints
+#         self._i = 0
+#         self._checkBoxList = []
+#         self.pointXEdits = []
+#         self.pointYEdits = []
+#         self.mainLayout = QVBoxLayout()
+#         polygonLayerGroup = QGroupBox("Polygon Layer")
+#         polygonLayerGroupLayout = QFormLayout()
+#         self.polygonLayerCB = QComboBox()
+#         polygonLayerGroupLayout.addRow(edf.boldLabel("Layer:"),self.polygonLayerCB)
+#         self.mainLayout.addLayout(polygonLayerGroupLayout)
+#         self.polygonGroup = QGroupBox("Polygon Properties")
+#         self.polygonGroupLayout = QGridLayout()
+#         self.polygonGroup.setLayout(self.polygonGroupLayout)
+#         self.polygonGroupLayout.addWidget(edf.boldLabel("Points:"), 0, 0)
+#         self.polygonGroupLayout.addWidget(edf.boldLabel("X:"), 0, 1)
+#         self.polygonGroupLayout.addWidget(edf.boldLabel("Y:"), 0, 2)
+#         self.polygonGroupLayout.addWidget(edf.boldLabel("Delete:"), 0, 3)
+#         for self._i in range(numPoints+1):
+#             self.polygonGroupLayout.addWidget(
+#                 edf.boldLabel(f"Point {self._i + 1}"), self._i+1, 0
+#             )
+#             self.pointXEdits.append(edf.shortLineEdit())
+#             self.polygonGroupLayout.addWidget(self.pointXEdits[-1], self._i+1, 1)
+#             self.pointYEdits.append(edf.shortLineEdit())
+#             self.polygonGroupLayout.addWidget(self.pointYEdits[-1], self._i+1, 2)
+#             self._checkBoxList.append(QCheckBox())
+#             self.polygonGroupLayout.addWidget(
+#                 self._checkBoxList[self._i], self._i+1, 3
+#             )
+#             self._checkBoxList[self._i].stateChanged.connect(self._deleteRow)
+#         # now add an empty row and when it is edited add a new row.
+#         self.polygonGroupLayout.itemAtPosition(
+#             self._i + 1, 2
+#         ).widget().editingFinished.connect(self._newPointYChanged)
+#         self.mainLayout.addWidget(self.polygonGroup)
+#
+#         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+#         self.buttonBox = QDialogButtonBox(QBtn)
+#         self.buttonBox.accepted.connect(self.accept)
+#         self.buttonBox.rejected.connect(self.reject)
+#         self.mainLayout.addWidget(self.buttonBox)
+#         self.setLayout(self.mainLayout)
+#         self.show()
+#
+#     def _newPointYChanged(self):
+#         """
+#         This function is called when the user clicks the add point button for a polygon.
+#         It adds a new row to the layout with the appropriate labels and input fields for
+#         the x and y coordinates of the new point.
+#         The function also adds a delete button to the new row that allows the user to
+#         delete the point.
+#
+#         Returns:
+#             None
+#         """
+#         self._i += 1
+#         self.polygonGroupLayout.addWidget(
+#             edf.boldLabel(f"Point {self._i + 1}"), self._i + 2, 0
+#         )
+#         self.pointXEdits.append(edf.shortLineEdit())
+#         self.polygonGroupLayout.addWidget(self.pointXEdits[-1], self._i + 2, 1)
+#         self.pointYEdits.append(edf.shortLineEdit())
+#         self.polygonGroupLayout.addWidget(self.pointYEdits[-1], self._i + 2, 2)
+#         self._checkBoxList.append(QCheckBox())
+#         self.polygonGroupLayout.addWidget(self._checkBoxList[self._i], self._i + 2, 3)
+#         self._checkBoxList[self._i].stateChanged.connect(self._deleteRow)
+#
+#     def _deleteRow(self, state):
+#         """
+#         This function is called when the user clicks the delete button for a polygon point.
+#         It removes the corresponding row from the layout and adjusts the layout size.
+#
+#         Parameters:
+#         state (int): The state of the delete button, which is 2 when the button is clicked.
+#
+#         Returns:
+#         None
+#         """
+#         if state == 2:
+#             sender = self.sender()
+#             row = self._checkBoxList.index(sender) + 1
+#             for i in range(4):
+#                 widget = self.polygonGroupLayout.itemAtPosition(row, i).widget()
+#                 print(widget)
+#                 # self.polygonGroupLayout.removeWidget(widget)
+#                 # widget.deleteLater()
+#             self.adjustSize()
+#
 
 class layoutInstancePropertiesDialog(QDialog):
     def __init__(self, parent: QWidget) -> None:

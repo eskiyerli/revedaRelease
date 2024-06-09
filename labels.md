@@ -21,7 +21,7 @@ There are three types of labels:
    These are:
 
    | Label Name     | Label Definition | Explanation                                       |
-      | -------------- | ---------------- | ------------------------------------------------- |
+         | -------------- | ---------------- | ------------------------------------------------- |
    | cell name      | `[@cellName]`    | Cell Name, e.g. nand2, nmos, etc                  |
    | instance name  | `[@instName]`    | Instance name for netlisting, e.g. I1, I15, etc.  |
    | library Name   | `[@libName]`     | Library Name for the symbol                       |
@@ -41,7 +41,7 @@ There are three types of labels:
 3. **PyLabel**: These type labels can *ideally* use any function defined in Python. However,
    they are able to use the methods defined for the parent item of the label in our
    implementation. There is no need for `.` (dot) notation when inputting the method name.
-   Revolution EDA will automatically handle it. 
+   Revolution EDA will automatically handle it.
 
 ## Flowchart for Label Evaluation
 

@@ -1,6 +1,7 @@
 *.png
 *.pyc*
 *.zip
+*.json
 *.spec
 *.log
 *.xml
@@ -13,4 +14,7 @@ build/
 schematicEditor.kdev4
 reveda.log
 revolution_eda.egg-info/
-
+.venv/
+venv/
+*.pyc
+.VSCodeCounter/

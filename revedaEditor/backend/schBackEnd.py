@@ -141,10 +141,17 @@ class viewItem(QStandardItem):
 
     @property
     def viewName(self):
-        return self.viewPath.stem
+        return str(self.viewPath.stem)
 
 
 def createLibrary(parent, model, libraryDir, libraryName) -> libraryItem:
+    """
+    Create a library item with the given parameters and add it to the model.
+    If the library name is empty, show a warning message.
+    If the library already exists, show a warning message.
+    Log the creation of the library item.
+    Return the newly created library item.
+    """
     if libraryName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a library name")
     else:
@@ -182,6 +189,13 @@ def createCell(parent, model, selectedLib, cellName):
 
 
 def createCellView(parent, viewName, cellItem: cellItem):
+    """
+    Create a cell view with the given view name and cell item.
+    If the view name is empty, show a warning message.
+    If the view path exists, replace the cell view and show a warning message.
+    Create an empty cell view path and append the new view item to the cell item.
+    Return the new view item.
+    """
     if viewName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a view name")
         return None
@@ -195,7 +209,7 @@ def createCellView(parent, viewName, cellItem: cellItem):
         ][0]
         oldView.delete()
     newViewItem = viewItem(viewPath)
-    viewPath.touch()  # create empty cell view
+    viewPath.touch()  # create empty cell view path
     items = list()
     if "schematic" in viewName:
         items.insert(0, {"viewName": "schematic"})
@@ -203,22 +217,22 @@ def createCellView(parent, viewName, cellItem: cellItem):
     elif "symbol" in viewName:
         items.insert(0, {"viewName": "symbol"})
         items.insert(1, {"snapGrid": (10, 5)})
-    elif "veriloga" in viewName:
-        items.insert(0, {"viewName": "veriloga"})
-    elif "config" in viewName:
-        items.insert(0, {"viewName": "config"})
     elif "layout" in viewName:
         items.insert(0, {"viewName": "layout"})
         items.insert(1, {"snapGrid": (10, 5)})
     elif "pcell" in viewName:
         items.insert(0, {"viewName": "pcell"})
+    elif "spice" in viewName:
+        items.insert(0, {"viewName": "spice"})
+    elif "veriloga" in viewName:
+        items.insert(0, {"viewName": "veriloga"})
+    elif "config" in viewName:
+        items.insert(0, {"viewName": "config"})
     with viewPath.open(mode="w") as f:
         json.dump(items, f, indent=4)
     parent.logger.warning(f"Created {viewName} at {str(viewPath)}")
     cellItem.appendRow(newViewItem)
-
     return newViewItem
-
 
 # function for copying a cell
 def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -> bool:
@@ -264,6 +278,15 @@ def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -
 
 
 def renameCell(parent, oldCell, newName) -> bool:
+    """
+    Function to rename a cell in the parent with a new name.
+    Parameters:
+    - parent: the parent of the cell
+    - oldCell: the cell to be renamed
+    - newName: the new name for the cell
+    Returns:
+    - bool: True if the cell is successfully renamed, False otherwise
+    """
     cellPath = oldCell.data(Qt.UserRole + 2)
     if newName.strip() == "":
         QMessageBox.warning(parent, "Error", "Please enter a cell name")

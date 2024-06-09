@@ -76,7 +76,8 @@ class layoutEncoder(json.JSONEncoder):
                     "type": "Via",
                     "st": item.mapToScene(item.start).toTuple(),
                     "via": viaDict,
-                    "sp": item.spacing,
+                    "xs": item.xs,
+                    "ys": item.ys,
                     "xn": item.xnum,
                     "yn": item.ynum,
                 }
@@ -122,14 +123,13 @@ class layoutEncoder(json.JSONEncoder):
                 }
             case _:  # now check super class types:
                 match item.__class__.__bases__[0]:
-                    case lshp.layoutPcell:
+                    case baseCell:
                         init_args = inspect.signature(
                             item.__class__.__init__
                         ).parameters
                         args_used = [param for param in init_args if (param != "self")]
 
                         argDict = {arg: getattr(item, arg) for arg in args_used}
-                        # print(argDict)
                         itemDict = {
                             "type": "Pcell",
                             "lib": item.libraryName,

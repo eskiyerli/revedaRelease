@@ -22,28 +22,6 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
-
-#    “Commons Clause” License Condition v1.0
-#   #
-#    The Software is provided to you by the Licensor under the License, as defined
-#    below, subject to the following condition.
-#
-#    Without limiting other conditions in the License, the grant of rights under the
-#    License will not include, and the License does not grant to you, the right to
-#    Sell the Software.
-#
-#    For purposes of the foregoing, “Sell” means practicing any or all of the rights
-#    granted to you under the License to provide to third parties, for a fee or other
-#    consideration (including without limitation fees for hosting or consulting/
-#    support services related to the Software), a product or service whose value
-#    derives, entirely or substantially, from the functionality of the Software. Any
-#    license notice or attribution required by the License must also include this
-#    Commons Clause License Condition notice.
-#
-#    Software: Revolution EDA
-#    License: Mozilla Public License 2.0
-#    Licensor: Revolution Semiconductor (Registered in the Netherlands)
-#
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPainter, QPen, QAction, QIcon
 from PySide6.QtWidgets import (
@@ -211,24 +189,23 @@ class stippleEditor(QMainWindow):
         file_dialog.setNameFilter("PNG Image (*.png)")
         if file_dialog.exec():
             file_path = file_dialog.selectedFiles()[0]
-            image = QImage(
-                self.view.size * self.view.gridStep,
-                self.view.size * self.view.gridStep,
-                QImage.Format_RGB32,
-            )
-            image.fill(Qt.white)
+            self.imageExportToFile(file_path)
 
-            painter = QPainter(image)
-            painter.setRenderHint(QPainter.Antialiasing)
-
-            for row in self.view.gridSquares:
-                for square in row:
-                    if square is not None:
-                        painter.fillRect(square.rect(), Qt.black)
-
-            painter.end()
-
-            image.save(file_path)
+    def imageExportToFile(self, file_path):
+        image = QImage(
+            self.view.size * self.view.gridStep,
+            self.view.size * self.view.gridStep,
+            QImage.Format_RGB32,
+        )
+        image.fill(Qt.white)
+        painter = QPainter(image)
+        painter.setRenderHint(QPainter.Antialiasing)
+        for row in self.view.gridSquares:
+            for square in row:
+                if square is not None:
+                    painter.fillRect(square.rect(), Qt.black)
+        painter.end()
+        image.save(file_path)
 
     def exportPatternAsText(self):
         file_dialog = QFileDialog(self)
@@ -262,24 +239,26 @@ class stippleEditor(QMainWindow):
 
             self.clearPattern()
 
-            with open(file_path, "r") as file:
-                lines = file.readlines()
-            index = 2
-            match len(lines):
-                case 8:
-                    index = 0
-                case 16:
-                    index = 1
-                case 32:
-                    index = 2
-            self.sizeCB.setCurrentIndex(index)
-            self.matrixSizeChanged(index)
+            self.loadPatternFromFile(file_path)
 
-            for row, line in enumerate(lines):
-                row_data = line.strip().split()
-                for col, data in enumerate(row_data):
-                    if data == "1":
-                        self.view.drawDot(row, col)
+    def loadPatternFromFile(self, file_path):
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+        index = 2
+        match len(lines):
+            case 8:
+                index = 0
+            case 16:
+                index = 1
+            case 32:
+                index = 2
+        self.sizeCB.setCurrentIndex(index)
+        self.matrixSizeChanged(index)
+        for row, line in enumerate(lines):
+            row_data = line.strip().split()
+            for col, data in enumerate(row_data):
+                if data == "1":
+                    self.view.drawDot(row, col)
 
     def matrixSizeChanged(self, index: int):
         self.view.scene().clear()

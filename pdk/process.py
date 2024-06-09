@@ -24,12 +24,22 @@
 #
 import revedaEditor.backend.dataDefinitions as ddef
 import pdk.layoutLayers as laylyr
+from pdk.sg13_tech import SG13_Tech as sg13
+from quantiphy import Quantity
+
+techClass = sg13()
+techParams = techClass.techParams
+
 # common process parameters
-dbu = 100 # grid points per micron
+dbu = 1000  # grid points per micron
 
 # Some predefined rules
 # via defintions
-con = ddef.viaDefTuple('con',laylyr.contactLayer_drw, '', '0.1', '10', '0.1', '10', '0.1', '10')
-v1 = ddef.viaDefTuple('v1', laylyr.via1Layer_drw, '', '0.2', '10', '0.2', '10', '0.1', '10')
-processVias = [con,v1]
-processViaNames = [item.name for item in processVias]
+cont = ddef.viaDefTuple("cont", laylyr.Cont_drw, "", 0.16, 0.16, 0.16, 0.16, 0.18, 10)
+viamim = ddef.viaDefTuple('viamim', laylyr.Vmim_drw, "", techParams['TV1_a'], 10,
+                          techParams['TV1_a'], 10, 0.84, 10)
+# v1 = ddef.viaDefTuple(
+#     "v1", laylyr.via1Layer_drw, "", "0.2", "10", "0.2", "10", "0.1", "10"
+# )
+# processVias = [con, v1]
+# processViaNames = [item.name for item in processVias]

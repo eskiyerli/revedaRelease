@@ -1,0 +1,15 @@
+[submodule "revedaEditor"]
+	path = revedaEditor
+	url = ./revedaEditor/
+	
+[submodule "exampleLibraries"]
+	path = exampleLibraries
+	url = ./exampleLibraries/
+	
+[submodule "pdk"]
+	path = pdk
+	url = ./pdk/
+
+[submodule "docs"]
+	path = docs
+	url = ./docs/

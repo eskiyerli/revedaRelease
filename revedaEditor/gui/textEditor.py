@@ -178,10 +178,10 @@ class xyceHighlighter(QSyntaxHighlighter):
 class verilogaEditor(QMainWindow):
     closedSignal = Signal(ddef.viewTuple, str)
 
-    def __init__(self, fileName=""):
-        super().__init__()
+    def __init__(self, parent, fileName=""):
+        super().__init__(parent=parent)
         self._cellViewTuple = ddef.viewTuple("", "", "")
-
+        self.parent = parent
         self.fileName: str = fileName
         self.textEdit = QTextEdit()
         self.setCentralWidget(self.textEdit)
@@ -380,8 +380,8 @@ class verilogaEditor(QMainWindow):
 
 
 class xyceEditor(verilogaEditor):
-    def __init__(self, fileName=""):
-        super().__init__(fileName)
+    def __init__(self,parent, fileName=""):
+        super().__init__(parent, fileName)
         self.initEditor()
         self.setWindowTitle("Xyce/SPICE Editor")
 
@@ -413,7 +413,7 @@ class xyceEditor(verilogaEditor):
 
 def main():
     app = QApplication(sys.argv)
-    editor = verilogaEditor()
+    editor = verilogaEditor('')
     editor.show()
     sys.exit(app.exec())
 
