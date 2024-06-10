@@ -1,4 +1,3 @@
-*.png
 *.pyc*
 *.zip
 *.json
@@ -18,3 +17,4 @@ revolution_eda.egg-info/
 venv/
 *.pyc
 .VSCodeCounter/
+reveda.log

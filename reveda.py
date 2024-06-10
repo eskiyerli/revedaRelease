@@ -31,10 +31,11 @@
 
 # The PySide6 plugin covers qt-plugins
 # nuitka-project: --enable-plugin=pyside6
-# nuitka-project: --windows-console-mode=force
+# nuitka-project: --windows-icon-from-ico={MAIN_DIRECTORY}/revedalogo.png
+# nuitka-project: --disable-console
 # nuitka-project: --include-package=pdk,numpy,revedaEditor
 # nuitka-project: --include-package-data=pdk
-# nuitka-project: --include-data-files=.env=./.
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/.env=.env
 # nuitka-project --include-onefile-external-data=.
 # nuitka-project --product-version=0.7.0
 

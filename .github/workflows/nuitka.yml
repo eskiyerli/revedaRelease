@@ -35,7 +35,7 @@ jobs:
         # Build Executable with Nuitka
       - uses: Nuitka/Nuitka-Action@main
         with:
-           nuitka-version: main
+           nuitka-version: 2.2
            script-name: reveda.py
            # many more Nuitka options available, see action doc, but it's best
            # to use nuitka-project: options in your code, so e.g. you can make

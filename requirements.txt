@@ -3,3 +3,4 @@ python-dotenv~=1.0.1
 quantiphy~=2.19
 setuptools~=70.0.0
 gdstk~=0.9.51
+imageio~=2.34.1

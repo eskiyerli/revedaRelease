@@ -19,7 +19,7 @@ from PySide6.QtPrintSupport import (
     QPrinter,
     QPrintPreviewDialog,
 )
-
+import revedaEditor.gui.revinit as revinit
 
 class helpBrowser(QMainWindow):
     def __init__(self, parent):
@@ -133,7 +133,7 @@ class aboutDialog(QDialog):
         # Add information about your application using rich text
         about_label = QLabel(
             "<h2>Revolution EDA</h2>"
-            "<p><strong>Version:</strong> 0.6.3</p>"
+            f"<p><strong>Version:</strong>{revinit.__version__}</p>"
             "<p><strong>Copyright: Revolution Semiconductor</strong> © 2024</p>"
             "<p><strong>License:</strong> Mozilla Public License 2.0 amended with Commons Clause</p>"
             "<p><strong> Website:</strong> <a href='https://www.reveda.eu'>Revolution EDA</a></p>"
