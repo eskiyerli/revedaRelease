@@ -49,3 +49,6 @@ path = "revedaEditor/gui/revinit.py"
 "./reveda.conf" = "reveda.conf"
 "./library.json" = "library.json"
 
+[tool.pyright]
+venvPath = "/home/eskiyerli/.local/"
+venv = ".venv_3p12"

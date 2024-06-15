@@ -49,15 +49,22 @@ from PySide6.QtWidgets import (
     QGraphicsSceneMouseEvent,
     QGraphicsSceneHoverEvent,
 )
-from quantiphy import Quantity
 from typing import (
     Union,
     NamedTuple,
 )
-import pdk.schLayers as schlyr
-import pdk.symLayers as symlyr
 
-import revedaEditor.backend.dataDefinitions as ddef
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.symLayers as symlyr
+    import pdk.schLayers as schlyr
+else:
+    import defaultPDK.symLayers as symlyr
+    import defaultPDK.schLayers as schlyr
+
 import revedaEditor.common.net as net
 from revedaEditor.common.labels import symbolLabel
 

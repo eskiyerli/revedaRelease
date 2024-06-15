@@ -27,7 +27,6 @@
 import inspect
 import itertools as itt
 import json
-import os
 import time
 
 # from hashlib import new
@@ -35,8 +34,8 @@ import pathlib
 from collections import Counter
 from copy import deepcopy
 from functools import lru_cache
-from typing import Union, Any, Type
-from dotenv import load_dotenv
+from typing import Union, Any
+
 
 # import numpy as np
 from PySide6.QtCore import (
@@ -86,6 +85,8 @@ import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.propertyDialogues as pdlg
 
+import os
+from dotenv import load_dotenv
 load_dotenv()
 
 if os.environ.get("REVEDA_PDK_PATH"):
@@ -94,14 +95,11 @@ if os.environ.get("REVEDA_PDK_PATH"):
     import pdk.schLayers as schlyr
     import pdk.pcells as pcells
 else:
-    import defaultPdk.layoutLayers as laylyr
-    import defaultPdk.process as fabproc
-    import defaultPdk.schLayers as schlyr
-    import defaultPdk.pcells as pcells
+    import defaultPDK.layoutLayers as laylyr
+    import defaultPDK.process as fabproc
+    import defaultPDK.schLayers as schlyr
+    import defaultPDK.pcells as pcells
 
-# import os
-# if os.environ.get('REVEDASIM_PATH'):
-#     import revedasim.simMainWindow as smw
 
 
 class editorScene(QGraphicsScene):
@@ -2383,7 +2381,7 @@ class layoutScene(editorScene):
     # 9. rotate item/s
 
     @staticmethod
-    def toLayoutCoord(point: [QPoint | QPointF]) -> QPoint | QPointF:
+    def toLayoutCoord(point: Union[QPoint | QPointF]) -> QPoint | QPointF:
         """
         Converts a point in scene coordinates to layout coordinates by dividing it to
         fabproc.dbu.
@@ -2392,7 +2390,7 @@ class layoutScene(editorScene):
         return point
 
     @staticmethod
-    def toSceneCoord(point: [QPoint | QPointF]) -> QPoint | QPointF:
+    def toSceneCoord(point: Union[QPoint | QPointF]) -> QPoint | QPointF:
         """
         Converts a point in layout coordinates to scene coordinates by multiplying it with
         fabproc.dbu.

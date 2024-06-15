@@ -25,9 +25,18 @@
 
 import gdstk
 import revedaEditor.common.layoutShapes as lshp
-import pdk.pcells as pcell
 import pathlib
 import inspect
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.pcells as pcells
+else:
+    import defaultPDK.pcells as pcells
 
 
 class gdsExporter:
@@ -138,8 +147,8 @@ class gdsExporter:
                 parentCell.add(viaArray)
             case _:  # now check super class types:
                 match item.__class__.__bases__[0]:
-                    # case lshp.layoutPcell:
-                    case pcell.baseCell:
+
+                    case pcells.baseCell:
                         pcellParamDict = gdsExporter.extractPcellInstanceParameters(
                             item
                         )

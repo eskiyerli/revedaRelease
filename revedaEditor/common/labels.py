@@ -23,14 +23,22 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
-from PySide6.QtCore import QPoint, Qt
-from PySide6.QtGui import QBrush, QFont, QColor
+import os
+
+from PySide6.QtCore import (QPoint, )
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGraphicsSimpleTextItem, QGraphicsItem
-import pdk.symLayers as symlyr
-import pdk.callbacks as cb
-import itertools as itt
-from typing import Union, Optional, NamedTuple
+from dotenv import load_dotenv
 from quantiphy import Quantity
+
+load_dotenv()
+
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.symLayers as symlyr
+    import pdk.callbacks as cb
+else:
+    import defaultPDK.symLayers as symlyr
+    import defaultPDK.callbacks as cb
 
 
 class symbolLabel(QGraphicsSimpleTextItem):
@@ -193,8 +201,8 @@ class symbolLabel(QGraphicsSimpleTextItem):
     @labelHeight.setter
     def labelHeight(self, labelHeight):
         self.prepareGeometryChange()
-        self._labelHeight = labelHeight
-        self._labelFont.setPointSize(labelHeight)
+        self._labelHeight = int(float(labelHeight))
+        self._labelFont.setPointSize(self._labelHeight)
         self.setFont(self._labelFont)
 
     @property
@@ -336,20 +344,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
                 f"Error parsing label definition: {self._labelDefinition}, {e}"
             )
 
-    # def createPyLabel(self):
-    #     try:
-    #         labelFields = self._labelDefinition.strip().split("=")
-    #         self._labelName = labelFields[0].strip()
-    #         labelFunction = labelFields[1].strip()
-    #         if self.parentItem() and hasattr(self.parentItem(), "cellName"):
-    #             expression = f"cb.{self.parentItem().cellName}(self.parentItem().labels).{labelFunction}"
-    #             self._labelValue = Quantity(eval(expression)).render(prec=3)
-    #             self._labelText = f"{self._labelName}={self._labelValue}"
-    #         else:
-    #             self._labelText = f"{self._labelName} = {labelFunction}"
-    #     except Exception as e:
-    #         if self.scene():
-    #             self.scene().logger.error(f"PyLabel Error:{e}")
+
 
     def createPyLabel(self):
         """
@@ -362,11 +357,21 @@ class symbolLabel(QGraphicsSimpleTextItem):
             # Check if parent item exists and has 'cellName' attribute
             if self.parentItem() and hasattr(self.parentItem(), "cellName"):
                 # Construct the expression to evaluate
-                expression = f"cb.{self.parentItem().cellName}(self.parentItem().labels).{labelFunction}"
-                # Evaluate the expression and render the result
-                self._labelValue = Quantity(eval(expression)).render(prec=3)
+                parentItem = self.parentItem()
+                parentCellName = parentItem.cellName
+                parentLabelsDict = parentItem.labels
+                if hasattr(cb, parentCellName):
+                    callbackClass = getattr(cb, parentCellName)
+                    callbackClassObj = callbackClass(parentLabelsDict)
+                    if hasattr(callbackClassObj, labelFunction):
+                        labelMethod = getattr(callbackClassObj, labelFunction)
+                        if labelMethod:
+                            self._labelValue = Quantity(labelMethod()).render(prec=3)
+                        else:
+                            self._labelValue = '?'
+
                 # Set the label text with the name and value
-                self._labelText = f"{labelName}={self._labelValue}"
+                        self._labelText = f"{labelName}={self._labelValue}"
             else:
                 # Set the label text with the name and function
                 self._labelText = f"{labelName} = {labelFunction}"

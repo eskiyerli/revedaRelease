@@ -51,8 +51,17 @@ from PySide6.QtWidgets import (
     QGraphicsSceneMouseEvent,
     QGraphicsSceneHoverEvent,
 )
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-import pdk.layoutLayers as laylyr
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.layoutLayers as laylyr
+
+else:
+    import defaultPDK.layoutLayers as laylyr
+
+
 import revedaEditor.backend.dataDefinitions as ddef
 
 
