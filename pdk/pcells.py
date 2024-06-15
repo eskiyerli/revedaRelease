@@ -41,8 +41,8 @@ if os.environ.get("REVEDA_PDK_PATH"):
     import pdk.layoutLayers as laylyr
     import pdk.process as fabproc
 else:
-    import defaultPdk.layoutLayers as laylyr
-    import defaultPdk.process as fabproc
+    import defaultPDK.layoutLayers as laylyr
+    import defaultPDK.process as fabproc
 
 
 class baseCell(lshp.layoutPcell):

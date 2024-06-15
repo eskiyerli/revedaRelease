@@ -17,8 +17,15 @@ from PySide6.QtWidgets import (
     QGraphicsView,
 )
 
-# import pdk.symLayers as symlyr
-import pdk.schLayers as schlyr
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.schLayers as schlyr
+else:
+    import defaultPDK.schLayers as schlyr
+
 import revedaEditor.common.net as net
 import revedaEditor.backend.undoStack as us
 

@@ -40,14 +40,21 @@ from PySide6.QtWidgets import (
     QGraphicsLineItem,
     QGraphicsItem,
     QGraphicsPathItem,
-    QGraphicsEllipseItem,
     QGraphicsSceneMouseEvent,
     QGraphicsSceneHoverEvent,
 )
-import pdk.schLayers as schlyr
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.schLayers as schlyr
+
+else:
+    import defaultPDK.schLayers as schlyr
+
 import math
-import itertools as itt
-from typing import Union, Optional, NamedTuple, Type
+from typing import Union, NamedTuple, Type
 from enum import Enum
 
 

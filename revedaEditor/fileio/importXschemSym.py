@@ -35,14 +35,21 @@ from PySide6.QtCore import (
 import revedaEditor.backend.libraryModelView as lmview
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.backend.schBackEnd as scb
-import revedaEditor.gui.editorWindows as edw
+import revedaEditor.gui.editorWindow as edw
 import revedaEditor.common.shapes as shp
 import revedaEditor.common.labels as lbl
 import revedaEditor.fileio.symbolEncoder as symenc
-import pdk.callbacks as clb
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.callbacks as cb
+
+else:
+    import defaultPDK.callbacks as cb
 
 import re
-import os
 
 
 class importXschemSym:
@@ -310,7 +317,7 @@ class importXschemSym:
         for (key, value) in zip(parameterMatches, tclEvalMatches):
             self._expressionDict[key] = value
 
-        clbPathObj = pathlib.Path(clb.__file__)
+        clbPathObj = pathlib.Path(cb.__file__)
         with clbPathObj.open("a") as clbFile:
             clbFile.write("\n\n")
             clbFile.write(f"class {self.cellName}(baseInst):\n")

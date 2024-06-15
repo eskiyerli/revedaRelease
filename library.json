@@ -1,6 +1,6 @@
 {
     "libdefs": {
-        "analogLib": "C:\\Users\\eskiy\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\analogLib",
-        "sg13g2_pr": "C:\\Users\\eskiy\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\sg13g2_pr"
+        "analogLib": "/home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/exampleLibraries/analogLib",
+        "sg13g2_pr": "/home/eskiyerli/OneDrive_reveda/Projects/revedaRelease/exampleLibraries/sg13g2_pr"
     }
 }

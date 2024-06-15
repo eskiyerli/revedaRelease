@@ -28,8 +28,6 @@
 
 import json
 
-import pdk.pcells
-import pdk.process as fabproc
 from PySide6.QtCore import QPoint, QLineF
 from PySide6.QtWidgets import QGraphicsScene
 
@@ -38,12 +36,19 @@ import revedaEditor.common.shapes as shp
 import revedaEditor.common.labels as lbl
 import revedaEditor.common.layoutShapes as lshp
 import revedaEditor.fileio.symbolEncoder as se
-import pdk.layoutLayers as laylyr
-import pdk.pcells as pcells
+import os
 import pathlib
-from cachetools import LRUCache, cachedmethod
-from cachetools.keys import hashkey
+from dotenv import load_dotenv
+load_dotenv()
 
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.layoutLayers as laylyr
+    import pdk.process as fabproc
+    import pdk.pcells as pcells
+else:
+    import defaultPDK.layoutLayers as laylyr
+    import defaultPDK.process as fabproc
+    import defaultPDK.pcells as pcells
 
 class symbolItems:
     def __init__(self, scene: QGraphicsScene):
@@ -80,8 +85,8 @@ class symbolItems:
                     return self.createTextItem(item)
                 case "polygon":
                     return self.createPolygonItem(item)
-
-    def createRectItem(self, item: dict):
+    @staticmethod
+    def createRectItem(item: dict):
         """
         Create symbol items from json file.
         """
@@ -94,7 +99,8 @@ class symbolItems:
         rect.angle = item["ang"]
         return rect
 
-    def createCircleItem(self, item: dict):
+    @staticmethod
+    def createCircleItem(item: dict):
         centre = QPoint(item["cen"][0], item["cen"][1])
         end = QPoint(item["end"][0], item["end"][1])
         circle = shp.symbolCircle(centre, end)  # note that we are using grid
@@ -384,7 +390,7 @@ class layoutItems:
 
 
         pcellClassName = pcellDef[1].get("reference")
-        pcellClass = pdk.pcells.pcells.get(pcellClassName)
+        pcellClass = pcells.pcells.get(pcellClassName)
         if not pcellClass:
             self.scene.logger.error(f"Unknown PCell class: {pcellClassName}")
             return None

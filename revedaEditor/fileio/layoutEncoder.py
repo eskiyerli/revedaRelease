@@ -25,7 +25,15 @@
 
 import json
 import inspect
-import pdk.layoutLayers as laylyr
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+if os.environ.get("REVEDA_PDK_PATH"):
+    import pdk.layoutLayers as laylyr
+else:
+    import defaultPDK.layoutLayers as laylyr
+
 import revedaEditor.common.layoutShapes as lshp
 
 

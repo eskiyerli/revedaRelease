@@ -1,3 +1,4 @@
+
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -23,4 +24,25 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
+# from hashlib import new
 
+# import numpy as np
+from PySide6.QtCore import (
+    QRunnable,
+    Slot,
+)
+
+
+class startThread(QRunnable):
+    __slots__ = ("fn",)
+
+    def __init__(self, fn):
+        super().__init__()
+        self.fn = fn
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            self.fn
+        except Exception as e:
+            print(e)
