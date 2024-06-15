@@ -30,9 +30,10 @@ import revedaEditor.backend.schBackEnd as scb  # import the backend
 import revedaEditor.backend.libraryModelView as lmview
 import revedaEditor.common.shapes as shp
 import revedaEditor.fileio.symbolEncoder as se
-import revedaEditor.gui.editorWindows as edw
 import revedaEditor.gui.propertyDialogues as pdlg
 import revedaEditor.gui.fileDialogues as fd
+import revedaEditor.gui.libraryBrowser as libw
+import revedaEditor.gui.symbolEditor as syed
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtWidgets import QMainWindow, QDialog
 
@@ -184,7 +185,7 @@ def createSpiceSymbol(
     parent: QMainWindow,
     spiceItemTuple: ddef.viewItemTuple,
     libraryDict: dict,
-    libraryBrowser: edw.libraryBrowser,
+    libraryBrowser: libw.libraryBrowser,
     importedSpiceObj: hdl.spiceC,
 ):
     symbolNameDlg = fd.createCellViewDialog(
@@ -199,7 +200,7 @@ def createSpiceSymbol(
         newSpiceFilePathObj = spiceItemTuple.cellItem.data(Qt.UserRole + 2).joinpath(
             importedSpiceObj.pathObj.name
         )
-        symbolWindow = edw.symbolEditor(
+        symbolWindow = syed.symbolEditor(
             symbolViewItem,
             libraryDict,
             libraryBrowser.libBrowserCont.designView,
@@ -261,7 +262,7 @@ def createVaSymbol(
     parent: QMainWindow,
     vaItemTuple: ddef.viewItemTuple,
     libraryDict: dict,
-    libraryBrowser: edw.libraryBrowser,
+    libraryBrowser: libw.libraryBrowser,
     importedVaObj: hdl.verilogaC,
 ) -> None:
     """
@@ -293,7 +294,7 @@ def createVaSymbol(
         newVaFilePathObj = vaItemTuple.cellItem.data(Qt.UserRole + 2).joinpath(
             importedVaObj.pathObj.name
         )
-        symbolWindow = edw.symbolEditor(
+        symbolWindow = syed.symbolEditor(
             symbolViewItem,
             libraryDict,
             libraryBrowser.libBrowserCont.designView,

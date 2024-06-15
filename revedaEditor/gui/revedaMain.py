@@ -25,7 +25,6 @@ import json
 import logging
 import logging.config
 import pathlib
-import os
 
 from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QAction, QFont, QIcon
@@ -38,17 +37,18 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.hdlBackEnd as hdl
 import revedaEditor.backend.importViews as imv
-import revedaEditor.gui.editorWindows as edw
-import revedaEditor.gui.fileDialogues as fd
-import revedaEditor.gui.pythonConsole as pcon
-import revedaEditor.gui.stippleEditor as stip
-import revedaEditor.gui.helpBrowser as hlp
-import revedaEditor.gui.revinit as revinit
-import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.fileio.importLayp as imlyp
 import revedaEditor.fileio.importXschemSym as impxsym
+import revedaEditor.gui.fileDialogues as fd
+import revedaEditor.gui.helpBrowser as hlp
+import revedaEditor.gui.libraryBrowser as libw
+import revedaEditor.gui.pythonConsole as pcon
+import revedaEditor.gui.revinit as revinit
+import revedaEditor.gui.stippleEditor as stip
+import revedaEditor.resources.resources
 
 
 class mainwContainer(QWidget):
@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
         # look for library.json file where the script is invoked
         self.libraryPathObj = self.runPath.joinpath("library.json")
         self.libraryDict = self.readLibDefFile(self.libraryPathObj)
-        self.libraryBrowser = edw.libraryBrowser(self)
+        self.libraryBrowser = libw.libraryBrowser(self)
         self.logger_def()
         # revEDAPathObj = Path(__file__)
         # library definition file path
@@ -230,7 +230,9 @@ class MainWindow(QMainWindow):
             QMessageBox.No,
         )
         if reply == QMessageBox.Yes:
-            self.app.closeAllWindows()
+            for item in self.app.topLevelWidgets():
+                item.close()
+            # self.app.closeAllWindows()
         else:
             event.ignore()
 

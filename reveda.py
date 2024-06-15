@@ -23,23 +23,17 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
-# Compilation mode, support OS-specific options
-# nuitka-project-if: {OS} in ("Windows", "Linux", "Darwin", "FreeBSD"):
-#    nuitka-project: --onefile
-# nuitka-project-else:
-#    nuitka-project: --standalone
-
 # The PySide6 plugin covers qt-plugins
+# nuitka-project: --standalone
+# nuitka-project: --include-plugin-directory=revedaEditor
+# nuitka-project: --nofollow-import-to=pdk,defaultPDK
 # nuitka-project: --enable-plugin=pyside6
-# nuitka-project: --windows-icon-from-ico={MAIN_DIRECTORY}/revedalogo.png
-# nuitka-project: --disable-console
-# nuitka-project: --include-package=pdk,numpy,revedaEditor
-# nuitka-project: --include-package-data=pdk
-# nuitka-project: --include-data-files={MAIN_DIRECTORY}/.env=.env
-# nuitka-project --include-onefile-external-data=.
-# nuitka-project --product-version=0.7.0
-
-
+# nuitka-project: --include-module=_json
+# nuitka-project: --product-version="0.7.1"
+# nuitka-project: --linux-icon=./logo-color.png
+# nuitka-project: --windows-icon-from-ico=./logo-color.png
+# nuitka-project: --company-name="Revolution EDA"
+# nuitka-project: --file-description="Electronic Design Automation Software for Professional Custom IC Design Engineers"
 import os
 import platform
 import sys
