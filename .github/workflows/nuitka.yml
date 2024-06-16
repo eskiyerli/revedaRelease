@@ -1,43 +1,52 @@
+name: Nuitka Build
+
+# Controls when the workflow will run
+on:
+  release:
+    types: [published]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
 jobs:
-build:
-   strategy:
-      matrix:
-      os: [macos-latest, ubuntu-latest, windows-latest]
 
-   runs-on: ${{ matrix.os }}
+   build:
 
-   steps:
-      - name: Check-out repository
-      uses: actions/checkout@v4
+      strategy:
+         matrix:
+            os: [macos-latest, ubuntu-latest, windows-latest]
 
-      - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-         python-version: '3.11'
-         cache: 'pip'
-         cache-dependency-path: |
-            **/requirements*.txt
+      runs-on: ${{ matrix.os }}
 
-      - name: Install your Dependencies
-      run: |
-         pip install -r requirements.txt -r requirements-dev.txt
+      steps:
+      # Check-out repository
+      - uses: actions/checkout@v3
 
-      - name: Build Executable with Nuitka
-      uses: Nuitka/Nuitka-Action@main
-      with:
-         nuitka-version: main
-         script-name: reveda.py
-         # many more Nuitka options available, see action doc, but it's best
-         # to use nuitka-project: options in your code, so e.g. you can make
-         # a difference for macOS and create an app bundle there.
-         onefile: false
-         standalone: true
+      # Setup Python
+      -  uses: actions/setup-python@v4
+         with:
+            python-version: '3.11'
+            cache: 'pip'
 
-      - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-         name: ${{ runner.os }} Build
-         path: | # match what's created for the 3 OSes
-            build/*.exe
-            build/*.bin
-            build/*.app/**/*
+      # Install your Dependencies
+      -  run: |
+            pip install -r requirements.txt
+
+         # Build Executable with Nuitka
+      -  uses: Nuitka/Nuitka-Action@main
+         with:
+            nuitka-version: main
+            script-name: reveda.py
+            # many more Nuitka options available, see action doc, but it's best
+            # to use nuitka-project: options in your code, so e.g. you can make
+            # a difference for macOS and create an app bundle there.
+            standalone: true
+
+      -  name: Upload Artifacts
+         uses: actions/upload-artifact@v3
+         with:
+            name: ${{ runner.os }} Build
+            path: | # match what's created for the 3 OSes
+               build/*.exe
+               build/*.bin
+               build/*.app/**/*
