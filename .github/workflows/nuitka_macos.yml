@@ -1,0 +1,52 @@
+name: Macos Nuitka Build
+
+# Controls when the workflow will run
+on:
+  release:
+    types: [published]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+     strategy:
+        matrix:
+          os: [macos-latest]
+  
+     runs-on: ${{ matrix.os }}
+  
+     steps:
+       # Check-out repository
+      - uses: actions/checkout@v3
+  
+       # Setup Python
+      - uses: actions/setup-python@v4
+        with:
+           python-version: '3.11'
+           cache: 'pip'
+
+       # Install your Dependencies
+      - run: |
+           pip install -r requirements.txt
+  
+        # Build Executable with Nuitka
+      - uses: Nuitka/Nuitka-Action@main
+        with:
+           nuitka-version: 2.2
+           script-name: reveda.py
+           # many more Nuitka options available, see action doc, but it's best
+           # to use nuitka-project: options in your code, so e.g. you can make
+           # a difference for macOS and create an app bundle there.
+           onefile: true
+  
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+           name: ${{ runner.os }} Build
+           path: | # match what's created for the 3 OSes
+              build/*.exe
+              build/*.bin
+              build/*.app/**/*
