@@ -27,7 +27,6 @@ import gdstk
 import revedaEditor.common.layoutShapes as lshp
 import pathlib
 import inspect
-
 import os
 from dotenv import load_dotenv
 
@@ -38,7 +37,6 @@ if os.environ.get("REVEDA_PDK_PATH"):
 else:
     import defaultPDK.pcells as pcells
 
-
 class gdsExporter:
     def __init__(self, cellname: str, items: list, outputFileObj: pathlib.Path):
         self._cellname = cellname
@@ -48,7 +46,8 @@ class gdsExporter:
         self._unit = 1e-6
         self._precision = 1e-9
         self._topCell = None
-        self._cellNamesSet = set()
+        self._cellCache = {}  # Cache to store already processed cells
+        self._itemCounter = 0
 
     def gds_export(self):
         self._outputFileObj.parent.mkdir(parents=True, exist_ok=True)
@@ -59,23 +58,27 @@ class gdsExporter:
 
         lib.write_gds(self._outputFileObj)
 
-    def createCells(
-        self, library: gdstk.Library, item: lshp.layoutShape, parentCell: gdstk.Cell
-    ):
+    def createCells(self, library: gdstk.Library, item: lshp.layoutShape, parentCell: gdstk.Cell):
         match type(item):
-            case lshp.layoutInstance:  # recursive search under a layout cell
-                if item.cellName not in self._cellNamesSet:
-                    cellGDSName = f"{item.libraryName}_{item.cellName}_{item.viewName}"
-                    library.new_cell(cellGDSName)
-                    self._cellNamesSet.add(cellGDSName)
+            case lshp.layoutInstance:
+                cell_key = (item.libraryName, item.cellName, item.viewName)
+                if cell_key not in self._cellCache:
+                    cellGDSName = f"{item.libraryName}_{item.cellName}_{item.viewName}_{self._itemCounter}"
+                    self._itemCounter += 1
+                    new_cell = library.new_cell(cellGDSName)
+                    self._cellCache[cell_key] = new_cell
                     for shape in item.shapes:
-                        self.createCells(library, shape, library[cellGDSName])
+                        self.createCells(library, shape, new_cell)
+                else:
+                    new_cell = self._cellCache[cell_key]
+                
                 ref = gdstk.Reference(
-                    library[cellGDSName],
+                    new_cell,
                     item.pos().toPoint().toTuple(),
                     rotation=item.angle,
                 )
                 parentCell.add(ref)
+            
             case lshp.layoutRect:
                 rect = gdstk.rectangle(
                     corner1=item.start.toTuple(),
@@ -84,6 +87,7 @@ class gdsExporter:
                     datatype=item.layer.datatype,
                 )
                 parentCell.add(rect)
+            
             case lshp.layoutPath:
                 path = gdstk.FlexPath(
                     points=[
@@ -97,6 +101,7 @@ class gdsExporter:
                     datatype=item.layer.datatype,
                 )
                 parentCell.add(path)
+            
             case lshp.layoutLabel:
                 label = gdstk.Label(
                     text=item.labelText,
@@ -105,6 +110,7 @@ class gdsExporter:
                     layer=item.layer.gdsLayer,
                 )
                 parentCell.add(label)
+            
             case lshp.layoutPin:
                 pin = gdstk.rectangle(
                     corner1=item.start.toTuple(),
@@ -113,6 +119,7 @@ class gdsExporter:
                     datatype=item.layer.datatype,
                 )
                 parentCell.add(pin)
+            
             case lshp.layoutPolygon:
                 points = [point.toTuple() for point in item.points]
                 polygon = gdstk.Polygon(
@@ -121,22 +128,23 @@ class gdsExporter:
                     datatype=item.layer.datatype,
                 )
                 parentCell.add(polygon)
+            
             case lshp.layoutViaArray:
-                viaName = f"via_{item.via.width}_{item.via.height}_{item.via.layer.name}_{item.via.layer.purpose}"
-                if viaName not in self._cellNamesSet:
-                    viaCell = library.new_cell(
-                        f"via_{item.via.width}_{item.via.height}_"
-                        f"{item.via.layer.name}_{item.via.layer.purpose}"
-                    )
+                via_key = (item.via.width, item.via.height, item.via.layer.name, item.via.layer.purpose)
+                if via_key not in self._cellCache:
+                    viaName = f"via_{item.via.width}_{item.via.height}_{item.via.layer.name}_{item.via.layer.purpose}"
+                    viaCell = library.new_cell(viaName)
                     via = gdstk.rectangle(
                         item.mapToScene(item.via.rect.topLeft()).toTuple(),
                         item.mapToScene(item.via.rect.bottomRight()).toTuple(),
                         layer=item.via.layer.gdsLayer,
                         datatype=item.via.layer.datatype,
                     )
-                    self._cellNamesSet.add(viaCell.name)
                     viaCell.add(via)
-                viaCell = library[viaName]
+                    self._cellCache[via_key] = viaCell
+                else:
+                    viaCell = self._cellCache[via_key]
+                
                 viaArray = gdstk.Reference(
                     cell=viaCell,
                     origin=item.start.toTuple(),
@@ -145,27 +153,27 @@ class gdsExporter:
                     spacing=(item.xs + item.width, item.ys + item.height),
                 )
                 parentCell.add(viaArray)
-            case _:  # now check super class types:
+            
+            case _:
                 match item.__class__.__bases__[0]:
-
                     case pcells.baseCell:
-                        pcellParamDict = gdsExporter.extractPcellInstanceParameters(
-                            item
-                        )
-                        pcellNameSuffix = "_".join(
-                            [f"{key}_{value}" for key, value in pcellParamDict.items()]
-                        ).replace(".", "p")
-                        pcellName = (
-                            f"{item.libraryName}_{type(item).__name__}"
-                            f"_{pcellNameSuffix}"
-                        )
-                        if pcellName not in self._cellNamesSet:
-                            library.new_cell(pcellName)
-                            self._cellNamesSet.add(pcellName)
+                        pcellParamDict = self.extractPcellInstanceParameters(item)
+                        pcell_key = (item.libraryName, type(item).__name__, frozenset(pcellParamDict.items()))
+                        
+                        if pcell_key not in self._cellCache:
+                            pcellNameSuffix = "_".join(
+                                [f"{key}_{value}" for key, value in pcellParamDict.items()]
+                            ).replace(".", "p")
+                            pcellName = f"{item.libraryName}_{type(item).__name__}_{pcellNameSuffix}"
+                            new_cell = library.new_cell(pcellName)
+                            self._cellCache[pcell_key] = new_cell
                             for shape in item.shapes:
-                                self.createCells(library, shape, library[pcellName])
+                                self.createCells(library, shape, new_cell)
+                        else:
+                            new_cell = self._cellCache[pcell_key]
+                        
                         ref = gdstk.Reference(
-                            library[pcellName],
+                            new_cell,
                             item.pos().toPoint().toTuple(),
                             rotation=item.angle,
                         )

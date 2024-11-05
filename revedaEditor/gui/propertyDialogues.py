@@ -121,25 +121,22 @@ class arcPropertyDialog(QDialog):
         super().__init__(parent)
         self.parent = parent
         self.setWindowTitle("Arc Properties")
-        # self.arcType = self.arcItem.arcType
-        # self.arcTypeCombo = QComboBox()
-        # self.arcTypeCombo.addItems(shp.arc.arcTypes)
-        # self.arcTypeCombo.setCurrentText(self.arcType)
-
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.mainLayout = QVBoxLayout()
         self.fLayout = QFormLayout()
         self.fLayout.setContentsMargins(10, 10, 10, 10)
         # self.mainLayout.addWidget(self.arcTypeCombo)
         self.startXEdit = edf.shortLineEdit()
-        self.fLayout.addRow(QLabel("X Origin:"), self.startXEdit)
+        self.fLayout.addRow(edf.boldLabel("X Origin:"), self.startXEdit)
         self.startYEdit = edf.shortLineEdit()
-        self.fLayout.addRow(QLabel("Y Origin:"), self.startYEdit)
+        self.fLayout.addRow(edf.boldLabel("Y Origin:"), self.startYEdit)
         self.widthEdit = edf.shortLineEdit()
 
-        self.fLayout.addRow(QLabel("Width:"), self.widthEdit)
+        self.fLayout.addRow(edf.boldLabel("Width:"), self.widthEdit)
         self.heightEdit = edf.shortLineEdit()
-        self.fLayout.addRow(QLabel("Height:"), self.heightEdit)
+        self.fLayout.addRow(edf.boldLabel("Height:"), self.heightEdit)
+        self.arcTypeCombo = QComboBox()
+        self.fLayout.addRow(edf.boldLabel('Arc Type:'), self.arcTypeCombo)
         self.mainLayout.addLayout(self.fLayout)
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
@@ -177,13 +174,12 @@ class linePropertyDialog(QDialog):
         self.show()
 
 
-
 class pointsTableWidget(QTableWidget):
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setColumnCount(3)
         self.setHorizontalHeaderLabels(["Del.", 'X', "Y"])
-        self.setColumnWidth(0,8)
+        self.setColumnWidth(0, 8)
         self.setShowGrid(True)
         self.setGridStyle(Qt.SolidLine)
 
@@ -241,9 +237,9 @@ class symbolPolygonProperties(QDialog):
 
     def handleCellChange(self, row, column):
         if (
-            row == self.tableWidget.rowCount() - 1
+                row == self.tableWidget.rowCount() - 1
         ):  # Check if last row and tuple text column
-            if self.tableWidget.item(row,2) is not None:
+            if self.tableWidget.item(row, 2) is not None:
                 text1 = self.tableWidget.item(row, 1).text()
                 text2 = self.tableWidget.item(row, 2).text()
                 if text1 != "" and text2 != "":
@@ -254,8 +250,6 @@ class symbolPolygonProperties(QDialog):
         print("delete")
         if state == 2:  # Checked state
             self.tableWidget.removeRow(row)
-
-
 
 
 class createPinDialog(QDialog):
@@ -590,9 +584,9 @@ class createSchematicPinDialog(createPinDialog):
 
 
 class schematicPinPropertiesDialog(createPinDialog):
-    def __init__(self, parent, item):
+    def __init__(self, parent):
         super().__init__(parent)
-        self.setWindowTitle(f"{item.pinName} - Pin Properties")
+        self.setWindowTitle("Pin Properties")
         self.xlocationEdit = edf.shortLineEdit()
         self.xlocationEdit.setToolTip("x location of pin")
         self.fLayout.addRow("x location:", self.xlocationEdit)
@@ -743,18 +737,6 @@ class noteTextEdit(QDialog):
             for size in QFontDatabase.pointSizes(selectedFamily, selectedStyle)
         ]
         self.fontsizeCB.addItems(self.fontSizes)
-
-
-class noteTextEditProperties(noteTextEdit):
-    def __init__(self, parent, note: shp.text):
-        super().__init__(parent)
-        self.note = note
-        self.plainTextEdit.setText(self.note.textContent)
-        self.familyCB.setCurrentText(self.note.fontFamily)
-        self.fontStyleCB.setCurrentText(self.note.fontStyle)
-        self.fontsizeCB.setCurrentText(self.note.textHeight)
-        self.textAlignmCB.setCurrentText(self.note.textAlignment)
-        self.textOrientCB.setCurrentText(self.note.textOrient)
 
 
 class displayConfigDialog(QDialog):

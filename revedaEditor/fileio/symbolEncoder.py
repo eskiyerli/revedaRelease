@@ -61,95 +61,95 @@ class symbolAttribute(object):
 
 class symbolEncoder(json.JSONEncoder):
     def default(self, item):
-        match type(item):
-            case shp.symbolRectangle:
-                itemDict = {
-                    "type": "rect",
-                    "rect": item.rect.getCoords(),
-                    "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                    "ang": item.angle,
-                }
-                return itemDict
-            case shp.symbolLine:
-                itemDict = {
-                    "type": "line",
-                    "st": item.start.toTuple(),
-                    "end": item.end.toTuple(),
-                    "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                    "ang": item.angle,
-                }
-                return itemDict
-            case shp.symbolCircle:
-                itemDict = {
-                    "type": "circle",
-                    "cen": item.centre.toTuple(),
-                    "end": item.end.toTuple(),
-                    "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                    "ang": item.angle,
-                }
-                return itemDict
-            case shp.symbolPolygon:
-                pointsList = [item.mapToScene(point).toTuple() for point in item.points]
-                itemDict = {
-                    "type": "polygon",
-                    "ps": pointsList,
-                }
-                return itemDict
-            case shp.symbolArc:
-                itemDict = {
-                    "type": "arc",
-                    "st": item.start.toTuple(),
-                    "end": item.end.toTuple(),
-                    "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                    "ang": item.angle,
-                }
-                return itemDict
-            case shp.symbolPin:
-                itemDict = {
-                    "type": "pin",
-                    "st": item.start.toTuple(),
-                    "nam": item.pinName,
-                    "pd": item.pinDir,
-                    "pt": item.pinType,
-                    "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                    "ang": item.angle,
-                }
-                return itemDict
-            case shp.text:
-                itemDict = {
-                    "type": "text",
-                    "st": item.start.toTuple(),
-                    "tc": item.textContent,
-                    "ff": item.fontFamily,
-                    "fs": item.fontStyle,
-                    "th": item.textHeight,
-                    "ta": item.textAlignment,
-                    "to": item.textOrient,
-                    "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                    "ang": item.angle,
-                }
-                return itemDict
-            case lbl.symbolLabel:
-                itemDict = {
-                    "type": "label",
-                    "st": item.start.toTuple(),
-                    "nam": item.labelName,
-                    "def": item.labelDefinition,  # label as entered
-                    "txt": item.labelText,  # shown label
-                    "val": item.labelValue,  # label value
-                    "vis": item.labelVisible,  # label visibility
-                    "lt": item.labelType,
-                    "ht": item.labelHeight,
-                    "al": item.labelAlign,
-                    "or": item.labelOrient,
-                    "use": item.labelUse,
-                    "loc": (item.scenePos() - item.scene().origin).toTuple(),
-                }
-                return itemDict
-            case symbolAttribute:
-                itemDict = {
-                    "type": "attr",
-                    "nam": item.name,
-                    "def": item.definition,
-                }
-                return itemDict
+        if isinstance(item, shp.symbolRectangle):
+            return {
+                "type": "rect",
+                "rect": item.rect.getCoords(),
+                "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                "ang": item.angle,
+                "fl": item.flipTuple,
+            }
+        elif isinstance(item, shp.symbolLine):
+            return {
+                "type": "line",
+                "st": item.start.toTuple(),
+                "end": item.end.toTuple(),
+                "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                "ang": item.angle,
+                "fl": item.flipTuple,
+            }
+        elif isinstance(item, shp.symbolCircle):
+            return {
+                "type": "circle",
+                "cen": item.centre.toTuple(),
+                "end": item.end.toTuple(),
+                "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                "ang": item.angle,
+                "fl": item.flipTuple,
+            }
+        elif isinstance(item, shp.symbolPolygon):
+            pointsList = [item.mapToScene(point).toTuple() for point in item.points]
+            return {
+                "type": "polygon",
+                "ps": pointsList,
+                "fl": item.flipTuple,
+            }
+        elif isinstance(item, shp.symbolArc):
+            return {
+                "type": "arc",
+                "st": item.start.toTuple(),
+                "end": item.end.toTuple(),
+                "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                "ang": item.angle,
+                "fl": item.flipTuple,
+            }
+        elif isinstance(item, shp.symbolPin):
+            return {
+                "type": "pin",
+                "st": item.start.toTuple(),
+                "nam": item.pinName,
+                "pd": item.pinDir,
+                "pt": item.pinType,
+                "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                "ang": item.angle,
+                "fl": item.flipTuple,
+            }
+        elif isinstance(item, shp.text):
+            return {
+                "type": "text",
+                "st": item.start.toTuple(),
+                "tc": item.textContent,
+                "ff": item.fontFamily,
+                "fs": item.fontStyle,
+                "th": item.textHeight,
+                "ta": item.textAlignment,
+                "to": item.textOrient,
+                "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                "ang": item.angle,
+                "fl": item.flipTuple,
+            }
+        elif isinstance(item, lbl.symbolLabel):
+            return {
+                "type": "label",
+                "st": item.start.toTuple(),
+                "nam": item.labelName,
+                "def": item.labelDefinition,  # label as entered
+                "txt": item.labelText,  # shown label
+                "val": item.labelValue,  # label value
+                "vis": item.labelVisible,  # label visibility
+                "lt": item.labelType,
+                "ht": item.labelHeight,
+                "al": item.labelAlign,
+                "or": item.labelOrient,
+                "use": item.labelUse,
+                "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                "fl": item.flipTuple,
+            }
+        elif isinstance(item, symbolAttribute):
+            return {
+                "type": "attr",
+                "nam": item.name,
+                "def": item.definition,
+            }
+        else:
+            return {"type": "unknown"}

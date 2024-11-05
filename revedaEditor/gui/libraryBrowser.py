@@ -1,4 +1,3 @@
-
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -28,31 +27,19 @@ import json
 # from hashlib import new
 import pathlib
 import shutil
+import importlib
 from copy import deepcopy
 
 # import numpy as np
-from PySide6.QtCore import (
-    Qt,
-)
-from PySide6.QtGui import (
-    QAction,
-    QCloseEvent,
-    QIcon,
-)
-from PySide6.QtWidgets import (
-    QDialog,
-    QFileDialog,
-    QMainWindow,
-    QToolBar,
-    QVBoxLayout,
-    QWidget,
-)
-
+from PySide6.QtCore import (Qt, )
+from PySide6.QtGui import (QAction, QCloseEvent, QIcon, )
+from PySide6.QtWidgets import (QDialog, QFileDialog, QMainWindow, QToolBar, QVBoxLayout,
+                               QWidget, QApplication, QMessageBox)
 
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.backend.libraryModelView as lmview
-import revedaEditor.backend.schBackEnd as scb
+import revedaEditor.backend.libBackEnd as libb
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.textEditor as ted
@@ -62,13 +49,17 @@ from revedaEditor.gui.layoutEditor import layoutEditor
 from revedaEditor.gui.configEditor import configViewEdit
 import revedaEditor.resources.resources
 
+
 class libraryBrowser(QMainWindow):
     def __init__(self, appMainW: QMainWindow) -> None:
         super().__init__()
         self.resize(300, 600)
         self.appMainW = appMainW
+        self._app = QApplication.instance()
         self.libraryDict = self.appMainW.libraryDict
-        self.cellViews = self.appMainW.cellViews
+        # self.cellViews = self.appMainW.cellViews
+        self.cellViews = ["schematic", "symbol", "layout", "veriloga", "config", "spice",
+                          "pcell", "revbench"]
         self.setWindowTitle("Library Browser")
         self._createMenuBar()
         self._createActions()
@@ -123,9 +114,7 @@ class libraryBrowser(QMainWindow):
         self.cellMenu.addAction(self.deleteCellAction)
 
         newCellViewIcon = QIcon(":/icons/document--pencil.png")
-        self.newCellViewAction = QAction(
-            newCellViewIcon, "Create New CellView...", self
-        )
+        self.newCellViewAction = QAction(newCellViewIcon, "Create New CellView...", self)
         self.newCellViewAction.setToolTip("Create New Cellview")
         self.viewMenu.addAction(self.newCellViewAction)
 
@@ -135,9 +124,7 @@ class libraryBrowser(QMainWindow):
         self.viewMenu.addAction(self.openCellViewAction)
 
         deleteCellViewIcon = QIcon(":/icons/node-delete.png")
-        self.deleteCellViewAction = QAction(
-            deleteCellViewIcon, "Delete CellView...", self
-        )
+        self.deleteCellViewAction = QAction(deleteCellViewIcon, "Delete CellView...", self)
         self.deleteCellViewAction.setToolTip("Delete Cellview")
         self.viewMenu.addAction(self.deleteCellViewAction)
 
@@ -213,11 +200,9 @@ class libraryBrowser(QMainWindow):
             model = pathEditDlg.pathsModel
             for row in range(model.rowCount()):
                 if model.itemFromIndex(model.index(row, 1)).text().strip():
-                    self.libraryDict[
-                        model.itemFromIndex(model.index(row, 0)).text().strip()
-                    ] = pathlib.Path(
-                        model.itemFromIndex(model.index(row, 1)).text().strip()
-                    )
+                    self.libraryDict[model.itemFromIndex(
+                        model.index(row, 0)).text().strip()] = pathlib.Path(
+                        model.itemFromIndex(model.index(row, 1)).text().strip())
         self.writeLibDefFile(self.libraryDict, libDefFilePathObj)
         self.appMainW.libraryDict = self.libraryDict
         self.designView.reworkDesignLibrariesView(self.appMainW.libraryDict)
@@ -237,7 +222,7 @@ class libraryBrowser(QMainWindow):
         if cellName.strip() == "":
             self.logger.error("Please enter a cell name.")
         else:
-            scb.createCell(parent, libraryModel, libItem, cellName)
+            libb.createCell(parent, libraryModel, libItem, cellName)
 
     def deleteCellClick(self, s):
         dlg = fd.deleteCellDialog(self, self.libraryModel)
@@ -246,9 +231,6 @@ class libraryBrowser(QMainWindow):
             if dlg.cellCB.currentText().strip() == "":
                 self.logger.error("Please enter a cell name.")
             else:
-                # cellItemsLib = {libItem.child(i).cellName: libItem.child(i) for i in
-                #                 range(libItem.rowCount())}
-                # cellItem = cellItemsLib.get(dlg.cellCB.currentText())
                 cellItem = libm.getCellItem(libItem, dlg.cellCB.currentText())
                 # remove the directory
                 shutil.rmtree(cellItem.data(Qt.UserRole + 2))
@@ -258,25 +240,35 @@ class libraryBrowser(QMainWindow):
         dlg = fd.newCellViewDialog(self, self.libraryModel)
         dlg.viewType.addItems(self.cellViews)
         if dlg.exec() == QDialog.Accepted:
-            # cellPath = dlg.selectedLibPath.joinpath(dlg.cellCB.currentText())
             libItem = libm.getLibItem(self.libraryModel, dlg.libNamesCB.currentText())
             cellItem = libm.getCellItem(libItem, dlg.cellCB.currentText())
-            viewItem = scb.createCellView(
-                self.appMainW, dlg.viewName.text().strip(), cellItem
-            )
-            self.createNewCellView(libItem, cellItem, viewItem)
+            viewName = dlg.viewName.text().strip()
+            viewItem = libm.findViewItem(self.libraryModel, libItem.libraryName,
+                                         cellItem.cellName, viewName)
+            if viewItem:
+                messagebox = QMessageBox(self)
+                messagebox.setText("Cell view already exists.")
+                messagebox.setIcon(QMessageBox.Warning)
+                messagebox.setWindowTitle(f'{viewItem.viewName} already exists')
+                messagebox.setStandardButtons(QMessageBox.Save | QMessageBox.Discard)
+                messagebox.setDefaultButton(QMessageBox.Discard)
+                result = messagebox.exec()
+                if result == QMessageBox.save:
+                    viewItem = libb.createCellView(self.appMainW, viewName,
+                                                   cellItem)
+                    self.createNewCellView(libItem, cellItem, viewItem)
+            else:
+                viewItem = libb.createCellView(self.appMainW, viewName, cellItem)
+                self.createNewCellView(libItem, cellItem, viewItem)
 
     def createNewCellView(self, libItem, cellItem, viewItem):
-        viewTuple = ddef.viewTuple(
-            libItem.libraryName, cellItem.cellName, viewItem.viewName
-        )
+        viewTuple = ddef.viewTuple(libItem.libraryName, cellItem.cellName,
+                                   viewItem.viewName)
         match viewItem.viewType:
             case "config":
-                schViewsList = [
-                    cellItem.child(row).viewName
-                    for row in range(cellItem.rowCount())
-                    if cellItem.child(row).viewType == "schematic"
-                ]
+                schViewsList = [cellItem.child(row).viewName for row in
+                                range(cellItem.rowCount()) if
+                                cellItem.child(row).viewType == "schematic"]
 
                 dlg = fd.createConfigViewDialogue(self.appMainW)
                 dlg.libraryNameEdit.setText(libItem.libraryName)
@@ -288,31 +280,22 @@ class libraryBrowser(QMainWindow):
                 if dlg.exec() == QDialog.Accepted:
                     selectedSchName = dlg.viewNameCB.currentText()
                     selectedSchItem = libm.getViewItem(cellItem, selectedSchName)
-                    schematicWindow = schematicEditor(
-                        selectedSchItem,
-                        self.libraryDict,
-                        self.libBrowserCont.designView,
-                    )
+                    schematicWindow = schematicEditor(selectedSchItem, self.libraryDict,
+                                                      self.libBrowserCont.designView, )
                     schematicWindow.loadSchematic()
-                    switchViewList = [
-                        viewName.strip()
-                        for viewName in dlg.switchViews.text().split(",")
-                    ]
-                    stopViewList = [
-                        viewName.strip() for viewName in dlg.stopViews.text().split(",")
-                    ]
+                    switchViewList = [viewName.strip() for viewName in
+                                      dlg.switchViews.text().split(",")]
+                    stopViewList = [viewName.strip() for viewName in
+                                    dlg.stopViews.text().split(",")]
                     schematicWindow.switchViewList = switchViewList
                     schematicWindow.stopViewList = stopViewList
                     schematicWindow.configDict = dict()  # clear config dictionary
 
                     # clear netlisted cells list
                     newConfigDict = dict()  # create an empty newconfig dict
-                    schematicWindow.createConfigView(
-                        viewItem,
-                        schematicWindow.configDict,
-                        newConfigDict,
-                        schematicWindow.processedCells,
-                    )
+                    schematicWindow.createConfigView(viewItem, schematicWindow.configDict,
+                                                     newConfigDict,
+                                                     schematicWindow.processedCells, )
                     configFilePathObj = viewItem.data(Qt.UserRole + 2)
                     items = list()
                     items.insert(0, {"cellView": "config"})
@@ -321,30 +304,26 @@ class libraryBrowser(QMainWindow):
                     with configFilePathObj.open(mode="w+") as configFile:
                         json.dump(items, configFile, indent=4)
 
-                    configWindow = self.openConfigEditWindow(
-                        schematicWindow.configDict, selectedSchItem, viewItem
-                    )
+                    configWindow = self.openConfigEditWindow(schematicWindow.configDict,
+                                                             selectedSchItem, viewItem)
                     self.appMainW.openViews[viewTuple] = configWindow
             case "schematic":
-                # scb.createCellView(self.appMainW, viewItem.viewName, cellItem)
-                schematicWindow = schematicEditor(
-                    viewItem, self.libraryDict, self.libBrowserCont.designView
-                )
+                # libb.createCellView(self.appMainW, viewItem.viewName, cellItem)
+                schematicWindow = schematicEditor(viewItem, self.libraryDict,
+                                                  self.libBrowserCont.designView)
                 self.appMainW.openViews[viewTuple] = schematicWindow
                 schematicWindow.loadSchematic()
                 schematicWindow.show()
             case "symbol":
-                # scb.createCellView(self.appMainW, viewItem.viewName, cellItem)
-                symbolWindow = symbolEditor(
-                    viewItem, self.libraryDict, self.libBrowserCont.designView
-                )
+                # libb.createCellView(self.appMainW, viewItem.viewName, cellItem)
+                symbolWindow = symbolEditor(viewItem, self.libraryDict,
+                                            self.libBrowserCont.designView)
                 self.appMainW.openViews[viewTuple] = symbolWindow
                 symbolWindow.loadSymbol()
                 symbolWindow.show()
             case "layout":
-                layoutWindow = layoutEditor(
-                    viewItem, self.libraryDict, self.libBrowserCont.designView
-                )
+                layoutWindow = layoutEditor(viewItem, self.libraryDict,
+                                            self.libBrowserCont.designView)
                 self.appMainW.openViews[viewTuple] = layoutWindow
                 layoutWindow.loadLayout()
                 layoutWindow.show()
@@ -373,6 +352,40 @@ class libraryBrowser(QMainWindow):
                         viewItem.parent().removeRow(viewItem.row())
                     except OSError as e:
                         self.logger.warning(f"Error:{e.strerror}")
+            case "revbench":
+                if self._app.revedasim_path:
+                    try:
+                        simdlg = importlib.import_module("revedasim.dialogueWindows",
+                                                         str(self._app.revedasim_pathObj))
+                        revbenchdlg = simdlg.createRevbenchDialogue(self,
+                                                                    self.libraryModel,
+                                                                    cellItem, viewItem)
+                        # hide view name dialog not to confuse the user.
+                        revbenchdlg.benchBox.setVisible(False)
+                        revbenchdlg.mainLayout.update()
+                        if revbenchdlg.exec() == QDialog.Accepted:
+                            items = []
+                            libraryName = libItem.data(Qt.UserRole + 2).name
+                            cellName = cellItem.data(Qt.UserRole + 2).name
+                            items.append({"viewType": "revbench"})
+                            items.append({"libraryName": libraryName})
+                            items.append({"cellName": cellName})
+                            items.append({"designName": revbenchdlg.viewCB.currentText()})
+                            items.append({"settings": []})
+                            with viewItem.data(Qt.UserRole + 2).open(mode="w") as benchFile:
+                                json.dump(items, benchFile, indent=4)
+                            try:
+                                simmwModule = importlib.import_module(
+                                    "revedasim.simMainWindow",
+                                    str(self._app.revedasim_pathObj))
+                                simmw = simmwModule.SimMainWindow(viewItem,
+                                                                  self.libraryModel,
+                                                                  self.designView)
+                                simmw.show()
+                            except (ImportError, NameError):
+                                self.logger.error("Reveda SAE is not installed.")
+                    except (ImportError, NameError):
+                        self.logger.error('No license for Reveda SAE')
 
     def openConfigEditWindow(self, configDict, schViewItem, viewItem):
         schematicName = schViewItem.viewName
@@ -381,23 +394,18 @@ class libraryBrowser(QMainWindow):
         configWindow.centralWidget.libraryNameEdit.setText(libItem.libraryName)
         cellItem = viewItem.parent()
         configWindow.centralWidget.cellNameEdit.setText(cellItem.cellName)
-        schViewsList = [
-            cellItem.child(row).viewName
-            for row in range(cellItem.rowCount())
-            if cellItem.child(row).viewType == "schematic"
-        ]
+        schViewsList = [cellItem.child(row).viewName for row in range(cellItem.rowCount())
+                        if cellItem.child(row).viewType == "schematic"]
         configWindow.centralWidget.viewNameCB.addItems(schViewsList)
         configWindow.centralWidget.viewNameCB.setCurrentText(schematicName)
         configWindow.centralWidget.switchViewsEdit.setText(
-            ", ".join(self.appMainW.switchViewList)
-        )
+            ", ".join(self.appMainW.switchViewList))
         configWindow.centralWidget.stopViewsEdit.setText(
-            ", ".join(self.appMainW.stopViewList)
-        )
+            ", ".join(self.appMainW.stopViewList))
         configWindow.show()
         return configWindow
 
-    def selectCellView(self, libModel) -> scb.viewItem:
+    def selectCellView(self, libModel) -> libb.viewItem:
         dlg = fd.selectCellViewDialog(self, libModel)
         if dlg.exec() == QDialog.Accepted:
             libItem = libm.getLibItem(libModel, dlg.libNamesCB.currentText())
@@ -418,9 +426,8 @@ class libraryBrowser(QMainWindow):
         libItem = cellItem.parent()
         self.openCellView(viewItem, cellItem, libItem)
 
-    def openCellView(
-        self, viewItem: scb.viewItem, cellItem: scb.cellItem, libItem: scb.libraryItem
-    ):
+    def openCellView(self, viewItem: libb.viewItem, cellItem: libb.cellItem,
+                     libItem: libb.libraryItem):
         viewName = viewItem.viewName
         cellName = cellItem.cellName
         libName = libItem.libraryName
@@ -430,26 +437,23 @@ class libraryBrowser(QMainWindow):
         else:
             match viewItem.viewType:
                 case "layout":
-                    layoutWindow = layoutEditor(
-                        viewItem, self.libraryDict, self.libBrowserCont.designView
-                    )
+                    layoutWindow = layoutEditor(viewItem, self.libraryDict,
+                                                self.libBrowserCont.designView)
                     layoutWindow.loadLayout()
                     layoutWindow.show()
                     layoutWindow.centralW.scene.fitItemsInView()
                     self.appMainW.openViews[openCellViewTuple] = layoutWindow
 
                 case "schematic":
-                    schematicWindow = schematicEditor(
-                        viewItem, self.libraryDict, self.libBrowserCont.designView
-                    )
+                    schematicWindow = schematicEditor(viewItem, self.libraryDict,
+                                                      self.libBrowserCont.designView)
                     schematicWindow.loadSchematic()
                     schematicWindow.show()
                     schematicWindow.centralW.scene.fitItemsInView()
                     self.appMainW.openViews[openCellViewTuple] = schematicWindow
                 case "symbol":
-                    symbolWindow = symbolEditor(
-                        viewItem, self.libraryDict, self.libBrowserCont.designView
-                    )
+                    symbolWindow = symbolEditor(viewItem, self.libraryDict,
+                                                self.libBrowserCont.designView)
                     symbolWindow.loadSymbol()
                     symbolWindow.show()
                     symbolWindow.centralW.scene.fitItemsInView()
@@ -459,13 +463,10 @@ class libraryBrowser(QMainWindow):
                         items = json.load(tempFile)
                     if items[1]["filePath"]:
                         VerilogafilePathObj = (
-                            viewItem.parent()
-                            .data(Qt.UserRole + 2)
-                            .joinpath(items[1]["filePath"])
-                        )
-                        verilogaEditor = ted.verilogaEditor(
-                            self.appMainW, str(VerilogafilePathObj)
-                        )
+                            viewItem.parent().data(Qt.UserRole + 2).joinpath(
+                                items[1]["filePath"]))
+                        verilogaEditor = ted.verilogaEditor(self.appMainW,
+                                                            str(VerilogafilePathObj))
                         self.appMainW.openViews[openCellViewTuple] = verilogaEditor
                         verilogaEditor.cellViewTuple = openCellViewTuple
                         verilogaEditor.closedSignal.connect(self.verilogaEditFinished)
@@ -477,34 +478,43 @@ class libraryBrowser(QMainWindow):
                         items = json.load(tempFile)
                     if items[1]["filePath"]:
                         spicefilePathObj = (
-                            viewItem.parent()
-                            .data(Qt.UserRole + 2)
-                            .joinpath(items[1]["filePath"])
-                        )
-                        xyceEditor = ted.xyceEditor(
-                            self.appMainW, str(spicefilePathObj)
-                        )
+                            viewItem.parent().data(Qt.UserRole + 2).joinpath(
+                                items[1]["filePath"]))
+                        xyceEditor = ted.xyceEditor(self.appMainW, str(spicefilePathObj))
                         self.appMainW.openViews[openCellViewTuple] = xyceEditor
                         xyceEditor.cellViewTuple = openCellViewTuple
                         xyceEditor.closedSignal.connect(self.spiceEditFinished)
                         xyceEditor.show()
 
                 case "pcell":
-                    with open(viewItem.viewPath) as tempFile:
-                        items = json.load(tempFile)
+                    textEditor = ted.jsonEditor(self.appMainW, str(viewItem.viewPath))
+                    textEditor.show()
 
                 case "config":
                     with open(viewItem.viewPath) as tempFile:
                         items = json.load(tempFile)
-                    # viewName = items[0]["viewName"]
                     schematicName = items[1]["reference"]
                     schViewItem = libm.getViewItem(cellItem, schematicName)
                     configDict = items[2]
-                    configWindow = self.openConfigEditWindow(
-                        configDict, schViewItem, viewItem
-                    )
+                    configWindow = self.openConfigEditWindow(configDict, schViewItem,
+                                                             viewItem)
                     self.appMainW.openViews[openCellViewTuple] = configWindow
-
+                case "revbench":
+                    print(str(self._app.revedasim_pathObj))
+                    if self._app.revedasim_pathObj:
+                        try:
+                            simmwModule = importlib.import_module(
+                                "revedasim.simMainWindow", str(self._app.revedasim_pathObj))
+                            simmw = simmwModule.SimMainWindow(viewItem, self.libraryModel,
+                                                              self.designView)
+                            simmw.show()
+                            self.appMainW.openViews[openCellViewTuple] = simmw
+                        except (ImportError, NameError):
+                            self.logger.error("Reveda SAE is not installed.")
+                    else:
+                        self.logger.error('No license for Reveda SAE')
+                case _:
+                    pass
         return openCellViewTuple
 
     def verilogaCreateFinished(self, editorViewTuple: ddef.viewTuple, fileName: str):

@@ -34,18 +34,18 @@ from PySide6.QtCore import (
 )
 import revedaEditor.backend.libraryModelView as lmview
 import revedaEditor.backend.libraryMethods as libm
-import revedaEditor.backend.schBackEnd as scb
-import revedaEditor.gui.editorWindow as edw
+import revedaEditor.backend.libBackEnd as scb
+import revedaEditor.gui.symbolEditor as symed
 import revedaEditor.common.shapes as shp
 import revedaEditor.common.labels as lbl
 import revedaEditor.fileio.symbolEncoder as symenc
 
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 if os.environ.get("REVEDA_PDK_PATH"):
     import pdk.callbacks as cb
-
 else:
     import defaultPDK.callbacks as cb
 
@@ -84,13 +84,12 @@ class importXschemSym:
             self.parent, self.libraryView.libraryModel, libItem, self.cellName
         )
         symbolViewItem = scb.createCellView(self.parent, "symbol", cellItem)
-        self.symbolWindow = edw.symbolEditor(
+        self.symbolWindow = symed.symbolEditor(
             symbolViewItem, self.parent.libraryDict, self.libraryView
         )
         self.symbolScene = self.symbolWindow.centralW.scene
-        
-    def importSymFile(self):
 
+    def importSymFile(self):
         with self.filePathObj.open("r") as file:
             for line in file.readlines():
                 lineTokens = line.split()
@@ -151,7 +150,7 @@ class importXschemSym:
                     self.symbolScene.addItem(polygon)
                 elif line[0] == "T" and len(lineTokens) > 4:
                     if "tcleval" in line:
-                    # self._functions.append(line)  # just a reminder
+                        # self._functions.append(line)  # just a reminder
                         self._tclExpressLines.append(line)
 
         with self.filePathObj.open("r") as file:
@@ -229,8 +228,6 @@ class importXschemSym:
             )
         self.processTclEval(self._tclExpressLines)
         self.symbolWindow.checkSaveCell()
-        
-
 
     @property
     def scaleFactor(self) -> float:
@@ -305,16 +302,16 @@ class importXschemSym:
         formatDict["template"] = templateDict
         return formatDict
 
-    def processTclEval(self,inputLines:list[str]):
+    def processTclEval(self, inputLines: list[str]):
         tclEvalMatches = []
         parameterMatches = []
-        tclPattern = r'\\{(.*?)\\}'
-        parameterPattern =  r'tcleval\((.*?)=\['
+        tclPattern = r"\\{(.*?)\\}"
+        parameterPattern = r"tcleval\((.*?)=\["
         for lineItem in inputLines:
             tclEvalMatches.append(re.findall(tclPattern, lineItem)[0])
-            parameterMatches.append(re.findall(parameterPattern,lineItem)[0])
+            parameterMatches.append(re.findall(parameterPattern, lineItem)[0])
 
-        for (key, value) in zip(parameterMatches, tclEvalMatches):
+        for key, value in zip(parameterMatches, tclEvalMatches):
             self._expressionDict[key] = value
 
         clbPathObj = pathlib.Path(cb.__file__)
@@ -324,12 +321,14 @@ class importXschemSym:
             clbFile.write(f"    def __init__(self, labels_dict:dict):\n")
             clbFile.write(f"        super().__init__(labels_dict)\n")
             for labelName in self._labelList:
-                clbFile.write(f"        self.{labelName[1:]} = Quantity(self._labelsDict["
-                              f"'{labelName}'].labelValue)\n")
+                clbFile.write(
+                    f"        self.{labelName[1:]} = Quantity(self._labelsDict["
+                    f"'{labelName}'].labelValue)\n"
+                )
 
             for key, value in self._expressionDict.items():
                 for labelName in self._labelList:
-                    value = value.replace(labelName, f'self.{labelName[1:]}')
+                    value = value.replace(labelName, f"self.{labelName[1:]}")
                 clbFile.write("\n")
                 clbFile.write(f"    def {key}parm(self):\n")
                 clbFile.write(f"       returnValue = {value}\n")
@@ -342,7 +341,7 @@ class importXschemSym:
                     lbl.symbolLabel.labelAlignments[0],
                     lbl.symbolLabel.labelOrients[0],
                     lbl.symbolLabel.labelUses[1],
-                    )
+                )
                 label.labelDefs()
                 label.labelVisible = True
                 label.setOpacity(1)

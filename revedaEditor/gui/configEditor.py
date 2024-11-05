@@ -1,4 +1,3 @@
-
 #    “Commons Clause” License Condition v1.0
 #   #
 #    The Software is provided to you by the Licensor under the License, as defined
@@ -50,6 +49,7 @@ import revedaEditor.resources.resources
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.gui.editFunctions as edf
 import revedaEditor.gui.schematicEditor as sced
+
 
 # from hashlib import new
 

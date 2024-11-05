@@ -26,8 +26,6 @@
 import json
 import inspect
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
 if os.environ.get("REVEDA_PDK_PATH"):
     import pdk.layoutLayers as laylyr
@@ -50,6 +48,7 @@ class layoutEncoder(json.JSONEncoder):
                     "ic": item.counter,
                     "loc": (item.scenePos() - item.scene().origin).toTuple(),
                     "ang": item.angle,
+                    "fl": item.flipTuple,
                 }
             case lshp.layoutRect:
                 itemDict = {
@@ -58,6 +57,7 @@ class layoutEncoder(json.JSONEncoder):
                     "br": item.mapToScene(item.rect.bottomRight()).toTuple(),
                     "ang": item.angle,
                     "ln": laylyr.pdkAllLayers.index(item.layer),
+                    "fl": item.flipTuple,
                 }
             case lshp.layoutPath:
                 itemDict = {
@@ -71,14 +71,16 @@ class layoutEncoder(json.JSONEncoder):
                     "md": item.mode,
                     "nam": item.name,
                     "ang": item.angle,
+                    "fl": item.flipTuple,
                 }
             case lshp.layoutViaArray:
                 viaDict = {
                     "st": item.via.mapToScene(item.via.start).toTuple(),
-                    "vdt": item.via.viaDefTuple.name,
+                    "vdt": item.via.viaDefTuple.netName,
                     "w": item.via.width,
                     "h": item.via.height,
                     "ang": item.angle,
+                    "fl": item.flipTuple,
                 }
                 itemDict = {
                     "type": "Via",
@@ -99,6 +101,7 @@ class layoutEncoder(json.JSONEncoder):
                     "pt": item.pinType,
                     "ln": laylyr.pdkPinLayers.index(item.layer),
                     "ang": item.angle,
+                    "fl": item.flipTuple,
                 }
             case lshp.layoutLabel:
                 itemDict = {
@@ -112,6 +115,7 @@ class layoutEncoder(json.JSONEncoder):
                     "lo": item.labelOrient,
                     "ln": laylyr.pdkTextLayers.index(item.layer),
                     "ang": item.angle,
+                    "fl": item.flipTuple,
                 }
             case lshp.layoutPolygon:
                 pointsList = [item.mapToScene(point).toTuple() for point in item.points]
@@ -120,6 +124,7 @@ class layoutEncoder(json.JSONEncoder):
                     "ps": pointsList,
                     "ln": laylyr.pdkAllLayers.index(item.layer),
                     "ang": item.angle,
+                    "fl": item.flipTuple,
                 }
             case lshp.layoutRuler:
                 itemDict = {
@@ -128,13 +133,12 @@ class layoutEncoder(json.JSONEncoder):
                     "dfl2": item.mapToScene(item.draftLine.p2()).toTuple(),
                     "md": item.mode,
                     "ang": item.angle,
+                    "fl": item.flipTuple,
                 }
             case _:  # now check super class types:
                 match item.__class__.__bases__[0]:
                     case baseCell:
-                        init_args = inspect.signature(
-                            item.__class__.__init__
-                        ).parameters
+                        init_args = inspect.signature(item.__class__.__init__).parameters
                         args_used = [param for param in init_args if (param != "self")]
 
                         argDict = {arg: getattr(item, arg) for arg in args_used}
@@ -147,6 +151,7 @@ class layoutEncoder(json.JSONEncoder):
                             "ic": item.counter,
                             "loc": (item.scenePos() - item.scene().origin).toTuple(),
                             "ang": item.angle,
+                            "fl": item.flipTuple,
                             "params": argDict,
                         }
         return itemDict

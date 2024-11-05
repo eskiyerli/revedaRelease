@@ -133,7 +133,7 @@ class aboutDialog(QDialog):
         # Add information about your application using rich text
         about_label = QLabel(
             "<h2>Revolution EDA</h2>"
-            "<p><strong>Version:</strong> 0.6.3</p>"
+            "<p><strong>Version:</strong> 0.7.1</p>"
             "<p><strong>Copyright: Revolution Semiconductor</strong> © 2024</p>"
             "<p><strong>License:</strong> Mozilla Public License 2.0 amended with Commons Clause</p>"
             "<p><strong> Website:</strong> <a href='https://www.reveda.eu'>Revolution EDA</a></p>"
@@ -149,56 +149,3 @@ class aboutDialog(QDialog):
         layout.addWidget(close_button)
 
         self.setLayout(layout)
-
-
-def show_about_dialog():
-    dialog = AboutDialog()
-    dialog.exec_()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    main_window = QMainWindow()
-    main_window.setWindowTitle("Revolution EDA")
-    main_window.setGeometry(100, 100, 800, 600)
-
-    # Create an "About" action
-    about_action = QAction("About", main_window)
-    about_action.setShortcut(QKeySequence(Qt.Key_F1))
-    about_action.triggered.connect(show_about_dialog)
-
-    # Create a menu bar
-    menu_bar = main_window.menuBar()
-    help_menu = menu_bar.addMenu("Help")
-    help_menu.addAction(about_action)
-
-    main_window.show()
-    sys.exit(app.exec_())
-
-
-class startThread(QRunnable):
-    __slots__ = ("fn",)
-
-    def __init__(self, fn):
-        super().__init__()
-        self.fn = fn
-
-    @Slot()
-    def run(self) -> None:
-        try:
-            self.fn
-        except Exception as e:
-            print(e)
-
-
-def main():
-    app = QApplication(sys.argv)
-    window = helpBrowser()
-
-    window.show()
-    sys.exit(app.exec_())
-
-
-if __name__ == "__main__":
-    main()

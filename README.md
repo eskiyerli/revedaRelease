@@ -29,8 +29,6 @@ circuit design.
 When downloading the package from pypi repository, you may want to download to source package as
 well to download *exampleLibraries*.
 
-Version 0.7.0 includes symbol library imported from [IHP]: https://github.com/IHP-GmbH/IHP-Open-PDK as well as parametric layout cells for NMOS, silicide resistor and MIMCAP. Revolution EDA is not associated with IHP.
-
 ## Attribution
 
 - Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). Licensed under

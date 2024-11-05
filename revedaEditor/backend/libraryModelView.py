@@ -43,8 +43,10 @@ from PySide6.QtWidgets import (
 
 
 import revedaEditor.backend.libraryMethods as libm
-import revedaEditor.backend.schBackEnd as scb
+import revedaEditor.backend.libBackEnd as libb
 import revedaEditor.gui.fileDialogues as fd
+
+from typing import List
 
 
 class designLibrariesView(QTreeView):
@@ -52,11 +54,10 @@ class designLibrariesView(QTreeView):
         super().__init__(parent=parent)  # QTreeView
         self.parent = parent
         self.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.viewCounter = 0
-        self.libBrowsW = self.parent.parent
+        self.libBrowsW = self.parentWidget().parentWidget()
         self.appMainW = self.libBrowsW.appMainW
         self.libraryDict = self.appMainW.libraryDict  # type: dict
-        self.cellViews = self.appMainW.cellViews  # type: list
+        self.cellViews = self.libBrowsW.cellViews  # type: list
         self.openViews = self.appMainW.openViews  # type: dict
         self.logger = self.appMainW.logger
         self.selectedItem = None
@@ -66,6 +67,7 @@ class designLibrariesView(QTreeView):
         self.setUniformRowHeights(True)
         self.expandAll()
         self.setModel(self.libraryModel)
+
 
     def removeLibrary(self):
         button = QMessageBox.question(
@@ -90,12 +92,12 @@ class designLibrariesView(QTreeView):
 
     def createCell(self):
         dlg = fd.createCellDialog(self, self.libraryModel)
-        assert isinstance(self.selectedItem, scb.libraryItem)
-        dlg.libNamesCB.setCurrentText(self.selectedItem.libraryName)
+        assert isinstance(self.selectedItem, libb.libraryItem)
+        dlg.libNamelibb.setCurrentText(self.selectedItem.libraryName)
         if dlg.exec() == QDialog.Accepted:
             cellName = dlg.cellCB.currentText()
             if cellName.strip() != "":
-                scb.createCell(self, self.libraryModel, self.selectedItem, cellName)
+                libb.createCell(self, self.libraryModel, self.selectedItem, cellName)
             else:
                 self.logger.error("Please enter a cell name.")
 
@@ -103,14 +105,14 @@ class designLibrariesView(QTreeView):
         dlg = fd.copyCellDialog(self, self.libraryModel, self.selectedItem)
 
         if dlg.exec() == QDialog.Accepted:
-            scb.copyCell(
+            libb.copyCell(
                 self, dlg.model, dlg.cellItem, dlg.copyName.text(), dlg.selectedLibPath
             )
 
     def renameCell(self):
         dlg = fd.renameCellDialog(self, self.selectedItem)
         if dlg.exec() == QDialog.Accepted:
-            scb.renameCell(self, dlg.cellItem, dlg.nameEdit.text())
+            libb.renameCell(self, dlg.cellItem, dlg.nameEdit.text())
 
     def deleteCell(self):
         try:
@@ -120,14 +122,31 @@ class designLibrariesView(QTreeView):
             self.logger.warning(f"Error:{e}")
 
     def createCellView(self):
-        dlg = fd.createCellViewDialog(self, self.libraryModel, self.selectedItem)
+        dlg = fd.createCellViewDialog(self.libBrowsW)
+        dlg.viewComboBox.addItems(self.cellViews)
         if dlg.exec() == QDialog.Accepted:
-            viewItem = scb.createCellView(
-                self.appMainW, dlg.nameEdit.text(), self.selectedItem
+            libItem = self.selectedItem.parent()
+            cellItem = self.selectedItem
+            viewName = dlg.nameEdit.text().strip()
+            viewItem = libm.findViewItem(
+                self.libraryModel, libItem.libraryName, cellItem.cellName, viewName
             )
-            self.libBrowsW.createNewCellView(
-                self.selectedItem.parent(), self.selectedItem, viewItem
-            )
+            if viewItem:
+                messagebox = QMessageBox(self)
+                messagebox.setText("Cell view already exists.")
+                messagebox.setIcon(QMessageBox.Warning)
+                messagebox.setWindowTitle(f"{viewItem.viewName} already exists")
+                messagebox.setStandardButtons(QMessageBox.Save | QMessageBox.Discard)
+                messagebox.setDefaultButton(QMessageBox.Discard)
+                result = messagebox.exec()
+                if result == QMessageBox.Save:
+                    viewItem = libb.createCellView(
+                        self.appMainW, viewName.strip(), cellItem
+                    )
+                    self.libBrowsW.createNewCellView(libItem, cellItem, viewItem)
+            else:
+                viewItem = libb.createCellView(self.appMainW, viewName.strip(), cellItem)
+                self.libBrowsW.createNewCellView(libItem, cellItem, viewItem)
 
     def openView(self):
         viewItem = self.selectedItem
@@ -150,14 +169,10 @@ class designLibrariesView(QTreeView):
                     selectedLibItem.child(row).cellName
                     for row in range(selectedLibItem.rowCount())
                 ]
-                if (
-                    cellName in libCellNames
-                ):  # check if there is the cell in the library
-                    cellItem = libm.getCellItem(
-                        selectedLibItem, dlg.cellCB.currentText()
-                    )
+                if cellName in libCellNames:  # check if there is the cell in the library
+                    cellItem = libm.getCellItem(selectedLibItem, dlg.cellCB.currentText())
                 else:
-                    cellItem = scb.createCell(
+                    cellItem = libb.createCell(
                         self.libBrowsW,
                         self.libraryModel,
                         selectedLibItem,
@@ -176,7 +191,7 @@ class designLibrariesView(QTreeView):
                         f"{newViewName}.json"
                     )
                     shutil.copy(viewPath, newViewPath)
-                    cellItem.appendRow(scb.viewItem(newViewPath))
+                    cellItem.appendRow(libb.viewItem(newViewPath))
 
     def renameView(self):
         oldViewName = self.selectedItem.viewName
@@ -188,7 +203,7 @@ class designLibrariesView(QTreeView):
                 newPathObj = self.selectedItem.data(Qt.UserRole + 2).rename(
                     viewPathObj.parent.joinpath(f"{newName}.json")
                 )
-                self.selectedItem.parent().appendRow(scb.viewItem(newPathObj))
+                self.selectedItem.parent().appendRow(libb.viewItem(newPathObj))
                 self.selectedItem.parent().removeRow(self.selectedItem.row())
             except FileExistsError:
                 self.logger.error("Cellview exists.")
@@ -228,21 +243,13 @@ class designLibrariesView(QTreeView):
                     QAction("Create CellView...", self, triggered=self.createCellView)
                 )
                 menu.addAction(QAction("Copy Cell...", self, triggered=self.copyCell))
-                menu.addAction(
-                    QAction("Rename Cell...", self, triggered=self.renameCell)
-                )
-                menu.addAction(
-                    QAction("Delete Cell...", self, triggered=self.deleteCell)
-                )
+                menu.addAction(QAction("Rename Cell...", self, triggered=self.renameCell))
+                menu.addAction(QAction("Delete Cell...", self, triggered=self.deleteCell))
             elif self.selectedItem.data(Qt.UserRole + 1) == "view":
                 menu.addAction(QAction("Open View", self, triggered=self.openView))
                 menu.addAction(QAction("Copy View...", self, triggered=self.copyView))
-                menu.addAction(
-                    QAction("Rename View...", self, triggered=self.renameView)
-                )
-                menu.addAction(
-                    QAction("Delete View...", self, triggered=self.deleteView)
-                )
+                menu.addAction(QAction("Rename View...", self, triggered=self.renameView))
+                menu.addAction(QAction("Delete View...", self, triggered=self.deleteView))
             menu.exec(event.globalPos())
         except UnboundLocalError:
             pass
@@ -278,18 +285,49 @@ class designLibrariesModel(QStandardItemModel):
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
 
     def addLibraryToModel(self, designPath):
-        libraryEntry = scb.libraryItem(designPath)
+        libraryEntry = libb.libraryItem(designPath)
         self.rootItem.appendRow(libraryEntry)
         return libraryEntry
 
     def addCellToModel(self, cellPath, parentItem):
-        cellEntry = scb.cellItem(cellPath)
+        cellEntry = libb.cellItem(cellPath)
         parentItem.appendRow(cellEntry)
         return cellEntry
 
     def addViewToModel(self, viewPath, parentItem):
-        viewEntry = scb.viewItem(viewPath)
+        viewEntry = libb.viewItem(viewPath)
         parentItem.appendRow(viewEntry)
+
+    def listLibraries(self) -> List[str]:
+        librariesList = []
+        for row in range(self.rowCount()):
+            itemText = self.item(row, 0).text()
+            if itemText:
+                librariesList.append(itemText)
+        return librariesList
+
+    def listLibraryCells(self, libraryName: str) -> List[str]:
+        cellsList = []
+        libraryItem = libm.getLibItem(self, libraryName)
+        if libraryItem:
+            for row in range(libraryItem.rowCount()):
+                itemText = libraryItem.child(row, 0).text()
+                if itemText:
+                    cellsList.append(itemText)
+        return cellsList
+
+    def listCellViews(
+        self, libraryName: str, cellName: str, viewTypes: List[str]
+    ) -> List[str]:
+        viewsList = []
+        libraryItem = libm.getLibItem(self, libraryName)
+        cellItem = libm.getCellItem(libraryItem, cellName)
+        if cellItem:
+            for row in range(cellItem.rowCount()):
+                if cellItem.child(row, 0).viewType in viewTypes:
+                    viewsList.append(cellItem.child(row, 0).text())
+        return viewsList
+
 
 class symbolViewsModel(designLibrariesModel):
     """

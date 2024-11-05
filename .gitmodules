@@ -1,0 +1,15 @@
+[submodule "docs"]
+	path=docs
+	url=./docs/
+[submodule "revedasim"]
+	path = revedasim
+	url = https://github.com/eskiyerli/revedaSim.git
+[submodule "ihp_pdk"]
+	path = ihp_pdk
+	url = https://github.com/eskiyerli/ihp_pdk.git
+[submodule "gf180_pdk"]
+	path = gf180_pdk
+	url = https://github.com/eskiyerli/gf180mcu_pdk.git
+[submodule "exampleLibraries"]
+	path = exampleLibraries
+	url = https://github.com/eskiyerli/exampleLibraries.git
