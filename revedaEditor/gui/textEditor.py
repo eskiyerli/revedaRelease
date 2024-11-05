@@ -24,161 +24,160 @@
 #
 
 import sys
-from PySide6.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QTextEdit,
-    QFileDialog,
-    QToolBar,
-    QFontDialog,
-    QInputDialog,
-    QMessageBox,
-    QLabel,
-)
-from PySide6.QtGui import (
-    QTextCharFormat,
-    QColor,
-    QFont,
-    QSyntaxHighlighter,
-    QAction,
-    QIcon,
-)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QTextEdit, QFileDialog, QToolBar,
+                               QFontDialog, QInputDialog, QMessageBox, QLabel, )
+from PySide6.QtGui import (QTextCharFormat, QColor, QFont, QSyntaxHighlighter, QAction,
+                           QIcon, )
 
-from PySide6.QtCore import (
-    Signal,
-)
+from PySide6.QtCore import (Signal, )
 import re
 import revedaEditor.resources.resources
 import revedaEditor.backend.dataDefinitions as ddef
 
 
-class verilogaHighlighter(QSyntaxHighlighter):
+class BaseHighlighter(QSyntaxHighlighter):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.highlightingRules = []
+        self.commentFormat = QTextCharFormat()
+        self.commentFormat.setForeground(QColor("#007F00"))
+
+    def highlightBlock(self, text):
+        for pattern, format in self.highlightingRules:
+            expression = re.compile(pattern)
+            for match in expression.finditer(text):
+                start, end = match.span()
+                self.setFormat(start, end - start, format)
+        self.highlightComments(text)
+
+    def highlightComments(self, text):
+        pass
+
+
+class JsonHighlighter(BaseHighlighter):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        # String format (green)
+        stringFormat = QTextCharFormat()
+        stringFormat.setForeground(QColor("#009900"))
+        self.highlightingRules.append((r'"(?:\\.|[^"\\])*"', stringFormat))
+
+        # Number format (blue)
+        numberFormat = QTextCharFormat()
+        numberFormat.setForeground(QColor("#0000FF"))
+        self.highlightingRules.append(
+            (r'\b-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b', numberFormat))
+
+        # Boolean format (purple)
+        booleanFormat = QTextCharFormat()
+        booleanFormat.setForeground(QColor("#990099"))
+        self.highlightingRules.append((r'\b(true|false)\b', booleanFormat))
+
+        # Null format (red)
+        nullFormat = QTextCharFormat()
+        nullFormat.setForeground(QColor("#FF0000"))
+        self.highlightingRules.append((r'\bnull\b', nullFormat))
+
+        # Object key format (brown)
+        keyFormat = QTextCharFormat()
+        keyFormat.setForeground(QColor("#8B4513"))
+        keyFormat.setFontWeight(QFont.Bold)
+        self.highlightingRules.append((r'"([^"\\]|\\.)*"\s*:', keyFormat))
+
+        # Braces and brackets format (dark gray)
+        bracesFormat = QTextCharFormat()
+        bracesFormat.setForeground(QColor("#666666"))
+        bracesFormat.setFontWeight(QFont.Bold)
+        self.highlightingRules.append((r'[{}\[\]]', bracesFormat))
+
+
+class VerilogAHighlighter(BaseHighlighter):
+    def __init__(self, parent=None):
+        super().__init__(parent)
         keywordFormat = QTextCharFormat()
         keywordFormat.setForeground(QColor("#0000FF"))
         keywordFormat.setFontWeight(QFont.Bold)
+
+        keywords = ["module", "endmodule", "input", "output", "inout", "parameter",
+                    "analog", "real", "electrical", "discipline", "nature"]
+        self.highlightingRules.append((r'\b(' + '|'.join(keywords) + r')\b', keywordFormat))
+
         functionFormat = QTextCharFormat()
         functionFormat.setForeground(QColor("#00FF00"))
         functionFormat.setFontWeight(QFont.Bold)
 
-        self.highlightingRules = [
-            (
-                r"\b(module|endmodule|input|output|inout|parameter|analog|real|electrical)\b",
-                keywordFormat,
-            ),
-            (
-                r"\b(cos|sin|ln|log|min|pow|sinh|sqrt|tan|tanh|exp|cosh|ddt|ddx|idt)\b",
-                functionFormat,
-            ),
-            # Add more highlighting rules as needed
-        ]
+        functions = ["cos", "sin", "ln", "log", "min", "pow", "sinh", "sqrt", "tan", "tanh",
+                     "exp", "cosh", "ddt", "ddx", "idt", "laplace_nd", "laplace_zd"]
+        self.highlightingRules.append(
+            (r'\b(' + '|'.join(functions) + r')\b', functionFormat))
 
-        self.highlightingComment = QTextCharFormat()
-        self.highlightingComment.setForeground(
-            QColor("#007F00")
-        )  # Green color for comments
+    def highlightComments(self, text):
+        self.highlightSingleLineComments(text, '//')
+        self.highlightMultiLineComments(text, r'/\*', r'\*/')
 
-        self.commentStart = "//"
-        self.multi_comment_start = "/*"
-        self.multi_comment_end = "*/"
+    def highlightSingleLineComments(self, text, commentStart):
+        expression = re.compile(commentStart + '.*$')
+        for match in expression.finditer(text):
+            start, end = match.span()
+            self.setFormat(start, end - start, self.commentFormat)
 
-    def highlightBlock(self, text):
-        for pattern, char_format in self.highlightingRules:
-            for match in re.finditer(pattern, text):
-                self.setFormat(match.start(), match.end() - match.start(), char_format)
-
-        index = text.find(self.commentStart)
-        while index >= 0:
-            comment_length = len(text) - index
-            self.setFormat(index, comment_length, self.highlightingComment)
-            index = text.find(self.commentStart, index + comment_length)
-
-        self.setCurrentBlockState(0)
+    def highlightMultiLineComments(self, text, commentStart, commentEnd):
         startIndex = 0
         if self.previousBlockState() != 1:
-            startIndex = text.find(self.multi_comment_start)
+            startIndex = text.find(commentStart)
 
         while startIndex >= 0:
-            endIndex = text.find(self.multi_comment_end, startIndex)
+            endIndex = text.find(commentEnd, startIndex)
             if endIndex == -1:
                 self.setCurrentBlockState(1)
-                comment_length = len(text) - startIndex
+                commentLength = len(text) - startIndex
             else:
-                comment_length = endIndex - startIndex + len(self.multi_comment_end)
-            self.setFormat(startIndex, comment_length, self.highlightingComment)
-            startIndex = text.find(
-                self.multi_comment_start, startIndex + comment_length
-            )
+                commentLength = endIndex - startIndex + len(commentEnd)
+
+            self.setFormat(startIndex, commentLength, self.commentFormat)
+            startIndex = text.find(commentStart, startIndex + commentLength)
 
 
-class xyceHighlighter(QSyntaxHighlighter):
+class XyceHighlighter(BaseHighlighter):
     def __init__(self, parent=None):
         super().__init__(parent)
-
         keywordFormat = QTextCharFormat()
         keywordFormat.setForeground(QColor("#0000FF"))
         keywordFormat.setFontWeight(QFont.Bold)
+
+        keywords = [".print", ".plot", ".include", ".subckt", ".end", ".ends", ".param",
+                    ".model", ".lib", ".sweep"]
+        self.highlightingRules.append((r'\b(' + '|'.join(keywords) + r')\b', keywordFormat))
+
         analysisFormat = QTextCharFormat()
         analysisFormat.setForeground(QColor("#00FF0F"))
         analysisFormat.setFontWeight(QFont.Bold)
 
-        self.highlightingRules = [
-            (
-                r"(\.subckt|\.end|\.ends|\.param|\.model|\.lib|\.sweep)\b",
-                keywordFormat,
-            ),
-            (
-                r"\b(\.ac|\.dc|\.tran|\.hb|\.noise|\.op)\b",
-                analysisFormat,
-            ),
-            # Add more highlighting rules as needed
-        ]
+        analyses = [".ac", ".dc", ".tran", ".hb", ".noise", ".op"]
+        self.highlightingRules.append(
+            (r'\b(' + '|'.join(analyses) + r')\b', analysisFormat))
 
-        self.highlightingComment = QTextCharFormat()
-        self.highlightingComment.setForeground(
-            QColor("#007F00")
-        )  # Green color for comments
+        componentFormat = QTextCharFormat()
+        componentFormat.setForeground(QColor("#FF0000"))
 
-        self.comment_start = "*"
-        self.multi_comment_start = "/*"
-        self.multi_comment_end = "*/"
+        components = "RCLVIQMDJBEFGHKTSWZUOPXx"
+        self.highlightingRules.append((r'^[' + components + r']', componentFormat))
 
-    def highlightBlock(self, inputText):
-        text = inputText.lower()
-        for pattern, char_format in self.highlightingRules:
-            for match in re.finditer(pattern, text):
-                self.setFormat(match.start(), match.end() - match.start(), char_format)
+    def highlightComments(self, text):
+        self.highlightSingleLineComments(text, r'\*')
 
-        index = text.find(self.comment_start)
-        while index >= 0:
-            comment_length = len(text) - index
-            self.setFormat(index, comment_length, self.highlightingComment)
-            index = text.find(self.comment_start, index + comment_length)
-
-        self.setCurrentBlockState(0)
-        startIndex = 0
-        if self.previousBlockState() != 1:
-            startIndex = text.find(self.multi_comment_start)
-
-        while startIndex >= 0:
-            endIndex = text.find(self.multi_comment_end, startIndex)
-            if endIndex == -1:
-                self.setCurrentBlockState(1)
-                comment_length = len(text) - startIndex
-            else:
-                comment_length = endIndex - startIndex + len(self.multi_comment_end)
-            self.setFormat(startIndex, comment_length, self.highlightingComment)
-            startIndex = text.find(
-                self.multi_comment_start, startIndex + comment_length
-            )
+    def highlightSingleLineComments(self, text, commentStart):
+        expression = re.compile('^' + commentStart + '.*$')
+        for match in expression.finditer(text):
+            start, end = match.span()
+            self.setFormat(start, end - start, self.commentFormat)
 
 
-class verilogaEditor(QMainWindow):
+class textEditor(QMainWindow):
     closedSignal = Signal(ddef.viewTuple, str)
 
-    def __init__(self, parent, fileName=""):
+    def __init__(self, parent, fileName: str = ""):
         super().__init__(parent=parent)
         self._cellViewTuple = ddef.viewTuple("", "", "")
         self.parent = parent
@@ -196,12 +195,10 @@ class verilogaEditor(QMainWindow):
 
         self.textEdit.cursorPositionChanged.connect(self.updateStatus)
 
-        self.setWindowTitle("Verilog-A Editor")
         self.resize(600, 800)
         self.initEditor()
 
     def initEditor(self):
-        self.highlighter = verilogaHighlighter(self.textEdit.document())
         if self.fileName:
             with open(self.fileName, "r") as file:
                 text = file.read()
@@ -259,7 +256,7 @@ class verilogaEditor(QMainWindow):
 
     def createMenus(self):
         menubar = self.menuBar()
-
+        menubar.setNativeMenuBar(False)
         fileMenu = menubar.addMenu("&File")
         fileMenu.addAction(self.openAction)
         fileMenu.addAction(self.saveAction)
@@ -295,9 +292,8 @@ class verilogaEditor(QMainWindow):
         toolbar.addAction(self.replaceAction)
 
     def openFile(self):
-        (self.fileName, _) = QFileDialog.getOpenFileName(
-            self, "Open File", "", "Verilog-A Files (*.va);;All Files (*)"
-        )
+        (self.fileName, _) = QFileDialog.getOpenFileName(self, "Open File", "",
+                                                         "JSON Files (*.json);;All Files (*)")
         if self.fileName:
             with open(self.fileName, "r") as file:
                 text = file.read()
@@ -312,9 +308,8 @@ class verilogaEditor(QMainWindow):
             self.saveAsFile()
 
     def saveAsFile(self):
-        (self.fileName, _) = QFileDialog.getSaveFileName(
-            self, "Save File", "", "Verilog-A Files (*.va);;All Files (*)"
-        )
+        (self.fileName, _) = QFileDialog.getSaveFileName(self, "Save File", "",
+                                                         "JSON Files (*.json);;All Files (*)")
         if self.fileName:
             with open(self.fileName, "w") as file:
                 text = self.textEdit.toPlainText()
@@ -338,9 +333,8 @@ class verilogaEditor(QMainWindow):
     def replaceText(self):
         findText, ok1 = QInputDialog.getText(self, "Replace", "Enter text to find:")
         if ok1:
-            replace_text, ok2 = QInputDialog.getText(
-                self, "Replace", "Enter replacement text:"
-            )
+            replace_text, ok2 = QInputDialog.getText(self, "Replace",
+                                                     "Enter replacement text:")
             if ok2:
                 document = self.textEdit.document()
                 cursor = document.find(findText)
@@ -357,13 +351,8 @@ class verilogaEditor(QMainWindow):
 
     def closeEvent(self, event):
         if self.textEdit.toPlainText():
-            reply = QMessageBox.question(
-                self,
-                "Save File",
-                "Do you want to save the file?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
-            )
+            reply = QMessageBox.question(self, "Save File", "Do you want to save the file?",
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No, )
             if reply == QMessageBox.Yes:
                 self.saveFile()
         self.closedSignal.emit(self.cellViewTuple, self.fileName)
@@ -379,32 +368,73 @@ class verilogaEditor(QMainWindow):
             self._cellViewTuple = viewTuple
 
 
-class xyceEditor(verilogaEditor):
-    def __init__(self,parent, fileName=""):
+class jsonEditor(textEditor):
+    def __init__(self, parent, fileName=""):
         super().__init__(parent, fileName)
         self.initEditor()
-        self.setWindowTitle("Xyce/SPICE Editor")
+        self.setWindowTitle("JSON Editor")
 
     def initEditor(self):
-        self.highlighter = xyceHighlighter(self.textEdit.document())
+        self.highlighter = JsonHighlighter(self.textEdit.document())
+        super().initEditor()
+
+
+class verilogaEditor(textEditor):
+    def __init__(self, parent, fileName=""):
+        super().__init__(parent, fileName)
+        self.initEditor()
+        self.setWindowTitle("Verilog-A Editor")
+
+    def initEditor(self):
+        self.highlighter = VerilogAHighlighter(self.textEdit.document())
+        super().initEditor()
+
+    def openFile(self):
+        (self.fileName, _) = QFileDialog.getOpenFileName(self, "Open File", "",
+                                                         "Verilog-A Files (*.va);;All Files (*)")
         if self.fileName:
             with open(self.fileName, "r") as file:
                 text = file.read()
                 self.textEdit.setPlainText(text)
 
+    def saveFile(self):
+        if self.fileName:
+            with open(self.fileName, "w") as file:
+                text = self.textEdit.toPlainText()
+                file.write(text)
+        else:
+            self.saveAsFile()
+
+    def saveAsFile(self):
+        (self.fileName, _) = QFileDialog.getSaveFileName(self, "Save File", "",
+                                                         "Verilog-A Files (*.va);;All Files (*)")
+        if self.fileName:
+            with open(self.fileName, "w") as file:
+                text = self.textEdit.toPlainText()
+                file.write(text)
+
+
+class xyceEditor(textEditor):
+    def __init__(self, parent, fileName=""):
+        super().__init__(parent, fileName)
+        self.initEditor()
+        self.setWindowTitle("Xyce/SPICE Editor")
+
+    def initEditor(self):
+        self.highlighter = XyceHighlighter(self.textEdit.document())
+        super().initEditor()
+
     def openFile(self):
-        (self.fileName, _) = QFileDialog.getOpenFileName(
-            self, "Open File", "", "Xyce Files (*.sp);;All Files (*)"
-        )
+        (self.fileName, _) = QFileDialog.getOpenFileName(self, "Open File", "",
+                                                         "Xyce Files (*.sp);;All Files (*)")
         if self.fileName:
             with open(self.fileName, "r") as file:
                 text = file.read()
                 self.textEdit.setPlainText(text)
 
     def saveAsFile(self):
-        (self.fileName, _) = QFileDialog.getSaveFileName(
-            self, "Save File", "", "Xyce Files (*.sp);;All Files (*)"
-        )
+        (self.fileName, _) = QFileDialog.getSaveFileName(self, "Save File", "",
+                                                         "Xyce Files (*.sp);;All Files (*)")
         if self.fileName:
             with open(self.fileName, "w") as file:
                 text = self.textEdit.toPlainText()
@@ -413,7 +443,7 @@ class xyceEditor(verilogaEditor):
 
 def main():
     app = QApplication(sys.argv)
-    editor = verilogaEditor('')
+    editor = verilogaEditor(None, '')
     editor.show()
     sys.exit(app.exec())
 

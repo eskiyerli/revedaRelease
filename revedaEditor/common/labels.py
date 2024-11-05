@@ -30,7 +30,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGraphicsSimpleTextItem, QGraphicsItem
 from dotenv import load_dotenv
 from quantiphy import Quantity
-
+from typing import Tuple
 load_dotenv()
 
 if os.environ.get("REVEDA_PDK_PATH"):
@@ -60,6 +60,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
         "[@elementNum]",
     ]
 
+
     def __init__(
         self,
         start: QPoint,
@@ -72,9 +73,9 @@ class symbolLabel(QGraphicsSimpleTextItem):
     ):
         super().__init__("")
         self._start = start  # top left corner
-        self._labelDefinition = labelDefinition  # label definition is what is
-        # entered in the symbol editor
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self._labelDefinition = labelDefinition
+        # label definition is what is entered in the symbol editor
+        self.setFlag(QGraphicsItem.ItemIsMovable, False)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
@@ -93,6 +94,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
         self._labelVisible: bool = False
 
         self._angle = 0.0  # rotation angle
+        self._flipTuple = (1,1)
         self.setBrush(symlyr.labelBrush)
         self.setPos(self._start)
 
@@ -115,12 +117,21 @@ class symbolLabel(QGraphicsSimpleTextItem):
             f" {self._labelUse})"
         )
 
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if self.scene() and self.scene().editModes.moveItem:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+
     def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemSelectedHasChanged:
-            if value:
-                self.setBrush(symlyr.selectedLabelBrush)
-            else:
-                self.setBrush(symlyr.labelBrush)
+        if self.scene():
+            match change:
+                case QGraphicsItem.ItemSelectedHasChanged:
+                    if value:
+                        self.setBrush(symlyr.selectedLabelBrush)
+                        self.setZValue(self.zValue() + 10)
+                    else:
+                        self.setBrush(symlyr.labelBrush)
+                        self.setZValue(self.zValue() - 10)
         return super().itemChange(change, value)
 
     def contextMenuEvent(self, event):
@@ -259,6 +270,23 @@ class symbolLabel(QGraphicsSimpleTextItem):
             self.setOpacity(0.001)
             self._labelVisible = False
 
+    @property
+    def flipTuple(self):
+        return self._flipTuple
+
+    @flipTuple.setter
+    def flipTuple(self, flipState: Tuple[int, int]):
+        self.prepareGeometryChange()
+    # Get the current transformation
+        transform = self.transform()
+
+        # Apply the scaling
+        transform.scale(*flipState)
+
+        # Set the new transformation
+        self.setTransform(transform)
+        self._flipTuple = (transform.m11(), transform.m22())
+
     def moveBy(self, delta: QPoint):
         self._start += delta
 
@@ -380,3 +408,4 @@ class symbolLabel(QGraphicsSimpleTextItem):
             # Log the error if scene exists
             if self.scene():
                 self.scene().logger.error(f"PyLabel Error: {e}")
+

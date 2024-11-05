@@ -1,6 +1,6 @@
 import gdstk
 import revedaEditor.common.layoutShapes as lshp
-import revedaEditor.backend.schBackEnd as scb
+import revedaEditor.backend.libBackEnd as scb
 import pathlib
 import inspect
 

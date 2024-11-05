@@ -10,10 +10,14 @@
         <file>icons/database-delete.png</file>
         <file>icons/ui-label.png</file>
         <file>icons/document.png</file>
+        <file>icons/disk.png</file>
         <file>icons/document--plus.png</file>
         <file>icons/document--pencil.png</file>
         <file>icons/document-import.png</file>
         <file>icons/document-copy.png</file>
+        <file>icons/document-hf-insert.png</file>
+        <file>icons/document-hf-delete-footer.png</file>
+        <file>icons/document-hf-select.png</file>
         <file>icons/grid-snap-dot.png</file>
         <file>icons/target.png</file>
         <file>icons/pencil--plus.png</file>
@@ -42,6 +46,8 @@
         <file>icons/node-delete.png</file>
         <file>icons/arrow-skip.png</file>
         <file>icons/arrow-move.png</file>
+        <file>icons/arrow-090.png</file>
+        <file>icons/arrow-270.png</file>
         <file>icons/arrow-transition.png</file>
         <file>icons/fill.png</file>
         <file>icons/arrow-step-out.png</file>
@@ -80,6 +86,7 @@
         <file>icons/application-run.png</file>
         <file>icons/gear--pencil.png</file>
         <file>icons/table.png</file>
+        <file>icons/table-draw.png</file>
         <file>icons/node-select.png</file>
         <file>icons/toggle-expand.png</file>
         <file>icons/regular-expression.png</file>
@@ -90,6 +97,9 @@
         <file>icons/scripts-text.png</file>
         <file>icons/clipboard-text.png</file>
         <file>icons/blue-document-attribute-s.png</file>
+        <file>icons/blue-document-import.png</file>
+        <file>icons/blue-document-export.png</file>
+        <file>icons/blue-document--pencil.png</file>
         <file>icons/magnifier-zoom-fit.png</file>
         <file>icons/magnifier-zoom-in.png</file>
         <file>icons/magnifier-zoom-out.png</file>
@@ -105,5 +115,9 @@
         <file>icons/layers-alignment-center.png</file>
         <file>icons/layers-alignment-left.png</file>
         <file>icons/layers-alignment-right.png</file>
+        <file>icons/layer-flip-vertical.png</file>
+        <file>icons/layer-flip.png</file>
+        <file>icons/highlighter--plus.png</file>
+        <file>icons/highlighter--exclamation.png</file>
     </qresource>
 </RCC>

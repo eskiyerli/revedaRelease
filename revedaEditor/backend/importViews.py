@@ -26,7 +26,7 @@
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.hdlBackEnd as hdl
 import revedaEditor.backend.libraryMethods as libm  # library view functions
-import revedaEditor.backend.schBackEnd as scb  # import the backend
+import revedaEditor.backend.libBackEnd as scb  # import the backend
 import revedaEditor.backend.libraryModelView as lmview
 import revedaEditor.common.shapes as shp
 import revedaEditor.fileio.symbolEncoder as se

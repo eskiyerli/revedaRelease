@@ -22,8 +22,9 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
-
 import json
+import os
+
 # from hashlib import new
 import pathlib
 
@@ -43,40 +44,33 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from dotenv import load_dotenv
 from quantiphy import Quantity
 
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
 if os.environ.get("REVEDA_PDK_PATH"):
-
-    import pdk.layoutLayers as laylyr
     import pdk.process as fabproc
 else:
-    import defaultPDK.layoutLayers as laylyr
     import defaultPDK.process as fabproc
-
-
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.backend.libraryModelView as lmview
-import revedaEditor.backend.schBackEnd as scb
+import revedaEditor.backend.libBackEnd as libb
 import revedaEditor.fileio.gdsExport as gdse
 import revedaEditor.fileio.layoutEncoder as layenc
 import revedaEditor.fileio.loadJSON as lj
-import revedaEditor.gui.editorScenes as escn
 import revedaEditor.gui.editorViews as edv
 import revedaEditor.gui.editorWindow as edw
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.lsw as lsw
+from revedaEditor.gui.layoutScene import layoutScene
 from revedaEditor.gui.startThread import startThread
-import revedaEditor.resources.resources
+
+load_dotenv()
 
 
 class layoutEditor(edw.editorWindow):
-    def __init__(self, viewItem: scb.viewItem, libraryDict: dict, libraryView) -> None:
+    def __init__(self, viewItem: libb.viewItem, libraryDict: dict, libraryView) -> None:
         super().__init__(viewItem, libraryDict, libraryView)
         self.setWindowTitle(f"Layout Editor - {self.cellName} - {self.viewName}")
         self.setWindowIcon(QIcon(":/icons/edLayer-shape.png"))
@@ -96,7 +90,7 @@ class layoutEditor(edw.editorWindow):
         super()._createMenuBar()
         self.alignMenu = QMenu("Align", self)
         self.alignMenu.setIcon(QIcon("icons/layers-alignment-middle.png"))
-        
+
         self.propertyMenu = self.menuEdit.addMenu("Properties")
 
     def _createActions(self):
@@ -240,12 +234,8 @@ class layoutEditor(edw.editorWindow):
 
     def createPinClick(self):
         dlg = ldlg.createLayoutPinDialog(self)
-        pinLayersNames = [
-            f"{item.name} [{item.purpose}]" for item in laylyr.pdkPinLayers
-        ]
-        textLayersNames = [
-            f"{item.name} [{item.purpose}]" for item in laylyr.pdkTextLayers
-        ]
+        pinLayersNames = [f"{item.name} [{item.purpose}]" for item in laylyr.pdkPinLayers]
+        textLayersNames = [f"{item.name} [{item.purpose}]" for item in laylyr.pdkTextLayers]
         dlg.pinLayerCB.addItems(pinLayersNames)
         dlg.labelLayerCB.addItems(textLayersNames)
 
@@ -264,21 +254,17 @@ class layoutEditor(edw.editorWindow):
             dlg.labelHeightCB.setCurrentText(
                 str(self.centralW.scene.newLabelTuple.fontHeight)
             )
-            dlg.labelAlignCB.setCurrentText(
-                self.centralW.scene.newLabelTuple.labelAlign
-            )
-            dlg.labelOrientCB.setCurrentText(
-                self.centralW.scene.newLabelTuple.labelOrient
-            )
+            dlg.labelAlignCB.setCurrentText(self.centralW.scene.newLabelTuple.labelAlign)
+            dlg.labelOrientCB.setCurrentText(self.centralW.scene.newLabelTuple.labelOrient)
         if dlg.exec() == QDialog.Accepted:
             self.centralW.scene.editModes.setMode("drawPin")
             pinName = dlg.pinName.text()
             pinDir = dlg.pinDir.currentText()
             pinType = dlg.pinType.currentText()
             pinLayerName = dlg.pinLayerCB.currentText().split()[0]
-            pinLayer = [
-                item for item in laylyr.pdkPinLayers if item.name == pinLayerName
-            ][0]
+            pinLayer = [item for item in laylyr.pdkPinLayers if item.name == pinLayerName][
+                0
+            ]
             labelLayerName = dlg.labelLayerCB.currentText().split()[0]
             labelLayer = [
                 item for item in laylyr.pdkTextLayers if item.name == labelLayerName
@@ -303,9 +289,7 @@ class layoutEditor(edw.editorWindow):
 
     def createLabelClick(self):
         dlg = ldlg.createLayoutLabelDialog(self)
-        textLayersNames = [
-            f"{item.name} [{item.purpose}]" for item in laylyr.pdkTextLayers
-        ]
+        textLayersNames = [f"{item.name} [{item.purpose}]" for item in laylyr.pdkTextLayers]
         dlg.labelLayerCB.addItems(textLayersNames)
         if dlg.exec() == QDialog.Accepted:
             self.centralW.scene.editModes.setMode("addLabel")
@@ -316,7 +300,7 @@ class layoutEditor(edw.editorWindow):
             ][0]
             fontFamily = dlg.familyCB.currentText()
             fontStyle = dlg.fontStyleCB.currentText()
-            fontHeight = float(dlg.labelHeightCB.currentText())
+            fontHeight = int(float(dlg.labelHeightCB.currentText()) * fabproc.dbu)
             labelAlign = dlg.labelAlignCB.currentText()
             labelOrient = dlg.labelOrientCB.currentText()
             self.centralW.scene.newLabelTuple = ddef.layoutLabelTuple(
@@ -343,11 +327,6 @@ class layoutEditor(edw.editorWindow):
             self.centralW.scene.editModes.setMode("addVia")
             self.centralW.scene.addVia = True
             if dlg.singleViaRB.isChecked():
-                # selViaDefTuple = [
-                #     viaDefTuple
-                #     for viaDefTuple in fabproc.processVias
-                #     if viaDefTuple.name == dlg.singleViaNamesCB.currentText()
-                # ][0]
                 selViaDefTuple = fabproc.processVias[
                     fabproc.processViaNames.index(dlg.singleViaNamesCB.currentText())
                 ]
@@ -368,7 +347,7 @@ class layoutEditor(edw.editorWindow):
                 selViaDefTuple = [
                     viaDefTuple
                     for viaDefTuple in fabproc.processVias
-                    if viaDefTuple.name == dlg.arrayViaNamesCB.currentText()
+                    if viaDefTuple.netName == dlg.arrayViaNamesCB.currentText()
                 ][0]
 
                 singleViaTuple = ddef.singleViaTuple(
@@ -417,12 +396,9 @@ class layoutEditor(edw.editorWindow):
             libItem = libm.getLibItem(
                 libraryModel, self.layoutChooser.libNamesCB.currentText()
             )
-            cellItem = libm.getCellItem(
-                libItem, self.layoutChooser.cellCB.currentText()
-            )
-            viewItem = libm.getViewItem(
-                cellItem, self.layoutChooser.viewCB.currentText()
-            )
+            cellItem = libm.getCellItem(libItem, self.layoutChooser.cellCB.currentText())
+            viewItem = libm.getViewItem(cellItem, self.layoutChooser.viewCB.currentText())
+            libm.findViewItem(libraryModel, self.layoutChooser.libNamesCB.currentText())
             self.centralW.scene.layoutInstanceTuple = ddef.viewItemTuple(
                 libItem, cellItem, viewItem
             )
@@ -438,13 +414,9 @@ class layoutEditor(edw.editorWindow):
             gdsExportPath = self.gdsExportDir / f"{self.cellName}.gds"
             # reprocess the layout to get the layout positions right.
             topLevelItems = [
-                item
-                for item in self.centralW.scene.items()
-                if item.parentItem() is None
+                item for item in self.centralW.scene.items() if item.parentItem() is None
             ]
-            decodedData = json.loads(
-                json.dumps(topLevelItems, cls=layenc.layoutEncoder)
-            )
+            decodedData = json.loads(json.dumps(topLevelItems, cls=layenc.layoutEncoder))
             layoutItems = [
                 lj.layoutItems(self.centralW.scene).create(item)
                 for item in decodedData
@@ -465,7 +437,7 @@ class layoutContainer(QWidget):
     def __init__(self, parent: layoutEditor):
         super().__init__(parent=parent)
         self.parent = parent
-        self.scene = escn.layoutScene(self)
+        self.scene = layoutScene(self)
         self.view = edv.layoutView(self.scene, self)
         self.lswModel = lsw.layerDataModel(laylyr.pdkAllLayers)
         layerViewTable = lsw.layerViewTable(self, self.lswModel)
@@ -474,7 +446,6 @@ class layoutContainer(QWidget):
         self.lswWidget.lswTable.dataSelected.connect(self.selectLayer)
         self.lswWidget.lswTable.layerSelectable.connect(self.layerSelectableChange)
         self.lswWidget.lswTable.layerVisible.connect(self.layerVisibleChange)
-
         self.init_UI()
 
     def init_UI(self):
@@ -497,12 +468,12 @@ class layoutContainer(QWidget):
 
     def findSelectedLayer(self, layerName: str, layerPurpose: str):
         for layer in laylyr.pdkAllLayers:
-            if layer.name == layerName and layer.purpose == layerPurpose:
+            if layer.netName == layerName and layer.purpose == layerPurpose:
                 return layer
         return laylyr.pdkAllLayers[0]
 
     def layerSelectableChange(
-        self, layerName: str, layerPurpose: str, layerSelectable: bool
+            self, layerName: str, layerPurpose: str, layerSelectable: bool
     ):
         selectedLayer = self.findSelectedLayer(layerName, layerPurpose)
         if selectedLayer:
@@ -510,9 +481,9 @@ class layoutContainer(QWidget):
 
         for item in self.scene.items():
             if (
-                hasattr(item, "layer")
-                and item.layer == selectedLayer
-                and item.parentItem() is None
+                    hasattr(item, "layer")
+                    and item.layer == selectedLayer
+                    and item.parentItem() is None
             ):
                 item.setEnabled(layerSelectable)
                 item.update()

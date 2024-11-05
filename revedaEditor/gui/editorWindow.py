@@ -23,34 +23,19 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
-# from hashlib import new
+
 import pathlib
 
 # import numpy as np
-from PySide6.QtCore import (
-    Qt,
-)
-from PySide6.QtGui import (
-    QAction,
-    QIcon,
-    QImage,
-    QKeySequence,
-)
+from PySide6.QtCore import (Qt, QSize, )
+from PySide6.QtGui import (QAction, QIcon, QImage, QKeySequence, )
 from PySide6.QtPrintSupport import QPrintDialog, QPrinter, QPrintPreviewDialog
-from PySide6.QtWidgets import (
-    QApplication,
-    QDialog,
-    QFileDialog,
-    QLabel,
-    QMainWindow,
-    QMenu,
-    QToolBar,
-)
-
+from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QLabel, QMainWindow,
+                               QMenu, QToolBar, )
 
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryModelView as lmview
-import revedaEditor.backend.schBackEnd as scb
+import revedaEditor.backend.libBackEnd as libb
 import revedaEditor.gui.helpBrowser as hlp
 import revedaEditor.gui.propertyDialogues as pdlg
 import revedaEditor.resources.resources
@@ -62,26 +47,21 @@ class editorWindow(QMainWindow):
     Base class for editor windows.
     """
 
-    def __init__(
-        self,
-        viewItem: scb.viewItem,
-        libraryDict: dict,
-        libraryView: lmview.designLibrariesView,
-    ):  # file is a pathlib.Path object
+    def __init__(self, viewItem: libb.viewItem, libraryDict: dict,
+                 libraryView: lmview.designLibrariesView, ):  # file is a pathlib.Path object
         super().__init__()
         self.centralW = None
         self.viewItem = viewItem
-        self.file: pathlib.Path = self.viewItem.data(
-            Qt.UserRole + 2
-        )  # pathlib Path object
+        self.file: pathlib.Path = self.viewItem.data(Qt.UserRole + 2)  # pathlib Path object
         self.cellItem = self.viewItem.parent()
         self.cellName = self.cellItem.cellName
         self.libItem = self.cellItem.parent()
-        self.libName = self.libItem.libraryName
-        self.viewName = self.viewItem.viewName
+        self.libName: str = self.libItem.libraryName
+        self.viewName: str = self.viewItem.viewName
         self.libraryDict = libraryDict
         self.libraryView = libraryView
         self.parentEditor = None  # type: editorWindow
+        self.parentObj = None  # type symbol or layoutInstance
         self._app = QApplication.instance()  # main application pointer
         self.appMainW = self.libraryView.parent.parent.appMainW
         self.logger = self.appMainW.logger
@@ -93,8 +73,8 @@ class editorWindow(QMainWindow):
         self.majorGrid = 10  # dot/line grid spacing
         self.snapGrid = 5  # snapping grid size
         self.snapTuple = (self.snapGrid, self.snapGrid)
-        self.snapDistance = 2 * self.snapGrid
         self.init_UI()
+        self._createSignalConnections()
 
     def init_UI(self):
         self.resize(1600, 800)
@@ -190,7 +170,8 @@ class editorWindow(QMainWindow):
 
         alignVerticalIcon = QIcon(":/icons/layers-alignment-center.png")
         self.alignVerticalAction = QAction(alignVerticalIcon, "Vertical Align", self)
-        self.alignVerticalAction.setToolTip("Align selected objects vertically at the centre")
+        self.alignVerticalAction.setToolTip(
+            "Align selected objects vertically at the centre")
 
         alignRightIcon = QIcon(":/icons/layers-alignment-center.png")
         self.alignRightAction = QAction(alignRightIcon, "Right Align", self)
@@ -210,9 +191,7 @@ class editorWindow(QMainWindow):
         self.selectConfigAction.setToolTip("Configure the selection options")
 
         panZoomConfigIcon = QIcon(":/icons/selection-resize.png")
-        self.panZoomConfigAction = QAction(
-            panZoomConfigIcon, "Pan/Zoom Config...", self
-        )
+        self.panZoomConfigAction = QAction(panZoomConfigIcon, "Pan/Zoom Config...", self)
         self.panZoomConfigAction.setToolTip("Configure the pan/zoom options")
 
         undoIcon = QIcon(":/icons/arrow-circle-315-left.png")
@@ -261,6 +240,14 @@ class editorWindow(QMainWindow):
         scaleIcon = QIcon(":/icons/selection-resize.png")
         self.scaleAction = QAction(scaleIcon, "Scale...", self)
         self.scaleAction.setToolTip("Scale item")
+
+        verticalFlipIcon = QIcon(":/icons/layer-flip-vertical.png")
+        self.verticalFlipAction = QAction(verticalFlipIcon, "Vertical Flip", self)
+        self.verticalFlipAction.setToolTip("Vertical Flip")
+
+        horizontalFlipIcon = QIcon(":/icons/layer-flip.png")
+        self.horizontalFlipAction = QAction(horizontalFlipIcon, "Horizontal Flip", self)
+        self.horizontalFlipAction.setToolTip("Horizontal Flip")
 
         netNameIcon = QIcon(":/icons/node-design.png")
         self.netNameAction = QAction(netNameIcon, "Net Name...", self)
@@ -378,9 +365,8 @@ class editorWindow(QMainWindow):
         self.selectPinAction.setToolTip("Select Pins Only")
 
         removeSelectFilterIcon = QIcon(":icons/eraser.png")
-        self.removeSelectFilterAction = QAction(
-            removeSelectFilterIcon, "Remove Select Filters", self
-        )
+        self.removeSelectFilterAction = QAction(removeSelectFilterIcon,
+                                                "Remove Select Filters", self)
         self.removeSelectFilterAction.setToolTip("Remove Selection Filters")
 
         ignoreIcon = QIcon(":/icons/minus-circle.png")
@@ -398,6 +384,7 @@ class editorWindow(QMainWindow):
     def _createToolBars(self):
         # Create tools bar called "main toolbar"
         self.toolbar = QToolBar("Main Toolbar", self)
+        self.toolbar.setIconSize(QSize(32, 32))
         # place toolbar at top
         self.addToolBar(self.toolbar)
         self.toolbar.addAction(self.saveCellAction)
@@ -413,6 +400,8 @@ class editorWindow(QMainWindow):
         self.toolbar.addAction(self.copyAction)
         self.toolbar.addAction(self.stretchAction)
         self.toolbar.addAction(self.rotateAction)
+        self.toolbar.addAction(self.horizontalFlipAction)
+        self.toolbar.addAction(self.verticalFlipAction)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.fitAction)
         self.toolbar.addAction(self.zoomInAction)
@@ -448,6 +437,8 @@ class editorWindow(QMainWindow):
         self.menuEdit.addAction(self.moveOriginAction)
         self.menuEdit.addAction(self.stretchAction)
         self.menuEdit.addAction(self.rotateAction)
+        self.menuEdit.addAction(self.horizontalFlipAction)
+        self.menuEdit.addAction(self.verticalFlipAction)
         self.selectMenu = QMenu('Selection', self)
         self.selectMenu.setIcon(QIcon('icons/node-select.png'))
         self.menuEdit.addMenu(self.selectMenu)
@@ -492,8 +483,11 @@ class editorWindow(QMainWindow):
         self.copyAction.triggered.connect(self.copyClick)
         self.undoAction.triggered.connect(self.undoClick)
         self.redoAction.triggered.connect(self.redoClick)
+        self.moveAction.triggered.connect(self.moveClick)
         self.moveByAction.triggered.connect(self.moveByClick)
         self.rotateAction.triggered.connect(self.rotateItemClick)
+        self.verticalFlipAction.triggered.connect(self.verticalFlipClick)
+        self.horizontalFlipAction.triggered.connect(self.horizontalFlipClick)
         self.goUpAction.triggered.connect(self.goUpHierarchy)
         self.helpAction.triggered.connect(self.helpClick)
         self.aboutAction.triggered.connect(self.aboutClick)
@@ -512,7 +506,10 @@ class editorWindow(QMainWindow):
 
     def _editorContextMenu(self):
         self.centralW.scene.itemContextMenu.addAction(self.copyAction)
+        self.centralW.scene.itemContextMenu.addAction(self.moveAction)
         self.centralW.scene.itemContextMenu.addAction(self.moveByAction)
+        self.centralW.scene.itemContextMenu.addAction(self.verticalFlipAction)
+        self.centralW.scene.itemContextMenu.addAction(self.horizontalFlipAction)
         self.centralW.scene.itemContextMenu.addAction(self.rotateAction)
         self.centralW.scene.itemContextMenu.addAction(self.deleteAction)
         self.centralW.scene.itemContextMenu.addAction(self.objPropAction)
@@ -551,16 +548,16 @@ class editorWindow(QMainWindow):
             scd.partialSelection.setChecked(True)
         else:
             scd.fullSelection.setChecked(True)
-        scd.snapDistanceEntry.setText(str(self.snapDistance))
+        scd.snapDistanceEntry.setText(str(self.centralW.scene._snapDistance))
         if scd.exec() == QDialog.Accepted:
             self.centralW.scene.partialSelection = scd.partialSelection.isChecked()
-            self.snapDistance = int(float(scd.snapDistanceEntry.text()))
+            self.centralW.scene._snapDistance = int(float(scd.snapDistanceEntry.text()))
 
-    def checkSaveCell(self):
-        pass
-
-    def saveCell(self):
-        pass
+    # def checkSaveCell(self):
+    #     pass
+    #
+    # def saveCell(self):
+    #     pass
 
     def readOnlyCellClick(self):
         self.centralW.scene.readOnly = self.readOnlyCellAction.isChecked()
@@ -575,9 +572,7 @@ class editorWindow(QMainWindow):
             printer = dlg.printer()
             printRunner = startThread(self.centralW.view.printView(printer))
             self.appMainW.threadPool.start(printRunner)
-            self.logger.info(
-                "Printing started"
-            )  # self.centralW.view.printView(printer)
+            self.logger.info("Printing started")  # self.centralW.view.printView(printer)
 
     def printPreviewClick(self):
         printer = QPrinter(QPrinter.ScreenResolution)
@@ -587,9 +582,8 @@ class editorWindow(QMainWindow):
         ppdlg.exec()
 
     def imageExportClick(self):
-        image = QImage(
-            self.centralW.view.viewport().size(), QImage.Format_ARGB32_Premultiplied
-        )
+        image = QImage(self.centralW.view.viewport().size(),
+                       QImage.Format_ARGB32_Premultiplied)
         self.centralW.view.printView(image)
         fdlg = QFileDialog(self, caption="Select or create an image file")
         fdlg.setDefaultSuffix("png")
@@ -615,13 +609,16 @@ class editorWindow(QMainWindow):
         self.centralW.scene.stretchSelectedItems()
 
     def moveClick(self):
+        self.messageLine.setText('Move Selected Items')
         self.centralW.scene.editModes.setMode("moveItem")
 
     def moveByClick(self):
         self.centralW.scene.editModes.setMode("moveItem")
+        self.messageLine.setText('Enter move distances.')
         self.centralW.scene.moveBySelectedItems()
 
     def rotateClick(self):
+        self.messageLine.setText('Rotate Selected Items')
         self.centralW.scene.editModes.setMode("rotateItem")
 
     def panView(self):
@@ -642,18 +639,31 @@ class editorWindow(QMainWindow):
         self.centralW.scene.editModes.setMode("copyItem")
         self.centralW.scene.copySelectedItems()
 
+    def horizontalFlipClick(self):
+        self.messageLine.setText('Flipping Selected Items Horizontally')
+        self.centralW.scene.flipHorizontal()
+
+    def verticalFlipClick(self):
+        self.messageLine.setText('Flipping Selected Items Vertically')
+        self.centralW.scene.flipVertical()
+
     def zoomIn(self):
         self.centralW.view.scale(1.25, 1.25)
+        self.centralW.view.viewRect = self.centralW.view.mapToScene(
+            self.rect()).boundingRect().toRect()
 
     def zoomOut(self):
         self.centralW.view.scale(0.8, 0.8)
+        self.centralW.view.viewRect = self.centralW.view.mapToScene(
+            self.rect()).boundingRect().toRect()
 
     def closeWindow(self):
         self.close()
 
     def closeEvent(self, event):
         cellViewTuple = ddef.viewTuple(self.libName, self.cellName, self.viewName)
-        self.appMainW.openViews.pop(cellViewTuple)
+        if cellViewTuple in self.appMainW.openViews:
+            self.appMainW.openViews.pop(cellViewTuple)
         event.accept()
         super().closeEvent(event)
 
@@ -661,6 +671,9 @@ class editorWindow(QMainWindow):
         self.centralW.scene.editModes.setMode("changeOrigin")
 
     def undoClick(self, s):
+        for i in range(self.centralW.scene.undoStack.count()):
+            print(f'command {i}: {self.centralW.scene.undoStack.command(i).text()}')
+        self.messageLine.setText(self.centralW.scene.undoStack.undoText())
         self.centralW.scene.undoStack.undo()
 
     def redoClick(self, s):
@@ -672,3 +685,15 @@ class editorWindow(QMainWindow):
     def redraw(self):
         self.messageLine.setText("Redrawing...")
         self.centralW.view.update()
+
+    def _findTopParent(self):
+        current = self
+        while current is not None and hasattr(current, 'parentObj'):
+            if current.parentObj is None:
+                return current
+            current = current.parentObj
+        return current
+
+    def _createSignalConnections(self):
+        self.centralW.scene.selectionChanged.connect(self.appMainW.selectionChangedScene)
+        self.centralW.view.keyPressedSignal.connect(self.appMainW.viewKeyPressed)

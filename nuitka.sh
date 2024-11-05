@@ -1,5 +1,7 @@
+#!/usr/bin/env bash
+#
 #    “Commons Clause” License Condition v1.0
-#   #
+#
 #    The Software is provided to you by the Licensor under the License, as defined
 #    below, subject to the following condition.
 #
@@ -22,23 +24,7 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
+#
 
-from PySide6.QtCore import (
-    QRunnable,
-    Slot,
-)
-
-
-class startThread(QRunnable):
-    __slots__ = ("fn",)
-
-    def __init__(self, fn):
-        super().__init__()
-        self.fn = fn
-
-    @Slot()
-    def run(self) -> None:
-        try:
-            self.fn
-        except Exception as e:
-            print(e)
+#python -m nuitka --standalone reveda.py --enable-plugin=pyside6 --include-package=socket,queue  --include-data-dir=./docs=docs/ --include-data-files=.env=. --include-data-files=revinit.py=. --include-data-files=README.md=. --include-data-files=LICENSE.txt=. --include-package=pdk --include-data-dir=exampleLibraries=./exampleLibraries
+python -m nuitka reveda.py --standalone --enable-plugin=pyside6 --include-package=socket,queue,pdk,numpy --include-data-files=./pdk/sg13g2_tech.json=./pdk/sg13g2_tech.json

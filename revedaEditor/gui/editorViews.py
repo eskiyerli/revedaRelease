@@ -1,3 +1,28 @@
+#    “Commons Clause” License Condition v1.0
+#   #
+#    The Software is provided to you by the Licensor under the License, as defined
+#    below, subject to the following condition.
+#
+#    Without limiting other conditions in the License, the grant of rights under the
+#    License will not include, and the License does not grant to you, the right to
+#    Sell the Software.
+#
+#    For purposes of the foregoing, “Sell” means practicing any or all of the rights
+#    granted to you under the License to provide to third parties, for a fee or other
+#    consideration (including without limitation fees for hosting or consulting/
+#    support services related to the Software), a product or service whose value
+#    derives, entirely or substantially, from the functionality of the Software. Any
+#    license notice or attribution required by the License must also include this
+#    Commons Clause License Condition notice.
+#
+#   Add-ons and extensions developed for this software may be distributed
+#   under their own separate licenses.
+#
+#    Software: Revolution EDA
+#    License: Mozilla Public License 2.0
+#    Licensor: Revolution Semiconductor (Registered in the Netherlands)
+#
+
 from collections import Counter
 
 # import numpy as np
@@ -19,6 +44,7 @@ from PySide6.QtWidgets import (
 
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 if os.environ.get("REVEDA_PDK_PATH"):
@@ -34,11 +60,14 @@ import revedaEditor.backend.undoStack as us
 # if os.environ.get('REVEDASIM_PATH'):
 #     import revedasim.simMainWindow as smw
 
+
 class editorView(QGraphicsView):
     """
     The qgraphicsview for qgraphicsscene. It is used for both schematic and layout editors.
     """
-    zoomFactorChanged = Signal(float)
+    keyPressedSignal = Signal(int)
+
+    # zoomFactorChanged = Signal(float)
     def __init__(self, scene, parent):
         super().__init__(scene, parent)
         self.parent = parent
@@ -79,7 +108,6 @@ class editorView(QGraphicsView):
         self.setRenderHint(QPainter.TextAntialiasing, True)
         self.viewRect = self.mapToScene(self.rect()).boundingRect().toRect()
 
-
     def wheelEvent(self, event: QWheelEvent) -> None:
         """
         Handle the wheel event for zooming in and out of the view.
@@ -100,22 +128,8 @@ class editorView(QGraphicsView):
         # Calculate the delta and adjust the scene position
         delta = newPos - oldPos
         self.translate(delta.x(), delta.y())
-        self.zoomFactorChanged.emit(self.zoomFactor)
-
-    def snapToBase(self, number, base):
-        """
-        Restrict a number to the multiples of base
-        """
-        return int(base * int(round(number / base)))
-
-    def snapToGrid(self, point: QPoint, snapTuple: tuple[int, int]):
-        """
-        snap point to grid. Divides and multiplies by grid size.
-        """
-        return QPoint(
-            self.snapToBase(point.x(), snapTuple[0]),
-            self.snapToBase(point.y(), snapTuple[1]),
-        )
+        self.viewRect = self.mapToScene(self.rect()).boundingRect().toRect()
+        # self.zoomFactorChanged.emit(self.zoomFactor)
 
     def drawBackground(self, painter, rect):
         """
@@ -195,7 +209,11 @@ class editorView(QGraphicsView):
         return x_coords, y_coords
 
     def keyPressEvent(self, event: QKeyEvent):
+        self.keyPressedSignal.emit(event.key())
         match event.key():
+            case Qt.Key_M:
+                self.scene.editModes.setMode('moveItem')
+                self.editor.messageLine.setText('Move Item')
             case Qt.Key_F:
                 self.scene.fitItemsInView()
             case Qt.Key_Left:
@@ -209,6 +227,11 @@ class editorView(QGraphicsView):
             case Qt.Key_Escape:
                 self.scene.editModes.setMode("selectItem")
                 self.editor.messageLine.setText("Select Item")
+                self.scene.deselectAll()
+                self.scene._items = None
+                if self.scene._selectionRectItem:
+                    self.scene.removeItem(self.scene._selectionRectItem)
+                    self.scene._selectionRectItem = None
             case _:
                 super().keyPressEvent(event)
 
@@ -254,16 +277,13 @@ class symbolView(editorView):
         super().__init__(self.scene, self.parent)
 
     def keyPressEvent(self, event: QKeyEvent):
+        super().keyPressEvent(event)
         match event.key():
             case Qt.Key_Escape:
-                self.scene.editModes.setMode("selectItem")
-                self.editor.messageLine.setText("Select Item")
                 if self.scene.polygonGuideLine is not None:
                     self.scene.removeItem(self.scene.polygonGuideLine)
                     self.scene.polygonGuideLine = None
                     self.scene.newPolygon = None
-            case _:
-                super().keyPressEvent(event)
 
 
 class schematicView(editorView):
@@ -282,7 +302,6 @@ class schematicView(editorView):
             if isinstance(guideLineItem, net.guideLine)
         }
         self.removeSnapLines(viewSnapLinesSet)
-
         self.mergeSplitViewNets()
 
     def mergeSplitViewNets(self):
@@ -296,20 +315,19 @@ class schematicView(editorView):
                 self.scene.mergeSplitNets(netItem)
 
     def removeSnapLines(self, viewSnapLinesSet):
-
         undoCommandList = []
         for snapLine in viewSnapLinesSet:
-            lines: list[net.schematicNet] = self.scene.addStretchWires(
+            lines = self.scene.addStretchWires(
                 snapLine.sceneEndPoints[0], snapLine.sceneEndPoints[1]
             )
 
-            if lines:
+            if lines != []:
                 for line in lines:
                     line.inheritGuideLine(snapLine)
-                undoCommandList.append(us.addShapesUndo(self.scene, lines))
-
-        undoCommandList.append(us.deleteShapesUndo(self.scene, list(viewSnapLinesSet)))
-        self.scene.addUndoMacroStack(undoCommandList, 'Stretch Wires')
+                    undoCommandList.append(us.addShapeUndo(self.scene, line))
+                self.scene.addUndoMacroStack(undoCommandList, "Stretch Wires")
+                # undoCommandList.append(us.addShapesUndo(self.scene, lines))
+            self.scene.removeItem(snapLine)
 
     def drawBackground(self, painter, rect):
         super().drawBackground(painter, rect)
@@ -363,21 +381,26 @@ class layoutView(editorView):
         self.parent = parent
         super().__init__(self.scene, self.parent)
 
-
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Escape:
             if self.scene._newPath is not None:
                 self.scene._newPath = None
             elif self.scene._newRect:
+                if self.scene._newRect.rect.isNull():
+                    self.scene.removeItem(self.scene._newRect)
+                    self.scene.undoStack.removeLastCommand()
                 self.scene._newRect = None
             elif self.scene._stretchPath is not None:
                 self.scene._stretchPath.setSelected(False)
                 self.scene._stretchPath.stretch = False
                 self.scene._stretchPath = None
-            elif self.scene._newPolygon:
+            elif self.scene.editModes.drawPolygon:
                 self.scene.removeItem(self.scene._polygonGuideLine)
-                self.scene._newPolygon.points.pop(0) # remove first duplicate point
+                self.scene._newPolygon.points.pop(0)  # remove first duplicate point
                 self.scene._newPolygon = None
+            elif self.scene.editModes.addInstance:
+                self.scene.newInstance = None
+                self.scene.layoutInstanceTuple = None
 
             self.scene.editModes.setMode("selectItem")
         super().keyPressEvent(event)

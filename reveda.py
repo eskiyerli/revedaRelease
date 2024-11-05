@@ -22,20 +22,12 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
-# nuitka-project-if: {OS} == "Darwin":
-#    nuitka-project: --standalone
-#    nuitka-project: --macos-create-app-bundle
+
 # The PySide6 plugin covers qt-plugins
-# nuitka-project: --standalone
-# nuitka-project: --windows-console-mode=disable
-# nuitka-project: --include-plugin-directory=revedaEditor
-# nuitka-project: --nofollow-import-to=pdk,defaultPDK
+# nuitka project: --include-plugin-directory=revedaEditor
 # nuitka-project: --enable-plugin=pyside6
-# nuitka-project: --product-version="0.7.1"
-# nuitka-project: --linux-icon=./logo-color.png
-# nuitka-project: --windows-icon-from-ico=./logo-color.png
-# nuitka-project: --company-name="Revolution EDA"
-# nuitka-project: --file-description="Electronic Design Automation Software for Professional Custom IC Design Engineers"
+# nuitka-project --product-version=0.7.2
+
 
 import os
 import platform
@@ -49,8 +41,9 @@ from contextlib import redirect_stdout, redirect_stderr
 from dotenv import load_dotenv
 from pathlib import Path
 
-
-# simulation window
+import cProfile
+import pstats
+from pstats import SortKey
 
 
 class revedaApp(QApplication):
@@ -65,6 +58,8 @@ class revedaApp(QApplication):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Load environment variables
+        self.revedaeditor_pathObj = None
+        self.revedasim_pathObj = None
         load_dotenv()
         reveda_runpathObj = Path(__file__).resolve().parent
         self.revedaeditor_path = None
@@ -94,9 +89,7 @@ class revedaApp(QApplication):
             if Path(self.reveda_pdk_path).is_absolute():
                 self.reveda_pdk_pathObj = Path(self.reveda_pdk_path)
             else:
-                self.reveda_pdk_pathObj = reveda_runpathObj.joinpath(
-                    self.reveda_pdk_path
-                )
+                self.reveda_pdk_pathObj = reveda_runpathObj.joinpath(self.reveda_pdk_path)
             sys.path.append(str(self.reveda_pdk_pathObj))
 
 
@@ -124,3 +117,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    # cProfile.run('main()', 'output.prof')
+    #
+    # # Print the 20 lines that took the most cumulative time
+    # p = pstats.Stats('output.prof')
+    # p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(20)

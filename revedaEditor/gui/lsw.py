@@ -34,10 +34,11 @@ from PySide6.QtGui import (
     QBitmap,
     QImage,
 )
-from PySide6.QtWidgets import (QTableView, QMenu, QGraphicsItem,)
+from PySide6.QtWidgets import (QTableView, QMenu, QGraphicsItem, )
 
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 if os.environ.get("REVEDA_PDK_PATH"):
@@ -103,7 +104,7 @@ class layerDataModel(QStandardItemModel):
         ]
 
     @staticmethod
-    def createImage(filePath:Path, color: QColor):
+    def createImage(filePath: Path, color: QColor):
         # Read the file and split lines
         with filePath.open('r') as file:
             lines = file.readlines()
@@ -122,6 +123,7 @@ class layerDataModel(QStandardItemModel):
                     image.setPixelColor(x, y, QColor(0, 0, 0, 0))  # Transparent for 0
 
         return image
+
 
 class layerViewTable(QTableView):
     dataSelected = Signal(str, str)
@@ -157,7 +159,7 @@ class layerViewTable(QTableView):
             self.dataSelected.emit(layerName, layerPurpose)
 
     def onDataChanged(
-        self, topLeft: QModelIndex, bottomRight: QModelIndex, roles: list
+            self, topLeft: QModelIndex, bottomRight: QModelIndex, roles: list
     ):
         # Check if the changed data involves the check state
         if Qt.CheckStateRole in roles:

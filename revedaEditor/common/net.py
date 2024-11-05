@@ -22,6 +22,8 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
+import os
+
 # net class definition.
 from PySide6.QtCore import (
     QPoint,
@@ -32,93 +34,93 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import (
     QPen,
-    QStaticText,
     QPainterPath,
-    QFont,
+    QPainter,
 )
 from PySide6.QtWidgets import (
     QGraphicsLineItem,
+    QGraphicsSimpleTextItem,
     QGraphicsItem,
     QGraphicsPathItem,
     QGraphicsSceneMouseEvent,
     QGraphicsSceneHoverEvent,
 )
-import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.schLayers as schlyr
+    import pdk.schLayers as schLayers
 
 else:
-    import defaultPDK.schLayers as schlyr
+    import defaultPDK.schLayers as schLayers
 
 import math
-from typing import Union, NamedTuple, Type
-from enum import Enum
+from typing import Union, Type, Set, Tuple
+from enum import IntEnum
 
 
-class netNameStrengthEnum(Enum):
-    NONAME = 1
+
+class NetMode(IntEnum):
+    ORTHOGONAL = 0
+    DIAGONAL = 1
+    FREE = 2
+
+
+class customIntEnum(IntEnum):
+    @classmethod
+    def _missing_(cls, value):
+        # Handle out-of-range values
+        return cls(max(min(value, max(cls)), min(cls)))
+
+    def increment(self):
+        """Increment the enum value, wrapping around if necessary."""
+        try:
+            return self.__class__(self.value + 1)
+        except ValueError:
+            return self.__class__(min(self.__class__))
+
+    def decrement(self):
+        """Decrement the enum value, wrapping around if necessary."""
+        try:
+            return self.__class__(self.value - 1)
+        except ValueError:
+            return self.__class__(max(self.__class__))
+
+class netNameStrengthEnum(customIntEnum):
+    NONAME = 0
+    WEAK = 1
     INHERIT = 2
     SET = 3
 
-
-class pointSelfIndex(NamedTuple):
-    point: QPoint
-    selfIndex: int
-
+class schematicNetLine(QGraphicsLineItem):
+    def __init__(self, start: QPoint, end: QPoint, mode: int = 0):
+        super().__init__(start, end)
+        
 
 class schematicNet(QGraphicsItem):
-    _netSnapLines: dict
-    __slots__ = (
-        "_mode",
-        "_name",
-        "_nameConflict",
-        "_netNameStrength",
-        "_highlighted",
-        "_flightLinesSet",
-        "_connectedNetsSet",
-        "_netIndexTupleSet",
-        "_scene",
-        "_netSnapLines",
-        "_stretch",
-        "_stretchSide",
-        "_nameFont",
-        "_nameItem",
-        "_draftLine",
-        "_shapeRect",
-        "_boundingRect",
-        "_angle",
-        "_transformOriginPoint",
-    )
+    # _netSnapLines: dict
 
     def __init__(self, start: QPoint, end: QPoint, mode: int = 0):
         super().__init__()
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemIsMovable, False)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         # self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
         self.setAcceptHoverEvents(True)
         self._mode = 0
-        self._name: str = ""
+        self._stretch = False
         self._nameConflict: bool = False
-        self._nameAdded: bool = False
-        self._nameSet: bool = False
         self._nameStrength: netNameStrengthEnum = netNameStrengthEnum.NONAME
-        self._highlighted: bool = False
-        self._flightLinesSet: set[schematicNet] = set()
-        self._connectedNetsSet: set[schematicNet] = set()
+        self._highlighted = False
+        self._flightLinesSet: Set["schematicNet"] = set()
+        self._connectedNetsSet: Set["schematicNet"] = set()
         self._netSnapLines: dict = {}
-        self._stretch: bool = False
-        self._stretchSide: str = ""
-        self._nameFont = QFont()
-        self._nameFont.setPointSize(8)
-        self._nameItem = QStaticText(self._name)
         self._draftLine = QLineF(start, end)
         self._transformOriginPoint = self._draftLine.p1()
         self._angle = None
+        self._flip = (1,1)
         match self._mode:
             case 0:
                 self._angle = 90 * math.floor(
@@ -137,6 +139,10 @@ class schematicNet(QGraphicsItem):
         )
         self._boundingRect = self._shapeRect.adjusted(-8, -8, 8, 8)
         self.setRotation(-self._angle)
+        self._nameItem = netName('', self)
+        self._nameItem.setPos(self._draftLine.center())
+        self._nameItem.setParentItem(self)
+
 
     @property
     def draftLine(self):
@@ -177,59 +183,56 @@ class schematicNet(QGraphicsItem):
     def boundingRect(self):
         return self._boundingRect
 
-    def paint(self, painter, option, widget=...):
-        painter.setFont(self._nameFont)
-        if self.isSelected():
-            pen = schlyr.selectedWirePen
-        elif self._stretch:
-            pen = schlyr.stretchWirePen
-        elif self._highlighted:
-            pen = schlyr.hilightPen
-        elif self._nameConflict:
-            pen = schlyr.errorWirePen
-        else:
-            pen = schlyr.wirePen
-
+    def paint(self, painter: QPainter, option, widget=None):
+        pen = self._getPen()
         painter.setPen(pen)
         painter.drawLine(self._draftLine)
-        # painter.drawEllipse(self._draftLine.p1(), 2, 2)
-        if self._nameStrength.value == 3:
-            painter.save()
-            painter.translate(
-                self._draftLine.center().x(), self._draftLine.center().y()
-            )
-            painter.rotate(self._angle)
-            painter.drawStaticText(0, 0, self._nameItem)
-            painter.restore()
+
+    def _getPen(self):
+        if self.isSelected():
+            return schLayers.selectedWirePen
+        elif self._stretch:
+            return schLayers.stretchWirePen
+        elif self._highlighted:
+            return schLayers.hilightPen
+        elif self._nameConflict:
+            return schLayers.errorWirePen
+        else:
+            return schLayers.wirePen
 
     def __repr__(self):
         return f"schematicNet({self.sceneEndPoints})"
 
     def itemChange(self, change, value):
         if self.scene():
-            if change == QGraphicsItem.ItemSelectedHasChanged:
-                if value:
-                    self.scene().selectedNet= self
-                else:
-                    self.scene().selectedNet = None
+            match change:
+                case QGraphicsItem.ItemSelectedHasChanged:
+                    if value:
+                        self.setZValue(self.zValue() + 10)
+                        self.scene().selectedNet= self
+                    else:
+                        self.setZValue(self.zValue() - 10)
+                        self.scene().selectedNet = None
         return super().itemChange(change, value)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         super().mousePressEvent(event)
-        if self._stretch:
-            eventPos = event.pos().toPoint()
-            self.setFlag(QGraphicsItem.ItemIsMovable, False)
-            if (
-                eventPos - self._draftLine.p1().toPoint()
-            ).manhattanLength() <= self.scene().snapDistance:
-                self.setCursor(Qt.SizeHorCursor)
-                self._stretchSide = "p1"
-            elif (
-                eventPos - self._draftLine.p2().toPoint()
-            ).manhattanLength() <= self.scene().snapDistance:
-                self.setCursor(Qt.SizeHorCursor)
-                self._stretchSide = "p2"
-            self.scene().stretchNet(self, self._stretchSide)
+        if self.scene():
+            if self.scene().editModes.moveItem:
+                self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            elif self._stretch:
+                eventPos = event.pos().toPoint()
+                if (
+                    eventPos - self._draftLine.p1().toPoint()
+                ).manhattanLength() <= self.scene().snapDistance:
+                    self.setCursor(Qt.SizeHorCursor)
+                    self._stretchSide = "p1"
+                elif (
+                    eventPos - self._draftLine.p2().toPoint()
+                ).manhattanLength() <= self.scene().snapDistance:
+                    self.setCursor(Qt.SizeHorCursor)
+                    self._stretchSide = "p2"
+                self.scene().stretchNet(self, self._stretchSide)
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         """
@@ -259,6 +262,11 @@ class schematicNet(QGraphicsItem):
                 )
                 self._flightLinesSet.add(flightLine)
                 self.scene().addItem(flightLine)
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        self.setSelected(True)
+        if self.scene().editModes.moveItem:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        super().mouseReleaseEvent(event)
 
     def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         super().hoverLeaveEvent(event)
@@ -292,13 +300,7 @@ class schematicNet(QGraphicsItem):
         Returns:
             set: A set of netItems that overlap with self.sceneShapeRect.
         """
-        overlapNets = set()
         if self.scene():
-            # overlapNets = {
-            #     netItem
-            #     for netItem in self.scene().items(self.sceneShapeRect)
-            #     if isinstance(netItem, schematicNet)
-            # }
             overlapNets = {netItem for netItem in self.collidingItems() if isinstance(netItem, schematicNet)}
             return overlapNets - {self}
 
@@ -368,45 +370,41 @@ class schematicNet(QGraphicsItem):
             if otherNet.nameStrength.value == 3 and self.name != otherNet.name:
                 self.nameConflict = True
                 otherNet.nameConflict = True
-        elif otherNet.nameStrength.value > 1:  # INHERIT or SET
+        else:
             self.name = otherNet.name
-            self.nameStrength = netNameStrengthEnum.INHERIT
+            self.nameStrength = otherNet.nameStrength.decrement()
 
     def inheritGuideLine(self, otherNet: Type["guideLine"]):
         self.name = otherNet.name
         self.nameStrength = otherNet.nameStrength
 
     @property
-    def name(self):
-        return self._name
+    def name(self) -> str:
+        return self._nameItem.name
 
     @name.setter
-    def name(self, name):
-        if name != "":  # net name should not be an empty string
+    def name(self, name: str):
+        if name:
             self.prepareGeometryChange()
-            self._name = name
-            self._nameItem = QStaticText(self._name)
+            self._nameItem.name = name
+            self._nameItem.setPos(self._draftLine.center())
 
     @property
     def nameStrength(self) -> netNameStrengthEnum:
-        return self._nameStrength
+        return self._nameItem.nameStrength
 
     @nameStrength.setter
     def nameStrength(self, value: netNameStrengthEnum):
-        assert isinstance(value, netNameStrengthEnum)
-        self._nameStrength = value
+        self._nameItem.nameStrength = value
 
     @property
     def nameConflict(self) -> bool:
-        """
-        If two different names are attempted to be set for the net.
-        """
-        return self._nameConflict
+        return self._nameItem.nameConflict
 
     @nameConflict.setter
     def nameConflict(self, value: bool):
-        assert isinstance(value, bool)
-        self._nameConflict = value
+        self._nameItem.nameConflict = value
+
 
     @property
     def endPoints(self):
@@ -475,12 +473,72 @@ class schematicNet(QGraphicsItem):
     def stretch(self, value: bool):
         self._stretch = value
 
+    @property
+    def mode(self) -> int:
+        return self._mode
+
+class netName(QGraphicsSimpleTextItem):
+    def __init__(self, name: str, parent: schematicNet):
+        super().__init__(name, parent)
+        self.parent = parent
+        self.setBrush(schLayers.wireBrush)
+        self._nameConflict = False
+        self._nameStrength = netNameStrengthEnum.NONAME
+        self.setRotation(self.parent.angle)
+
+    def setSelected(self, selected):
+        super().setSelected(selected)
+        if selected:
+            self.setBrush(schLayers.selectedWireBrush)
+        else:
+            self.setBrush(schLayers.wireBrush)
+        self.update()
+
+    @property
+    def nameConflict(self) -> bool:
+        return self._nameConflict
+
+    @nameConflict.setter
+    def nameConflict(self, value: bool):
+        if value:
+            self.setBrush(schLayers.errorWireBrush)
+        else:
+            self.setBrush(schLayers.wireBrush)
+        self.update()
+
+    @property
+    def nameStrength(self) -> netNameStrengthEnum:
+        return self._nameStrength
+
+    @nameStrength.setter
+    def nameStrength(self, value: netNameStrengthEnum):
+        self._nameStrength = value
+        if self._nameStrength == netNameStrengthEnum.SET:
+            self.setVisible(True)
+        else:
+            self.setVisible(False)
+
+    @property
+    def name(self) -> str:
+        return self.text()
+
+    @name.setter
+    def name(self, value: str):
+        self.prepareGeometryChange()
+        self.setText(value)
+        self.setRotation(self.parent.angle)
+        if self._nameStrength == netNameStrengthEnum.SET:
+            self.setVisible(True)
+        else:
+            self.setVisible(False)
+
+
 
 class netFlightLine(QGraphicsPathItem):
     wireHighlightPen = QPen(
-        schlyr.wireHilightLayer.pcolor,
-        schlyr.wireHilightLayer.pwidth,
-        schlyr.wireHilightLayer.pstyle,
+        schLayers.wireHilightLayer.pcolor,
+        schLayers.wireHilightLayer.pwidth,
+        schLayers.wireHilightLayer.pstyle,
     )
 
     def __init__(self, start: QPoint, end: QPoint):
@@ -510,7 +568,7 @@ class guideLine(QGraphicsLineItem):
         self._start = start
         self._end = end
         super().__init__(QLineF(self._start, self._end))
-        self.setPen(schlyr.guideLinePen)
+        self.setPen(schLayers.guideLinePen)
         self.pen().setCosmetic(True)
         self._name: str = ""
         self._nameStrength: netNameStrengthEnum = netNameStrengthEnum.NONAME

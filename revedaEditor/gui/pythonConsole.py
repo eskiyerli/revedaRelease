@@ -127,10 +127,10 @@ class pythonConsole(QWidget):
     """A GUI version of code.InteractiveConsole."""
 
     def __init__(
-        self,
-        context=locals(),  # context for interpreter
-        history: int = 200,  # max lines in history buffer
-        blockcount: int = 500,  # max lines in output buffer
+            self,
+            context=locals(),  # context for interpreter
+            history: int = 200,  # max lines in history buffer
+            blockcount: int = 500,  # max lines in output buffer
     ) -> "pythonConsole":
         super().__init__()
         self.setcontext(context)

@@ -25,10 +25,16 @@ import json
 import logging
 import logging.config
 import pathlib
+import os
 
-from PySide6.QtCore import QThreadPool
-from PySide6.QtGui import QAction, QFont, QIcon
+from PySide6.QtCore import QThreadPool, Slot, Signal, QTimer, QObject
+from PySide6.QtGui import (
+    QAction,
+    QFont,
+    QIcon,
+)
 from PySide6.QtWidgets import (
+    QGraphicsScene,
     QApplication,
     QDialog,
     QMainWindow,
@@ -48,7 +54,17 @@ import revedaEditor.gui.libraryBrowser as libw
 import revedaEditor.gui.pythonConsole as pcon
 import revedaEditor.gui.revinit as revinit
 import revedaEditor.gui.stippleEditor as stip
-import revedaEditor.resources.resources
+
+
+class EventLoopMonitor(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.check_event_loop)
+        self.timer.start(1000)  # Check every second
+
+    def check_event_loop(self):
+        print("Event loop is responsive")
 
 
 class mainwContainer(QWidget):
@@ -64,13 +80,9 @@ class mainwContainer(QWidget):
 
     def init_UI(self):
         self.console.setfont(QFont("Fira Mono Regular", 12))
-        self.console.writeoutput(
-            f"Welcome to Revolution EDA version {revinit.__version__}"
-        )
+        self.console.writeoutput(f"Welcome to Revolution EDA version {revinit.__version__}")
         self.console.writeoutput("Revolution Semiconductor (C) 2024.")
-        self.console.writeoutput(
-            "Mozilla Public License v2.0 modified with Commons Clause"
-        )
+        self.console.writeoutput("Mozilla Public License v2.0 modified with Commons Clause")
         # layout statements, using a grid layout
         gLayout = QVBoxLayout()
         gLayout.setSpacing(10)
@@ -78,26 +90,19 @@ class mainwContainer(QWidget):
         self.setLayout(gLayout)
 
 
-#
 class MainWindow(QMainWindow):
+    sceneSelectionChanged = Signal(QGraphicsScene)
+    keyPressedView = Signal(int)
+
     def __init__(self):
         super().__init__()
         self.resize(900, 300)
         self._createActions()
         self._createMenuBar()
         self._createTriggers()
-        self.cellViews = [
-            "schematic",
-            "symbol",
-            "layout",
-            "veriloga",
-            "config",
-            "spice",
-            "pcell",
-        ]
+
         self.switchViewList = ["schematic", "veriloga", "spice", "symbol"]
         self.stopViewList = ["symbol"]
-        self.simulationPath = pathlib.Path.cwd().parent
         self.openViews = dict()
         # create container to position all widgets
         self.centralW = mainwContainer(self)
@@ -105,25 +110,18 @@ class MainWindow(QMainWindow):
         self.mainW_statusbar = self.statusBar()
         self.mainW_statusbar.showMessage("Ready")
         self.app = QApplication.instance()
-        # print(self.app.reveda_runpathObj)
-        # logger name is 'reveda'
         self.logger = logging.getLogger("reveda")
         # library definition file path
-        self.runPath = pathlib.Path.cwd()
+        self.runPath = pathlib.Path.cwd()  # all paths should refer to this
+        self.simulationPath = self.runPath.parent / "testbenches"  # good default
         # look for library.json file where the script is invoked
         self.libraryPathObj = self.runPath.joinpath("library.json")
         self.libraryDict = self.readLibDefFile(self.libraryPathObj)
         self.libraryBrowser = libw.libraryBrowser(self)
-        self.logger_def()
-        # revEDAPathObj = Path(__file__)
-        # library definition file path
-        self.runPath = pathlib.Path.cwd()
-        # look for library.json file where the script is invoked
-        self.libraryPathObj = self.runPath.joinpath("library.json")
-        self.libraryDict = self.readLibDefFile(self.libraryPathObj)
-        self.textEditorPath: pathlib.Path = self.runPath
         self.threadPool = QThreadPool.globalInstance()
         self.confFilePath = self.runPath.joinpath("reveda.conf")
+        self.logger_def()
+        # now check the configuration file
         self.loadState()
 
     def _createMenuBar(self):
@@ -152,12 +150,8 @@ class MainWindow(QMainWindow):
         self.exitAction = QAction(exitIcon, "Exit", self)
         self.exitAction.setShortcut("Ctrl+Q")
         importVerilogaIcon = QIcon(":/icons/document-import.png")
-        self.importVerilogaAction = QAction(
-            importVerilogaIcon, "Import Verilog-a file..."
-        )
-        self.importSpiceAction = QAction(
-            importVerilogaIcon, "Import Spice file...", self
-        )
+        self.importVerilogaAction = QAction(importVerilogaIcon, "Import Verilog-a file...")
+        self.importSpiceAction = QAction(importVerilogaIcon, "Import Spice file...", self)
         self.importLaypFileAction = QAction(
             importVerilogaIcon, "Import KLayout Layer Prop. " "File...", self
         )
@@ -214,9 +208,7 @@ class MainWindow(QMainWindow):
         c_handler.setFormatter(c_format)
         f_handler = logging.FileHandler("reveda.log")
         f_handler.setLevel(logging.INFO)
-        f_format = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         f_handler.setFormatter(f_format)
         self.logger.addHandler(c_handler)
         self.logger.addHandler(f_handler)
@@ -238,17 +230,16 @@ class MainWindow(QMainWindow):
 
     def optionsClick(self):
         dlg = fd.appProperties(self)
-        dlg.editorPathEdit.setText(str(self.textEditorPath))
+        dlg.rootPathEdit.setText(str(self.runPath))
         dlg.simPathEdit.setText(str(self.simulationPath))
         dlg.switchViewsEdit.setText(", ".join(self.switchViewList))
         dlg.stopViewsEdit.setText(", ".join(self.stopViewList))
 
         if dlg.exec() == QDialog.Accepted:
-            self.textEditorPath = pathlib.Path(dlg.editorPathEdit.text())
+            self.runPath = pathlib.Path(dlg.rootPathEdit.text())
             self.simulationPath = pathlib.Path(dlg.simPathEdit.text())
             self.switchViewList = [
-                switchView.strip()
-                for switchView in dlg.switchViewsEdit.text().split(",")
+                switchView.strip() for switchView in dlg.switchViewsEdit.text().split(",")
             ]
             self.stopViewList = [
                 stopView.strip() for stopView in dlg.stopViewsEdit.text().split(",")
@@ -259,20 +250,10 @@ class MainWindow(QMainWindow):
     def importVerilogaClick(self):
         """
         Import a Verilog-A view and add it to a design library.
-
-        Args:
-            self: The instance of the class.
-
-        Returns:
-            None
         """
         self.importVerilogaModule(ddef.viewTuple("", "", ""), "")
 
     def importVerilogaModule(self, viewT: ddef.viewTuple, filePath: str):
-        """
-
-        @param filePath:
-        """
         library_model = self.libraryBrowser.libraryModel
         # Open the import dialog
         importDlg = fd.importVerilogaCellDialogue(library_model, self)
@@ -317,10 +298,9 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
-        self.importSpiceSubckt("", ddef.viewTuple("", "", ""))
+        self.importSpiceSubckt(ddef.viewTuple("", "", ""), "")
 
     def importLaypClick(self):
-
         importDlg = fd.klayoutLaypImportDialogue(self)
         if importDlg.exec() == QDialog.Accepted:
             imlyp.parseLyp(importDlg.laypFileEdit.text())
@@ -412,16 +392,17 @@ class MainWindow(QMainWindow):
             self.logger.info(f"Configuration file: {self.confFilePath} exists")
             with self.confFilePath.open(mode="r") as f:
                 items = json.load(f)
-            self.textEditorPath = pathlib.Path(items.get("textEditorPath"))
-            self.simulationPath = pathlib.Path(items.get("simulationPath"))
-            if items.get("switchViewList")[0] != "":
-                self.switchViewList = items.get("switchViewList")
-            if items.get("stopViewList")[0] != "":
-                self.stopViewList = items.get("stopViewList")
+            if items:
+                self.runPath = pathlib.Path(items.get("runPath", os.getcwd()))
+                self.simulationPath = pathlib.Path(items.get("simulationPath", os.getcwd()))
+                if items.get("switchViewList")[0] != "":
+                    self.switchViewList = items.get("switchViewList", "")
+                if items.get("stopViewList")[0] != "":
+                    self.stopViewList = items.get("stopViewList", "")
 
     def saveState(self):
         items = {
-            "textEditorPath": str(self.textEditorPath),
+            "runPath": str(self.runPath),
             "simulationPath": str(self.simulationPath),
             "switchViewList": self.switchViewList,
             "stopViewList": self.stopViewList,
@@ -431,3 +412,12 @@ class MainWindow(QMainWindow):
 
     def exitApp(self):
         self.app.closeAllWindows()
+
+    @Slot()
+    def selectionChangedScene(self):
+        sender = self.sender()
+        self.sceneSelectionChanged.emit(sender)
+
+    @Slot()
+    def viewKeyPressed(self, key: int):
+        self.keyPressedView.emit(key)
