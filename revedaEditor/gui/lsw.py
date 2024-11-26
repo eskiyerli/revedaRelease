@@ -38,14 +38,9 @@ from PySide6.QtWidgets import (QTableView, QMenu, QGraphicsItem, )
 
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
-
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.layoutLayers as laylyr
-else:
-    import defaultPDK.layoutLayers as laylyr
-
+from revedaEditor.backend.pdkPaths import importPDKModule
+fabproc = importPDKModule('process')
+laylyr = importPDKModule('layoutLayers')
 
 class layerDataModel(QStandardItemModel):
     def __init__(self, data: list):
@@ -65,7 +60,8 @@ class layerDataModel(QStandardItemModel):
             # bitmap = QBitmap.fromImage(QPixmap(layer.btexture).scaled(5, 5).toImage())
             reveda_pdk_path = os.environ.get("REVEDA_PDK_PATH", None)
             if reveda_pdk_path is None:
-                reveda_pdk_pathobj = Path(__file__).parent.parent.joinpath("defaultPDK")
+                reveda_pdk_pathobj = Path(__file__).parents[2].joinpath(
+                    "defaultPDK")
             else:
                 reveda_pdk_pathobj = pathlib.Path(reveda_pdk_path)
             texturePath = reveda_pdk_pathobj.joinpath(layer.btexture)

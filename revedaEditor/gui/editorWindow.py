@@ -69,7 +69,7 @@ class editorWindow(QMainWindow):
         self.stopViewList = self.appMainW.stopViewList
         self.statusLine = self.statusBar()
         self.messageLine = QLabel()  # message line
-        self.statusLine.addPermanentWidget(self.messageLine)
+        self.statusLine.insertPermanentWidget(0,self.messageLine)
         self.majorGrid = 10  # dot/line grid spacing
         self.snapGrid = 5  # snapping grid size
         self.snapTuple = (self.snapGrid, self.snapGrid)

@@ -24,3 +24,6 @@ venv/
 =======
 >>>>>>> 48c3e214f5d57cbe1a9d26355522ae35cae46a75
 .env
+/nbproject/
+/.ropeproject/
+library.json

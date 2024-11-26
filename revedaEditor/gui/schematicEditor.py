@@ -49,7 +49,6 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-# import pdk.symLayers as symlyr
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.backend.libraryModelView as lmview
@@ -62,9 +61,8 @@ import revedaEditor.gui.editorWindow as edw
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.propertyDialogues as pdlg
 import revedaEditor.gui.schematicScene as schscn
-import revedaEditor.resources.resources
 from revedaEditor.gui.startThread import startThread
-from typing import List, Union
+from typing import List
 import importlib
 
 
@@ -169,8 +167,6 @@ class schematicEditor(edw.editorWindow):
 
     def _createToolBars(self):
         super()._createToolBars()
-        # toolbar.addAction(self.rulerAction)
-        # toolbar.addAction(self.delRulerAction)
         self.toolbar.addAction(self.objPropAction)
         self.toolbar.addAction(self.viewPropAction)
 
@@ -203,6 +199,7 @@ class schematicEditor(edw.editorWindow):
         self.createNetAction.setShortcut(Qt.Key_W)
         self.createPinAction.setShortcut(Qt.Key_P)
         self.goDownAction.setShortcut("Shift+E")
+
 
     def createNetClick(self, s):
         self.centralW.scene.editModes.setMode("drawWire")
@@ -320,6 +317,7 @@ class schematicEditor(edw.editorWindow):
             self.logger.error("Reveda SAE is not installed.")
 
     def renumberInstanceClick(self, s):
+        self.saveCell()
         self.centralW.scene.renumberInstances()
 
     def checkSaveCell(self):
@@ -334,11 +332,11 @@ class schematicEditor(edw.editorWindow):
         self.centralW.scene.loadSchematic(self.file)
 
     def createConfigView(
-            self,
-            configItem: libb.viewItem,
-            configDict: dict,
-            newConfigDict: dict,
-            processedCells: set,
+        self,
+        configItem: libb.viewItem,
+        configDict: dict,
+        newConfigDict: dict,
+        processedCells: set,
     ):
         sceneSymbolSet = self.centralW.scene.findSceneSymbolSet()
         for item in sceneSymbolSet:
@@ -712,10 +710,10 @@ class schematicContainer(QWidget):
 
 class xyceNetlist:
     def __init__(
-            self,
-            schematic: schematicEditor,
-            filePathObj: pathlib.Path,
-            useConfig: bool = False,
+        self,
+        schematic: schematicEditor,
+        filePathObj: pathlib.Path,
+        useConfig: bool = False,
     ):
         self.filePathObj = filePathObj
         self.schematic = schematic
@@ -817,7 +815,7 @@ class xyceNetlist:
     @lru_cache(maxsize=16)
     def processElementSymbol(self, elementSymbol, schematic, cirFile):
         if elementSymbol.symattrs.get("XyceNetlistPass") != "1" and (
-                not elementSymbol.netlistIgnore
+            not elementSymbol.netlistIgnore
         ):
             libItem = libm.getLibItem(
                 schematic.libraryView.libraryModel, elementSymbol.libraryName
@@ -847,11 +845,11 @@ class xyceNetlist:
             return "symbol"
 
     def createItemLine(
-            self,
-            cirFile,
-            elementSymbol: shp.schematicSymbol,
-            cellItem: libb.cellItem,
-            netlistView: str,
+        self,
+        cirFile,
+        elementSymbol: shp.schematicSymbol,
+        cellItem: libb.cellItem,
+        netlistView: str,
     ):
         if "schematic" in netlistView:
             # First write subckt call in the netlist.
@@ -887,32 +885,67 @@ class xyceNetlist:
         """
         try:
             xyceNetlistFormatLine = elementSymbol.symattrs["XyceSymbolNetlistLine"].strip()
+
+            # Process labels
             for labelItem in elementSymbol.labels.values():
-                if labelItem.labelName in xyceNetlistFormatLine:
-                    xyceNetlistFormatLine = xyceNetlistFormatLine.replace(
-                        labelItem.labelName, labelItem.labelValue
-                    )
+                xyceNetlistFormatLine = xyceNetlistFormatLine.replace(
+                    labelItem.labelName, labelItem.labelValue
+                )
 
+            # Process attributes
             for attrb, value in elementSymbol.symattrs.items():
-                if f"%{attrb}" in xyceNetlistFormatLine:
-                    xyceNetlistFormatLine = xyceNetlistFormatLine.replace(
-                        f"%{attrb}", value
-                    )
+                xyceNetlistFormatLine = xyceNetlistFormatLine.replace(f"%{attrb}", value)
 
+            # Add pin list
             pinList = " ".join(elementSymbol.pinNetMap.values())
             xyceNetlistFormatLine = (
-                    xyceNetlistFormatLine.replace("@pinList", pinList) + "\n"
+                xyceNetlistFormatLine.replace("@pinList", pinList) + "\n"
             )
+
             return xyceNetlistFormatLine
+
         except Exception as e:
-            self._scene.logger.error(e)
             self._scene.logger.error(
-                f"Netlist line is not defined for {elementSymbol.instanceName}"
+                f"Error creating netlist line for {elementSymbol.instanceName}: {e}"
             )
-            # if there is no NLPDeviceFormat line, create a warning line
             return (
                 f"*Netlist line is not defined for symbol of {elementSymbol.instanceName}\n"
             )
+
+    # def createXyceSymbolLine(self, elementSymbol: shp.schematicSymbol):
+    #     """
+    #     Create a netlist line from a nlp device format line.
+    #     """
+    #     try:
+    #         xyceNetlistFormatLine = elementSymbol.symattrs["XyceSymbolNetlistLine"].strip()
+    #         for labelItem in elementSymbol.labels.values():
+    #             if labelItem.labelType == 'NLPLabel' and labelItem.labelDefinition not in lbl.symbolLabel.predefinedLabels and labelItem.labelValue.strip()[0].isalpha():
+    #                 labelItem.labelValue = f'{{{labelItem.labelValue}}}'
+    #             if labelItem.labelName in xyceNetlistFormatLine:
+    #                 xyceNetlistFormatLine = xyceNetlistFormatLine.replace(
+    #                     labelItem.labelName, labelItem.labelValue
+    #                 )
+
+    #         for attrb, value in elementSymbol.symattrs.items():
+    #             if f"%{attrb}" in xyceNetlistFormatLine:
+    #                 xyceNetlistFormatLine = xyceNetlistFormatLine.replace(
+    #                     f"%{attrb}", value
+    #                 )
+
+    #         pinList = " ".join(elementSymbol.pinNetMap.values())
+    #         xyceNetlistFormatLine = (
+    #                 xyceNetlistFormatLine.replace("@pinList", pinList) + "\n"
+    #         )
+    #         return xyceNetlistFormatLine
+    #     except Exception as e:
+    #         self._scene.logger.error(e)
+    #         self._scene.logger.error(
+    #             f"Netlist line is not defined for {elementSymbol.instanceName}"
+    #         )
+    #         # if there is no NLPDeviceFormat line, create a warning line
+    #         return (
+    #             f"*Netlist line is not defined for symbol of {elementSymbol.instanceName}\n"
+    #         )
 
     def createSpiceLine(self, elementSymbol: shp.schematicSymbol):
         """
@@ -933,7 +966,7 @@ class xyceNetlist:
                     )
             pinList = elementSymbol.symattrs.get("pinOrder", ", ").replace(",", " ")
             spiceNetlistFormatLine = (
-                    spiceNetlistFormatLine.replace("@pinList", pinList) + "\n"
+                spiceNetlistFormatLine.replace("@pinList", pinList) + "\n"
             )
             self.includeLines.add(
                 elementSymbol.symattrs.get(
@@ -972,7 +1005,7 @@ class xyceNetlist:
                     )
             pinList = " ".join(elementSymbol.pinNetMap.values())
             verilogaNetlistFormatLine = (
-                    verilogaNetlistFormatLine.replace("@pinList", pinList) + "\n"
+                verilogaNetlistFormatLine.replace("@pinList", pinList) + "\n"
             )
             self.vamodelLines.add(
                 elementSymbol.symattrs.get(

@@ -135,6 +135,7 @@ class symbolEditor(edw.editorWindow):
 
     def createPolyClick(self, s):
         self.centralW.scene.editModes.setMode("drawPolygon")
+        self.messageLine.setText("Press left mouse button for the first point.")
 
     def createArcClick(self, s):
         self.centralW.scene.editModes.setMode("drawArc")

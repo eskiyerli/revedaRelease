@@ -56,7 +56,7 @@ else:
     import defaultPDK.schLayers as schLayers
 
 import math
-from typing import Union, Type, Set, Tuple
+from typing import Type, Set
 from enum import IntEnum
 
 
@@ -121,6 +121,7 @@ class schematicNet(QGraphicsItem):
         self._transformOriginPoint = self._draftLine.p1()
         self._angle = None
         self._flip = (1,1)
+        self.parallelNetsSet = set()
         match self._mode:
             case 0:
                 self._angle = 90 * math.floor(
@@ -221,7 +222,7 @@ class schematicNet(QGraphicsItem):
             if self.scene().editModes.moveItem:
                 self.setFlag(QGraphicsItem.ItemIsMovable, True)
             elif self._stretch:
-                eventPos = event.pos().toPoint()
+                eventPos = event.pos().toPoint()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                 if (
                     eventPos - self._draftLine.p1().toPoint()
                 ).manhattanLength() <= self.scene().snapDistance:
@@ -233,6 +234,13 @@ class schematicNet(QGraphicsItem):
                     self.setCursor(Qt.SizeHorCursor)
                     self._stretchSide = "p2"
                 self.scene().stretchNet(self, self._stretchSide)
+
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        self.setSelected(False)
+        if self.scene().editModes.moveItem:
+            self.setFlag(QGraphicsItem.ItemIsMovable, False)
+            self.scene().mergeSplitNets(self)
+        super().mouseReleaseEvent(event)
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         """
@@ -262,11 +270,7 @@ class schematicNet(QGraphicsItem):
                 )
                 self._flightLinesSet.add(flightLine)
                 self.scene().addItem(flightLine)
-    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        self.setSelected(True)
-        if self.scene().editModes.moveItem:
-            self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        super().mouseReleaseEvent(event)
+
 
     def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         super().hoverLeaveEvent(event)
@@ -303,63 +307,6 @@ class schematicNet(QGraphicsItem):
         if self.scene():
             overlapNets = {netItem for netItem in self.collidingItems() if isinstance(netItem, schematicNet)}
             return overlapNets - {self}
-
-    def mergeNets(self) -> tuple["schematicNet", "schematicNet"]:
-        """
-        Merges overlapping nets and returns the merged net.
-
-        Returns:
-            Optional[schematicNet]: The merged net if there are overlapping nets, otherwise returns self.
-        """
-        # Find other nets that overlap with self
-        otherNets = self.findOverlapNets()
-        # If there are other nets
-        if otherNets:
-            # Filter the other nets to find the parallel ones
-            parallelNets = [
-                netItem for netItem in otherNets if self.isParallel(netItem)
-            ]
-
-            # If there are parallel nets
-            if parallelNets:
-                # Create an initialRect variable and set it to self's sceneShapeRect
-                initialRect = self.sceneShapeRect
-
-                # Iterate over the parallel nets
-                for netItem in parallelNets:
-                    # Update the initialRect by uniting it with each parallel net's
-                    # sceneShapeRect
-                    self.inherit(netItem)
-                    if not self.nameConflict:
-                        initialRect = initialRect.united(netItem.sceneShapeRect)
-                        if self.scene():
-                            self.scene().removeItem(netItem)
-                    else:
-                        break  # break out of the for loop
-                if not self.nameConflict:
-                    # Adjust the initialRect by 2 pixels on each side
-                    newNetPoints = initialRect.adjusted(2, 2, -2, -2)
-
-                    # Get the coordinates of the adjusted rectangle
-                    x1, y1, x2, y2 = newNetPoints.getCoords()
-
-                    # Create a new schematicNet with the snapped coordinates
-                    newNet = schematicNet(
-                        self.snapToGrid(QPoint(x1, y1)), self.snapToGrid(QPoint(x2, y2))
-                    )
-                    newNet.inherit(self)
-                    return self, newNet  # original net, new net
-                else:
-                    return self, self
-
-        # If there are no other nets or no parallel nets, return self
-        return self, self
-
-    def snapToGrid(self, point: Union[QPoint, QPointF]) -> QPoint:
-        if self.scene():
-            return self.scene().snapToGrid(point, self.scene().snapTuple)
-        else:
-            return point
 
     def inherit(self, otherNet: Type["schematicNet"]):
         """

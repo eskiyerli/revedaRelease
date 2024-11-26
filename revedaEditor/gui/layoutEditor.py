@@ -44,13 +44,20 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from dotenv import load_dotenv
+
+from revedaEditor.backend.dataDefinitions import layLayer
+from revedaEditor.gui.editorViews import layoutView
+from revedaEditor.backend.pdkPaths import importPDKModule
+fabproc = importPDKModule('process')
+laylyr = importPDKModule('layoutLayers')
 from quantiphy import Quantity
 
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.process as fabproc
-else:
-    import defaultPDK.process as fabproc
+# if os.environ.get("REVEDA_PDK_PATH"):
+#     import pdk.process as fabproc
+#     import pdk.layoutLayers as laylyr
+# else:
+#     import defaultPDK.process as fabproc
+#     import defaultPDK.layoutLayers as laylyr
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.backend.libraryModelView as lmview
@@ -65,8 +72,6 @@ import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.lsw as lsw
 from revedaEditor.gui.layoutScene import layoutScene
 from revedaEditor.gui.startThread import startThread
-
-load_dotenv()
 
 
 class layoutEditor(edw.editorWindow):

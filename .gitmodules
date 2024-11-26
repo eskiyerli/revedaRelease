@@ -13,3 +13,6 @@
 [submodule "exampleLibraries"]
 	path = exampleLibraries
 	url = https://github.com/eskiyerli/exampleLibraries.git
+[submodule "revedaEditor"]
+	path = revedaEditor
+	url = https://github.com/eskiyerli/revedaEditor.git

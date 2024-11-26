@@ -40,7 +40,7 @@ from PySide6.QtCore import (
     QRectF,
     Qt,
     QLineF,
-    QProcess,
+    Signal,
     Slot,
 )
 from PySide6.QtGui import (
@@ -72,16 +72,19 @@ from revedaEditor.gui.editorScene import editorScene
 
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
-
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.schLayers as schlyr
-else:
-    import defaultPDK.schLayers as schlyr
+#
+# load_dotenv()
+#
+# if os.environ.get("REVEDA_PDK_PATH"):
+#     import pdk.schLayers as schlyr
+# else:
+#     import defaultPDK.schLayers as schlyr
+from revedaEditor.backend.pdkPaths import importPDKModule
+schlyr = importPDKModule('schLayers')
 
 
 class schematicScene(editorScene):
+    wireFinished = Signal(net.schematicNet)
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -145,6 +148,7 @@ class schematicScene(editorScene):
         ]
         self.fixedFont.setPointSize(fontSize)
         self.fixedFont.setKerning(False)
+        self.wireFinished.connect(self._handleWireFinished)
 
     @property
     def drawMode(self):
@@ -154,6 +158,8 @@ class schematicScene(editorScene):
 
     def mousePressEvent(self, mouseEvent: QGraphicsSceneMouseEvent) -> None:
         # self.selectionChangedHandler()
+        netsInScene = [netItem for netItem in self.items() if isinstance(netItem, net.schematicNet)]
+        print(netsInScene)
         super().mousePressEvent(mouseEvent)
         try:
             self.mousePressLoc = mouseEvent.scenePos().toPoint()
@@ -182,6 +188,10 @@ class schematicScene(editorScene):
         super().mouseMoveEvent(mouseEvent)
         self.mouseMoveLoc = mouseEvent.scenePos().toPoint()
         self._handleMouseMove(self.mouseMoveLoc)
+        cursorPosition = self.mouseMoveLoc - self.origin
+        # Show the cursor position in the status line
+        self.statusLine.showMessage(
+            f"Cursor Position: ({cursorPosition.x()}, {cursorPosition.y()})")
 
     def _handleMouseRelease(self, mouseReleaseLoc: QPoint, button: Qt.MouseButton) -> None:
         """
@@ -249,7 +259,8 @@ class schematicScene(editorScene):
         :param mouseReleaseLoc: QPoint instance
         """
         if self._newNet:  # finish net drawing
-            self.checkNewNet(self._newNet)
+            # self.checkNewNet(self._newNet)
+            self.wireFinished.emit(self._newNet)
             self._newNet = None
         mouseReleaseLoc = self.findSnapPoint(mouseReleaseLoc, set())
         self._newNet = net.schematicNet(mouseReleaseLoc, mouseReleaseLoc)
@@ -280,7 +291,8 @@ class schematicScene(editorScene):
             self._stretchNet.draftLine.p1(), self.mouseMoveLoc
         )
 
-    def checkNewNet(self, newNet: net.schematicNet):
+    @Slot(net.schematicNet)
+    def _handleWireFinished(self, newNet: net.schematicNet):
         """
         check if the new net is valid. If it has zero length, remove it. Otherwise process it.
 
@@ -291,78 +303,114 @@ class schematicScene(editorScene):
         else:
             self.mergeSplitNets(newNet)
 
+
     def mergeSplitNets(self, inputNet: net.schematicNet):
-        self.mergeNets(inputNet)  # output is self._totalNet
-        overlapNets = self._totalNet.findOverlapNets()
-        splitPoints = set()
-        # inputNet splits overlapping nets
-        for netItem in overlapNets:
-            for end in netItem.endPoints:
-                endPoint = self._totalNet.mapFromItem(
-                    netItem, end
-                ).toPoint()  # map to totalNet (mergedNet) coordinates
-                if (
-                        self._totalNet.contains(endPoint)
-                        and endPoint not in self._totalNet.endPoints
-                ):
-                    splitPoints.add(endPoint)
-        overlapSymbols = {
-            item
-            for item in self._totalNet.collidingItems()
-            if isinstance(item, shp.schematicSymbol)
-        }
-        for schemSymbol in overlapSymbols:
-            for pin in schemSymbol.pins.values():
-                if self._totalNet in pin.collidingItems():
-                    splitPoints.add(
-                        self._totalNet.mapFromItem(pin, pin.start).toPoint()
-                    )
-        if splitPoints:
-            splitPointsList = list(splitPoints)
-            splitPointsList.insert(0, self._totalNet.endPoints[0])
-            splitPointsList.append(self._totalNet.endPoints[1])
-            orderedPointsObj = map(
-                self._totalNet.mapToScene,
-                list(Counter(self.orderPoints(splitPointsList)).keys()),
-            )
-            orderedPoints = [opoint.toPoint() for opoint in orderedPointsObj]
+        searchRect = inputNet.sceneShapeRect
+        mergedNet = self.mergeNets(inputNet)
+        splitNetsList = []
+        if inputNet.draftLine != mergedNet.draftLine and inputNet.parallelNetsSet:
+            for netItem in inputNet.parallelNetsSet:
+                self.removeItem(netItem)
+            # merged net is split by other nets
+            splitNetsList.extend(self.splitNets(mergedNet))
+        else:
+            splitNetsList.extend(self.splitNets(inputNet))
+        # now find the other nets in sceneShapeRect of the original drawn net.
+        crossingNets = [netItem for netItem in self.items(searchRect) if isinstance(
+            netItem, net.schematicNet) and inputNet.isOrthogonal(netItem)]
+        for netItem in crossingNets:
+            splitNetsList.extend(self.splitNets(netItem))
+            self.removeItem(netItem)
+        splitNetsSet = set(splitNetsList)
+        self.removeItem(inputNet)
+        self.addListUndoStack(splitNetsSet)
+
+
+    def splitNets(self, inputNet):
+        splitPointsSet = set()
+        orthoNets = [netItem for netItem in self.items(inputNet.sceneShapeRect) if
+                     isinstance(netItem, net.schematicNet) and inputNet.isOrthogonal(
+                         netItem)]
+        if orthoNets:
+            for netItem in orthoNets:
+                for netItemEnd in netItem.sceneEndPoints:
+                    if inputNet.sceneShapeRect.contains(netItemEnd):
+                        splitPointsSet.add(netItemEnd)
+        symbolPinsPointSet = {item.mapToScene(item.start).toPoint() for item in self.items(
+            inputNet.sceneShapeRect) if
+                      isinstance(item, shp.symbolPin)}
+        splitPointsSet.update(symbolPinsPointSet)
+        schematicPinsPointSet = {item.mapToScene(item.start).toPoint() for item in
+            self.items(
+            inputNet.sceneShapeRect) if
+                      isinstance(item, shp.schematicPin)}
+        splitPointsSet.update(schematicPinsPointSet)
+        if splitPointsSet:
+            splitPointsList = list(splitPointsSet)
+            splitPointsList.insert(0, inputNet.sceneEndPoints[0])
+            splitPointsList.append(inputNet.sceneEndPoints[1])
+            orderedPoints = list(Counter(self.orderPoints(splitPointsList)).keys())
+            # print(orderedPoints)
             splitNetList = []
             for i in range(len(orderedPoints) - 1):
                 splitNet = net.schematicNet(orderedPoints[i], orderedPoints[i + 1])
-                splitNetList.append(splitNet)
-                if inputNet.isSelected():
-                    splitNet.setSelected(True)
+                if not splitNet.draftLine.isNull():
+                    splitNetList.append(splitNet)
             for netItem in splitNetList:
-                netItem.name = self._totalNet.name
-                netItem.nameStrength = self._totalNet.nameStrength.decrement()
-            splitNetList[0].nameStrength = self._totalNet.nameStrength
+                if inputNet.isSelected():
+                    netItem.setSelected(True)
+                netItem.name = inputNet.name
+                netItem.nameStrength = inputNet.nameStrength.decrement()
+            splitNetList[0].nameStrength = inputNet.nameStrength
+            return splitNetList
+        else:
+            return [inputNet]
 
-            self.addListUndoStack(splitNetList)
-            self.deleteUndoStack(self._totalNet)
 
     def mergeNets(self, inputNet: net.schematicNet) -> net.schematicNet:
         """
-        Recursively merge nets until no changes are made.
+        Merges overlapping nets and returns the merged net.
 
-        :param inputNet: The net to merge
-        :return: The merged net
+        Returns:
+            Optional[schematicNet]: The merged net if there are overlapping nets, otherwise returns self.
         """
-        (origNet, mergedNet) = inputNet.mergeNets()
-        if origNet.isSelected():
-            mergedNet.setSelected(True)
+        # Find other nets that overlap with self
+        otherNets = inputNet.findOverlapNets()
+        parallelNets = [
+            netItem for netItem in otherNets if inputNet.isParallel(netItem)
+        ]
 
-        if origNet.sceneShapeRect == mergedNet.sceneShapeRect:
-            # No changes, exit recursion
-            self._totalNet = origNet
-            return origNet
+        # If there are parallel nets
+        if parallelNets:
+            # Create an initialRect variable and set it to self's sceneShapeRect
+            initialRect = inputNet.sceneShapeRect
 
-        # Remove original net and add merged net
+            # Iterate over the parallel nets
+            for netItem in parallelNets:
+                # Update the initialRect by uniting it with each parallel net's
+                # sceneShapeRect
+                inputNet.inherit(netItem)
+                if not inputNet.nameConflict:
+                    initialRect = initialRect.united(netItem.sceneShapeRect)
+                    inputNet.parallelNetsSet.add(netItem)
+                else: #name conflict
+                    return inputNet
 
-        self.removeItem(origNet)
-        self.addItem(mergedNet)
+            newNetPoints = initialRect.adjusted(2, 2, -2, -2)
 
-        # Recursively merge the new net
-        return self.mergeNets(mergedNet)
+            # Get the coordinates of the adjusted rectangle
+            x1, y1, x2, y2 = newNetPoints.getCoords()
+
+            # Create a new schematicNet with the snapped coordinates
+            newNet = net.schematicNet(
+                self.snapToGrid(QPoint(x1, y1), self.snapTuple),
+                self.snapToGrid(QPoint(x2, y2), self.snapTuple)
+            )
+            newNet.inherit(inputNet)
+            return newNet  # original net, new net
+        else:
+            return inputNet
+
 
     def removeSnapRect(self):
         if self._snapPointRect:
@@ -666,31 +714,6 @@ class schematicScene(editorScene):
             otherNetsSet -= newFoundConnectedSet
 
         return connectedSet, otherNetsSet
-
-    # def traverseNets(
-    #         self, connectedSet: set[net.schematicNet], otherNetsSet: set[net.schematicNet]
-    # ) -> tuple[set[net.schematicNet], set[net.schematicNet]]:
-    #     """
-    #     Start from a net and traverse the schematic to find all connected nets.
-    #     If the connected net search
-    #     is exhausted, remove those nets from the scene nets set and start again
-    #     in another net until all
-    #     the nets in the scene are exhausted.
-    #     """
-    #     newFoundConnectedSet = set()
-    #     for netItem in connectedSet:
-    #         for netItem2 in otherNetsSet:
-    #             if self.checkNetConnect(netItem, netItem2):
-    #                 netItem2.inherit(netItem)
-    #                 if netItem2.nameConflict:
-    #                     continue
-    #                 else:
-    #                     newFoundConnectedSet.add(netItem2)
-    #     if len(newFoundConnectedSet) > 0:
-    #         connectedSet.update(newFoundConnectedSet)
-    #         otherNetsSet -= newFoundConnectedSet
-    #         self.traverseNets(connectedSet, otherNetsSet)
-    #     return connectedSet, otherNetsSet
 
     # Main method
     def groupAllNets(self, sceneNetsSet: set[net.schematicNet]) -> None:
@@ -1298,6 +1321,7 @@ class schematicScene(editorScene):
             ]
 
     def renumberInstances(self):
+
         symbolList = [
             item for item in self.items() if isinstance(item, shp.schematicSymbol)
         ]

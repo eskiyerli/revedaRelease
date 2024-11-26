@@ -1,6 +1,7 @@
 {
     "libdefs": {
-        "analogLib": "/home/eskiyerli/onedrive_reveda/Projects/RevEDA/exampleLibraries/analogLib",
-        "anotherExampleLibrary": "/home/eskiyerli/onedrive_reveda/Projects/RevEDA/exampleLibraries/anotherExampleLibrary"
+        "analogLib": "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\analogLib",
+        "anotherExampleLibrary": "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\anotherExampleLibrary",
+        "sg13g2_pr": "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\sg13g2_pr"
     }
 }

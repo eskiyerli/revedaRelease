@@ -53,17 +53,21 @@ import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.propertyDialogues as pdlg
 from revedaEditor.gui.editorScene import editorScene
 
-load_dotenv()
+# load_dotenv()
 
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.layoutLayers as laylyr
-    import pdk.process as fabproc
-    import pdk.pcells as pcells
-else:
-    import defaultPDK.layoutLayers as laylyr
-    import defaultPDK.process as fabproc
-    import defaultPDK.pcells as pcells
+# if os.environ.get("REVEDA_PDK_PATH"):
+#     import pdk.layoutLayers as laylyr
+#     import pdk.process as fabproc
+#     import pdk.pcells as pcells
+# else:
+#     import defaultPDK.layoutLayers as laylyr
+#     import defaultPDK.process as fabproc
+#     import defaultPDK.pcells as pcells
 
+from revedaEditor.backend.pdkPaths import importPDKModule
+fabproc = importPDKModule('process')
+laylyr = importPDKModule('layoutLayers')
+pcells = importPDKModule('pcells')
 
 class layoutScene(editorScene):
     def __init__(self, parent):

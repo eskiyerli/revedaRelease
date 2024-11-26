@@ -34,15 +34,18 @@ from PySide6.QtGui import (QBrush, QFont, QFontMetrics, QPainterPath, QTextOptio
 from PySide6.QtWidgets import (QGraphicsItem, QGraphicsPolygonItem, QGraphicsSimpleTextItem,
                                QGraphicsRectItem, QGraphicsSceneMouseEvent,
                                QGraphicsSceneHoverEvent, QGraphicsScene)
-from dotenv import load_dotenv
-load_dotenv()
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.schLayers as schlyr
-    import pdk.symLayers as symlyr
-else:
-    import defaultPDK.schLayers as schlyr
-    import defaultPDK.symLayers as symlyr
+# from dotenv import load_dotenv
+# load_dotenv()
+# if os.environ.get("REVEDA_PDK_PATH"):
+#     import pdk.schLayers as schlyr
+#     import pdk.symLayers as symlyr
+# else:
+#     import defaultPDK.schLayers as schlyr
+#     import defaultPDK.symLayers as symlyr
 
+from revedaEditor.backend.pdkPaths import importPDKModule
+schlyr = importPDKModule('schLayers')
+symlyr = importPDKModule('symLayers')
 import revedaEditor.common.net as net
 from revedaEditor.common.labels import symbolLabel
 
