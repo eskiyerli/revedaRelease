@@ -321,8 +321,8 @@ class schematicEditor(edw.editorWindow):
         self.centralW.scene.renumberInstances()
 
     def checkSaveCell(self):
-        schematicNets = self.centralW.scene.findSceneNetsSet()
-        self.centralW.scene.groupAllNets(schematicNets)
+        # schematicNets = self.centralW.scene.findSceneNetsSet()
+        self.centralW.scene.nameSceneNets()
         self.centralW.scene.saveSchematic(self.file)
 
     def saveCell(self):
@@ -801,8 +801,8 @@ class xyceNetlist:
         """
         try:
             schematicScene = schematic.centralW.scene
-            schematicNets = schematicScene.findSceneNetsSet()
-            schematicScene.groupAllNets(schematicNets)  # name all nets in the schematic
+            # schematicNets = schematicScene.findSceneNetsSet()
+            schematicScene.nameSceneNets()  # name all nets in the schematic
 
             sceneSymbolSet = schematicScene.findSceneSymbolSet()
             schematicScene.generatePinNetMap(tuple(sceneSymbolSet))

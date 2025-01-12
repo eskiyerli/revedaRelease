@@ -553,12 +553,6 @@ class editorWindow(QMainWindow):
             self.centralW.scene.partialSelection = scd.partialSelection.isChecked()
             self.centralW.scene._snapDistance = int(float(scd.snapDistanceEntry.text()))
 
-    # def checkSaveCell(self):
-    #     pass
-    #
-    # def saveCell(self):
-    #     pass
-
     def readOnlyCellClick(self):
         self.centralW.scene.readOnly = self.readOnlyCellAction.isChecked()
 
@@ -671,8 +665,8 @@ class editorWindow(QMainWindow):
         self.centralW.scene.editModes.setMode("changeOrigin")
 
     def undoClick(self, s):
-        for i in range(self.centralW.scene.undoStack.count()):
-            print(f'command {i}: {self.centralW.scene.undoStack.command(i).text()}')
+        # for i in range(self.centralW.scene.undoStack.count()):
+        #     print(f'command {i}: {self.centralW.scene.undoStack.command(i).text()}')
         self.messageLine.setText(self.centralW.scene.undoStack.undoText())
         self.centralW.scene.undoStack.undo()
 

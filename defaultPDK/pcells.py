@@ -29,8 +29,6 @@ from PySide6.QtCore import (
 from revedaEditor.backend.pdkPaths import importPDKModule
 laylyr = importPDKModule('layoutLayers')
 fabproc = importPDKModule('process')
-# import defaultPDK.layoutLayers as laylyr
-# import defaultPDK.process as fabproc
 import revedaEditor.common.layoutShapes as lshp
 
 class nmos(lshp.layoutPcell):

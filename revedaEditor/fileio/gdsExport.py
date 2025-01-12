@@ -29,13 +29,8 @@ import pathlib
 import inspect
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
-
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.pcells as pcells
-else:
-    import defaultPDK.pcells as pcells
+from revedaEditor.backend.pdkPaths import importPDKModule
+pcells = importPDKModule('pcells')
 
 class gdsExporter:
     def __init__(self, cellname: str, items: list, outputFileObj: pathlib.Path):

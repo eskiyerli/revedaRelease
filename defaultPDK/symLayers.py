@@ -35,7 +35,7 @@ import revedaEditor.backend.dataDefinitions as ddef
 # layers are not real layers to draw on but a collection of attributes that a particular
 # class of shapes can inherit from.
 
-symbolLayer = ddef.edLayer(name="symbol", pcolor=QColor("green"), pwidth=2, z=2,
+symbolLayer = ddef.edLayer(name="symbol", pcolor=QColor("green"), pwidth=4, z=2,
                            pstyle=Qt.SolidLine, visible=True, selectable=True)
 stretchSymbolLayer = replace(symbolLayer, name="stretchSymbol", pcolor=QColor("red"), z=2)
 selectedSymbolLayer = replace(symbolLayer, name="selectedSymbol", pcolor=QColor("blue"),
@@ -58,6 +58,7 @@ draftLayer = replace(symbolLayer, pcolor=QColor("gray"), bcolor=QColor("gray"), 
 
 # Symbol Pens
 symbolPen = QPen(symbolLayer.pcolor, symbolLayer.pwidth, symbolLayer.pstyle)
+symbolPen.setCosmetic(True)
 stretchSymbolPen = QPen(stretchSymbolLayer.pcolor, stretchSymbolLayer.pwidth,
                         stretchSymbolLayer.pstyle)
 selectedSymbolPen = QPen(selectedSymbolLayer.pcolor, selectedSymbolLayer.pwidth,

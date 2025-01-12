@@ -23,7 +23,9 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 import revedaEditor.backend.dataDefinitions as ddef
-import defaultPDK.layoutLayers as laylyr
+from revedaEditor.backend.pdkPaths import importPDKModule
+fabproc = importPDKModule('process')
+laylyr = importPDKModule('layoutLayers')
 
 # common process parameters
 dbu = 100  # grid points per micron

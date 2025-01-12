@@ -23,22 +23,20 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
-# from hashlib import new
+
 import inspect
 import json
-import os
-# from hashlib import new
+
 import pathlib
 import time
 from typing import List, Dict, Any, Union
 
 # import numpy as np
-from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLineF, )
+from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLineF,)
 from PySide6.QtGui import (QColor, QGuiApplication, QTransform, QPen, QFontDatabase,
                            QFont, )
-from PySide6.QtWidgets import (QDialog, QFormLayout, QGraphicsSceneMouseEvent,
-                               QGraphicsLineItem, QCompleter, )
-from dotenv import load_dotenv
+from PySide6.QtWidgets import (QDialog, QGraphicsSceneMouseEvent,
+                               QGraphicsLineItem, QCompleter, QGraphicsRectItem)
 
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
@@ -53,20 +51,10 @@ import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.propertyDialogues as pdlg
 from revedaEditor.gui.editorScene import editorScene
 
-# load_dotenv()
-
-# if os.environ.get("REVEDA_PDK_PATH"):
-#     import pdk.layoutLayers as laylyr
-#     import pdk.process as fabproc
-#     import pdk.pcells as pcells
-# else:
-#     import defaultPDK.layoutLayers as laylyr
-#     import defaultPDK.process as fabproc
-#     import defaultPDK.pcells as pcells
-
 from revedaEditor.backend.pdkPaths import importPDKModule
 fabproc = importPDKModule('process')
 laylyr = importPDKModule('layoutLayers')
+schlyr = importPDKModule('schLayers')
 pcells = importPDKModule('pcells')
 
 class layoutScene(editorScene):
@@ -156,20 +144,24 @@ class layoutScene(editorScene):
         point *= fabproc.dbu
         return point
 
-    def mousePressEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
-        """
-        Handle the mouse press event.
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
 
-        Args:
-            mouse_event: The mouse event object.
-
-        Returns:
-            None
-        """
-        # Store the mouse press location
-        self.mousePressLoc = mouse_event.scenePos().toPoint()
-        # Call the base class mouse press event
-        super().mousePressEvent(mouse_event)
+        super().mousePressEvent(event)
+        modifiers = QGuiApplication.keyboardModifiers()
+        if event.button() != Qt.LeftButton:
+            return
+        try:
+            self.mousePressLoc = event.scenePos().toPoint()
+            if self.editModes.selectItem:
+                if (modifiers == Qt.KeyboardModifier.ShiftModifier or modifiers ==
+                        Qt.KeyboardModifier.ControlModifier):
+                    self._selectionRectItem = QGraphicsRectItem()
+                    self._selectionRectItem.setRect(QRectF(self.mousePressLoc.x(),
+                                                           self.mousePressLoc.y(),0,0))
+                    self._selectionRectItem.setPen(schlyr.draftPen)
+                    self.addItem(self._selectionRectItem)
+        except Exception as e:
+            self.logger.error(f"Mouse press error: {e}")
 
     def mouseMoveEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         """
@@ -186,7 +178,7 @@ class layoutScene(editorScene):
         # Call the parent class's mouseMoveEvent method
         super().mouseMoveEvent(mouse_event)
         # Get the keyboard modifiers
-        modifiers = QGuiApplication.keyboardModifiers()
+        # modifiers = QGuiApplication.keyboardModifiers()
 
         # Handle drawing path mode
         if self.editModes.drawPath and self._newPath is not None:
@@ -228,7 +220,7 @@ class layoutScene(editorScene):
     def mouseReleaseEvent(self, mouse_event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(mouse_event)
         self.mouseReleaseLoc = mouse_event.scenePos().toPoint()
-        modifiers = QGuiApplication.keyboardModifiers()
+        # modifiers = QGuiApplication.keyboardModifiers()
         try:
             if mouse_event.button() == Qt.LeftButton:
                 if self.editModes.drawPath:
@@ -479,7 +471,7 @@ class layoutScene(editorScene):
                 decodedData = json.load(file)
 
             # Unpack grid settings
-            viewType, gridSettings, *itemData = decodedData
+            _, gridSettings, *itemData = decodedData
             snapGrid = gridSettings.get("snapGrid", [1, 1])
             self.majorGrid, self.snapGrid = snapGrid
             self.snapTuple = (self.snapGrid, self.snapGrid)
@@ -490,7 +482,6 @@ class layoutScene(editorScene):
             endTime = time.perf_counter()
 
             self.logger.info(f"Load time: {endTime - startTime:.4f} seconds")
-            print(f"Load time: {endTime - startTime:.4f} seconds")
         except Exception as e:
             self.logger.error(f"Cannot load layout: {e}")
 
@@ -571,7 +562,7 @@ class layoutScene(editorScene):
         dlg = ldlg.layoutPolygonProperties(self.editorWindow, pointsTupleList)
         dlg.polygonLayerCB.addItems(
             [f"{item.name} [{item.purpose}]" for item in laylyr.pdkAllLayers])
-        dlg.polygonLayerCB.setCurrentText(f"{item.layer.name} [" f"{item.layer.purpose}]")
+        dlg.polygonLayerCB.setCurrentText(f"{item.layer.name} [{item.layer.purpose}]")
 
         if dlg.exec() == QDialog.Accepted:
             newLayer = laylyr.pdkAllLayers[dlg.polygonLayerCB.currentIndex()]
@@ -904,6 +895,32 @@ class layoutScene(editorScene):
                     f"Moved items by {dlg.xEdit.text()} and {dlg.yEdit.text()}")
                 self.editModes.setMode("selectItem")
 
+
+    def copySelectedItems(self):
+        selectedItems = [
+            item for item in self.selectedItems() if item.parentItem() is None
+        ]
+        if selectedItems:
+            for item in selectedItems:
+                selectedItemJson = json.dumps(item, cls=layenc.layoutEncoder)
+                itemCopyDict = json.loads(selectedItemJson)
+                shape = lj.layoutItems(self).create(itemCopyDict)
+                if shape is not None:
+                    item.setSelected(False)
+                    self.addUndoStack(shape)
+                    shape.setSelected(True)
+                    # shift position by four grid units to right and down
+                    shape.setPos(
+                        QPoint(
+                            item.pos().x() +  self.snapTuple[0]*fabproc.dbu,
+                            item.pos().y() +  self.snapTuple[1]*fabproc.dbu,
+                        )
+                    )
+                    if isinstance(shape, lshp.layoutInstance) or isinstance(shape,lshp.layoutPcell):
+                        self.itemCounter += 1
+                        shape.counter = self.itemCounter
+                        shape.instanceName = f"I{shape.counter}"
+
     def deleteAllRulers(self):
         for ruler in self.rulersSet:
             undoCommand = us.deleteShapeUndo(self, ruler)
@@ -961,38 +978,12 @@ class layoutScene(editorScene):
                                                            pathItem)
         self.undoStack.push(addDeleteStretchNetCommand)
 
-    #
-    # @staticmethod
-    # def rotateVector(mouseLoc: QPoint, vector: layp.layoutPath, transform: QTransform):
-    #     """
-    #     Rotate the vector based on the mouse location and transform.
-    #
-    #     Args:
-    #         mouseLoc (QPoint): The current mouse location.
-    #         vector (layp.layoutPath): The vector to rotate.
-    #         transform (QTransform): The transform to apply to the vector.
-    #     """
-    # start = vector.start
-    # xmove = mouseLoc.x() - start.x()
-    # ymove = mouseLoc.y() - start.y()
-
-    #     # Determine the new end point of the vector based on the mouse movement
-    #     if xmove >= 0 and ymove >= 0:
-    #         vector.end = QPoint(start.x(), start.y() + ymove)
-    #     elif xmove >= 0 and ymove < 0:
-    #         vector.end = QPoint(start.x() + xmove, start.y())
-    #     elif xmove < 0 and ymove < 0:
-    #         vector.end = QPoint(start.x(), start.y() + ymove)
-    #     elif xmove < 0 and ymove >= 0:
-    #         vector.end = QPoint(start.x() + xmove, start.y())
-    #
-    #     vector.setTransform(transform)
-
     def findClosestFontSize(self, sizes: List[int], target: int = 16) -> int:
         return min(sizes, key=lambda x: abs(x - target))
 
     def setRulerFont(self, target_size: int = 16) -> QFont:
         fontDatabase = QFontDatabase()
+        fixedFamilies = None
         if fontDatabase:
             fixedFamilies = [family for family in fontDatabase.families(QFontDatabase.Latin)
                              if
@@ -1001,22 +992,22 @@ class layoutScene(editorScene):
         if not fixedFamilies:
             self.logger.warning("No fixed-pitch fonts found. Using default font.")
             return QFont()
+        else:
+            for family in fixedFamilies:
+                styles = fontDatabase.styles(family)
+                if not styles:
+                    continue
 
-        for family in fixedFamilies:
-            styles = fontDatabase.styles(family)
-            if not styles:
-                continue
+                style = styles[0]  # Use the first available style
+                sizes = fontDatabase.pointSizes(family, style)
 
-            style = styles[0]  # Use the first available style
-            sizes = fontDatabase.pointSizes(family, style)
-
-            if sizes:
-                closest_size = self.findClosestFontSize(sizes, target_size)
-                font = QFont(family)
-                font.setStyleName(style)
-                font.setPointSize(closest_size)
-                font.setKerning(False)
-                return font
+                if sizes:
+                    closest_size = self.findClosestFontSize(sizes, target_size)
+                    font = QFont(family)
+                    font.setStyleName(style)
+                    font.setPointSize(closest_size)
+                    font.setKerning(False)
+                    return font
 
         self.scene().logger.warning("No suitable font found. Using default font.")
         return QFont()

@@ -93,7 +93,7 @@ class designLibrariesView(QTreeView):
     def createCell(self):
         dlg = fd.createCellDialog(self, self.libraryModel)
         assert isinstance(self.selectedItem, libb.libraryItem)
-        dlg.libNamelibb.setCurrentText(self.selectedItem.libraryName)
+        dlg.libNamesCB.setCurrentText(self.selectedItem.libraryName)
         if dlg.exec() == QDialog.Accepted:
             cellName = dlg.cellCB.currentText()
             if cellName.strip() != "":

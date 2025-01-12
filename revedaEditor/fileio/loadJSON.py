@@ -27,9 +27,8 @@
 # import pathlib
 
 import json
-import os
 import pathlib
-from typing import Dict, Any, List
+from typing import Any, List
 
 from PySide6.QtCore import QPoint, QLineF, QRect
 from PySide6.QtGui import (
@@ -42,32 +41,18 @@ from PySide6.QtWidgets import (
     QGraphicsRectItem,
     QGraphicsTextItem,
 )
-from dotenv import load_dotenv
 from methodtools import lru_cache
-
-
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.pcells as pcells
-    import pdk.process as fabproc
-else:
-    import defaultPDK.pcells as pcells
-    import defaultPDK.process as fabproc
-
-
 
 import revedaEditor.common.labels as lbl
 import revedaEditor.common.layoutShapes as lshp
 import revedaEditor.common.net as net
 import revedaEditor.common.shapes as shp
 import revedaEditor.fileio.symbolEncoder as se
+from revedaEditor.backend.pdkPaths import importPDKModule
 
-load_dotenv()
-
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.layoutLayers as laylyr
-else:
-    import defaultPDK.layoutLayers as laylyr
-
+laylyr = importPDKModule('layoutLayers')
+pcells = importPDKModule('pcells')
+fabproc = importPDKModule('process')
 
 class symbolItems:
     def __init__(self, scene: QGraphicsScene):
@@ -241,7 +226,8 @@ class schematicItems:
                 case "txt":
                     return self._createText(item)
                 case _:
-                    return self.unknownItem()
+                    pass
+                    # return self.unknownItem()
 
     def _createText(self, item):
         start = QPoint(item["st"][0], item["st"][1])
@@ -418,7 +404,7 @@ class PCellCache:
     @classmethod
     @lru_cache(maxsize=100)
     def getPCellClass(cls, pcell_class_name: str) -> Any:
-        return pdk.pcells.pcells.get(pcell_class_name)
+        return pcells.pcells.get(pcell_class_name)
 
     @classmethod
     def getLayoutFileContents(cls, file_path: str) -> List:
@@ -501,7 +487,7 @@ class layoutItems:
             return None
 
         pcellClassName = pcellDef[1].get("reference")
-        pcellClass = pdk.pcells.pcells.get(pcellClassName)
+        pcellClass = pcells.pcells.get(pcellClassName)
         if not pcellClass:
             self.scene.logger.error(f"Unknown PCell class: {pcellClassName}")
             return None

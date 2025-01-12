@@ -25,12 +25,9 @@
 
 import json
 import inspect
-import os
 
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.layoutLayers as laylyr
-else:
-    import defaultPDK.layoutLayers as laylyr
+from revedaEditor.backend.pdkPaths import importPDKModule
+laylyr = importPDKModule('layoutLayers')
 
 import revedaEditor.common.layoutShapes as lshp
 

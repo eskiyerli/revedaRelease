@@ -23,22 +23,20 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
-import os
+from typing import Tuple
 
 from PySide6.QtCore import (QPoint, )
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGraphicsSimpleTextItem, QGraphicsItem
 from dotenv import load_dotenv
 from quantiphy import Quantity
-from typing import Tuple
-load_dotenv()
 
-if os.environ.get("REVEDA_PDK_PATH"):
-    import pdk.symLayers as symlyr
-    import pdk.callbacks as cb
-else:
-    import defaultPDK.symLayers as symlyr
-    import defaultPDK.callbacks as cb
+load_dotenv()
+from revedaEditor.backend.pdkPaths import importPDKModule
+
+schlyr = importPDKModule('schLayers')
+symlyr = importPDKModule('symLayers')
+cb = importPDKModule('callbacks')
 
 
 class symbolLabel(QGraphicsSimpleTextItem):
@@ -51,26 +49,11 @@ class symbolLabel(QGraphicsSimpleTextItem):
     labelOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
     labelUses = ["Normal", "Instance", "Pin", "Device", "Annotation"]
     labelTypes = ["Normal", "NLPLabel", "PyLabel"]
-    predefinedLabels = [
-        "[@libName]",
-        "[@cellName]",
-        "[@viewName]",
-        "[@instName]",
-        "[@modelName]",
-        "[@elementNum]",
-    ]
+    predefinedLabels = ["[@libName]", "[@cellName]", "[@viewName]", "[@instName]",
+        "[@modelName]", "[@elementNum]", ]
 
-
-    def __init__(
-        self,
-        start: QPoint,
-        labelDefinition: str,
-        labelType: str,
-        labelHeight: int,
-        labelAlign: str,
-        labelOrient: str,
-        labelUse: str,
-    ):
+    def __init__(self, start: QPoint, labelDefinition: str, labelType: str,
+            labelHeight: int, labelAlign: str, labelOrient: str, labelUse: str, ):
         super().__init__("")
         self._start = start  # top left corner
         self._labelDefinition = labelDefinition
@@ -94,7 +77,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
         self._labelVisible: bool = False
 
         self._angle = 0.0  # rotation angle
-        self._flipTuple = (1,1)
+        self._flipTuple = (1, 1)
         self.setBrush(symlyr.labelBrush)
         self.setPos(self._start)
 
@@ -111,11 +94,9 @@ class symbolLabel(QGraphicsSimpleTextItem):
                 self.setRotation(0)
 
     def __repr__(self):
-        return (
-            f"symbolLabel({self._start},{self._labelDefinition},"
-            f" {self._labelType}, {self._labelHeight}, {self._labelAlign}, {self._labelOrient},"
-            f" {self._labelUse})"
-        )
+        return (f"symbolLabel({self._start},{self._labelDefinition},"
+                f" {self._labelType}, {self._labelHeight}, {self._labelAlign}, {self._labelOrient},"
+                f" {self._labelUse})")
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
@@ -277,7 +258,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
     @flipTuple.setter
     def flipTuple(self, flipState: Tuple[int, int]):
         self.prepareGeometryChange()
-    # Get the current transformation
+        # Get the current transformation
         transform = self.transform()
 
         # Apply the scaling
@@ -305,7 +286,6 @@ class symbolLabel(QGraphicsSimpleTextItem):
         elif self._labelType == symbolLabel.labelTypes[1]:  # NLPLabel
             self.createNLPLabel()
         elif self._labelType == symbolLabel.labelTypes[2]:  # pyLabel
-            # self._labelText = f'{self._labelDefinition}'
             self.createPyLabel()
         self.setText(self._labelText)
 
@@ -322,33 +302,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
                     self._labelValue = ""
                 else:
                     if self._labelDefinition in symbolLabel.predefinedLabels:
-                        match self._labelDefinition:
-                            case "[@cellName]":
-                                # Set label name to "cellName" and value and text to parent item's cell name
-                                self._labelValue = self.parentItem().cellName
-                                self._labelText = self._labelValue
-                            case "[@instName]":
-                                # Set label name to "instName" and value and text to parent item's counter with prefix "I"
-                                self._labelValue = f"I{self.parentItem().counter}"
-                                self._labelText = self._labelValue
-                            case "[@libName]":
-                                # Set label name to "libName" and value and text to parent item's library name
-                                self._labelValue = self.parentItem().libraryName
-                                self._labelText = self._labelValue
-                            case "[@viewName]":
-                                # Set label name to "viewName" and value and text to parent item's view name
-                                self._labelValue = self.parentItem().viewName
-                                self._labelText = self._labelValue
-                            case "[@modelName]":
-                                # Set label name to "modelName" and value and text to parent item's "modelName" attribute
-                                self._labelValue = self.parentItem().attr.get(
-                                    "modelName", ""
-                                )
-                                self._labelText = self._labelValue
-                            case "[@elementNum]":
-                                # Set label name to "elementNum" and value and text to parent item's counter
-                                self._labelValue = f"{self.parentItem().counter}"
-                                self._labelText = self._labelValue
+                        self._createPredefinedLabels()
                     else:
                         if len(parts) > 1:
                             formatString = parts[1]
@@ -356,7 +310,6 @@ class symbolLabel(QGraphicsSimpleTextItem):
                         else:
                             formatString = ""
                             defaultValue = ""
-
                         if formatString:
                             prefix, suffix = formatString.split("%")
                             if self._labelValue:
@@ -369,10 +322,35 @@ class symbolLabel(QGraphicsSimpleTextItem):
                                 self._labelText = f"{prefix}{self._labelValue}{suffix}"
         except Exception as e:
             self.scene().logger.error(
-                f"Error parsing label definition: {self._labelDefinition}, {e}"
-            )
+                f"Error parsing label definition: {self._labelDefinition}, {e}")
 
-
+    def _createPredefinedLabels(self):
+        match self._labelDefinition:
+            case "[@cellName]":
+                # Set label name to "cellName" and value and text to parent item's cell name
+                self._labelValue = self.parentItem().cellName
+                self._labelText = self._labelValue
+            case "[@instName]":
+                # Set label name to "instName" and value and text to parent item's counter with prefix "I"
+                self._labelValue = f"I{self.parentItem().counter}"
+                self._labelText = self._labelValue
+            case "[@libName]":
+                # Set label name to "libName" and value and text to parent item's library name
+                self._labelValue = self.parentItem().libraryName
+                self._labelText = self._labelValue
+            case "[@viewName]":
+                # Set label name to "viewName" and value and text to parent item's view name
+                self._labelValue = self.parentItem().viewName
+                self._labelText = self._labelValue
+            case "[@modelName]":
+                # Set label name to "modelName" and value and text to parent item's "modelName" attribute
+                self._labelValue = self.parentItem().attr.get("modelName",
+                                                              "")
+                self._labelText = self._labelValue
+            case "[@elementNum]":
+                # Set label name to "elementNum" and value and text to parent item's counter
+                self._labelValue = f"{self.parentItem().counter}"
+                self._labelText = self._labelValue
 
     def createPyLabel(self):
         """
@@ -398,7 +376,7 @@ class symbolLabel(QGraphicsSimpleTextItem):
                         else:
                             self._labelValue = '?'
 
-                # Set the label text with the name and value
+                        # Set the label text with the name and value
                         self._labelText = f"{labelName}={self._labelValue}"
             else:
                 # Set the label text with the name and function
@@ -408,4 +386,3 @@ class symbolLabel(QGraphicsSimpleTextItem):
             # Log the error if scene exists
             if self.scene():
                 self.scene().logger.error(f"PyLabel Error: {e}")
-

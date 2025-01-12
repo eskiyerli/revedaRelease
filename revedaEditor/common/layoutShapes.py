@@ -63,12 +63,6 @@ import os
 from revedaEditor.backend.pdkPaths import importPDKModule
 laylyr = importPDKModule('layoutLayers')
 fabproc = importPDKModule('process')
-# if os.environ.get("REVEDA_PDK_PATH"):
-#     import pdk.layoutLayers as laylyr
-#     import pdk.process as fabproc
-# else:
-#     import defaultPDK.layoutLayers as laylyr
-#     import defaultPDK.process as fabproc
 import revedaEditor.backend.dataDefinitions as ddef
 
 

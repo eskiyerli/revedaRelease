@@ -473,7 +473,7 @@ class layoutContainer(QWidget):
 
     def findSelectedLayer(self, layerName: str, layerPurpose: str):
         for layer in laylyr.pdkAllLayers:
-            if layer.netName == layerName and layer.purpose == layerPurpose:
+            if layer.name == layerName and layer.purpose == layerPurpose:
                 return layer
         return laylyr.pdkAllLayers[0]
 

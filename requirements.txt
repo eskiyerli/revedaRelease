@@ -1,6 +1,6 @@
-PySide6~=6.8.0.2
+PySide6~=6.8.1
 python-dotenv~=1.0.1
 quantiphy~=2.20
-gdstk~=0.9.57
+gdstk~=0.9.58
 methodtools~=0.4.7
-numpy~=2.1.3
+numpy~=2.2.0

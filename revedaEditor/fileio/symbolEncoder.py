@@ -58,7 +58,6 @@ class symbolAttribute(object):
         assert isinstance(value, str)
         self._definition = value
 
-
 class symbolEncoder(json.JSONEncoder):
     def default(self, item):
         if isinstance(item, shp.symbolRectangle):

@@ -33,12 +33,10 @@ import revedaEditor.backend.dataDefinitions as ddef
 
 # schematic layers
 
-# schematic layers
-
 wireLayer = ddef.edLayer(
     name="wire",
     pcolor=QColor("cyan"),
-    pwidth=1,
+    pwidth=2,
     pstyle=Qt.SolidLine,
     z=0,
     bcolor=QColor("cyan"),

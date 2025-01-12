@@ -153,12 +153,10 @@ class addDeleteNetUndo(QUndoCommand):
     def undo(self):
         self._scene.removeItem(self._addNet)
         self._scene.addItem(self._deleteNet)
-        self._scene.findConnectedNetSet(self._deleteNet)
 
     def redo(self):
         self._scene.addItem(self._addNet)
         self._scene.removeItem(self._deleteNet)
-        self._scene.findConnectedNetSet(self._addNet)
 
 class updateSymUndo(QUndoCommand):
     def __init__(self, item: QGraphicsItem, oldItemList: list, newItemList: list):
@@ -221,22 +219,23 @@ class undoRotateShape(QUndoCommand):
         self._shape.angle += self._angle
 
 class undoMoveShapesCommand(QUndoCommand):
-    def __init__(self, shapes: Sequence[QGraphicsItem], shapesOffsetList: Sequence[QPoint],
+    def __init__(self, shapes: Sequence[QGraphicsItem],
                  startPos: QPoint, endPos: QPoint):
         super().__init__()
         self._shapes = shapes
-        self._shapesOffsetList = shapesOffsetList
         self._startPos = startPos
         self._endPos = endPos
         self.setText('undo move shapes')
 
     def undo(self) -> None:
-        for shape, offset in zip(self._shapes, self._shapesOffsetList):
-            shape.setPos(self._startPos + offset)
+        for shape in self._shapes:
+            shape.setPos(self._startPos + shape.offset)
+
 
     def redo(self) -> None:
-        for shape, offset in zip(self._shapes, self._shapesOffsetList):
-            shape.setPos(self._endPos + offset)
+        for shape in self._shapes:
+            shape.setPos(self._endPos + shape.offset)
+
 
 class undoMoveByCommand(QUndoCommand):
     def __init__(self, scene, items: List, dx: float, dy: float, description: str = "Move Items"):

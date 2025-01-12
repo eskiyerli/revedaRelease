@@ -39,13 +39,8 @@ from dotenv import load_dotenv
 import revedaEditor.common.layoutShapes as lshp
 import revedaEditor.gui.editFunctions as edf
 
-load_dotenv()
-
-if os.environ.get("REVEDA_PDK_PATH"):
-
-    import pdk.process as fabproc
-else:
-    import defaultPDK.process as fabproc
+from revedaEditor.backend.pdkPaths import importPDKModule
+fabproc = importPDKModule('process')
 
 from typing import Dict
 
@@ -667,7 +662,7 @@ class layoutPolygonProperties(QDialog):
                     self.addEmptyRow(row + 1)
 
     def deleteRow(self, row, state):
-        print("delete")
+        # print("delete")
         if state == 2:  # Checked state
             self.tableWidget.removeRow(row)
 
