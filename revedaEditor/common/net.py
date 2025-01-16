@@ -321,11 +321,6 @@ class schematicNet(QGraphicsItem):
                 return True
         else:
             return False
-        #     if self.name != otherNet.name:
-        #         self.nameConflict = True
-        #         otherNet.nameConflict = True
-        #         return False
-        #     return True
         return True
 
     def mergeNetNames(self, otherNet: Type["schematicNet"]) -> bool:

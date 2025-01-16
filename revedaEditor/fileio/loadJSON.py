@@ -552,7 +552,6 @@ class layoutItems:
         layoutInstance.angle = item.get("ang", 0)
         layoutInstance.flipTuple = item.get('fl', (1,1))
         layoutInstance.viewName = viewName
-
         return layoutInstance
 
     def createRectShape(self, item):

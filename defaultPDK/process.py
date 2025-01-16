@@ -28,7 +28,9 @@ fabproc = importPDKModule('process')
 laylyr = importPDKModule('layoutLayers')
 
 # common process parameters
-dbu = 100  # grid points per micron
+dbu = 1000  # grid points per micron
+snapGrid = 50 # 0.05
+majorGrid = 100 # 0.1 micron
 
 # Some predefined rules
 # via defintions

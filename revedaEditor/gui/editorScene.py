@@ -21,11 +21,8 @@
 #    Software: Revolution EDA
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
-#
 
-import os
 from typing import List, Sequence
-
 from PySide6.QtCore import (QEvent, QPoint, QRectF, Qt)
 from PySide6.QtGui import (QGuiApplication, QColor, QPen, QPainterPath, )
 from PySide6.QtWidgets import (QGraphicsRectItem, QGraphicsScene, QMenu, QGraphicsItem,
@@ -102,7 +99,7 @@ class editorScene(QGraphicsScene):
         """
         Restrict a number to the multiples of base
         """
-        return int(round(number / base)) * base
+        return int(round(float(number) / base)) * base
 
     def snapToGrid(self, point: QPoint, snapTuple: tuple[int, int]):
         """

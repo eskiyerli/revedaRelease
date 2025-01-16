@@ -146,7 +146,7 @@ class layoutEncoder(json.JSONEncoder):
                             "view": item.viewName,
                             "nam": item.instanceName,
                             "ic": item.counter,
-                            "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                            "loc": item.pos().toPoint().toTuple(),
                             "ang": item.angle,
                             "fl": item.flipTuple,
                             "params": argDict,

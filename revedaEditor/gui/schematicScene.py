@@ -30,7 +30,6 @@ import pathlib
 import time
 from collections import Counter
 from typing import Union, Set, Dict, Tuple, List
-
 from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLineF, Signal, Slot)
 from PySide6.QtGui import (QTextDocument, QFontDatabase, QFont, QGuiApplication,
                            QPainterPath, )
@@ -209,19 +208,22 @@ class schematicScene(editorScene):
             elif self.editModes.stretchItem:
                 self._handleStretchItem()
             elif self.editModes.selectItem and self._selectionRectItem:
-                self.clearSelection()
-                selectionMode = (Qt.ItemSelectionMode.IntersectsItemShape if
+                self._handleSelectionRect(modifiers)
+
+    def _handleSelectionRect(self, modifiers):
+        self.clearSelection()
+        selectionMode = (Qt.ItemSelectionMode.IntersectsItemShape if
                                  self.partialSelection else Qt.ItemSelectionMode.ContainsItemShape)
-                selectionPath = QPainterPath()
-                selectionPath.addRect(self._selectionRectItem.sceneBoundingRect())
-                match modifiers:
-                    case Qt.KeyboardModifier.ShiftModifier:
-                        self._handleShiftSelection(selectionMode, selectionPath)
-                    case Qt.KeyboardModifier.ControlModifier:
-                        for item in (self.items(selectionPath, mode=selectionMode)):
-                            item.setSelected(not item.isSelected())
-                self.removeItem(self._selectionRectItem)
-                self._selectionRectItem = None
+        selectionPath = QPainterPath()
+        selectionPath.addRect(self._selectionRectItem.sceneBoundingRect())
+        match modifiers:
+            case Qt.KeyboardModifier.ShiftModifier:
+                self._handleShiftSelection(selectionMode, selectionPath)
+            case Qt.KeyboardModifier.ControlModifier:
+                for item in (self.items(selectionPath, mode=selectionMode)):
+                    item.setSelected(not item.isSelected())
+        self.removeItem(self._selectionRectItem)
+        self._selectionRectItem = None
 
     def _handleShiftSelection(self, selectionMode, selectionPath):
         selectedItems = (self.items(selectionPath,
