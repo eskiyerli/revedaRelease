@@ -43,7 +43,6 @@ from PySide6.QtGui import (
     QPen,
     QBrush,
     QColor,
-    QTransform,
     QBitmap,
     QFontMetrics,
     QFont,
@@ -501,8 +500,8 @@ class layoutInstance(layoutShape):
         # Name of the instance
         self._instanceName = ""
         # Pen used for selection
-        self._selectedPen = QPen(QColor("yellow"), 1, Qt.DashLine)
-        self._selectedPen.setCosmetic(True)
+        self._selectedPen = QPen(QColor("yellow"), 4, Qt.DashLine)
+        self._selectedPen.setCosmetic(False)
         # Set the shapes for the symbol
         self.setShapes()
         # Enable child event filtering for filters and handles
@@ -511,7 +510,7 @@ class layoutInstance(layoutShape):
         # Enable flag to indicate that the item contains children in shape
         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
         # Set the top left position of the symbol
-        self._start = self.childrenBoundingRect().topLeft()
+        self._start = self.childrenBoundingRect().bottomLeft()
 
     def setShapes(self):
         for item in self._shapes:
@@ -685,17 +684,6 @@ class layoutPath(layoutShape):
         self._angle = 0
         self._rectCorners(self._draftLine.angle())
         self.setZValue(self._layer.z)
-
-    # def _definePensBrushes(self):
-    #     self._pen = QPen(self._layer.pcolor, self._layer.pwidth, self._layer.pstyle)
-    #     self._bitmap = QBitmap.fromImage(
-    #         QPixmap(self._layer.btexture).scaled(10, 10).toImage()
-    #     )
-    #     self._brush = QBrush(self._layer.bcolor, self._bitmap)
-    #     self._selectedPen = QPen(QColor("yellow"), self._layer.pwidth, Qt.DashLine)
-    #     self._selectedBrush = QBrush(QColor("yellow"), self._bitmap)
-    #     self._stretchPen = QPen(QColor("red"), self._layer.pwidth, Qt.SolidLine)
-    #     self._stretchBrush = QBrush(QColor("red"), self._bitmap)
 
     def __repr__(self):
         return (
@@ -1105,7 +1093,7 @@ class layoutRuler(layoutShape):
 class layoutLabel(layoutShape):
     labelAlignments = ["Left", "Center", "Right"]
     labelOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
-    labelScale = 10
+    LABELSCALE = 10
 
     def __init__(
         self,
@@ -1123,7 +1111,7 @@ class layoutLabel(layoutShape):
         self._labelText = labelText
         self._fontFamily = fontFamily
         self._fontStyle = fontStyle
-        self._fontHeight = fontHeight
+        self._fontHeight = fontHeight * layoutLabel.LABELSCALE
         self._labelAlign = labelAlign
         self._labelOrient = labelOrient
         self._layer = layer
@@ -1215,15 +1203,6 @@ class layoutLabel(layoutShape):
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
             self.setFlag(QGraphicsItem.ItemIsSelectable, False)
 
-    # def flip(self, direction: str):
-    #     currentTransform = self.transform()
-    #     newTransform = QTransform()
-    #     if direction == "x":
-    #         currentTransform = newTransform.scale(-1, 1) * currentTransform
-    #     elif direction == "y":
-    #         currentTransform = newTransform.scale(1, -1) * currentTransform
-    #     self.setTransform(currentTransform)
-
     @property
     def start(self):
         return self._start
@@ -1275,12 +1254,12 @@ class layoutLabel(layoutShape):
 
     @property
     def fontHeight(self):
-        return int(self._fontHeight/layoutLabel.labelScale)
+        return int(float(self._fontHeight/layoutLabel.LABELSCALE))
 
     @fontHeight.setter
-    def fontHeight(self, value: float):
+    def fontHeight(self, value: str):
         self.prepareGeometryChange()
-        self._fontHeight = int(value * layoutLabel.labelScale)
+        self._fontHeight = int(float(value) * layoutLabel.LABELSCALE)
         self._labelFont.setPointSize(self._fontHeight)
         self._fm = QFontMetrics(self._labelFont)
         self._rect = self._fm.boundingRect(self._labelText)

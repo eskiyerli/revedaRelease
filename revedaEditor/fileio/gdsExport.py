@@ -25,26 +25,31 @@
 
 import gdstk
 import revedaEditor.common.layoutShapes as lshp
-import pathlib
 import inspect
-import os
-from dotenv import load_dotenv
+from typing import List, Dict, Tuple, Any
+from pathlib import Path
 from revedaEditor.backend.pdkPaths import importPDKModule
 pcells = importPDKModule('pcells')
 
 class gdsExporter:
-    def __init__(self, cellname: str, items: list, outputFileObj: pathlib.Path):
+    __slots__ = ('_cellname', '_items', '_outputFileObj', '_libraryName',
+                 '_unit', '_precision', '_topCell', '_itemCounter')
+
+    DEFAULT_UNIT = 1e-6
+    DEFAULT_PRECISION = 1e-9
+
+    def __init__(self, cellname: str, items: List[Any], outputFileObj: Path):
+        self._unit = self.DEFAULT_UNIT
+        self._precision = self.DEFAULT_PRECISION
         self._cellname = cellname
         self._items = items
         self._outputFileObj = outputFileObj
         self._libraryName = None
-        self._unit = 1e-6
-        self._precision = 1e-9
         self._topCell = None
-        self._cellCache = {}  # Cache to store already processed cells
+
         self._itemCounter = 0
 
-    def gds_export(self):
+    def gdsExport(self):
         self._outputFileObj.parent.mkdir(parents=True, exist_ok=True)
         lib = gdstk.Library(unit=self._unit, precision=self._precision)
         self._topCell = lib.new_cell(self._cellname)  # top Cell
@@ -54,125 +59,115 @@ class gdsExporter:
         lib.write_gds(self._outputFileObj)
 
     def createCells(self, library: gdstk.Library, item: lshp.layoutShape, parentCell: gdstk.Cell):
-        match type(item):
-            case lshp.layoutInstance:
-                cell_key = (item.libraryName, item.cellName, item.viewName)
-                if cell_key not in self._cellCache:
-                    cellGDSName = f"{item.libraryName}_{item.cellName}_{item.viewName}_{self._itemCounter}"
-                    self._itemCounter += 1
-                    new_cell = library.new_cell(cellGDSName)
-                    self._cellCache[cell_key] = new_cell
-                    for shape in item.shapes:
-                        self.createCells(library, shape, new_cell)
-                else:
-                    new_cell = self._cellCache[cell_key]
-                
-                ref = gdstk.Reference(
-                    new_cell,
-                    item.pos().toPoint().toTuple(),
-                    rotation=item.angle,
-                )
-                parentCell.add(ref)
-            
-            case lshp.layoutRect:
-                rect = gdstk.rectangle(
-                    corner1=item.start.toTuple(),
-                    corner2=item.end.toTuple(),
-                    layer=item.layer.gdsLayer,
-                    datatype=item.layer.datatype,
-                )
-                parentCell.add(rect)
-            
-            case lshp.layoutPath:
-                path = gdstk.FlexPath(
-                    points=[
-                        item.draftLine.p1().toTuple(),
-                        item.draftLine.p2().toTuple(),
-                    ],
-                    width=item.width,
-                    ends=(item.startExtend, item.endExtend),
-                    simple_path=True,
-                    layer=item.layer.gdsLayer,
-                    datatype=item.layer.datatype,
-                )
-                parentCell.add(path)
-            
-            case lshp.layoutLabel:
-                label = gdstk.Label(
-                    text=item.labelText,
-                    origin=item.start.toTuple(),
-                    rotation=item.angle,
-                    layer=item.layer.gdsLayer,
-                )
-                parentCell.add(label)
-            
-            case lshp.layoutPin:
-                pin = gdstk.rectangle(
-                    corner1=item.start.toTuple(),
-                    corner2=item.end.toTuple(),
-                    layer=item.layer.gdsLayer,
-                    datatype=item.layer.datatype,
-                )
-                parentCell.add(pin)
-            
-            case lshp.layoutPolygon:
-                points = [point.toTuple() for point in item.points]
-                polygon = gdstk.Polygon(
-                    points=points,
-                    layer=item.layer.gdsLayer,
-                    datatype=item.layer.datatype,
-                )
-                parentCell.add(polygon)
-            
-            case lshp.layoutViaArray:
-                via_key = (item.via.width, item.via.height, item.via.layer.name, item.via.layer.purpose)
-                if via_key not in self._cellCache:
-                    viaName = f"via_{item.via.width}_{item.via.height}_{item.via.layer.name}_{item.via.layer.purpose}"
-                    viaCell = library.new_cell(viaName)
-                    via = gdstk.rectangle(
-                        item.mapToScene(item.via.rect.topLeft()).toTuple(),
-                        item.mapToScene(item.via.rect.bottomRight()).toTuple(),
-                        layer=item.via.layer.gdsLayer,
-                        datatype=item.via.layer.datatype,
-                    )
-                    viaCell.add(via)
-                    self._cellCache[via_key] = viaCell
-                else:
-                    viaCell = self._cellCache[via_key]
-                
-                viaArray = gdstk.Reference(
-                    cell=viaCell,
-                    origin=item.start.toTuple(),
-                    columns=item.xnum,
-                    rows=item.ynum,
-                    spacing=(item.xs + item.width, item.ys + item.height),
-                )
-                parentCell.add(viaArray)
-            
-            case _:
-                match item.__class__.__bases__[0]:
-                    case pcells.baseCell:
-                        pcellParamDict = self.extractPcellInstanceParameters(item)
-                        pcell_key = (item.libraryName, type(item).__name__, frozenset(pcellParamDict.items()))
-                        
-                        if pcell_key not in self._cellCache:
-                            pcellNameSuffix = "_".join(
-                                [f"{key}_{value}" for key, value in pcellParamDict.items()]
-                            ).replace(".", "p")
-                            pcellName = f"{item.libraryName}_{type(item).__name__}_{pcellNameSuffix}"
-                            new_cell = library.new_cell(pcellName)
-                            self._cellCache[pcell_key] = new_cell
-                            for shape in item.shapes:
-                                self.createCells(library, shape, new_cell)
-                        else:
-                            new_cell = self._cellCache[pcell_key]
-                        
-                        ref = gdstk.Reference(
-                            new_cell,
-                            item.pos().toPoint().toTuple(),
-                            rotation=item.angle,
-                        )
-                        parentCell.add(ref)
+        item_type = type(item)
+        if item_type == lshp.layoutInstance:
+            self._processInstance(library, item, parentCell)
+        elif item_type in (lshp.layoutRect, lshp.layoutPin):
+            self._processRectPin(item, parentCell)
+        elif item_type == lshp.layoutPath:
+            self.processPath(item, parentCell)
+        elif item_type == lshp.layoutLabel:
+            self._processLabel(item, parentCell)
+        elif item_type == lshp.layoutPolygon:
+            self._processPolygon(item, parentCell)
+        elif item_type == lshp.layoutViaArray:
+            self._processViaArray(library, item, parentCell)
+        else:
+            self._process_custom_layout(library, item, parentCell)
+
+    def _processInstance(self, library, item, parentCell):
+        cellGDSName = f"{item.libraryName}_{item.cellName}_{item.viewName}_{self._itemCounter}"
+        self._itemCounter += 1
+        cellGDS = library.new_cell(cellGDSName)
+        for shape in item.shapes:
+            self.createCells(library, shape, cellGDS)
+        ref = gdstk.Reference(
+            cellGDS,
+            item.transformOriginPoint().toPoint().toTuple()
+        )
+        parentCell.add(ref)
+
+    def _processRectPin(self, item, parentCell):
+        rect = gdstk.rectangle(
+            corner1=item.mapToScene(item.start).toPoint().toTuple(),
+            corner2=item.mapToScene(item.end).toPoint().toTuple(),
+            layer=item.layer.gdsLayer,
+            datatype=item.layer.datatype,
+        )
+        parentCell.add(rect)
+
+    def processPath(self, item, parentCell):
+        path = gdstk.FlexPath(
+            points=[item.sceneEndPoints[0].toTuple(), item.sceneEndPoints[1].toTuple()],
+            width=item.width,
+            ends=(item.startExtend, item.endExtend),
+            simple_path=True,
+            layer=item.layer.gdsLayer,
+            datatype=item.layer.datatype,
+        )
+        parentCell.add(path)
+
+    def _processLabel(self, item, parentCell):
+        label = gdstk.Label(
+            text=item.labelText,
+            origin=item.mapToScene(item.start).toPoint().toTuple(),
+            rotation=item.angle,
+            layer=item.layer.gdsLayer,
+        )
+        parentCell.add(label)
+
+    def _processPolygon(self, item, parentCell):
+        points = [item.mapToScene(point).toPoint().toTuple() for point in item.points]
+        polygon = gdstk.Polygon(
+            points=points,
+            layer=item.layer.gdsLayer,
+            datatype=item.layer.datatype,
+        )
+        parentCell.add(polygon)
+
+    def _processViaArray(self, library, item, parentCell):
+        via_key = (item.via.width, item.via.height, item.via.layer.name, item.via.layer.purpose)
+        if via_key not in self._cellCache:
+            viaName = f"via_{item.via.width}_{item.via.height}_{item.via.layer.name}_{item.via.layer.purpose}"
+            viaCell = library.new_cell(viaName)
+            via = gdstk.rectangle(
+                item.mapToScene(item.via.rect.topLeft()).toTuple(),
+                item.mapToScene(item.via.rect.bottomRight()).toTuple(),
+                layer=item.via.layer.gdsLayer,
+                datatype=item.via.layer.datatype,
+            )
+            viaCell.add(via)
+            self._cellCache[via_key] = viaCell
+        else:
+            viaCell = self._cellCache[via_key]
+
+        viaArray = gdstk.Reference(
+            cell=viaCell,
+            origin=item.start.toTuple(),
+            columns=item.xnum,
+            rows=item.ynum,
+            spacing=(item.xs + item.width, item.ys + item.height),
+        )
+        parentCell.add(viaArray)
+
+    def _process_custom_layout(self, library, item, parentCell):
+        if isinstance(item, pcells.baseCell):
+            pcellParamDict = self.extractPcellInstanceParameters(item)
+            pcellNameSuffix = "_".join(
+                f"{key}_{value}".replace(".", "p") for key, value in pcellParamDict.items()
+            )
+            pcellName = (f"{item.libraryName}_{type(item).__name__}_"
+                         f"{pcellNameSuffix}_{self._itemCounter}")
+            self._itemCounter += 1
+            pcellGDS = library.new_cell(pcellName)
+            for shape in item.shapes:
+                self.createCells(library, shape, pcellGDS)
+
+            ref = gdstk.Reference(
+                pcellGDS,
+                item.transformOriginPoint().toPoint().toTuple(),
+            )
+            parentCell.add(ref)
 
     @staticmethod
     def extractPcellInstanceParameters(instance: lshp.layoutPcell) -> dict:

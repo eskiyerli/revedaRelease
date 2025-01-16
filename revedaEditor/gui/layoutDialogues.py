@@ -169,6 +169,7 @@ class createPathDialogue(QDialog):
         self.pathLayerCB = QComboBox()
         self.formLayout.addRow(edf.boldLabel("Path Layer:"), self.pathLayerCB)
         self.pathWidth = edf.shortLineEdit()
+        self.pathWidth.textEdited.connect(self.pathWidthChanged)
         self.formLayout.addRow(edf.boldLabel("Path Width:"), self.pathWidth)
         self.pathNameEdit = edf.shortLineEdit()
         self.formLayout.addRow(edf.boldLabel("Path Name:"), self.pathNameEdit)
@@ -185,6 +186,11 @@ class createPathDialogue(QDialog):
         mainLayout.addWidget(self.buttonBox)
         self.setLayout(mainLayout)
         self.show()
+
+    def pathWidthChanged(self, text: str):
+        extend = float(text) / 2
+        self.startExtendEdit.setText(str(extend))
+        self.endExtendEdit.setText(str(extend))
 
 
 class layoutPathPropertiesDialog(createPathDialogue):

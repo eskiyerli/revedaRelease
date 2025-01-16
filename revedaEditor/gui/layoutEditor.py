@@ -23,7 +23,7 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 import json
-import os
+
 
 # from hashlib import new
 import pathlib
@@ -52,12 +52,7 @@ fabproc = importPDKModule('process')
 laylyr = importPDKModule('layoutLayers')
 from quantiphy import Quantity
 
-# if os.environ.get("REVEDA_PDK_PATH"):
-#     import pdk.process as fabproc
-#     import pdk.layoutLayers as laylyr
-# else:
-#     import defaultPDK.process as fabproc
-#     import defaultPDK.layoutLayers as laylyr
+
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.backend.libraryModelView as lmview
@@ -81,6 +76,9 @@ class layoutEditor(edw.editorWindow):
         self.setWindowIcon(QIcon(":/icons/edLayer-shape.png"))
         self.layoutViews = ["layout", "pcell"]
         self.dbu = fabproc.dbu
+        self.majorGrid = fabproc.majorGrid
+        self.snapGrid = fabproc.snapGrid
+        self.snapTuple = (self.snapGrid, self.snapGrid)
         self.layoutChooser = None
         self.gdsExportDir = pathlib.Path.cwd()
         self._layoutContextMenu()
@@ -305,7 +303,7 @@ class layoutEditor(edw.editorWindow):
             ][0]
             fontFamily = dlg.familyCB.currentText()
             fontStyle = dlg.fontStyleCB.currentText()
-            fontHeight = int(float(dlg.labelHeightCB.currentText()) * fabproc.dbu)
+            fontHeight = int(float(dlg.labelHeightCB.currentText()))
             labelAlign = dlg.labelAlignCB.currentText()
             labelOrient = dlg.labelOrientCB.currentText()
             self.centralW.scene.newLabelTuple = ddef.layoutLabelTuple(
@@ -403,7 +401,7 @@ class layoutEditor(edw.editorWindow):
             )
             cellItem = libm.getCellItem(libItem, self.layoutChooser.cellCB.currentText())
             viewItem = libm.getViewItem(cellItem, self.layoutChooser.viewCB.currentText())
-            libm.findViewItem(libraryModel, self.layoutChooser.libNamesCB.currentText())
+            # libm.findViewItem(libraryModel, self.layoutChooser.libNamesCB.currentText())
             self.centralW.scene.layoutInstanceTuple = ddef.viewItemTuple(
                 libItem, cellItem, viewItem
             )
@@ -432,7 +430,7 @@ class layoutEditor(edw.editorWindow):
             gdsExportObj.unit = Quantity(dlg.unitEdit.text().strip()).real
             gdsExportObj.precision = Quantity(dlg.precisionEdit.text().strip()).real
             if gdsExportObj:
-                gdsExportRunner = startThread(gdsExportObj.gds_export())
+                gdsExportRunner = startThread(gdsExportObj.gdsExport())
                 self.appMainW.threadPool.start(gdsExportRunner)
                 # netlistObj.writeNetlist()
                 self.logger.info("GDS Export is finished.")
