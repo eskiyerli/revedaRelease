@@ -27,11 +27,11 @@
 import pathlib
 
 # import numpy as np
-from PySide6.QtCore import (Qt, QSize, )
-from PySide6.QtGui import (QAction, QIcon, QImage, QKeySequence, )
+from PySide6.QtCore import (Qt, QSize, Signal)
+from PySide6.QtGui import (QAction, QIcon, QImage, QKeySequence,  )
 from PySide6.QtPrintSupport import QPrintDialog, QPrinter, QPrintPreviewDialog
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QLabel, QMainWindow,
-                               QMenu, QToolBar, )
+                               QMenu, QToolBar, QGraphicsItem)
 
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryModelView as lmview
@@ -46,6 +46,8 @@ class editorWindow(QMainWindow):
     """
     Base class for editor windows.
     """
+
+    childEditorChanged = Signal(QGraphicsItem)
 
     def __init__(self, viewItem: libb.viewItem, libraryDict: dict,
                  libraryView: lmview.designLibrariesView, ):  # file is a pathlib.Path object
@@ -557,6 +559,7 @@ class editorWindow(QMainWindow):
         self.centralW.scene.readOnly = self.readOnlyCellAction.isChecked()
 
     def updateDesignScene(self):
+        # reloadScene() is implemented editor scenes
         self.messageLine.setText("Reloading design.")
         self.centralW.scene.reloadScene()
 
@@ -665,8 +668,7 @@ class editorWindow(QMainWindow):
         self.centralW.scene.editModes.setMode("changeOrigin")
 
     def undoClick(self, s):
-        # for i in range(self.centralW.scene.undoStack.count()):
-        #     print(f'command {i}: {self.centralW.scene.undoStack.command(i).text()}')
+
         self.messageLine.setText(self.centralW.scene.undoStack.undoText())
         self.centralW.scene.undoStack.undo()
 
@@ -691,3 +693,5 @@ class editorWindow(QMainWindow):
     def _createSignalConnections(self):
         self.centralW.scene.selectionChanged.connect(self.appMainW.selectionChangedScene)
         self.centralW.view.keyPressedSignal.connect(self.appMainW.viewKeyPressed)
+        
+        

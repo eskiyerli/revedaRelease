@@ -26,8 +26,8 @@ import logging
 import logging.config
 import pathlib
 import os
-
-from PySide6.QtCore import QThreadPool, Slot, Signal, QTimer, QObject
+import shutil
+from PySide6.QtCore import (QThreadPool, Slot, Signal, QTimer, QObject)
 from PySide6.QtGui import (
     QAction,
     QFont,
@@ -41,6 +41,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QVBoxLayout,
     QWidget,
+    QFileDialog,
 )
 
 import revedaEditor.backend.dataDefinitions as ddef
@@ -54,7 +55,9 @@ import revedaEditor.gui.libraryBrowser as libw
 import revedaEditor.gui.pythonConsole as pcon
 import revedaEditor.gui.revinit as revinit
 import revedaEditor.gui.stippleEditor as stip
-
+import revedaEditor.fileio.importGDS as igds
+import revedaEditor.backend.libraryMethods as libm
+from revedaEditor.gui.startThread import startThread
 
 class EventLoopMonitor(QObject):
     def __init__(self, parent=None):
@@ -140,6 +143,7 @@ class MainWindow(QMainWindow):
         self.importTools.addAction(self.importSpiceAction)
         self.importTools.addAction(self.importLaypFileAction)
         self.importTools.addAction((self.importXschSymAction))
+        self.importTools.addAction(self.importGDSAction)
         self.menuOptions.addAction(self.optionsAction)
         self.menuHelp.addAction(self.helpAction)
         self.menuHelp.addAction(self.aboutAction)
@@ -158,6 +162,8 @@ class MainWindow(QMainWindow):
         self.importXschSymAction = QAction(
             importVerilogaIcon, "Import Xschem Symbols...", self
         )
+        self.importGDSAction = QAction(importVerilogaIcon,"Import GDS...", self)
+        self.importGDSAction.setToolTip("Import GDS to Layout")
         openLibIcon = QIcon(":/icons/database--pencil.png")
         self.libraryBrowserAction = QAction(openLibIcon, "Library Browser", self)
         optionsIcon = QIcon(":/icons/resource-monitor.png")
@@ -176,6 +182,7 @@ class MainWindow(QMainWindow):
         self.importLaypFileAction.triggered.connect(self.importLaypClick)
         self.importXschSymAction.triggered.connect(self.importXschSymClick)
         self.optionsAction.triggered.connect(self.optionsClick)
+        self.importGDSAction.triggered.connect(self.importGDSClick)
         self.createStippleAction.triggered.connect(self.createStippleClick)
         self.helpAction.triggered.connect(self.helpClick)
         self.aboutAction.triggered.connect(self.aboutClick)
@@ -303,7 +310,9 @@ class MainWindow(QMainWindow):
     def importLaypClick(self):
         importDlg = fd.klayoutLaypImportDialogue(self)
         if importDlg.exec() == QDialog.Accepted:
-            imlyp.parseLyp(importDlg.laypFileEdit.text())
+            lypFile = importDlg.laypFileEdit.text()
+            outputFile = importDlg.outputFileEdit.text()
+            imlyp.parseLyp(lypFile, outputFile)
 
     def importXschSymClick(self):
         importDlg = fd.xschemSymIimportDialogue(self, self.libraryBrowser.libraryModel)
@@ -360,6 +369,63 @@ class MainWindow(QMainWindow):
                     self.libraryBrowser,
                     importedSpiceObj,
                 )
+
+
+    def importGDSClick(self):
+        dlg = fd.gdsImportDialogue(self)
+        dlg.unitEdit.setText("1 nm")
+        dlg.libNameEdit.setText("importLib")
+        dlg.inputFileEdit.setText("/home/eskiyerli/onedrive_reveda/Projects/gds/newSymbol/newSymbol.gds") 
+        if dlg.exec() == QDialog.Accepted:
+            gdsImportLibName = dlg.libNameEdit.text().strip()
+            gdsImportFileObj = pathlib.Path(dlg.inputFileEdit.text().strip())
+            gdsImportLibDirObj = self.libraryDict.get(gdsImportLibName)
+            if gdsImportLibDirObj:
+                if gdsImportLibDirObj.exists():
+                    shutil.rmtree(gdsImportLibDirObj, ignore_errors=True)
+
+                libItem = libm.getLibItem(self.libraryBrowser.libraryModel, gdsImportLibName)
+                if libItem:
+                    self.libraryBrowser.libraryModel.removeLibraryFromModel(libItem)
+                gdsImportLibItem = self.libraryBrowser.libraryModel.addLibraryToModel(gdsImportLibDirObj)
+                gdsImportLibDirObj.mkdir(parents=True, exist_ok=True)
+                gdsImportLibDirObj.joinpath("reveda.lib").touch(exist_ok=True)
+            else:
+                gdsImportLibDirObj, gdsImportLibItem = self.createNewLibrary(gdsImportLibName)
+            try:
+                gdsImportObj = igds.gdsImporter(self, gdsImportFileObj, gdsImportLibItem)
+                if gdsImportObj:
+                    gdsImportRunner = startThread(gdsImportObj.gdsImporter())
+                self.threadPool.start(gdsImportRunner)
+                self.logger.info("GDS Import is finished.")
+            except Exception as e:
+                self.logger.error(f"GDS Import failed: {e}")
+
+
+    def createNewLibrary(self, libraryName):
+        warning = QMessageBox()
+        warning.setIcon(QMessageBox.Warning)
+        warning.setWindowTitle("Warning")
+        warning.setText("The library does not exist.")
+        warning.setInformativeText(f"Do you want to create a new library: {libraryName}?\n"
+                                   "Select the parent directory of the library.")
+        warning.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        warning.setDefaultButton(QMessageBox.Yes)
+        ret = warning.exec()
+        if ret == QMessageBox.Yes:
+            
+            libDialog = QFileDialog(self, "Select Parent Directory", self.runPath)
+            libDialog.setFileMode(QFileDialog.Directory)
+            if libDialog.exec() == QDialog.Accepted:
+                selectedDir = libDialog.selectedFiles()[0]
+                libraryPath = pathlib.Path(selectedDir).joinpath(libraryName)
+                libraryPath.mkdir(parents=True, exist_ok=True)
+                libraryPath.joinpath("reveda.lib").touch(exist_ok=True)
+                self.libraryDict[libraryName] = libraryPath
+                libraryItem = self.libraryBrowser.libraryModel.addLibraryToModel(libraryPath)
+                return libraryPath, libraryItem
+        else:
+            return None, None
 
     def createStippleClick(self):
         stippleWindow = stip.stippleEditor(self)

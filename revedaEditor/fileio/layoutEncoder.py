@@ -44,6 +44,7 @@ class layoutEncoder(json.JSONEncoder):
                     "nam": item.instanceName,
                     "ic": item.counter,
                     "loc": (item.scenePos() - item.scene().origin).toTuple(),
+                    # "loc": item.mapToScene(item.pos()).toTuple(),
                     "ang": item.angle,
                     "fl": item.flipTuple,
                 }
@@ -61,7 +62,7 @@ class layoutEncoder(json.JSONEncoder):
                     "type": "Path",
                     "dfl1": item.mapToScene(item.draftLine.p1()).toTuple(),
                     "dfl2": item.mapToScene(item.draftLine.p2()).toTuple(),
-                    "ln": laylyr.pdkDrawingLayers.index(item.layer),
+                    "ln": laylyr.pdkAllLayers.index(item.layer),
                     "w": item.width,
                     "se": item.startExtend,
                     "ee": item.endExtend,
@@ -96,7 +97,7 @@ class layoutEncoder(json.JSONEncoder):
                     "pn": item.pinName,
                     "pd": item.pinDir,
                     "pt": item.pinType,
-                    "ln": laylyr.pdkPinLayers.index(item.layer),
+                    "ln": laylyr.pdkAllLayers.index(item.layer),
                     "ang": item.angle,
                     "fl": item.flipTuple,
                 }
@@ -110,7 +111,7 @@ class layoutEncoder(json.JSONEncoder):
                     "fh": item.fontHeight,
                     "la": item.labelAlign,
                     "lo": item.labelOrient,
-                    "ln": laylyr.pdkTextLayers.index(item.layer),
+                    "ln": laylyr.pdkAllLayers.index(item.layer),
                     "ang": item.angle,
                     "fl": item.flipTuple,
                 }
@@ -151,4 +152,90 @@ class layoutEncoder(json.JSONEncoder):
                             "fl": item.flipTuple,
                             "params": argDict,
                         }
+        return itemDict
+    
+
+class gdsImportEncoder(json.JSONEncoder):
+    def default(self, item):
+        match type(item):
+            case lshp.layoutInstance:
+                itemDict = {
+                    "type": "Inst",
+                    "lib": item.libraryName,
+                    "cell": item.cellName,
+                    "view": item.viewName,
+                    "nam": item.instanceName,
+                    "ic": item.counter,
+                    "loc": item.pos().toTuple(),
+                    "ang": item.angle,
+                    "fl": item.flipTuple,
+                }
+            case lshp.layoutPath:
+                itemDict = {
+                    "type": "Path",
+                    "dfl1": item.mapToScene(item.draftLine.p1()).toTuple(),
+                    "dfl2": item.mapToScene(item.draftLine.p2()).toTuple(),
+                    "ln": laylyr.pdkAllLayers.index(item.layer),
+                    "w": item.width,
+                    "se": item.startExtend,
+                    "ee": item.endExtend,
+                    "md": item.mode,
+                    "nam": item.name,
+                    "ang": item.angle,
+                    "fl": item.flipTuple,
+                }
+            case lshp.layoutViaArray:
+                viaDict = {
+                    "st": item.via.mapToScene(item.via.start).toTuple(),
+                    "vdt": item.via.viaDefTuple.netName,
+                    "w": item.via.width,
+                    "h": item.via.height,
+                    "ang": item.angle,
+                    "fl": item.flipTuple,
+                }
+                itemDict = {
+                    "type": "Via",
+                    "st": item.mapToScene(item.start).toTuple(),
+                    "via": viaDict,
+                    "xs": item.xs,
+                    "ys": item.ys,
+                    "xn": item.xnum,
+                    "yn": item.ynum,
+                }
+            case lshp.layoutPin:
+                itemDict = {
+                    "type": "Pin",
+                    "tl": item.mapToScene(item.rect.topLeft()).toTuple(),
+                    "br": item.mapToScene(item.rect.bottomRight()).toTuple(),
+                    "pn": item.pinName,
+                    "pd": item.pinDir,
+                    "pt": item.pinType,
+                    "ln": laylyr.pdkAllLayers.index(item.layer),
+                    "ang": item.angle,
+                    "fl": item.flipTuple,
+                }
+            case lshp.layoutLabel:
+                itemDict = {
+                    "type": "Label",
+                    "st": item.mapToScene(item.start).toTuple(),
+                    "lt": item.labelText,
+                    "ff": item.fontFamily,
+                    "fs": item.fontStyle,
+                    "fh": item.fontHeight,
+                    "la": item.labelAlign,
+                    "lo": item.labelOrient,
+                    "ln": laylyr.pdkAllLayers.index(item.layer),
+                    "ang": item.angle,
+                    "fl": item.flipTuple,
+                }
+            case lshp.layoutPolygon:
+                pointsList = [item.mapToScene(point).toTuple() for point in item.points]
+                itemDict = {
+                    "type": "Polygon",
+                    "ps": pointsList,
+                    "ln": laylyr.pdkAllLayers.index(item.layer),
+                    "ang": item.angle,
+                    "fl": item.flipTuple,
+                }
+
         return itemDict

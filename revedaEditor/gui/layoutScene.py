@@ -31,11 +31,11 @@ import time
 from typing import List, Dict, Any, Union
 
 # import numpy as np
-from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLineF, )
+from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLineF,)
 from PySide6.QtGui import (QColor, QGuiApplication, QTransform, QPen, QFontDatabase,
                            QFont, )
 from PySide6.QtWidgets import (QDialog, QGraphicsSceneMouseEvent, QGraphicsLineItem,
-                               QCompleter, QGraphicsRectItem)
+                               QCompleter, QGraphicsRectItem, QGraphicsItem)
 
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
@@ -284,7 +284,7 @@ class layoutScene(editorScene):
             self._polygonGuideLine = QGraphicsLineItem(
                 QLineF(self._newPolygon.points[-2], self._newPolygon.points[-1]))
             self._polygonGuideLine.setPen(QPen(QColor(255, 255, 0), 2, Qt.DashLine))
-            self._polygonGuideLine.pen().setCosmetic(False)
+            self._polygonGuideLine.pen().setCosmetic(True)
             self.addUndoStack(self._polygonGuideLine)
         else:
             self._newPolygon.addPoint(self.mouseReleaseLoc)
@@ -502,15 +502,7 @@ class layoutScene(editorScene):
             self.undoStack.push(undoCommand)
 
     def reloadScene(self):
-        # Get the top level items from the scene
-        topLevelItems = [item for item in self.items() if item.parentItem() is None]
-        # Convert the top level items to JSON string
-        # Decode the JSON string back to Python objects
-        decodedData = json.loads(json.dumps(topLevelItems, cls=layenc.layoutEncoder))
-        # Clear the current scene
-        self.clear()
-        # Create layout items based on the decoded data
-        self.createLayoutItems(decodedData)
+        pass
 
     def deleteSelectedItems(self):
         for item in self.selectedItems():
@@ -552,7 +544,9 @@ class layoutScene(editorScene):
             self.logger.error(f"{type(item)} property editor error: {e}")
 
     def layoutPolygonProperties(self, item):
-        pointsTupleList = [self.toLayoutCoord(point) for point in item.points]
+
+        pointsTupleList = [self.toLayoutCoord(point).toTuple() for point in item.points]
+
         dlg = ldlg.layoutPolygonProperties(self.editorWindow, pointsTupleList)
         dlg.polygonLayerCB.addItems(
             [f"{item.name} [{item.purpose}]" for item in laylyr.pdkAllLayers])
@@ -698,8 +692,6 @@ class layoutScene(editorScene):
         dlg.labelAlignCB.setCurrentText(item.labelAlign)
         dlg.labelOrientCB.setCurrentText(item.labelOrient)
         start = item.mapToScene(item.start)
-        dlg.labelTopLeftX.setText(str(start.x() / fabproc.dbu))
-        dlg.labelTopLeftY.setText(str(start.y() / fabproc.dbu))
 
         if dlg.exec() == QDialog.Accepted:
             labelName = dlg.labelName.text()
@@ -709,7 +701,7 @@ class layoutScene(editorScene):
             ][0]
             fontFamily = dlg.familyCB.currentText()
             fontStyle = dlg.fontStyleCB.currentText()
-            fontHeight = int(float(dlg.labelHeightCB.currentText()))
+            fontHeight = dlg.labelHeightCB.currentText()
             labelAlign = dlg.labelAlignCB.currentText()
             labelOrient = dlg.labelOrientCB.currentText()
             newLabelTuple = ddef.layoutLabelTuple(
@@ -721,11 +713,9 @@ class layoutScene(editorScene):
                 labelOrient,
                 labelLayer,
             )
-
-            start = self.toSceneCoord(
-                QPointF(float(dlg.labelTopLeftX.text()), float(dlg.labelTopLeftY.text())))
             newLabel = lshp.layoutLabel(start, *newLabelTuple)
             self.undoStack.push(us.addDeleteShapeUndo(self, newLabel, item))
+            self.addItem(newLabel)
 
     def layoutPinProperties(self, item):
         dlg = ldlg.layoutPinProperties(self.editorWindow)
@@ -897,7 +887,6 @@ class layoutScene(editorScene):
 
     def copySelectedItems(self):
         selectedItems = [item for item in self.selectedItems() if item.parentItem() is None]
-
         if selectedItems:
             for item in selectedItems:
                 selectedItemJson = json.dumps(item, cls=layenc.layoutEncoder)
@@ -905,12 +894,11 @@ class layoutScene(editorScene):
                 shape = lj.layoutItems(self).create(itemCopyDict)
                 if shape is not None:
                     item.setSelected(False)
-                    self.undoStack.push(us.addShapeUndo(self, shape))
+                    self.addUndoStack(shape)
                     shape.setSelected(True)
                     # shift position by four grid units to right and down
-                    shape.setPos(QPoint(item.scenePos().x() + self.snapTuple[0] * 4,
-                                        item.scenePos().y() + self.snapTuple[1] * 4))
-                    print(shape.pos())
+                    shape.setPos(QPoint(item.pos().x() + self.snapTuple[0] * fabproc.dbu,
+                                        item.pos().y() + self.snapTuple[1] * fabproc.dbu, ))
                     if isinstance(shape, lshp.layoutInstance) or isinstance(shape,
                                                                             lshp.layoutPcell):
                         self.itemCounter += 1
@@ -1003,3 +991,6 @@ class layoutScene(editorScene):
 
         self.scene().logger.warning("No suitable font found. Using default font.")
         return QFont()
+
+    def updateItem(self, item: QGraphicsItem):
+        print(item)

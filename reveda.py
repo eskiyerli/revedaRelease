@@ -41,16 +41,14 @@ import os
 import platform
 import sys
 from PySide6.QtWidgets import QApplication
-
+from typing import Optional
+import time
 
 import revedaEditor.gui.revedaMain as rvm
 import revedaEditor.gui.pythonConsole as pcon
-from contextlib import redirect_stdout, redirect_stderr
+from contextlib import redirect_stdout, redirect_stderr, contextmanager
 from dotenv import load_dotenv
 from pathlib import Path
-
-
-# simulation window
 
 
 class revedaApp(QApplication):
@@ -100,27 +98,68 @@ class revedaApp(QApplication):
             sys.path.append(str(self.reveda_pdk_pathObj))
 
 
-def main():
-    # Start Main application window
-    app = revedaApp(sys.argv)
-    os_name = platform.system()
+@contextmanager
+def performance_monitor(operation_name: str):
+    """Context manager to monitor operation performance"""
+    start_time = time.perf_counter()
+    try:
+        yield
+    finally:
+        elapsed_time = time.perf_counter() - start_time
+        print(f"{operation_name} took {elapsed_time:.3f} seconds")
 
-    if os_name == "Windows":
-        app.setStyle("Windows")
-    elif os_name == "Linux":
-        app.setStyle("Breeze")
-    elif os_name == "Darwin":  # macOS
-        app.setStyle("macOS")
 
-    mainW = rvm.MainWindow()
-    mainW.setWindowTitle("Revolution EDA")
+OS_STYLE_MAP = {"Windows": "Windows", "Linux": "Breeze", "Darwin": "macOS"}
 
-    # empty argument as there is no parent window.
-    redirect = pcon.Redirect(mainW.centralW.console.errorwrite)
-    with redirect_stdout(mainW.centralW.console), redirect_stderr(redirect):
-        mainW.show()
-        sys.exit(app.exec())
+
+@contextmanager
+def performance_monitor(operation_name: str):
+    """Context manager to monitor operation performance"""
+    start_time = time.perf_counter()
+    try:
+        yield
+    finally:
+        elapsed_time = time.perf_counter() - start_time
+        print(f"{operation_name} took {elapsed_time:.3f} seconds")
+
+
+def initialize_app(argv) -> tuple[revedaApp, Optional[str]]:
+    """Initialize application and determine style"""
+    app = revedaApp(argv)
+    style = OS_STYLE_MAP.get(platform.system())
+    return app, style
+
+
+def main() -> int:
+    try:
+        with performance_monitor("Application startup"):
+            # Initialize application
+            app, style = initialize_app(sys.argv)
+
+            if style:
+                app.setStyle(style)
+                print(f"Applied {style} style")
+
+            # Create and configure main window
+            mainW = rvm.MainWindow()
+            mainW.setWindowTitle("Revolution EDA")
+
+            # Set up console redirection
+            console = mainW.centralW.console
+            redirect = pcon.Redirect(console.errorwrite)
+
+            # Show window and start event loop
+            with redirect_stdout(console), redirect_stderr(redirect):
+                mainW.show()
+                return app.exec()
+
+    except Exception as e:
+        print(f"Application failed to start: {e}", exc_info=True)
+        return 1
+    finally:
+        sys.exit()
 
 
 if __name__ == "__main__":
     main()
+

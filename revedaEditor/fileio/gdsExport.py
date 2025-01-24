@@ -46,7 +46,6 @@ class gdsExporter:
         self._outputFileObj = outputFileObj
         self._libraryName = None
         self._topCell = None
-
         self._itemCounter = 0
 
     def gdsExport(self):
@@ -83,7 +82,7 @@ class gdsExporter:
             self.createCells(library, shape, cellGDS)
         ref = gdstk.Reference(
             cellGDS,
-            item.transformOriginPoint().toPoint().toTuple()
+            (0,0)
         )
         parentCell.add(ref)
 
@@ -111,6 +110,7 @@ class gdsExporter:
         label = gdstk.Label(
             text=item.labelText,
             origin=item.mapToScene(item.start).toPoint().toTuple(),
+            magnification= float(item.fontHeight),
             rotation=item.angle,
             layer=item.layer.gdsLayer,
         )
@@ -123,6 +123,7 @@ class gdsExporter:
             layer=item.layer.gdsLayer,
             datatype=item.layer.datatype,
         )
+        print(polygon)
         parentCell.add(polygon)
 
     def _processViaArray(self, library, item, parentCell):
@@ -165,7 +166,7 @@ class gdsExporter:
 
             ref = gdstk.Reference(
                 pcellGDS,
-                item.transformOriginPoint().toPoint().toTuple(),
+                (0,0),
             )
             parentCell.add(ref)
 

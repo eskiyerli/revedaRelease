@@ -19,7 +19,7 @@ from PySide6.QtPrintSupport import (
     QPrinter,
     QPrintPreviewDialog,
 )
-
+from revedaEditor.gui.startThread import startThread
 
 class helpBrowser(QMainWindow):
     def __init__(self, parent):

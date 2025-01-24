@@ -33,18 +33,18 @@ from PySide6.QtGui import (
 
 from revedaEditor.backend.dataDefinitions import layLayer
 from revedaEditor.gui.stippleEditor import stippleEditor
+from PySide6.QtCore import Qt
 
-
-def parseLyp(lypFile):
+def parseLyp(lypFile: str, outputFileDir: str):
+    PENSTYLES = [Qt.PenStyle.DashLine, Qt.PenStyle.DotLine, Qt.PenStyle.DashDotLine, Qt.PenStyle.DashDotDotLine]
     lypFileObj = Path(lypFile)
+    outputFileDirObj = Path(outputFileDir)
     tree = ET.parse(lypFileObj)
     root = tree.getroot()
-    pdkDrawingLayers = 'pdkDrawingLayers = ['
-    pdkPinLayers = 'pdkPinLayers = ['
-    pdkViaLayers = 'pdkViaLayers = ['
-    pdkTextLayers = 'pdkTextLayers= ['
 
-    with lypFileObj.parent.joinpath("layoutLayers.py").open("w") as file:
+    purposeDict = {}
+
+    with outputFileDirObj.joinpath("layoutLayers.py").open("w") as file:
         try:
             for i, layerItem in enumerate(root.iterfind("properties")):
                 pcolor = QColor.fromString(layerItem.find("frame-color").text.upper())
@@ -72,30 +72,27 @@ def parseLyp(lypFile):
                     gdsLayer,
                     dataType,
                 )
+                if purpose not in purposeDict:
+                    purposeDict[purpose] = []
+                purposeDict[purpose].append(layoutLayerItem)
                 file.write(
                     f"{layoutLayerItem.name}_{layoutLayerItem.purpose}="
                     f"ddef.{layoutLayerItem}\n"
                 )
-                match purpose:
-                    case "drw":
-                        pdkDrawingLayers += (f"{layoutLayerItem.name}_"
-                                             f"{layoutLayerItem.purpose}, ")
-                    case "pin":
-                        pdkPinLayers += f"{layoutLayerItem.name}_{layoutLayerItem.purpose}, "
-                    case "lbl":
-                        pdkTextLayers += f"{layoutLayerItem.name}_{layoutLayerItem.purpose}, "
-                    case "txt":
-                        pdkTextLayers += f"{layoutLayerItem.name}_{layoutLayerItem.purpose}, "
-            pdkDrawingLayers += ']\n'
-            pdkPinLayers += ']\n'
-            pdkTextLayers += ']\n'
-            pdkAllLayers = 'pdkDrawingLayers + pdkPinLayers + pdkTextLayers\n'
-            file.write(pdkDrawingLayers)
-            file.write(pdkPinLayers)
-            file.write(pdkTextLayers)
-            file.write(pdkAllLayers)
+            pdkAllLayerString = "pdkAllLayers = ["
+            for purpose, layerList in purposeDict.items():
+                purposeString = f"pdk{purpose.capitalize()}Layers = ["
+                for layer in layerList:
+                    purposeString += f" {layer.name}_{layer.purpose}, "
+                    pdkAllLayerString += f" {layer.name}_{layer.purpose}, "
+                purposeString += "]\n"
+                file.write(purposeString)
+            pdkAllLayerString += "]\n"
+            file.write(pdkAllLayerString)
+
         except Exception as e:
             print(f"error: {e}")
+
 
         for ditherPattern in root.iterfind("custom-dither-pattern"):
             for orderItem in ditherPattern.iterfind("order"):

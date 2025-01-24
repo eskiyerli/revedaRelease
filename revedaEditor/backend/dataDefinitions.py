@@ -19,7 +19,7 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 
-from typing import NamedTuple, Union
+from typing import NamedTuple, Union, List
 from dataclasses import dataclass
 
 from PySide6.QtCore import Qt, QPoint, QPointF
@@ -57,6 +57,12 @@ class layLayer:
     gdsLayer: int = 0  # gds edLayer
     datatype: int = 0  # gds datatype
 
+
+    @classmethod
+    def filterByGDSLayer(cls, layer_list, gdsLayer:int, gdsDatatype:int) -> Union['layLayer', None]:
+            matching_layers = [layer for layer in layer_list if layer.gdsLayer == gdsLayer and
+                               layer.datatype == gdsDatatype]
+            return matching_layers[0] if matching_layers else None
 
 @dataclass
 class editModes:
@@ -175,7 +181,7 @@ class layoutLabelTuple(NamedTuple):
     labelText: str
     fontFamily: str
     fontStyle: str
-    fontHeight: float
+    fontHeight: str
     labelAlign: str
     labelOrient: str
     labelLayer: str

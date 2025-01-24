@@ -25,17 +25,19 @@
 import pathlib
 from pathlib import Path
 
-from PySide6.QtCore import (Signal, Qt, QModelIndex, )
+from PySide6.QtCore import (Signal, Qt, QModelIndex)
 from PySide6.QtGui import (
+    QPainter,
     QStandardItemModel,
     QStandardItem,
     QBrush,
     QColor,
     QBitmap,
+    QPixmap,
     QImage,
 )
 from PySide6.QtWidgets import (QTableView, QMenu, QGraphicsItem, )
-
+import numpy as np
 import os
 from dotenv import load_dotenv
 from revedaEditor.backend.pdkPaths import importPDKModule
@@ -43,6 +45,9 @@ fabproc = importPDKModule('process')
 laylyr = importPDKModule('layoutLayers')
 
 class layerDataModel(QStandardItemModel):
+    _file_content_cache = {}
+    _pixmap_cache = {}
+
     def __init__(self, data: list):
         super().__init__()
         self._data = data or []
@@ -64,14 +69,14 @@ class layerDataModel(QStandardItemModel):
                     "defaultPDK")
             else:
                 reveda_pdk_pathobj = pathlib.Path(reveda_pdk_path)
+
             texturePath = reveda_pdk_pathobj.joinpath(layer.btexture)
-            _bitmap = QBitmap.fromImage(self.createImage(texturePath, layer.bcolor))
-            # bitmap = QBitmap.fromImage(QPixmap(layer.btexture).scaled(QSize(4, 4),
-            #                         Qt.KeepAspectRatio, Qt.SmoothTransformation).toImage())
-            brush = QBrush(_bitmap)
-            brush.setColor(QColor(layer.bcolor))
+            _pixmap = QPixmap.fromImage(self.createImage(texturePath, layer.bcolor))
+            # Create a brush with black background
+            brush = QBrush(QColor('black'))
+            # Set the texture pattern over the black background
+            brush.setTexture(_pixmap)
             item = QStandardItem()
-            item.setForeground(QBrush(QColor(255, 255, 255)))
             item.setBackground(brush)
             self.setItem(row, 0, item)
             self.setItem(row, 1, QStandardItem(layer.name))
@@ -99,29 +104,53 @@ class layerDataModel(QStandardItemModel):
             for layer in layerlist
         ]
 
-    @staticmethod
-    def createImage(filePath: Path, color: QColor):
-        # Read the file and split lines
-        with filePath.open('r') as file:
-            lines = file.readlines()
+    @classmethod
+    def readFileContent(cls, filePath):
+        if filePath not in cls._file_content_cache:
+            with open(filePath, "r") as file:
+                cls._file_content_cache[filePath] = file.read()
+        return cls._file_content_cache[filePath]
+    
 
-        height = len(lines)
-        width = len(lines[0].split())
+    @classmethod
+    def createImage(cls,filePath: Path, color: QColor, scale: int = 1):
+        content = cls.readFileContent(str(filePath))
 
-        image = QImage(width, height, QImage.Format_ARGB32)
-        image.fill(QColor(0, 0, 0, 0))
+        # Use numpy's loadtxt for faster parsing of text data
+        data = np.loadtxt(content.splitlines(), dtype=np.uint8)
+        
+        # Scale up the pattern by repeating each pixel
+        data_scaled = np.repeat(np.repeat(data, scale, axis=0), scale, axis=1)
+        
+        height, width = data_scaled.shape
 
-        for y, line in enumerate(lines):
-            for x, value in enumerate(line.split()):
-                if int(value) == 1:
-                    image.setPixelColor(x, y, color)  #
-                else:
-                    image.setPixelColor(x, y, QColor(0, 0, 0, 0))  # Transparent for 0
+        # Create QImage with Format_ARGB32 (not premultiplied)
+        image = QImage(width, height, QImage.Format.Format_ARGB32)
+        # Fill with transparent pixels first
+        image.fill(Qt.black)
 
+        # Create painter to draw on the image
+        painter = QPainter(image)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QBrush(color))
+
+        # Draw solid rectangles for each pixel that should be colored
+        for i in range(height):
+            for j in range(width):
+                if data_scaled[i, j] == 1:  # Draw colored pixel
+                    painter.drawRect(j, i, 1, 1)
+
+        painter.end()
         return image
 
 
 class layerViewTable(QTableView):
+    columnTexture = 0
+    columnName = 1
+    columnPurpose = 2
+    columnVisible = 3
+    columnSelectable = 4
+
     dataSelected = Signal(str, str)
     layerSelectable = Signal(str, str, bool)
     layerVisible = Signal(str, str, bool)
@@ -132,90 +161,80 @@ class layerViewTable(QTableView):
         self.parent = parent
         self.layoutScene = self.parent.scene
         self.setModel(self._model)
+        
+        self.setupUi()
+        self.connectSignals()
+
+    def setupUi(self):
+        """Initialize UI components"""
         self.selectedRow: int = -1
         self.resizeColumnsToContents()
         self.setShowGrid(False)
-        # self.setMaximumWidth(400)
         self.setSelectionBehavior(QTableView.SelectRows)
         self.setSelectionMode(QTableView.SingleSelection)
         self.verticalHeader().setVisible(False)
-        selection_model = self.selectionModel()
-        selection_model.selectionChanged.connect(self.onSelectionChanged)
+
+    def connectSignals(self):
+        """Connect signal handlers"""
+        self.selectionModel().selectionChanged.connect(self.onSelectionChanged)
         self._model.dataChanged.connect(self.onDataChanged)
+
+    def getLayerInfo(self, row: int) -> tuple[str, str]:
+        """Helper method to get layer name and purpose"""
+        return (
+            self._model.item(row, self.columnName).text(),
+            self._model.item(row, self.columnPurpose).text()
+        )
+
+    def onDataChanged(self, topLeft: QModelIndex, bottomRight: QModelIndex, roles: list):
+        if Qt.CheckStateRole not in roles:
+            return
+
+        row, column = topLeft.row(), topLeft.column()
+        item = self._model.item(row, column)
+        isChecked = item.checkState() == Qt.Checked
+        layerName, layerPurpose = self.getLayerInfo(row)
+
+        if column == self.columnSelectable:
+            self.layerSelectable.emit(layerName, layerPurpose, isChecked)
+        elif column == self.columnVisible:
+            self.layerVisible.emit(layerName, layerPurpose, isChecked)
 
     def onSelectionChanged(self, selected, deselected):
         if selected.indexes():
-            # Get the first selected index
-            layerNameIndex = selected.indexes()[1]
-            layerPurposeIndex = selected.indexes()[2]
-            # Get the row and column of the selected index
-            # Get the data from the model at the selected index
-            layerName = self._model.data(layerNameIndex)
-            layerPurpose = self._model.data(layerPurposeIndex)
+            indices = selected.indexes()
+            layerName = self._model.data(indices[self.columnName])
+            layerPurpose = self._model.data(indices[self.columnPurpose])
             self.dataSelected.emit(layerName, layerPurpose)
 
-    def onDataChanged(
-            self, topLeft: QModelIndex, bottomRight: QModelIndex, roles: list
-    ):
-        # Check if the changed data involves the check state
-        if Qt.CheckStateRole in roles:
-            row = topLeft.row()
-            column = topLeft.column()
-            item = self._model.item(row, column)
-            # if item and item.isCheckable():
-            if column == 4:
-                if item.checkState() == Qt.Checked:
-                    self.layerSelectable.emit(
-                        self._model.item(row, 1).text(),
-                        self._model.item(row, 2).text(),
-                        True,
-                    )
-                else:
-                    self.layerSelectable.emit(
-                        self._model.item(row, 1).text(),
-                        self._model.item(row, 2).text(),
-                        False,
-                    )
-            elif column == 3:
-                if item.checkState() == Qt.Checked:
-                    self.layerVisible.emit(
-                        self._model.item(row, 1).text(),
-                        self._model.item(row, 2).text(),
-                        True,
-                    )
-                else:
-                    self.layerVisible.emit(
-                        self._model.item(row, 1).text(),
-                        self._model.item(row, 2).text(),
-                        False,
-                    )
+    def updateAllLayers(self, visible: bool = None, selectable: bool = None):
+        """Helper method to update all layers' visibility or selectability"""
+        state = Qt.Checked if (visible or selectable) else Qt.Unchecked
+        column = self.columnVisible if visible is not None else self.columnSelectable
 
-    def noLayersVisible(self):
         for layer in laylyr.pdkAllLayers:
-            layer.visible = False
-        for row in range(self._model.rowCount()):
-            self._model.item(row, 3).setCheckState(Qt.Unchecked)
+            if visible is not None:
+                layer.visible = visible
+            if selectable is not None:
+                layer.selectable = selectable
 
-    def allLayersVisible(self):
-        for layer in laylyr.pdkAllLayers:
-            layer.visible = True
         for row in range(self._model.rowCount()):
-            self._model.item(row, 3).setCheckState(Qt.Checked)
+            self._model.item(row, column).setCheckState(state)
 
-    def noLayersSelectable(self):
-        for layer in laylyr.pdkAllLayers:
-            layer.selectable = False
-        for row in range(self._model.rowCount()):
-            self._model.item(row, 4).setCheckState(Qt.Unchecked)
-        for item in self.layoutScene.items():
-            if hasattr(item, 'layer') and item.parentItem() is None:
-                item.setEnabled(False)
-
-    def allLayersSelectable(self):
-        for layer in laylyr.pdkAllLayers:
-            layer.selectable = True
-        for row in range(self._model.rowCount()):
-            self._model.item(row, 4).setCheckState(Qt.Checked)
+        # Update item selectability if needed
+        if selectable is not None:
             for item in self.layoutScene.items():
                 if item.parentItem() is None and hasattr(item, 'layer'):
-                    item.setEnabled(True)
+                    item.setEnabled(selectable)
+
+    def noLayersVisible(self):
+        self.updateAllLayers(visible=False)
+
+    def allLayersVisible(self):
+        self.updateAllLayers(visible=True)
+
+    def noLayersSelectable(self):
+        self.updateAllLayers(selectable=False)
+
+    def allLayersSelectable(self):
+        self.updateAllLayers(selectable=True)

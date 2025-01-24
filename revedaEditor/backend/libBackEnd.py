@@ -159,16 +159,20 @@ def createLibrary(parent, model, libraryDir: str, libraryName: str) -> libraryIt
         if libraryPath.exists():
             QMessageBox.warning(parent, "Error", "Library already exits.")
         else:
-            libraryPath.mkdir()
-            newLibraryItem = libraryItem(libraryPath)
-            newLibraryItem.setData(libraryPath, Qt.UserRole + 2)
-            newLibraryItem.setData("library", Qt.UserRole + 1)
-            model.appendRow(newLibraryItem)
+            newLibraryItem = createNewLibraryItem(model, libraryPath)
             parent.logger.info(f"Created {libraryPath}")
     return newLibraryItem
 
+def createNewLibraryItem(model, libraryPath):
+    libraryPath.mkdir()
+    newLibraryItem = libraryItem(libraryPath)
+    newLibraryItem.setData(libraryPath, Qt.UserRole + 2)
+    newLibraryItem.setData("library", Qt.UserRole + 1)
+    model.appendRow(newLibraryItem)
+    return newLibraryItem
 
-def createCell(parent, model, selectedLib, cellName) -> Union[cellItem, None]:
+
+def createCell(parent, selectedLib: libraryItem, cellName: str) -> Union[cellItem, None]:
     if selectedLib.data(Qt.UserRole + 1) == "library":
         selectedLibPath = selectedLib.data(Qt.UserRole + 2)
         cellPath = selectedLibPath.joinpath(cellName)
@@ -179,11 +183,15 @@ def createCell(parent, model, selectedLib, cellName) -> Union[cellItem, None]:
             QMessageBox.warning(parent, "Error", "Cell already exits. Delete cell first.")
             return None
         else:
-            cellPath.mkdir()
-            newCellItem = cellItem(cellPath)
-            selectedLib.appendRow(newCellItem)
+            newCellItem = createNewCellItem(selectedLib, cellPath)
             parent.logger.info(f"Created {cellName} cell at {str(cellPath)}")
             return newCellItem
+
+def createNewCellItem(selectedLib, cellPath):
+    cellPath.mkdir(mode=0o755, parents=True,exist_ok=True)
+    newCellItem = cellItem(cellPath)
+    selectedLib.appendRow(newCellItem)
+    return newCellItem
 
 
 def createCellView(parent: QWidget, viewName: str, cellItem: cellItem) -> viewItem:
@@ -203,6 +211,12 @@ def createCellView(parent: QWidget, viewName: str, cellItem: cellItem) -> viewIt
         oldView = [cellItem.child(row) for row in range(cellItem.rowCount()) if
             cellItem.child(row).viewName == viewName][0]
         oldView.delete()
+    newViewItem = createCellviewItem(viewName, viewPath)
+    parent.logger.warning(f"Created {viewName} at {str(viewPath)}")
+    cellItem.appendRow(newViewItem)
+    return newViewItem
+
+def createCellviewItem(viewName, viewPath):
     newViewItem = viewItem(viewPath)
     viewPath.touch()  # create empty cell view path
     items = list()
@@ -227,10 +241,7 @@ def createCellView(parent: QWidget, viewName: str, cellItem: cellItem) -> viewIt
         items.insert(0, {"viewType": "revbench"})
     with viewPath.open(mode="w") as f:
         json.dump(items, f, indent=4)
-    parent.logger.warning(f"Created {viewName} at {str(viewPath)}")
-    cellItem.appendRow(newViewItem)
     return newViewItem
-
 
 # function for copying a cell
 def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -> bool:
@@ -287,3 +298,4 @@ def renameCell(parent, oldCell, newName) -> bool:
         cellPath.rename(cellPath.parent / newName)
         oldCell.setText(newName)
         return True
+

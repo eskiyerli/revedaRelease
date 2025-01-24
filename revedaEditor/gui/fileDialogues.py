@@ -388,12 +388,14 @@ class gdsExportDialogue(QDialog):
 
         self.mainLayout = QVBoxLayout()
         self.mainLayout.addStretch(2)
-        settingsBox = QGroupBox("Settings")
+        settingsBox = QGroupBox("GDS Export Settings")
         settingsBoxLayout = QFormLayout()
         settingsBox.setLayout(settingsBoxLayout)
         self.unitEdit = edf.shortLineEdit()
+        self.unitEdit.setToolTip("The unit of the GDS file.")
         settingsBoxLayout.addRow(edf.boldLabel("Unit:"), self.unitEdit)
         self.precisionEdit = edf.shortLineEdit()
+        self.precisionEdit.setToolTip("The precision of the GDS file.")
         settingsBoxLayout.addRow(edf.boldLabel("Precision:"), self.precisionEdit)
         self.mainLayout.addWidget(settingsBox)
         fileBox = QGroupBox("GDS Export Directory")
@@ -411,12 +413,58 @@ class gdsExportDialogue(QDialog):
         self.setLayout(self.mainLayout)
 
     def onDirButtonClicked(self):
-        self.dirName = QFileDialog.getExistingDirectory()
-        if self.dirName:
+        dirName = QFileDialog.getExistingDirectory()
+        if dirName:
             self.exportPathEdit.setText(
-                f"{self.dirName}/{self.parent.cellName}-{self.parent.viewName}.gds"
+                f"{dirName}/{self.parent.cellName}"
             )
 
+class gdsImportDialogue(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.setWindowTitle(f"Import GDS File")
+        self.setMinimumWidth(500)
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.addStretch(2)
+        settingsBox = QGroupBox("GDS Import Settings")
+        settingsBoxLayout = QFormLayout()
+        settingsBox.setLayout(settingsBoxLayout)
+        self.libNameEdit = edf.longLineEdit()
+        self.libNameEdit.setToolTip("The name of the library to import the GDS into.")
+        settingsBoxLayout.addRow(edf.boldLabel("Import Library Name:"), self.libNameEdit)
+        self.unitEdit = edf.shortLineEdit()
+        self.unitEdit.setToolTip("The unit of the GDS file.")
+        settingsBoxLayout.addRow(edf.boldLabel("Unit:"), self.unitEdit)
+        self.precisionEdit = edf.shortLineEdit()
+        self.precisionEdit.setToolTip("The precision of the GDS file.")
+        settingsBoxLayout.addRow(edf.boldLabel("Precision:"), self.precisionEdit)
+        self.mainLayout.addWidget(settingsBox)
+        fileBox = QGroupBox("GDS File")
+        fileDialogLayout = QHBoxLayout()
+        fileDialogLayout.addWidget(edf.boldLabel("GDS File:"))
+        self.inputFileEdit = edf.longLineEdit()
+        fileDialogLayout.addWidget(self.inputFileEdit)
+        self.gdsImportButton = QPushButton("...")
+        self.gdsImportButton.clicked.connect(self.onFileButtonClicked)
+        fileDialogLayout.addWidget(self.gdsImportButton)
+        fileBox.setLayout(fileDialogLayout)
+        self.mainLayout.addWidget(fileBox)
+        self.mainLayout.addStretch(2)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+
+    def onFileButtonClicked(self):
+        gdsFileName, _ = QFileDialog.getOpenFileName(self, caption="Select GDS file.", filter="GDS files (*.gds)")
+        if gdsFileName:
+            self.inputFileEdit.setText(
+                gdsFileName
+            )
 
 class goDownHierDialogue(QDialog):
     def __init__(
@@ -804,18 +852,31 @@ class klayoutLaypImportDialogue(QDialog):
         self.logger = self.parent.logger
 
         self.setWindowTitle("KLayout Layout Layers File Importer")
-        self.setMinimumSize(500, 100)
+        self.setMinimumSize(500, 250)
         mainLayout = QVBoxLayout()
         fileBox = QGroupBox("Import KLayout Layer Properties File")
-        fileDialogLayout = QHBoxLayout()
-        fileDialogLayout.addWidget(edf.boldLabel("Layer Properties File:"))
+        fileBoxLayout = QVBoxLayout()
+        inputFileDialogLayout = QHBoxLayout()
+        inputFileDialogLayout.addWidget(edf.boldLabel("Layer Properties File:"))
         self.laypFileEdit = edf.longLineEdit()
-        fileDialogLayout.addWidget(self.laypFileEdit)
+        inputFileDialogLayout.addWidget(self.laypFileEdit)
         self.laypFileButton = QPushButton("...")
         self.laypFileButton.clicked.connect(self.onFileButtonClicked)
-        fileDialogLayout.addWidget(self.laypFileButton)
-        fileBox.setLayout(fileDialogLayout)
+        inputFileDialogLayout.addWidget(self.laypFileButton)
+        fileBoxLayout.addLayout(inputFileDialogLayout)
+        fileBoxLayout.addSpacing(20)
+        outputFileDialogLayout = QHBoxLayout()
+        outputFileDialogLayout.addWidget(edf.boldLabel("Output File Directory:"))
+        self.outputFileEdit = edf.longLineEdit()
+        outputFileDialogLayout.addWidget(self.outputFileEdit)
+        self.outputFileButton = QPushButton("...")
+        self.outputFileButton.clicked.connect(self.onDirButtonClicked)
+        outputFileDialogLayout.addWidget(self.outputFileButton)
+        fileBoxLayout.addLayout(outputFileDialogLayout)
+        fileBox.setLayout(fileBoxLayout)
         mainLayout.addWidget(fileBox)
+        mainLayout.addSpacing(20)
+
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
@@ -832,6 +893,13 @@ class klayoutLaypImportDialogue(QDialog):
         if laypFileName:
             self.laypFileEdit.setText(laypFileName)
 
+    def onDirButtonClicked(self):
+        dirDialog = QFileDialog()
+        dirDialog.setFileMode(QFileDialog.Directory)
+        dirDialog.setOption(QFileDialog.ShowDirsOnly)
+        dirDialog.exec()
+        if dirDialog.selectedFiles():
+            self.outputFileEdit.setText(dirDialog.selectedFiles()[0])
 
 class klayoutLaytImportDialogue(QDialog):
     def __init__(self, parent):

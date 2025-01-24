@@ -40,10 +40,11 @@ from PySide6.QtCore import (
     QLineF,
 )
 from PySide6.QtGui import (
+    QGuiApplication,
     QPen,
     QBrush,
     QColor,
-    QBitmap,
+    QPixmap,
     QFontMetrics,
     QFont,
     QTextOption,
@@ -52,6 +53,7 @@ from PySide6.QtGui import (
     QPolygonF,
     QImage,
     QPainter,
+    QTransform,
 )
 from PySide6.QtWidgets import (
     QGraphicsItem,
@@ -67,15 +69,7 @@ import revedaEditor.backend.dataDefinitions as ddef
 
 class textureCache:
     _file_content_cache = {}
-    _bitmap_cache = {}
-
-    @classmethod
-    def getCachedBitmap(cls, texturePath, color):
-        cache_key = (str(texturePath), color.name())
-        if cache_key not in cls._bitmap_cache:
-            image = cls.createImage(texturePath, color)
-            cls._bitmap_cache[cache_key] = QBitmap.fromImage(image)
-        return cls._bitmap_cache[cache_key]
+    _pixmap_cache = {}
 
     @classmethod
     def readFileContent(cls, filePath):
@@ -83,34 +77,51 @@ class textureCache:
             with open(filePath, "r") as file:
                 cls._file_content_cache[filePath] = file.read()
         return cls._file_content_cache[filePath]
+    
+    @classmethod
+    def createImage(cls, filePath: Path, color: QColor, scale: int = 1)  -> QImage:
+        content = cls.readFileContent(str(filePath))
+
+        # Use numpy's loadtxt for faster parsing of text data
+        data = np.loadtxt(content.splitlines(), dtype=np.uint8)
+        
+        # Scale up the pattern by repeating each pixel
+        data_scaled = np.repeat(np.repeat(data, scale, axis=0), scale, axis=1)
+        
+        height, width = data_scaled.shape
+
+        # Create QImage with Format_ARGB32 (not premultiplied)
+        image = QImage(width, height, QImage.Format.Format_ARGB32)
+        # Fill with transparent pixels first
+        image.fill(Qt.transparent)
+
+        # Create painter to draw on the image
+        painter = QPainter(image)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QBrush(color))
+
+        # Draw solid rectangles for each pixel that should be colored
+        for i in range(height):
+            for j in range(width):
+                if data_scaled[i, j] == 1:  # Draw colored pixel
+                    painter.drawRect(j, i, 1, 1)
+
+        painter.end()
+        return image
 
     @classmethod
-    def createImage(cls, filePath: Path, color: QColor):
-        content = cls.readFileContent(str(filePath))
-        data = np.array(
-            [[int(val) for val in line.split()] for line in content.strip().split("\n")]
-        )
-
-        height, width = data.shape
-        # image = QImage(width, height, QImage.Format.Format_ARGB32_Premultiplied)
-
-        color_array = np.array(
-            [color.red(), color.green(), color.blue(), 255], dtype=np.uint8
-        )
-        transparent = np.array([0, 0, 0, 0], dtype=np.uint8)
-
-        image_array = np.where(data[:, :, None] == 1, color_array, transparent)
-        buffer = image_array.tobytes()
-
-        image = QImage(
-            buffer, width, height, width * 4, QImage.Format.Format_ARGB32_Premultiplied
-        )
-        return image
+    def getCachedPixmap(cls, texturePath, color):
+        cache_key = (str(texturePath), color.name())
+        if cache_key not in cls._pixmap_cache:
+            image = cls.createImage(texturePath, color, 4)
+            pixmap = QPixmap.fromImage(image)
+            cls._pixmap_cache[cache_key] = pixmap
+        return cls._pixmap_cache[cache_key]
 
     @classmethod
     def clearCaches(cls):
         cls._file_content_cache.clear()
-        cls._bitmap_cache.clear()
+        cls._pixmap_cache.clear()
 
 
 class layoutShape(QGraphicsItem):
@@ -129,6 +140,9 @@ class layoutShape(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemUsesExtendedStyleOption)
         self._offset = QPoint(0, 0)
         self._flipTuple = (1, 1)
+        # Initialize brush-related attributes
+        self._transformedBrush = None
+        self._lastScale = None
 
     def __repr__(self):
         return "layoutShape()"
@@ -147,12 +161,22 @@ class layoutShape(QGraphicsItem):
         # Assuming 'layer' is your layer object:
         self._pen = QPen(layer.pcolor, layer.pwidth, layer.pstyle)
         texturePath = Path(laylyr.__file__).parent.joinpath(layer.btexture)
-        _bitmap = textureCache.getCachedBitmap(texturePath, layer.bcolor)
-        self._brush = QBrush(layer.bcolor, _bitmap)
+        _pixmap = textureCache.getCachedPixmap(texturePath, layer.bcolor)
+        self._brush = QBrush(layer.bcolor, _pixmap)
         self._selectedPen = QPen(QColor("yellow"), layer.pwidth, Qt.DashLine)
-        self._selectedBrush = QBrush(QColor("yellow"), _bitmap)
+        self._selectedBrush = QBrush(QColor("yellow"), _pixmap)
         self._stretchPen = QPen(QColor("red"), layer.pwidth, Qt.SolidLine)
-        self._stretchBrush = QBrush(QColor("red"), _bitmap)
+        self._stretchBrush = QBrush(QColor("red"), _pixmap)
+
+    def _updateTransformedBrush(self, brush: QBrush, scale: float):
+        """Update transformed brush only when needed"""
+        if self._transformedBrush is None:
+            self._transformedBrush = QBrush(brush.color())
+            self._transformedBrush.setTexture(brush.texture())
+
+        if self._lastScale != scale:
+            self._lastScale = scale
+            self._transformedBrush.setTransform(QTransform().scale(1 / scale, 1 / scale))
 
     @property
     def pen(self):
@@ -228,7 +252,6 @@ class layoutShape(QGraphicsItem):
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mouseReleaseEvent(event)
 
-
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         self.setCursor(Qt.ArrowCursor)
         self.setOpacity(0.75)
@@ -298,29 +321,41 @@ class layoutRect(layoutShape):
         self._stretchPen = QPen(QColor("red"), self._layer.pwidth, Qt.SolidLine)
         self._definePensBrushes(self._layer)
         self.setZValue(self._layer.z)
+        self._stretchSidesMap = {
+            self.sides[0]: (lambda r: r.topLeft(), lambda r: r.bottomLeft()),
+            self.sides[1]: (lambda r: r.topRight(), lambda r: r.bottomRight()),
+            self.sides[2]: (lambda r: r.topLeft(), lambda r: r.topRight()),
+            self.sides[3]: (lambda r: r.bottomLeft(), lambda r: r.bottomRight())
+        }
+
+
 
     def __repr__(self):
         return f"layoutRect({self._start}, {self._end}, {self._layer})"
 
+
     def paint(self, painter, option, widget):
-        painter.setRenderHint(QPainter.NonCosmeticBrushPatterns)
+        # Cache the rect to avoid multiple attribute lookups
+        rect = self._rect
+
+        # Get scale once and cache it
+        scale = self.scene().views()[0].transform().m11()
+
         if self.isSelected():
             painter.setPen(self._selectedPen)
-            painter.setBrush(self._selectedBrush)
+            self._updateTransformedBrush(self._selectedBrush, scale)
+
             if self.stretch:
                 painter.setPen(self._stretchPen)
-                if self._stretchSide == layoutRect.sides[0]:
-                    painter.drawLine(self.rect.topLeft(), self.rect.bottomLeft())
-                elif self._stretchSide == layoutRect.sides[1]:
-                    painter.drawLine(self.rect.topRight(), self.rect.bottomRight())
-                elif self._stretchSide == layoutRect.sides[2]:
-                    painter.drawLine(self.rect.topLeft(), self.rect.topRight())
-                elif self._stretchSide == layoutRect.sides[3]:
-                    painter.drawLine(self.rect.bottomLeft(), self.rect.bottomRight())
+                # Get the line endpoints from the mapping
+                if self._stretchSide in self._stretchSidesMap:
+                    start_func, end_func = self._stretchSidesMap[self._stretchSide]
+                    painter.drawLine(start_func(rect), end_func(rect))
         else:
             painter.setPen(self._pen)
-            painter.setBrush(self._brush)
-        painter.drawRect(self._rect)
+            self._updateTransformedBrush(self._brush, scale)
+        painter.setBrush(self._transformedBrush)
+        painter.drawRect(rect)
 
     def boundingRect(self):
         return self._rect.normalized().adjusted(-2, -2, 2, 2)
@@ -501,7 +536,7 @@ class layoutInstance(layoutShape):
         self._instanceName = ""
         # Pen used for selection
         self._selectedPen = QPen(QColor("yellow"), 4, Qt.DashLine)
-        self._selectedPen.setCosmetic(False)
+        self._selectedPen.setCosmetic(True)
         # Set the shapes for the symbol
         self.setShapes()
         # Enable child event filtering for filters and handles
@@ -685,6 +720,7 @@ class layoutPath(layoutShape):
         self._rectCorners(self._draftLine.angle())
         self.setZValue(self._layer.z)
 
+
     def __repr__(self):
         return (
             f"layoutPath({self._draftLine}, {self._layer}"
@@ -767,16 +803,19 @@ class layoutPath(layoutShape):
         return rect
 
     def paint(self, painter, option, widget):
+        # Get scale once and cache it
+        scale = self.scene().views()[0].transform().m11()
         if self.isSelected():
             if self._stretch:
                 painter.setPen(self._stretchPen)
-                painter.setBrush(self._stretchBrush)
+                self._updateTransformedBrush(self._stretchBrush, scale)
             else:
                 painter.setPen(self._selectedPen)
-                painter.setBrush(self._selectedBrush)
+                self._updateTransformedBrush(self._selectedBrush, scale)
         else:
             painter.setPen(self._pen)
-            painter.setBrush(self._brush)
+            self._updateTransformedBrush(self._brush, scale)
+        painter.setBrush(self._transformedBrush)
         painter.drawLine(self._draftLine)
         painter.drawRect(self._rect)
 
@@ -1091,9 +1130,9 @@ class layoutRuler(layoutShape):
 
 
 class layoutLabel(layoutShape):
-    labelAlignments = ["Left", "Center", "Right"]
-    labelOrients = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
-    LABELSCALE = 10
+    LABEL_ALIGNMENTS = ["Left", "Center", "Right"]
+    LABEL_ORIENTS = ["R0", "R90", "R180", "R270", "MX", "MX90", "MY", "MY90"]
+    LABEL_SCALE = 10
 
     def __init__(
         self,
@@ -1111,31 +1150,27 @@ class layoutLabel(layoutShape):
         self._labelText = labelText
         self._fontFamily = fontFamily
         self._fontStyle = fontStyle
-        self._fontHeight = fontHeight * layoutLabel.LABELSCALE
+        self._fontHeight = fontHeight
         self._labelAlign = labelAlign
         self._labelOrient = labelOrient
         self._layer = layer
         self._definePensBrushes(self._layer)
-        self.fontDefinition(fontFamily, fontStyle)
-        self._labelOptions = QTextOption()
-        if self._labelAlign == layoutLabel.labelAlignments[0]:
-            self._labelOptions.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        elif self._labelAlign == layoutLabel.labelAlignments[1]:
-            self._labelOptions.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        elif self._labelAlign == layoutLabel.labelAlignments[2]:
-            self._labelOptions.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.setOrient()
-        self.setZValue(self._layer.z)
-
-    def fontDefinition(self, fontFamily, fontStyle):
         self._labelFont = QFont(fontFamily)
         self._labelFont.setStyleName(fontStyle)
-        # self._labelFont.setPointSize(int(float(self._labelHeight)))
-        self._labelFont.setPointSize(int(float(self._fontHeight)))
         self._labelFont.setKerning(False)
+        self._labelFont.setPointSize(int(float(self._fontHeight)*self.LABEL_SCALE))
         # self.setOpacity(1)
         self._fm = QFontMetrics(self._labelFont)
         self._rect = self._fm.boundingRect(self._labelText)
+        self._labelOptions = QTextOption()
+        if self._labelAlign == layoutLabel.LABEL_ALIGNMENTS[0]:
+            self._labelOptions.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        elif self._labelAlign == layoutLabel.LABEL_ALIGNMENTS[1]:
+            self._labelOptions.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        elif self._labelAlign == layoutLabel.LABEL_ALIGNMENTS[2]:
+            self._labelOptions.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.setOrient()
+        self.setZValue(self._layer.z)
 
     def __repr__(self):
         return (
@@ -1146,20 +1181,20 @@ class layoutLabel(layoutShape):
 
     def setOrient(self):
         self.setTransformOriginPoint(self.mapFromScene(self._start))
-        if self._labelOrient == layoutLabel.labelOrients[0]:
+        if self._labelOrient == layoutLabel.LABEL_ORIENTS[0]:
             self.setRotation(0)
-        elif self._labelOrient == layoutLabel.labelOrients[1]:
+        elif self._labelOrient == layoutLabel.LABEL_ORIENTS[1]:
             self.setRotation(90)
-        elif self._labelOrient == layoutLabel.labelOrients[2]:
+        elif self._labelOrient == layoutLabel.LABEL_ORIENTS[2]:
             self.setRotation(180)
-        elif self._labelOrient == layoutLabel.labelOrients[3]:
+        elif self._labelOrient == layoutLabel.LABEL_ORIENTS[3]:
             self.setRotation(270)
-        elif self._labelOrient == layoutLabel.labelOrients[4]:
+        elif self._labelOrient == layoutLabel.LABEL_ORIENTS[4]:
             self.flipTuple = (-1, 1)
-        elif self._labelOrient == layoutLabel.labelOrients[5]:
+        elif self._labelOrient == layoutLabel.LABEL_ORIENTS[5]:
             self.flipTuple = (-1, 1)
             self.setRotation(90)
-        elif self._labelOrient == layoutLabel.labelOrients[6]:
+        elif self._labelOrient == layoutLabel.LABEL_ORIENTS[6]:
             self.flipTuple = (1, -1)
             self.setRotation(90)
 
@@ -1181,7 +1216,6 @@ class layoutLabel(layoutShape):
         return path
 
     def paint(self, painter, option, widget):
-        self._labelFont.setPointSize(int(self._fontHeight))
         painter.setFont(self._labelFont)
         if self.isSelected():
             painter.setPen(self._selectedPen)
@@ -1254,13 +1288,13 @@ class layoutLabel(layoutShape):
 
     @property
     def fontHeight(self):
-        return int(float(self._fontHeight/layoutLabel.LABELSCALE))
+        return self._fontHeight
 
     @fontHeight.setter
     def fontHeight(self, value: str):
         self.prepareGeometryChange()
-        self._fontHeight = int(float(value) * layoutLabel.LABELSCALE)
-        self._labelFont.setPointSize(self._fontHeight)
+        self._fontHeight = value
+        self._labelFont.setPointSize(int(float(self._fontHeight)*self.LABEL_SCALE))
         self._fm = QFontMetrics(self._labelFont)
         self._rect = self._fm.boundingRect(self._labelText)
 
@@ -1311,14 +1345,6 @@ class layoutPin(layoutShape):
         self._stretchPen = QPen(QColor("red"), self._layer.pwidth, Qt.SolidLine)
         self.setZValue(self._layer.z)
 
-    # def _definePensBrushes(self):
-    #     self._pen = QPen(self._layer.pcolor, self._layer.pwidth, self._layer.pstyle)
-    #     self._bitmap = QBitmap.fromImage(
-    #         QPixmap(self._layer.btexture).scaled(10, 10).toImage()
-    #     )
-    #     self._brush = QBrush(self._layer.bcolor, self._bitmap)
-    #     self._selectedPen = QPen(QColor("yellow"), self._layer.pwidth, Qt.DashLine)
-    #     self._selectedBrush = QBrush(QColor("yellow"), self._bitmap)
 
     def __repr__(self):
         return (
@@ -1327,12 +1353,15 @@ class layoutPin(layoutShape):
         )
 
     def paint(self, painter, option, widget):
+        # Get scale once and cache it
+        scale = self.scene().views()[0].transform().m11()
         if self.isSelected():
             painter.setPen(self._selectedPen)
-            painter.setBrush(self._selectedBrush)
+            self._updateTransformedBrush(self._selectedBrush, scale)
         else:
             painter.setPen(self._pen)
-            painter.setBrush(self._brush)
+            self._updateTransformedBrush(self._brush, scale)
+        painter.setBrush(self._brush)
         painter.drawRect(self._rect)
 
     def boundingRect(self):
@@ -1490,24 +1519,18 @@ class layoutVia(layoutShape):
         self._definePensBrushes(self._layer)
         self.setZValue(self._layer.z)
 
-    # def _definePensBrushes(self):
-    #     self._pen = QPen(self._layer.pcolor, self._layer.pwidth, self._layer.pstyle)
-    #     self._bitmap = QBitmap.fromImage(
-    #         QPixmap(self._layer.btexture).scaled(10, 10).toImage()
-    #     )
-    #     self._brush = QBrush(self._layer.bcolor, self._bitmap)
-    #     self._selectedPen = QPen(QColor("yellow"), self._layer.pwidth, Qt.DashLine)
-    #     self._selectedBrush = QBrush(QColor("yellow"), self._bitmap)
 
     def __repr__(self):
         return f"layoutVia({self._start}, {self._end}, {self._layer})"
 
     def paint(self, painter, option, widget):
+        scale = self.scene().views()[0].transform().m11()
         if self.isSelected():
             painter.setPen(self._selectedPen)
         else:
             painter.setPen(self._pen)
-        painter.setBrush(self._brush)
+        self._updateTransformedBrush(self._brush, scale)
+        painter.setBrush(self._transformedBrush)
         painter.drawRect(self._rect)
         painter.drawLine(self._rect.bottomLeft(), self._rect.topRight())
         painter.drawLine(self._rect.topLeft(), self._rect.bottomRight())
@@ -1768,25 +1791,19 @@ class layoutPolygon(layoutShape):
         return f"layoutPolygon({self._points}, {self._layer})"
 
     def paint(self, painter, option, widget):
+        scale = self.scene().views()[0].transform().m11()
         if self.isSelected():
             painter.setPen(self._selectedPen)
-            painter.setBrush(self._selectedBrush)
+            self._updateTransformedBrush(self._selectedBrush, scale)
 
             if self._stretch and self._selectedCorner != QPoint(99999, 99999):
                 painter.drawEllipse(self._selectedCorner, 5, 5)
         else:
             painter.setPen(self._pen)
-            painter.setBrush(self._brush)
+            self._updateTransformedBrush(self._brush, scale)
+        painter.setBrush(self._transformedBrush)
         painter.drawPolygon(self._polygon)
 
-    # def _definePensBrushes(self):
-    #     self._pen = QPen(self._layer.pcolor, self._layer.pwidth, self._layer.pstyle)
-    #     self._bitmap = QBitmap.fromImage(
-    #         QPixmap(self._layer.btexture).scaled(10, 10).toImage()
-    #     )
-    #     self._brush = QBrush(self._layer.bcolor, self._bitmap)
-    #     self._selectedPen = QPen(QColor("yellow"), self._layer.pwidth, Qt.DashLine)
-    #     self._selectedBrush = QBrush(QColor("yellow"), self._bitmap)
 
     def boundingRect(self) -> QRectF:
         return self._polygon.boundingRect()

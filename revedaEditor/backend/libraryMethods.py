@@ -29,14 +29,15 @@ from typing import Union
 
 
 def getLibItem(libraryModel: QStandardItemModel, libName: str) -> Union[scb.libraryItem, None]:
-    libItem = [
-        item
-        for item in libraryModel.findItems(libName)
-        if item.data(Qt.UserRole + 1) == "library"
-    ][0]
-    if libItem:
-        return libItem
-
+    try:
+        libItem = [
+            item
+            for item in libraryModel.findItems(libName)
+            if item.data(Qt.UserRole + 1) == "library"
+        ][0]
+    except IndexError:
+        return None
+    return libItem
 
 def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> Union[scb.cellItem, None]:
     cellItems = [
@@ -46,6 +47,7 @@ def getCellItem(libItem: scb.libraryItem, cellNameInp: str) -> Union[scb.cellIte
     ]
     if cellItems:
         return cellItems[0]
+    return None
 
 
 def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> Union[scb.viewItem, None]:
@@ -57,6 +59,7 @@ def getViewItem(cellItem: scb.cellItem, viewNameInp: str) -> Union[scb.viewItem,
         ]
     if viewItems:
         return viewItems[0]
+    return None
 
 
 def findViewItem(libraryModel, libName: str, cellName: str, viewName: str):

@@ -426,6 +426,7 @@ class layoutView(editorView):
         self.parent = parent
         super().__init__(self.scene, self.parent)
 
+
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Escape:
             if self.scene._newPath is not None:

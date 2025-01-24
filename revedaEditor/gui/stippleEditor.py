@@ -90,10 +90,13 @@ class stippleView(QGraphicsView):
             pos = self.mapToScene(event.pos())
             col = int(pos.x() // self._gridStep)
             row = int(pos.y() // self._gridStep)
-            if self.gridSquares[row][col] is not None:
-                self.clearDot(row, col)
-            else:
-                self.drawDot(row, col)
+            try:
+                if self.gridSquares[row][col] is not None:
+                    self.clearDot(row, col)
+                else:
+                    self.drawDot(row, col)
+            except IndexError:
+                pass
         else:
             super().mousePressEvent(event)
 

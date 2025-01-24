@@ -614,7 +614,7 @@ class guideLine(QGraphicsLineItem):
         assert isinstance(value, netNameStrengthEnum)
         self._nameStrength = value
 
-    def inherit(self, otherNet: [schematicNet]):
+    def inherit(self, otherNet: List[schematicNet]):
         """
         This method is used to carry the name information of the original net
         to stretch net.

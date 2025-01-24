@@ -1670,7 +1670,7 @@ class schematicPin(symbolShape):
         path.addRect(pin_rect)
         return path
 
-    def findPinNetIndexTuples(self) -> List[Tuple['schematicPin', 'schematicNet', int]]:
+    def findPinNetIndexTuples(self) -> List[Tuple['schematicPin', 'net.schematicNet', int]]:
         # Use a list instead of a set for better performance if order doesn't matter
         self._pinNetIndexTupleSet = []
 

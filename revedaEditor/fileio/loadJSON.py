@@ -557,7 +557,7 @@ class layoutItems:
     def createRectShape(self, item):
         start = QPoint(item["tl"][0], item["tl"][1])
         end = QPoint(item["br"][0], item["br"][1])
-        layoutLayer = laylyr.pdkDrawingLayers[item["ln"]]
+        layoutLayer = laylyr.pdkAllLayers[item["ln"]]
         rect = lshp.layoutRect(start, end, layoutLayer)
         # rect.setPos(QPoint(item["loc"][0], item["loc"][1]))
         rect.angle = item.get("ang", 0)
@@ -570,7 +570,7 @@ class layoutItems:
                 QPoint(item["dfl1"][0], item["dfl1"][1]),
                 QPoint(item["dfl2"][0], item["dfl2"][1]),
             ),
-            laylyr.pdkDrawingLayers[item["ln"]],
+            laylyr.pdkAllLayers[item["ln"]],
             item["w"],
             item["se"],
             item["ee"],
@@ -597,7 +597,7 @@ class layoutItems:
         return ruler
 
     def createLabelShape(self, item):
-        layoutLayer = laylyr.pdkTextLayers[item["ln"]]
+        layoutLayer = laylyr.pdkAllLayers[item["ln"]]
         label = lshp.layoutLabel(
             QPoint(item["st"][0], item["st"][1]),
             item["lt"],
@@ -613,7 +613,7 @@ class layoutItems:
         return label
 
     def createPinShape(self, item):
-        layoutLayer = laylyr.pdkPinLayers[item["ln"]]
+        layoutLayer = laylyr.pdkAllLayers[item["ln"]]
         pin = lshp.layoutPin(
             QPoint(item["tl"][0], item["tl"][1]),
             QPoint(item["br"][0], item["br"][1]),
@@ -627,7 +627,7 @@ class layoutItems:
         return pin
 
     def createPolygonShape(self, item):
-        layoutLayer = laylyr.pdkDrawingLayers[item["ln"]]
+        layoutLayer = laylyr.pdkAllLayers[item["ln"]]
         pointsList = [QPoint(point[0], point[1]) for point in item["ps"]]
         polygon = lshp.layoutPolygon(pointsList, layoutLayer)
         polygon.angle = item.get("ang", 0)

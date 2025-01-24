@@ -45,7 +45,7 @@ from PySide6.QtWidgets import (
 import revedaEditor.backend.libraryMethods as libm
 import revedaEditor.backend.libBackEnd as libb
 import revedaEditor.gui.fileDialogues as fd
-
+import pathlib
 from typing import List
 
 
@@ -76,8 +76,7 @@ class designLibrariesView(QTreeView):
             "Are you sure to delete " "this library? This action cannot be undone.",
         )
         if button == QMessageBox.Yes:
-            shutil.rmtree(self.selectedItem.data(Qt.UserRole + 2))
-            self.libraryModel.removeRow(self.selectedItem.row())
+            self.libraryModel.removeLibraryFromModel(self.selectedItem)
 
     def renameLib(self):
         oldLibraryName = self.selectedItem.libraryName
@@ -97,7 +96,7 @@ class designLibrariesView(QTreeView):
         if dlg.exec() == QDialog.Accepted:
             cellName = dlg.cellCB.currentText()
             if cellName.strip() != "":
-                libb.createCell(self, self.libraryModel, self.selectedItem, cellName)
+                libb.createCell(self, self.selectedItem, cellName)
             else:
                 self.logger.error("Please enter a cell name.")
 
@@ -267,14 +266,14 @@ class designLibrariesModel(QStandardItemModel):
         for designPath in self.libraryDict.values():
             self.populateLibrary(designPath)
 
-    def populateLibrary(self, designPath):  # designPath: Path
+    def populateLibrary(self, designPath: pathlib.Path) -> None:  # designPath: Path
         """
         Populate library view.
         """
         if designPath.joinpath("reveda.lib").exists():
             libraryItem = self.addLibraryToModel(designPath)
             cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
-            for cell in cellList:  # type: str
+            for cell in cellList:  
                 cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
                 viewList = [
                     view.name
@@ -284,20 +283,25 @@ class designLibrariesModel(QStandardItemModel):
                 for view in viewList:
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
 
-    def addLibraryToModel(self, designPath):
+    def addLibraryToModel(self, designPath) -> libb.libraryItem:
         libraryEntry = libb.libraryItem(designPath)
         self.rootItem.appendRow(libraryEntry)
         return libraryEntry
-
-    def addCellToModel(self, cellPath, parentItem):
+    
+    def removeLibraryFromModel(self, libraryItem):
+        shutil.rmtree(libraryItem.data(Qt.UserRole + 2), ignore_errors=True)
+        self.rootItem.removeRow(libraryItem.row())  
+        
+    def addCellToModel(self, cellPath, parentItem) -> libb.cellItem:
         cellEntry = libb.cellItem(cellPath)
         parentItem.appendRow(cellEntry)
         return cellEntry
 
-    def addViewToModel(self, viewPath, parentItem):
+    def addViewToModel(self, viewPath, parentItem) -> libb.viewItem:
         viewEntry = libb.viewItem(viewPath)
         parentItem.appendRow(viewEntry)
-
+        return viewEntry
+    
     def listLibraries(self) -> List[str]:
         librariesList = []
         for row in range(self.rowCount()):
@@ -352,7 +356,7 @@ class symbolViewsModel(designLibrariesModel):
         if designPath.joinpath("reveda.lib").exists():
             libraryItem = self.addLibraryToModel(designPath)
             cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
-            for cell in cellList:  # type: str
+            for cell in cellList: 
                 cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
                 viewList = [
                     view.name
@@ -376,7 +380,7 @@ class layoutViewsModel(designLibrariesModel):
         if designPath.joinpath("reveda.lib").exists():
             libraryItem = self.addLibraryToModel(designPath)
             cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
-            for cell in cellList:  # type: str
+            for cell in cellList: 
                 cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
                 viewList = [
                     view.name

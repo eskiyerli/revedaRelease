@@ -77,7 +77,7 @@ def createSpiceView(
 
     # If the cell name is not in the library and is not empty, create a new cell
     if cellName not in libCellNames and cellName != "":
-        scb.createCell(parent, libraryModel, libItem, cellName)
+        scb.createCell(parent, libItem, cellName)
 
         # Get the cell item
     cellItem = libm.getCellItem(libItem, cellName)

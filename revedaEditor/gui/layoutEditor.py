@@ -80,7 +80,7 @@ class layoutEditor(edw.editorWindow):
         self.snapGrid = fabproc.snapGrid
         self.snapTuple = (self.snapGrid, self.snapGrid)
         self.layoutChooser = None
-        self.gdsExportDir = pathlib.Path.cwd()
+        self.gdsExportDir = pathlib.Path.cwd().parent / "gds"
         self._layoutContextMenu()
 
     def init_UI(self):
@@ -100,6 +100,7 @@ class layoutEditor(edw.editorWindow):
         super()._createActions()
         self.exportGDSAction = QAction("Export GDS", self)
         self.exportGDSAction.setToolTip("Export GDS from Layout")
+
 
     def _addActions(self):
         super()._addActions()
@@ -123,10 +124,12 @@ class layoutEditor(edw.editorWindow):
         self.menuCreate.addAction(self.rulerAction)
         self.menuCreate.addAction(self.delRulerAction)
         self.menuTools.addAction(self.exportGDSAction)
+        
         # hierarchy submenu
         self.hierMenu = self.menuEdit.addMenu("Hierarchy")
         self.hierMenu.addAction(self.goUpAction)
         self.hierMenu.addAction(self.goDownAction)
+        
 
     def _layoutContextMenu(self):
         super()._editorContextMenu()
@@ -159,6 +162,7 @@ class layoutEditor(edw.editorWindow):
         self.createInstAction.triggered.connect(self.createInstClick)
         self.createRectAction.triggered.connect(self.createRectClick)
         self.exportGDSAction.triggered.connect(self.exportGDSClick)
+
         self.createPathAction.triggered.connect(self.createPathClick)
         self.createPinAction.triggered.connect(self.createPinClick)
         self.createLabelAction.triggered.connect(self.createLabelClick)
@@ -303,7 +307,7 @@ class layoutEditor(edw.editorWindow):
             ][0]
             fontFamily = dlg.familyCB.currentText()
             fontStyle = dlg.fontStyleCB.currentText()
-            fontHeight = int(float(dlg.labelHeightCB.currentText()))
+            fontHeight = dlg.labelHeightCB.currentText()
             labelAlign = dlg.labelAlignCB.currentText()
             labelOrient = dlg.labelOrientCB.currentText()
             self.centralW.scene.newLabelTuple = ddef.layoutLabelTuple(
@@ -379,9 +383,13 @@ class layoutEditor(edw.editorWindow):
 
     def checkSaveCell(self):
         self.centralW.scene.saveLayoutCell(self.file)
+        if self.parentEditor:
+            self.parentEditor.childEditorChanged.emit(self.parentObj)
 
     def saveCell(self):
         self.centralW.scene.saveLayoutCell(self.file)
+        if self.parentEditor:
+            self.parentEditor.childEditorChanged.emit(self.parentObj)
 
     def loadLayout(self):
         self.centralW.scene.loadLayoutCell(self.file)
@@ -410,11 +418,11 @@ class layoutEditor(edw.editorWindow):
         dlg = fd.gdsExportDialogue(self)
         dlg.unitEdit.setText("1 um")
         dlg.precisionEdit.setText("1 nm")
-        dlg.exportPathEdit.setText(str(self.gdsExportDir))
+        dlg.exportPathEdit.setText(str(self.gdsExportDir / f'{self.cellName}'))
 
         if dlg.exec() == QDialog.Accepted:
             self.gdsExportDir = pathlib.Path(dlg.exportPathEdit.text().strip())
-            gdsExportPath = self.gdsExportDir / f"{self.cellName}.gds"
+            gdsExportPath: pathlib.Path = self.gdsExportDir / f"{self.cellName}.gds"
             # reprocess the layout to get the layout positions right.
             topLevelItems = [
                 item for item in self.centralW.scene.items() if item.parentItem() is None
@@ -435,6 +443,9 @@ class layoutEditor(edw.editorWindow):
                 # netlistObj.writeNetlist()
                 self.logger.info("GDS Export is finished.")
 
+    def _createSignalConnections(self):
+        super()._createSignalConnections()
+        self.childEditorChanged.connect(self.centralW.scene.updateItem)
 
 class layoutContainer(QWidget):
     def __init__(self, parent: layoutEditor):
@@ -446,6 +457,7 @@ class layoutContainer(QWidget):
         layerViewTable = lsw.layerViewTable(self, self.lswModel)
         self.lswWidget = lswWindow(layerViewTable)
         self.lswWidget.setMinimumWidth(300)
+        self.lswWidget.setMaximumWidth(360)
         self.lswWidget.lswTable.dataSelected.connect(self.selectLayer)
         self.lswWidget.lswTable.layerSelectable.connect(self.layerSelectableChange)
         self.lswWidget.lswTable.layerVisible.connect(self.layerVisibleChange)

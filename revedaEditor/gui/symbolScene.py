@@ -253,7 +253,7 @@ class symbolScene(editorScene):
                         self._newArc = None
                     self.editorWindow.messageLine.setText("Click for the first point of Arc")
                     self._newArc = self.arcDraw(self.mouseReleaseLoc, self.mouseReleaseLoc)
-                    self_.newArc.setSelected(True)
+                    self._newArc.setSelected(True)
                 elif self.editModes.addLabel:
                     if self._newLabel:
                         self._newLabel = None

@@ -65,7 +65,7 @@ class importXschemSym:
         self.cellName = self.filePathObj.stem
         libItem = libm.getLibItem(self.libraryView.libraryModel, self.libraryName)
 
-        cellItem = scb.createCell(self.parent, self.libraryView.libraryModel, libItem,
+        cellItem = scb.createCell(self.parent, libItem,
             self.cellName)
         symbolViewItem = scb.createCellView(self.parent, "symbol", cellItem)
         self.symbolWindow = symed.symbolEditor(symbolViewItem, self.parent.libraryDict,

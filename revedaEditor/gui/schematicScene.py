@@ -167,7 +167,6 @@ class schematicScene(editorScene):
                 QRectF(self.mousePressLoc, self.mouseMoveLoc)
             )
         cursorPosition = self.snapToGrid(self.mouseMoveLoc - self.origin, self.snapTuple)
-        self.messageLine.setText(message)
         # Show the cursor position in the status line
         self.statusLine.showMessage(
             f"Cursor Position: ({cursorPosition.x()}, {cursorPosition.y()})")
