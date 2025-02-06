@@ -27,11 +27,11 @@
 #    nuitka-project: --macos-create-app-bundle
 # The PySide6 plugin covers qt-plugins
 # nuitka-project: --standalone
-# nuitka-project: --windows-console-mode=disable
+# nuitka-project: --windows-console-mode=attach
 # nuitka-project: --include-plugin-directory=revedaEditor
-# nuitka-project: --nofollow-import-to=pdk,defaultPDK
+# nuitka-project: --nofollow-import-to= defaultPDK, revedasim, revedaPlot, ihp_pdk, gf180_pdk
 # nuitka-project: --enable-plugin=pyside6
-# nuitka-project: --product-version="0.7.1"
+# nuitka-project: --product-version="0.7.9"
 # nuitka-project: --linux-icon=./logo-color.png
 # nuitka-project: --windows-icon-from-ico=./logo-color.png
 # nuitka-project: --company-name="Revolution EDA"
@@ -42,11 +42,11 @@ import platform
 import sys
 from PySide6.QtWidgets import QApplication
 from typing import Optional
-import time
+# import time
 
 import revedaEditor.gui.revedaMain as rvm
 import revedaEditor.gui.pythonConsole as pcon
-from contextlib import redirect_stdout, redirect_stderr, contextmanager
+from contextlib import redirect_stdout, redirect_stderr
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -90,37 +90,14 @@ class revedaApp(QApplication):
         self.reveda_pdk_path = os.environ.get("REVEDA_PDK_PATH", None)
         if self.reveda_pdk_path:
             if Path(self.reveda_pdk_path).is_absolute():
-                self.reveda_pdk_pathObj = Path(self.reveda_pdk_path)
+                self.revedaPdkPathObj = Path(self.reveda_pdk_path)
             else:
-                self.reveda_pdk_pathObj = reveda_runpathObj.joinpath(
+                self.revedaPdkPathObj = reveda_runpathObj.joinpath(
                     self.reveda_pdk_path
                 )
-            sys.path.append(str(self.reveda_pdk_pathObj))
-
-
-@contextmanager
-def performance_monitor(operation_name: str):
-    """Context manager to monitor operation performance"""
-    start_time = time.perf_counter()
-    try:
-        yield
-    finally:
-        elapsed_time = time.perf_counter() - start_time
-        print(f"{operation_name} took {elapsed_time:.3f} seconds")
-
+            sys.path.append(str(self.revedaPdkPathObj))
 
 OS_STYLE_MAP = {"Windows": "Windows", "Linux": "Breeze", "Darwin": "macOS"}
-
-
-@contextmanager
-def performance_monitor(operation_name: str):
-    """Context manager to monitor operation performance"""
-    start_time = time.perf_counter()
-    try:
-        yield
-    finally:
-        elapsed_time = time.perf_counter() - start_time
-        print(f"{operation_name} took {elapsed_time:.3f} seconds")
 
 
 def initialize_app(argv) -> tuple[revedaApp, Optional[str]]:
@@ -130,35 +107,18 @@ def initialize_app(argv) -> tuple[revedaApp, Optional[str]]:
     return app, style
 
 
-def main() -> int:
-    try:
-        with performance_monitor("Application startup"):
-            # Initialize application
-            app, style = initialize_app(sys.argv)
-
-            if style:
-                app.setStyle(style)
-                print(f"Applied {style} style")
-
-            # Create and configure main window
-            mainW = rvm.MainWindow()
-            mainW.setWindowTitle("Revolution EDA")
-
-            # Set up console redirection
-            console = mainW.centralW.console
-            redirect = pcon.Redirect(console.errorwrite)
-
-            # Show window and start event loop
-            with redirect_stdout(console), redirect_stderr(redirect):
-                mainW.show()
-                return app.exec()
-
-    except Exception as e:
-        print(f"Application failed to start: {e}", exc_info=True)
-        return 1
-    finally:
-        sys.exit()
-
+def main():
+    app, style = initialize_app(sys.argv)
+    if style:
+        app.setStyle(style)
+        print(f"Applied {style} style")
+    mainW = rvm.MainWindow()
+    mainW.setWindowTitle("Revolution EDA")
+    console = mainW.centralW.console
+    redirect = pcon.Redirect(console.errorwrite)
+    with redirect_stdout(console), redirect_stderr(redirect):
+        mainW.show()
+        return app.exec()
 
 if __name__ == "__main__":
     main()

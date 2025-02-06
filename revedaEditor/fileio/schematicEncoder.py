@@ -41,7 +41,9 @@ class schematicEncoder(json.JSONEncoder):
             return self._encodeSchematicPin(item)
         elif isinstance(item, shp.text):
             return self._encodeText(item)
-        else:
+        try:
+            return super().default(item)
+        except TypeError:
             return {'type': 'unknown'}
 
     def _encodeSchematicSymbol(self, item: shp.schematicSymbol) -> Dict[str, Any]:

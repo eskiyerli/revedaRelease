@@ -38,6 +38,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QGraphicsRectItem,
 
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.libraryMethods as libm
+import revedaEditor.backend.libBackEnd as libb
 import revedaEditor.backend.undoStack as us
 import revedaEditor.common.labels as lbl
 import revedaEditor.common.shapes as shp  # import the shapes
@@ -59,11 +60,8 @@ class schematicScene(editorScene):
 
     def __init__(self, parent):
         super().__init__(parent)
-
-        self.parent = parent
         self.instCounter = 0
-        self.start = QPoint(0, 0)
-        self.current = QPoint(0, 0)
+ 
         self.editModes = ddef.schematicModes(selectItem=True, deleteItem=False,
             moveItem=False, copyItem=False, rotateItem=False, changeOrigin=False,
             panView=False, drawPin=False, drawWire=False, drawText=False, addInstance=False,
@@ -77,7 +75,7 @@ class schematicScene(editorScene):
         self.selectedSymbol = None
         self.selectedSymbolPin = None
         # the same name
-        self.instanceSymbolTuple = None
+        self.newInstanceTuple = None
         # pin attribute defaults
         self.pinName = ""
         self.pinType = "Signal"
@@ -89,13 +87,8 @@ class schematicScene(editorScene):
         self._newPin = None
         self._newText = None
         self.textTuple = None
-        self._snapPointRect = QGraphicsRectItem()
-        self._snapPointRect.setRect(QRect(-2, -2, 4, 4))
-        self._snapPointRect.setZValue(100)
-        self._snapPointRect.setVisible(False)
-        self._snapPointRect.setPen(schlyr.guideLinePen)
-        self.snapDistance: int = 5
-        self.snapGrid = None
+        self.defineSnapRect()
+
         self.highlightNets = False
         self.hierarchyTrail = ""
         fontFamilies = QFontDatabase.families(QFontDatabase.Latin)
@@ -111,6 +104,13 @@ class schematicScene(editorScene):
         self.stretchNet.connect(self._handleStretchNet)
         self._symbolCache = {}
 
+    def defineSnapRect(self):
+        self._snapPointRect = QGraphicsRectItem()
+        self._snapPointRect.setRect(QRect(-2, -2, 4, 4))
+        self._snapPointRect.setZValue(100)
+        self._snapPointRect.setVisible(False)
+        self._snapPointRect.setPen(schlyr.guideLinePen)
+        self.addItem(self._snapPointRect)
 
     @property
     def drawMode(self):
@@ -132,6 +132,7 @@ class schematicScene(editorScene):
                     self._selectionRectItem.setRect(QRectF(self.mousePressLoc.x(),
                                                            self.mousePressLoc.y(),0,0))
                     self._selectionRectItem.setPen(schlyr.draftPen)
+                    self._selectionRectItem.setZValue(100)
                     self.addItem(self._selectionRectItem)
         except Exception as e:
             self.logger.error(f"Mouse press error: {e}")
@@ -256,9 +257,9 @@ class schematicScene(editorScene):
 
         :param eventLoc: QPoint instance
         """
-        # if self._newInstance:
-        #     self._newInstance = None
-        self._newInstance = self.drawInstance(eventLoc)
+        if self._newInstance:
+            self._newInstance = None
+        self._newInstance = self.drawInstance(self.newInstanceTuple, eventLoc)
         self._newInstance.setSelected(True)
 
     def _handleDrawPin(self, mouseReleaseLoc: QPoint) -> None:
@@ -725,26 +726,29 @@ class schematicScene(editorScene):
         self.addUndoStack(text)
         return text
 
-    def drawInstance(self, pos: QPoint):
+    def drawInstance(self, instanceTuple: ddef.viewTuple, pos: QPoint):
         """
         Add an instance of a symbol to the scene.
         """
-        instance = self.instSymbol(pos)
+        instance = self.instSymbol(instanceTuple, pos)
         if instance:  # Add check for None
             self.instanceCounter += 1
             self.addUndoStack(instance)
-        return instance
+            return instance
+        else:
+            return None
 
-    def instSymbol(self, pos: QPoint):
-        view_path = self.instanceSymbolTuple.viewItem.viewPath
+    def instSymbol(self, instanceTuple: ddef.viewTuple, pos: QPoint):
 
+        viewItem = libm.findViewItem(self.editorWindow.libraryView.libraryModel, instanceTuple.libraryName, instanceTuple.cellName, instanceTuple.viewName)
+        viewPath = viewItem.viewPath
         try:
             # Try to get items from cache first
-            items = self._symbolCache.get(view_path)
+            items = self._symbolCache.get(viewPath)
             if items is None:
-                with open(view_path, "r") as temp:
+                with open(viewPath, "r") as temp:
                     items = json.load(temp)
-                    self._symbolCache[view_path] = items
+                    self._symbolCache[viewPath] = items
 
             if items[0]["cellView"] != "symbol":
                 self.logger.error("Not a symbol!")
@@ -762,17 +766,17 @@ class schematicScene(editorScene):
                 for item in items[2:]
                 if item["type"] != "attr"
             ]
-
             symbolInstance = shp.schematicSymbol(itemShapes, itemAttributes)
-
+            cellItem = viewItem.parent()
+            libItem = cellItem.parent()
             # Batch property assignments
             instance_properties = {
                 "pos": pos,
                 "counter": self.instanceCounter,
                 "instanceName": f"I{self.instanceCounter}",
-                "libraryName": self.instanceSymbolTuple.libraryItem.libraryName,
-                "cellName": self.instanceSymbolTuple.cellItem.cellName,
-                "viewName": self.instanceSymbolTuple.viewItem.viewName
+                "libraryName": libItem.libraryName,
+                "cellName": cellItem.cellName,
+                "viewName": viewItem.viewName
             }
 
             for prop, value in instance_properties.items():
@@ -785,10 +789,10 @@ class schematicScene(editorScene):
             return symbolInstance
 
         except FileNotFoundError:
-            self.logger.error(f"Symbol file not found: {view_path}")
+            self.logger.error(f"Symbol file not found: {viewPath}")
             return None
         except json.JSONDecodeError:
-            self.logger.error(f"Invalid JSON in symbol file: {view_path}")
+            self.logger.error(f"Invalid JSON in symbol file: {viewPath}")
             return None
         except Exception as e:
             self.logger.warning(f"instantiation error: {e}")
@@ -807,16 +811,17 @@ class schematicScene(editorScene):
                     shape.setSelected(True)
                     # shift position by four grid units to right and down
                     shape.setPos(QPoint(item.pos().x() + 4 * self.snapTuple[0],
-                                        item.pos().y() + 4 * self.snapTuple[1], ))
+                                        item.pos().y() + 4 * self.snapTuple[1]))
                     if isinstance(shape, shp.schematicSymbol):
                         self.instanceCounter += 1
                         shape.instanceName = f"I{self.instanceCounter}"
                         shape.counter = int(self.instanceCounter)
                         [label.labelDefs() for label in shape.labels.values()]
 
+
     def saveSchematic(self, file: pathlib.Path):
         """
-        Save the schematic to a file.
+        Save the schematic to a file with optimized memory usage.
 
         Args:
             file (pathlib.Path): The file path to save the schematic to.
@@ -825,27 +830,32 @@ class schematicScene(editorScene):
             Exception: If there was an error saving the schematic.
         """
         try:
-            self.removeItem(self._snapPointRect)
-            topLevelItems = []
-            # Insert a cellview item at the beginning of the list
-            topLevelItems.insert(0, {"viewType": "schematic"})
-            topLevelItems.insert(1, {"snapGrid": self.snapTuple})
-            topLevelItems.extend(
-                [item for item in self.items() if item.parentItem() is None])
+            # Write items directly to file instead of building list in memory
             with file.open(mode="w") as f:
-                json.dump(topLevelItems, f, cls=schenc.schematicEncoder, indent=4)
-            # if there is a parent editor, to reload the changes.
-            if self.editorWindow.parentEditor is not None:
-                editorType = self.findEditorTypeString(self.editorWindow.parentEditor)
-                if editorType == "schematicEditor":
-                    self.editorWindow.parentEditor.loadSchematic()
-            self._snapPointRect.setVisible(False)
-            self.addItem(self._snapPointRect)
+                # Start array
+                f.write("[\n")
+                
+                # Write header items
+                json.dump({"viewType": "schematic"}, f)
+                f.write(",\n")
+                json.dump({"snapGrid": self.snapTuple}, f)
+                
+                # Stream top-level items one at a time
+                topLevelItemsSet = set(self.items())
+                for item in topLevelItemsSet:
+                    if item.parentItem() is None and item is not self._snapPointRect:
+                        f.write(",\n")
+                        json.dump(item, f, cls=schenc.schematicEncoder)
+                
+                # Close array
+                f.write("\n]")
 
-            self.logger.info(f"Saved schematic to {self.editorWindow.cellName}"
-                             f":{self.editorWindow.viewName}")
+            self.logger.info(f"Saved schematic to {self.editorWindow.cellName}:"
+                            f"{self.editorWindow.viewName}")
+                            
         except Exception as e:
             self.logger.error(e)
+
 
     @staticmethod
     def findEditorTypeString(editorWindow):
@@ -882,34 +892,34 @@ class schematicScene(editorScene):
             endTime = time.perf_counter()
 
             self.logger.info(f"Load time: {endTime - startTime:.4f} seconds")
-            viewCenter = self.views()[0].viewRect.center()
-            self._snapPointRect.setPos(viewCenter)
-            self.addItem(self._snapPointRect)
+            self.defineSnapRect()
         except Exception as e:
-            self.logger.error(f"Cannot load layout: {e}")
+            self.logger.error(f"Cannot load schematic: {e}")
 
     def createSchematicItems(self, itemsList: List[Dict]):
-        shapesList = list()
         for itemDict in itemsList:
             itemShape = lj.schematicItems(self).create(itemDict)
-            if (isinstance(itemShape,
-                           shp.schematicSymbol) and itemShape.counter > self.instanceCounter):
-                self.instanceCounter = itemShape.counter
-                # increment item counter for next symbol
-                self.instanceCounter += 1
-            shapesList.append(itemShape)
-        # self.undoStack.push(us.loadShapesUndo(self, shapesList))
-        for itemShape in shapesList:
-            self.addItem(itemShape)
+            if (isinstance(itemShape, shp.schematicSymbol) and 
+                itemShape.counter > self.instanceCounter):
+                self.instanceCounter = itemShape.counter + 1
+            
+            if itemShape is not None:
+                self.addItem(itemShape)
 
     def reloadScene(self):
-        topLevelItems = [item for item in self.items() if item.parentItem() is None]
-        # Insert a layout item at the beginning of the list
-        topLevelItems.insert(0, {"viewType": "schematic"})
-        topLevelItems.insert(1, {"snapGrid": self.snapTuple})
-        _, _, *itemData = json.loads(json.dumps(topLevelItems, cls=schenc.schematicEncoder))
-        self.clear()
-        self.createSchematicItems(itemData)
+
+        wasEnabled = self.undoStack.isActive()
+        self.undoStack.setActive(False)
+        
+        try:
+            topLevelItems = (item for item in self.items() if item.parentItem() is None)
+            encodedData = [schenc.schematicEncoder().default(item) for item in topLevelItems]
+            self.clear()
+            self.createSchematicItems(encodedData)
+            self.defineSnapRect()
+        finally:
+            # Restore undo stack state
+            self.undoStack.setActive(wasEnabled)
 
     def viewObjProperties(self):
         """
@@ -970,15 +980,18 @@ class schematicScene(editorScene):
             labelNameEdit.setToolTip(f"{name} attribute (Read Only)")
             dlg.instanceAttributesLayout.addWidget(labelNameEdit, counter, 1)
         if dlg.exec() == QDialog.Accepted:
-            selectedItemJson = json.dumps(item, cls=schenc.schematicEncoder)
-            itemCopyDict = json.loads(selectedItemJson)
-            newInstance = lj.schematicItems(self).create(itemCopyDict)
-            if newInstance is not None:
+            libraryName = dlg.libNameEdit.text().strip()
+            cellName = dlg.cellNameEdit.text().strip()
+            viewName = dlg.viewNameEdit.text().strip()
+            instanceTuple = ddef.viewTuple(libraryName, cellName, viewName)
+            location = QPoint(int(float(dlg.xLocationEdit.text().strip())),
+                    int(float(dlg.yLocationEdit.text().strip())), )
+            newInstance = self.instSymbol(instanceTuple, location)
 
+            if newInstance:
                 newInstance.instanceName = dlg.instNameEdit.text().strip()
                 newInstance.angle = float(dlg.angleEdit.text().strip())
-                location = QPoint(int(float(dlg.xLocationEdit.text().strip())),
-                    int(float(dlg.yLocationEdit.text().strip())), )
+
                 tempDoc = QTextDocument()
                 for i in range(dlg.instanceLabelsLayout.rowCount()):
                     # first create label name document with HTML annotations
@@ -1299,7 +1312,6 @@ class schematicScene(editorScene):
             initialNet.name = "net" + str(nameCounter)
             initialNet.nameStrength = snet.netNameStrengthEnum.INHERIT
             unnamedNetsSet = self.traverseNets(initialNet, unnamedNetsSet )
-            print(nameCounter)
             nameCounter += 1
             if len(unnamedNetsSet) > 1:
                 self.groupUnnamedNets(unnamedNetsSet, nameCounter)
@@ -1334,9 +1346,20 @@ class schematicScene(editorScene):
             if netItem.nameStrength.value < 3:
                 netItem.nameStrength = snet.netNameStrengthEnum.NONAME
 
-    # @staticmethod
-    # def checkPinNetConnect(pinItem: shp.schematicPin, netItem: snet.schematicNet):
-    #     """
-    #     Determine if a pin is connected to a net.
-    #     """
-    #     return bool(pinItem.sceneBoundingRect().intersects(netItem.sceneBoundingRect()))
+    def updateItem(self, item: QGraphicsItem):
+        # if the symbol is updated
+        if isinstance(item, shp.schematicSymbol):
+            viewItem = libm.findViewItem(self.editorWindow.libraryView.libraryModel, item.libraryName, item.cellName, item.viewName)
+
+            if viewItem:
+                newItem = self.instSymbol(viewItem, item.mapToScene(item.pos()).toPoint())
+                newItem.instanceName = item.instanceName
+                newItem.counter = item.counter
+                newItem.netlistIgnore = item.netlistIgnore
+                newItem.labels = item.labels
+                [labelItem.labelDefs() for labelItem in newItem.labels.values()]
+                newItem.angle = item.angle
+                self.removeItem(item)
+                self.addItem(newItem)
+
+

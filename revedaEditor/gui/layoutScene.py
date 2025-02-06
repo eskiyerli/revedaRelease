@@ -28,7 +28,7 @@ import inspect
 import json
 import pathlib
 import time
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Generator
 
 # import numpy as np
 from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLineF,)
@@ -283,8 +283,8 @@ class layoutScene(editorScene):
             # Create a guide line for the polygon
             self._polygonGuideLine = QGraphicsLineItem(
                 QLineF(self._newPolygon.points[-2], self._newPolygon.points[-1]))
-            self._polygonGuideLine.setPen(QPen(QColor(255, 255, 0), 2, Qt.DashLine))
-            self._polygonGuideLine.pen().setCosmetic(True)
+            self._polygonGuideLine.setPen(QPen(QColor(255, 255, 0), 0.1*fabproc.dbu, Qt.DashLine))
+            self._polygonGuideLine.pen().setCosmetic(False)
             self.addUndoStack(self._polygonGuideLine)
         else:
             self._newPolygon.addPoint(self.mouseReleaseLoc)
@@ -430,28 +430,33 @@ class layoutScene(editorScene):
         return {item for item in self.items() if isinstance(item, lshp.layoutInstance)}
 
     def saveLayoutCell(self, filePathObj: pathlib.Path) -> None:
-        """
-        Save the layout cell items to a file.
-
-        Args:
-            filePathObj (pathlib.Path): filepath object for layout file.
-
-        Returns:
-            None
-        """
         try:
-            # Only save the top-level items
+            # Write items directly to file instead of building list in memory
+            with filePathObj.open(mode="w") as f:
+                # Start array
+                f.write("[\n")
+                
+                # Write header items
+                json.dump({"viewType": "layout"}, f)
+                f.write(",\n")
+                json.dump({"snapGrid": self.snapTuple}, f)
+                
+                # Stream top-level items one at a time
+                for item in self.items():
+                    if item.parentItem() is None:
+                        f.write(",\n")
+                        json.dump(item, f, cls=layenc.layoutEncoder)
+                
+                # Close array
+                f.write("\n]")
 
-            topLevelItems = list(
-                {item for item in self.items() if item.parentItem() is None})
-            topLevelItems.insert(0, {"viewType": "layout"})
-            topLevelItems.insert(1, {"snapGrid": self.snapTuple})
-            with filePathObj.open("w") as file:
-                # Serialize items to JSON using layoutEncoder class
-                json.dump(topLevelItems, file, cls=layenc.layoutEncoder)
+            self.logger.info(f"Saved layout to {self.editorWindow.cellName}:"
+                            f"{self.editorWindow.viewName}")
+                            
         except Exception as e:
             self.logger.error(f"Cannot save layout: {e}")
 
+            
     def loadLayoutCell(self, filePathObj: pathlib.Path) -> None:
         """
         Load the layout cell from the given file path.
@@ -467,7 +472,7 @@ class layoutScene(editorScene):
                 decodedData = json.load(file)
 
             # Unpack grid settings
-            _, gridSettings, *itemData = decodedData
+            viewType, gridSettings, *itemData = decodedData
             snapGrid = gridSettings.get("snapGrid", [1, 1])
             self.majorGrid, self.snapGrid = snapGrid
             self.snapTuple = (self.snapGrid, self.snapGrid)
@@ -481,6 +486,7 @@ class layoutScene(editorScene):
         except Exception as e:
             self.logger.error(f"Cannot load layout: {e}")
 
+
     def createLayoutItems(self, decodedData: List[Dict[str, Any]]) -> None:
         """
         Create layout items from decoded data.
@@ -493,16 +499,23 @@ class layoutScene(editorScene):
         """
         if not decodedData:
             return
-
-        validTypes = frozenset(self.layoutShapes)
         loadedLayoutItems = [lj.layoutItems(self).create(item) for item in decodedData if
-                             item.get("type") in validTypes]
+                             item.get("type") in self.layoutShapes]
+
         if loadedLayoutItems:
-            undoCommand = us.loadShapesUndo(self, loadedLayoutItems)
-            self.undoStack.push(undoCommand)
+            self.undoStack.push(us.loadShapesUndo(self, loadedLayoutItems))
 
     def reloadScene(self):
-        pass
+        # Get the top level items from the scene
+        topLevelItems = [item for item in self.items() if item.parentItem() is None]
+        # Convert the top level items to JSON string
+        # Decode the JSON string back to Python objects
+        decodedData = json.loads(json.dumps(topLevelItems, cls=layenc.layoutEncoder))
+        # Clear the current scene
+        self.clear()
+        # Create layout items based on the decoded data
+        self.createLayoutItems(decodedData)
+
 
     def deleteSelectedItems(self):
         for item in self.selectedItems():
@@ -993,4 +1006,20 @@ class layoutScene(editorScene):
         return QFont()
 
     def updateItem(self, item: QGraphicsItem):
-        print(item)
+        #update the item to the latest version of the layout cell if it is edited in another editor window
+        if isinstance(item, lshp.layoutInstance):
+            libItem = libm.getLibItem(self.editorWindow.libraryView.libraryModel, item.libraryName)
+            cellItem = libm.getCellItem(libItem, item.cellName)
+            viewItem = libm.getViewItem(cellItem, item.viewName)
+            viewItemTuple = ddef.viewItemTuple(libItem, cellItem, viewItem)
+            if viewItem:
+                newItem = self.instLayout(viewItemTuple)
+                newItem.instanceName = item.instanceName
+                newItem.setPos(item.pos())
+                newItem.setRotation(item.rotation())
+                newItem.setScale(item.scale())
+                newItem.setTransform(item.transform())
+                updateRect = item.boundingRect()
+                self.removeItem(item)
+                self.addItem(newItem)
+                self.update(updateRect)

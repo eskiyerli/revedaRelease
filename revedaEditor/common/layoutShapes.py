@@ -98,7 +98,11 @@ class textureCache:
         # Create painter to draw on the image
         painter = QPainter(image)
         painter.setPen(Qt.NoPen)
-        painter.setBrush(QBrush(color))
+        # painter.setBrush(QBrush(color))
+        # Create semi-transparent color (50% opacity)
+        transparent_color = QColor(color)
+        transparent_color.setAlpha(64)  # 128 is 50% opacity (range is 0-255)
+        painter.setBrush(QBrush(transparent_color))
 
         # Draw solid rectangles for each pixel that should be colored
         for i in range(height):

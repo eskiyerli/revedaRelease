@@ -1363,6 +1363,8 @@ class schematicSymbol(symbolShape):
             painter.setPen(symlyr.selectedSymbolPen)
             painter.drawRect(self.boundingRect())
             self.setZValue(symlyr.selectedSymbolLayer.z)
+        else:
+            self.setZValue(symlyr.symbolLayer.z)
         if self.netlistIgnore:
             painter.setPen(schlyr.ignoreSymbolPen)
             painter.drawLine(self.boundingRect().bottomLeft(),

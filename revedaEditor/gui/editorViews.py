@@ -108,52 +108,7 @@ class editorView(QGraphicsView):
         self.viewRect = self.mapToScene(
             self.rect()).boundingRect().toRect()  # self.zoomFactorChanged.emit(self.zoomFactor)
 
-    # def drawBackground(self, painter, rect):
-    #     """
-    #     Draws the background of the painter within the given rectangle.
-    #
-    #     Args:
-    #         painter (QPainter): The painter object to draw on.
-    #         rect (QRect): The rectangle to draw the background within.
-    #     """
-    #
-    #     # Fill the rectangle with black color
-    #
-    #     # Calculate the coordinates of the left, top, bottom, and right edges of the rectangle
-    #     self._left = int(rect.left()) - (int(rect.left()) % self.majorGrid)
-    #     self._top = int(rect.top()) - (int(rect.top()) % self.majorGrid)
-    #     self._bottom = int(rect.bottom())
-    #     self._right = int(rect.right())
-    #     painter.fillRect(rect, QColor("black"))
-    #     if self.gridbackg:
-    #
-    #         # Set the pen color to gray
-    #         painter.setPen(QColor("white"))
-    #
-    #         # Create a range of x and y coordinates for drawing the grids
-    #         x_coords, y_coords = self.findCoords()
-    #
-    #         for x_coord in x_coords:
-    #             for y_coord in y_coords:
-    #                 painter.drawPoint(x_coord, y_coord)
-    #     elif self.linebackg:
-    #         # Set the pen color to gray
-    #         painter.setPen(QColor("gray"))
-    #
-    #         # Create a range of x and y coordinates for drawing the lines
-    #         x_coords, y_coords = self.findCoords()
-    #
-    #         # Draw vertical lines
-    #         for x in x_coords:
-    #             painter.drawLine(x, self._top, x, self._bottom)
-    #
-    #         # Draw horizontal lines
-    #         for y in y_coords:
-    #             painter.drawLine(self._left, y, self._right, y)
-    #
-    #     else:
-    #         # Call the base class method to draw the background
-    #         super().drawBackground(painter, rect)
+
 
     def drawBackground(self, painter, rect):
         """
@@ -303,6 +258,9 @@ class editorView(QGraphicsView):
         self._transparent = True
         painter = QPainter()
         painter.begin(printer)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setRenderHint(QPainter.TextAntialiasing, True)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
         self.render(painter)
         # Restore original states
         self.gridbackg = original_gridbackg
@@ -412,7 +370,7 @@ class schematicView(editorView):
                 self.scene._stretchNet.setSelected(False)
                 self.scene._stretchNet.stretch = False
                 self.scene.mergeSplitNets(self.scene._stretchNet)
-            self.scene.newInstance = None
+            self.scene._newInstance = None
             self.scene._newPin = None
             self.scene._newText = None
             # Set the edit mode to select item

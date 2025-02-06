@@ -27,8 +27,8 @@
 import pathlib
 
 # import numpy as np
-from PySide6.QtCore import (Qt, QSize, Signal)
-from PySide6.QtGui import (QAction, QIcon, QImage, QKeySequence,  )
+from PySide6.QtCore import (Qt, QSize, Signal,)
+from PySide6.QtGui import (QAction, QIcon, QImage, QKeySequence, QPainter,)
 from PySide6.QtPrintSupport import QPrintDialog, QPrinter, QPrintPreviewDialog
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QLabel, QMainWindow,
                                QMenu, QToolBar, QGraphicsItem)
@@ -77,6 +77,9 @@ class editorWindow(QMainWindow):
         self.snapTuple = (self.snapGrid, self.snapGrid)
         self.init_UI()
         self._createSignalConnections()
+
+    def __repr__(self):
+        return f'editorWindow({self.libName}-{self.cellName}-{self.viewName})'
 
     def init_UI(self):
         self.resize(1600, 800)
@@ -586,7 +589,7 @@ class editorWindow(QMainWindow):
         fdlg.setDefaultSuffix("png")
         fdlg.setFileMode(QFileDialog.AnyFile)
         fdlg.setViewMode(QFileDialog.Detail)
-        fdlg.setNameFilter("Image Files (*.png *.jpg *.bmp *.gif *.jpeg")
+        fdlg.setNameFilter("Image Files (*.png *.jpg *.bmp *.gif *.jpeg)")
         if fdlg.exec() == QDialog.Accepted:
             imageFile = fdlg.selectedFiles()[0]
             image.save(imageFile)
@@ -659,8 +662,7 @@ class editorWindow(QMainWindow):
 
     def closeEvent(self, event):
         cellViewTuple = ddef.viewTuple(self.libName, self.cellName, self.viewName)
-        if cellViewTuple in self.appMainW.openViews:
-            self.appMainW.openViews.pop(cellViewTuple)
+        self.appMainW.openViews.pop(cellViewTuple, None)
         event.accept()
         super().closeEvent(event)
 

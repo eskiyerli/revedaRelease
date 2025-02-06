@@ -121,6 +121,8 @@ class symbolEditor(edw.editorWindow):
 
     def checkSaveCell(self):
         self.centralW.scene.saveSymbolCell(self.file)
+        if self.parentEditor:
+            self.parentEditor.childEditorChanged.emit(self.parentObj)
 
     def saveCell(self):
         self.centralW.scene.saveSymbolCell(self.file)

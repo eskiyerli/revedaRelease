@@ -41,7 +41,7 @@ from PySide6.QtWidgets import (
     QGraphicsRectItem,
     QGraphicsTextItem,
 )
-from methodtools import lru_cache
+# from methodtools import lru_cache
 
 import revedaEditor.common.labels as lbl
 import revedaEditor.common.layoutShapes as lshp
@@ -199,12 +199,7 @@ class symbolItems:
 
     def unknownItem(self):
         rectItem = QGraphicsRectItem(QRect(0, 0, *self.snapTuple))
-        rectItem.setPen(QColor("red"))
-        textItem = QGraphicsTextItem("Unknown item type")
-        textItem.setFont(QFont("Arial", 10))
-        textItem.setDefaultTextColor(QColor("red"))
-        textItem.setParentItem(rectItem)
-        textItem.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
+        rectItem.setVisible(False)
         return rectItem
 
 
@@ -373,12 +368,7 @@ class schematicItems:
 
     def unknownItem(self):
         rectItem = QGraphicsRectItem(QRect(0, 0, *self.snapTuple))
-        rectItem.setPen(QColor("red"))
-        textItem = QGraphicsTextItem("Unknown item type")
-        textItem.setFont(QFont("Arial", 10))
-        textItem.setDefaultTextColor(QColor("red"))
-        textItem.setParentItem(rectItem)
-        textItem.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
+        rectItem.setVisible(False)
         return rectItem
 
 
@@ -393,7 +383,7 @@ class PCellCache:
         return cls._instance
 
     @classmethod
-    @lru_cache(maxsize=100)
+   # @lru_cache(maxsize=100)
     def getPCellDef(cls, file_path: str) -> dict:
         try:
             with open(file_path, "r") as temp:
@@ -402,7 +392,7 @@ class PCellCache:
             return {}
 
     @classmethod
-    @lru_cache(maxsize=100)
+    # @lru_cache(maxsize=100)
     def getPCellClass(cls, pcell_class_name: str) -> Any:
         return pcells.pcells.get(pcell_class_name)
 
@@ -658,10 +648,5 @@ class layoutItems:
 
     def unknownItem(self):
         rectItem = QGraphicsRectItem(QRect(0, 0, *self.snapTuple))
-        rectItem.setPen(QColor("red"))
-        textItem = QGraphicsTextItem("Unknown item type")
-        textItem.setFont(QFont("Arial", 10))
-        textItem.setDefaultTextColor(QColor("red"))
-        textItem.setParentItem(rectItem)
-        textItem.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
+        rectItem.setVisible(False)
         return rectItem

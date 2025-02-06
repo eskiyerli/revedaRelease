@@ -23,9 +23,8 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 import json
+import time
 
-
-# from hashlib import new
 import pathlib
 
 # import numpy as np
@@ -383,13 +382,13 @@ class layoutEditor(edw.editorWindow):
 
     def checkSaveCell(self):
         self.centralW.scene.saveLayoutCell(self.file)
-        if self.parentEditor:
-            self.parentEditor.childEditorChanged.emit(self.parentObj)
+        # if the parent editor is not None, emit the childEditorChanged signal
+        # and pass the parentObj as the argument
+        # if self.parentEditor:
+        #     self.parentEditor.childEditorChanged.emit(self.parentObj)
 
     def saveCell(self):
         self.centralW.scene.saveLayoutCell(self.file)
-        if self.parentEditor:
-            self.parentEditor.childEditorChanged.emit(self.parentObj)
 
     def loadLayout(self):
         self.centralW.scene.loadLayoutCell(self.file)
@@ -433,19 +432,22 @@ class layoutEditor(edw.editorWindow):
                 for item in decodedData
                 if item.get("type") in self.centralW.scene.layoutShapes
             ]
-
             gdsExportObj = gdse.gdsExporter(self.cellName, layoutItems, gdsExportPath)
             gdsExportObj.unit = Quantity(dlg.unitEdit.text().strip()).real
             gdsExportObj.precision = Quantity(dlg.precisionEdit.text().strip()).real
             if gdsExportObj:
+
+                start_time = time.time()
                 gdsExportRunner = startThread(gdsExportObj.gdsExport())
                 self.appMainW.threadPool.start(gdsExportRunner)
-                # netlistObj.writeNetlist()
-                self.logger.info("GDS Export is finished.")
+                elapsed_time = time.time() - start_time
+                self.logger.info(f"GDS Export completed in {elapsed_time:.4f} seconds")
+
 
     def _createSignalConnections(self):
         super()._createSignalConnections()
-        self.childEditorChanged.connect(self.centralW.scene.updateItem)
+        # if self.parentEditor is None:
+        #     self.childEditorChanged.connect(self.centralW.scene.reloadScene)
 
 class layoutContainer(QWidget):
     def __init__(self, parent: layoutEditor):

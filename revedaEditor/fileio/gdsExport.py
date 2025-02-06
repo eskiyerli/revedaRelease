@@ -123,7 +123,6 @@ class gdsExporter:
             layer=item.layer.gdsLayer,
             datatype=item.layer.datatype,
         )
-        print(polygon)
         parentCell.add(polygon)
 
     def _processViaArray(self, library, item, parentCell):

@@ -49,18 +49,20 @@ import revedaEditor.resources.resources
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.gui.editFunctions as edf
 import revedaEditor.gui.schematicEditor as sced
-
+import revedaEditor.backend.libBackEnd as libb
 
 # from hashlib import new
 
 
 class configViewEdit(QMainWindow):
-    def __init__(self, appMainW, schViewItem, configDict, viewItem):
-        super().__init__(parent=appMainW)
+    def __init__(self, appMainW: QMainWindow, schViewItem: libb.viewItem, configDict: dict, viewItem: libb.viewItem):
+        super().__init__()
         self.appMainW = appMainW  # app mainwindow
         self.schViewItem = schViewItem
         self.configDict = configDict
         self.viewItem = viewItem
+        self.configFilePathObj = viewItem.data(Qt.UserRole + 2)
+
         self.setWindowTitle("Edit Config View")
         self.setMinimumSize(500, 600)
         self._createMenuBar()
@@ -118,7 +120,7 @@ class configViewEdit(QMainWindow):
         self.centralWidget.configViewTable = configTable(self.centralWidget.confModel)
         self.centralWidget.configDictLayout.addWidget(
             self.centralWidget.configViewTable
-        )  # self.centralWidget.configDictGroup.setVisible(True)
+        )
 
     def updateConfigDict(self):
         self.centralWidget.configViewTable.updateModel()
@@ -138,25 +140,28 @@ class configViewEdit(QMainWindow):
         return newConfigDict
 
     def saveClick(self):
-        configFilePathObj = self.viewItem.data(Qt.UserRole + 2)
+        # configFilePathObj = self.viewItem.data(Qt.UserRole + 2)
         self.updateConfigDict()
         items = list()
         items.insert(0, {"viewName": "config"})
         items.insert(1, {"reference": self.schViewItem.viewName})
         items.insert(2, self.configDict)
-        with configFilePathObj.open(mode="w+") as configFile:
+        with self.configFilePathObj.open(mode="w+") as configFile:
             json.dump(items, configFile, indent=4)
 
     def closeEvent(self, event):
-        cellViewTuple = ddef.viewTuple(
-            self.viewItem.parent().parent().libraryName,
-            self.viewItem.parent().cellName,
-            self.viewItem.viewName,
-        )
-        self.appMainW.openViews.pop(cellViewTuple)
-        event.accept()
-        super().closeEvent(event)
-
+        try:
+            cellViewTuple = ddef.viewTuple(
+                self.viewItem.parent().parent().libraryName,
+                self.viewItem.parent().cellName,
+                self.viewItem.viewName,
+            )
+            self.appMainW.openViews.pop(cellViewTuple, None)
+        except Exception as e:
+            self.appMainW.logger.error(f"Unexpected error: {e}")
+        finally:
+            event.accept()
+            super().closeEvent(event)
 
 class configViewEditContainer(QWidget):
     def __init__(self, parent):

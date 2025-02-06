@@ -2,7 +2,6 @@
     "libdefs": {
         "analogLib": "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\analogLib",
         "anotherExampleLibrary": "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\anotherExampleLibrary",
-        "importLib": "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\importLib",
         "sg13g2_pr": "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\revedaRelease\\exampleLibraries\\sg13g2_pr"
     }
 }

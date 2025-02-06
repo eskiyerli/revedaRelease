@@ -43,6 +43,7 @@ class editorScene(QGraphicsScene):
         self.majorGrid = self.editorWindow.majorGrid
         self.snapTuple = self.editorWindow.snapTuple
         self._snapDistance = int(self.majorGrid * 0.5)
+        self.snapGrid = None
         self.mousePressLoc = None
         self.mouseMoveLoc = None
         self.mouseReleaseLoc = None
@@ -56,7 +57,7 @@ class editorScene(QGraphicsScene):
         self.undoStack.setUndoLimit(99)
         self.origin = QPoint(0, 0)
         self.cellName = self.editorWindow.file.parent.stem
-        self.partialSelection = True # TODO: add option to GUI
+        self.partialSelection = False
         self._selectionRectItem = None
         self._selectedItems = []
         self._selectedItemGroup = None

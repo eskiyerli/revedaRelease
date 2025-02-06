@@ -42,8 +42,8 @@ class stippleView(QGraphicsView):
         self._size = size
         self._gridStep = 20
         self.setRenderHint(QPainter.Antialiasing)
-        self.setDragMode(QGraphicsView.ScrollHandDrag)
-        self.setCursor(Qt.CrossCursor)
+        # self.setDragMode(QGraphicsView.ScrollHandDrag)
+        self.setCursor(Qt.ArrowCursor)
 
         self.setSceneRect(
             0, 0, self._size * self._gridStep, self._size * self._gridStep
