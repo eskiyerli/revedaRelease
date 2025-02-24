@@ -30,7 +30,7 @@ import itertools
 import math
 from pathlib import Path
 import numpy as np
-from typing import List, Set, Tuple, Union
+from typing import Tuple, Union
 from PySide6.QtCore import (
     QPoint,
     QRect,
@@ -40,7 +40,6 @@ from PySide6.QtCore import (
     QLineF,
 )
 from PySide6.QtGui import (
-    QGuiApplication,
     QPen,
     QBrush,
     QColor,
@@ -56,15 +55,17 @@ from PySide6.QtGui import (
     QTransform,
 )
 from PySide6.QtWidgets import (
+    QStyle,
     QGraphicsItem,
     QGraphicsSceneMouseEvent,
     QGraphicsSceneHoverEvent,
 )
-import os
+
+import revedaEditor.backend.dataDefinitions as ddef
 from revedaEditor.backend.pdkPaths import importPDKModule
 laylyr = importPDKModule('layoutLayers')
 fabproc = importPDKModule('process')
-import revedaEditor.backend.dataDefinitions as ddef
+
 
 
 class textureCache:
@@ -572,9 +573,12 @@ class layoutInstance(layoutShape):
 
     def paint(self, painter, option, widget):
         painter.setRenderHint(QPainter.NonCosmeticBrushPatterns)
-        if self.isSelected():
+        if option.state & QStyle.State_Selected:
             painter.setPen(self._selectedPen)
             painter.drawRect(self.childrenBoundingRect())
+        # if self.isSelected():
+        #     painter.setPen(self._selectedPen)
+        #     painter.drawRect(self.boundingRect())
 
     def sceneEvent(self, event):
         """
@@ -824,7 +828,7 @@ class layoutPath(layoutShape):
         painter.drawRect(self._rect)
 
     def boundingRect(self) -> QRectF:
-        return self._rect.adjusted(-2, 2, 2, 2)
+        return self._rect.adjusted(-2, -2, 2, 2)
 
     @property
     def draftLine(self):

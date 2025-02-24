@@ -257,7 +257,8 @@ class schematicItems:
     def _createNet(self, item):
         start = QPoint(item["st"][0], item["st"][1])
         end = QPoint(item["end"][0], item["end"][1])
-        netItem = net.schematicNet(start, end)
+        width = item.get('w',0)
+        netItem = net.schematicNet(start, end, width)
         match item["ns"]:
             case 3:
                 netItem.nameStrength = net.netNameStrengthEnum.SET

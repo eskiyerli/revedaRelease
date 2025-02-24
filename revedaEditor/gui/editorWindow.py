@@ -47,7 +47,6 @@ class editorWindow(QMainWindow):
     Base class for editor windows.
     """
 
-    childEditorChanged = Signal(QGraphicsItem)
 
     def __init__(self, viewItem: libb.viewItem, libraryDict: dict,
                  libraryView: lmview.designLibrariesView, ):  # file is a pathlib.Path object
@@ -696,4 +695,4 @@ class editorWindow(QMainWindow):
         self.centralW.scene.selectionChanged.connect(self.appMainW.selectionChangedScene)
         self.centralW.view.keyPressedSignal.connect(self.appMainW.viewKeyPressed)
         
-        
+    

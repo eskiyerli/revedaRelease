@@ -30,7 +30,8 @@ import pathlib
 import time
 from typing import List, Dict, Any, Union, Generator
 
-# import numpy as np
+from contextlib import contextmanager
+
 from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLineF,)
 from PySide6.QtGui import (QColor, QGuiApplication, QTransform, QPen, QFontDatabase,
                            QFont, )
@@ -49,7 +50,7 @@ import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.propertyDialogues as pdlg
 from revedaEditor.backend.pdkPaths import importPDKModule
-from revedaEditor.gui.editorScene import editorScene
+from revedaEditor.scenes.editorScene import editorScene
 
 fabproc = importPDKModule('process')
 laylyr = importPDKModule('layoutLayers')
@@ -154,6 +155,7 @@ class layoutScene(editorScene):
         try:
             self.mousePressLoc = event.scenePos().toPoint()
             if self.editModes.selectItem:
+                self.clearSelection()
                 if (
                         modifiers == Qt.KeyboardModifier.ShiftModifier or modifiers == Qt.KeyboardModifier.ControlModifier):
                     self._selectionRectItem = QGraphicsRectItem()
@@ -429,92 +431,243 @@ class layoutScene(editorScene):
         """
         return {item for item in self.items() if isinstance(item, lshp.layoutInstance)}
 
+
     def saveLayoutCell(self, filePathObj: pathlib.Path) -> None:
-        try:
-            # Write items directly to file instead of building list in memory
-            with filePathObj.open(mode="w") as f:
-                # Start array
-                f.write("[\n")
-                
-                # Write header items
-                json.dump({"viewType": "layout"}, f)
-                f.write(",\n")
-                json.dump({"snapGrid": self.snapTuple}, f)
-                
-                # Stream top-level items one at a time
-                for item in self.items():
-                    if item.parentItem() is None:
-                        f.write(",\n")
-                        json.dump(item, f, cls=layenc.layoutEncoder)
-                
-                # Close array
-                f.write("\n]")
-
-            self.logger.info(f"Saved layout to {self.editorWindow.cellName}:"
-                            f"{self.editorWindow.viewName}")
-                            
-        except Exception as e:
-            self.logger.error(f"Cannot save layout: {e}")
-
-            
-    def loadLayoutCell(self, filePathObj: pathlib.Path) -> None:
-        """
-        Load the layout cell from the given file path.
+        """Save the layout cell to a JSON file.
 
         Args:
-            filePathObj (pathlib.Path): The file path object.
+            filePathObj (pathlib.Path): Path object for the output file
 
-        Returns:
-            None
+        Raises:
+            IOError: If there are issues writing to the file
+            JSONEncodeError: If there are issues encoding the JSON
+            ValueError: If the layout data is invalid
         """
+        def get_layout_data() -> list:
+            """Prepare layout data with validation.
+
+            Returns:
+                list: List of layout items
+
+            Raises:
+                ValueError: If required attributes are missing
+            """
+            if not hasattr(self, 'snapTuple'):
+                raise ValueError("Missing required attribute: snapTuple")
+
+            # Pre-validate top-level items
+            top_level_items = [item for item in self.items() if item.parentItem() is None]
+
+            return [
+                {"viewType": "layout"},
+                {"snapGrid": self.snapTuple},
+                *top_level_items
+            ]
+
+        def safeJsonWrite(file_obj, data: list) -> None:
+            """Write JSON data with optimized settings.
+
+            Args:
+                file_obj: File object to write to
+                data: Data to be written
+
+            Raises:
+                JSONEncodeError: If JSON encoding fails
+            """
+            json.dump(
+                data,
+                file_obj,
+                cls=layenc.layoutEncoder,
+                separators=(',', ':'),  # Minimize JSON size
+                check_circular=False    # Optimize for non-circular references
+            )
+
         try:
-            with filePathObj.open("r") as file:
-                decodedData = json.load(file)
+            # Create parent directory if it doesn't exist
+            filePathObj.parent.mkdir(parents=True, exist_ok=True)
 
-            # Unpack grid settings
-            viewType, gridSettings, *itemData = decodedData
-            snapGrid = gridSettings.get("snapGrid", [1, 1])
-            self.majorGrid, self.snapGrid = snapGrid
-            self.snapTuple = (self.snapGrid, self.snapGrid)
-            self.snapDistance = 2 * self.snapGrid
+            # Prepare data before file operation
+            layout_data = get_layout_data()
 
-            startTime = time.perf_counter()
-            self.createLayoutItems(itemData)
-            endTime = time.perf_counter()
+            # Use temporary file for atomic write
+            temp_path = filePathObj.with_suffix('.tmp')
+            try:
+                with temp_path.open(mode='w', buffering=65536) as f:  # 64KB buffer
+                    safeJsonWrite(f, layout_data)
 
-            self.logger.info(f"Load time: {endTime - startTime:.4f} seconds")
+                # Atomic rename for safer file writing
+                temp_path.replace(filePathObj)
+
+            finally:
+                # Clean up temp file if it still exists
+                if temp_path.exists():
+                    temp_path.unlink()
+
+            self.logger.info(
+                f"Saved layout to {self.editorWindow.cellName}:{self.editorWindow.viewName}"
+                f"({len(layout_data)} items)"
+            )
+
+        except ValueError as e:
+            self.logger.error(f"Invalid layout data: {str(e)}")
+            raise
+
+        except (IOError, json.JSONEncodeError) as e:
+            self.logger.error(
+                f"Failed to save layout to {filePathObj}: {str(e)}"
+            )
+            raise
+
         except Exception as e:
-            self.logger.error(f"Cannot load layout: {e}")
+            self.logger.error(f"Unexpected error while saving layout: {str(e)}")
+            raise
 
 
-    def createLayoutItems(self, decodedData: List[Dict[str, Any]]) -> None:
-        """
-        Create layout items from decoded data.
+    def loadDesign(self, filePathObj: pathlib.Path) -> None:
+        """Load the layout cell from the given JSON file.
 
         Args:
-            decodedData (List[Dict[str, Any]]): List of item data dictionaries.
+            filePathObj (pathlib.Path): Path to the layout cell file.
 
-        Returns:
-            None
+        Raises:
+            IOError: If there are issues reading the file
+            json.JSONDecodeError: If the file contains invalid JSON
+            ValueError: If the file structure is invalid
+            KeyError: If required grid settings are missing
         """
-        if not decodedData:
+        CHUNK_SIZE = 65536  # 64KB chunks for reading
+
+        def setup_grid_settings(grid_settings: dict) -> None:
+            """Configure grid-related attributes from settings."""
+            try:
+                snap_grid = grid_settings["snapGrid"]
+                if len(snap_grid) != 2 or not all(isinstance(x, (int, float)) for x in snap_grid):
+                    raise ValueError("Invalid snap grid values")
+
+                self.majorGrid, self.snapGrid = snap_grid
+                self.snapTuple = (self.snapGrid, self.snapGrid)
+                self.snapDistance = 2 * self.snapGrid
+
+            except (KeyError, TypeError, IndexError) as e:
+                raise ValueError(f"Invalid grid settings: {e}")
+
+        def validate_header(data: list) -> tuple:
+            """Validate header and return processed data.
+
+            Returns:
+                tuple: (view_type, grid_settings, remaining_data)
+            """
+            if len(data) < 3:
+                raise ValueError("Insufficient data in layout file")
+
+            view_type, grid_settings, *item_data = data
+
+            if not isinstance(view_type, dict):
+                raise ValueError("Invalid view type format")
+            if view_type.get("viewType") != "layout":
+                raise ValueError("Unsupported view type")
+            if not isinstance(grid_settings, dict):
+                raise ValueError("Invalid grid settings format")
+
+            return view_type, grid_settings, item_data
+
+        def stream_load_json(file_path: pathlib.Path) -> dict:
+            """Load JSON file in streaming mode for large files."""
+            with file_path.open('rb') as f:
+                raw_data = f.read(CHUNK_SIZE)
+                decoder = json.JSONDecoder()
+                buffer = ''
+
+                while raw_data:
+                    buffer += raw_data.decode('utf-8')
+                    raw_data = f.read(CHUNK_SIZE)
+
+                try:
+                    return decoder.decode(buffer)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Invalid JSON format: {e}")
+
+        try:
+            with self.measureDuration():
+                # Validate file existence and size
+                if not filePathObj.exists():
+                    raise FileNotFoundError(f"Layout file not found: {filePathObj}")
+
+                file_size = filePathObj.stat().st_size
+                self.logger.debug(f"Loading layout file of size: {file_size/1024:.2f}KB")
+
+                # Load and validate data
+                decoded_data = stream_load_json(filePathObj)
+                if not isinstance(decoded_data, list):
+                    raise ValueError("Invalid layout file format")
+
+                # Process header and setup grid
+                view_type, grid_settings, item_data = validate_header(decoded_data)
+                setup_grid_settings(grid_settings)
+
+                # Clear existing items if any
+                self.clear()
+
+                self.createLayoutItems(item_data)
+
+
+        except (json.JSONDecodeError, IOError) as e:
+            self.logger.error(f"File operation error: {str(e)}")
+            raise
+
+        except ValueError as e:
+            self.logger.error(f"Invalid layout data: {str(e)}")
+            raise
+
+        except Exception as e:
+            self.logger.error(f"Unexpected error: {str(e)}")
+            raise
+
+    def createLayoutItems(self, decoded_data: List[Dict[str, Any]]) -> None:
+        """Create layout items from decoded data and add them to the undo stack.
+
+        Args:
+            decoded_data (List[Dict[str, Any]]): List of item data dictionaries containing
+                shape information and properties.
+        """
+        if not isinstance(decoded_data, list):
+            self.logger.error("Invalid input: decoded_data must be a list")
             return
-        loadedLayoutItems = [lj.layoutItems(self).create(item) for item in decodedData if
-                             item.get("type") in self.layoutShapes]
 
-        if loadedLayoutItems:
-            self.undoStack.push(us.loadShapesUndo(self, loadedLayoutItems))
+        if not decoded_data:
+            self.logger.debug("No layout items to create")
+            return
 
-    def reloadScene(self):
-        # Get the top level items from the scene
-        topLevelItems = [item for item in self.items() if item.parentItem() is None]
-        # Convert the top level items to JSON string
-        # Decode the JSON string back to Python objects
-        decodedData = json.loads(json.dumps(topLevelItems, cls=layenc.layoutEncoder))
-        # Clear the current scene
-        self.clear()
-        # Create layout items based on the decoded data
-        self.createLayoutItems(decodedData)
+        def create_valid_items() -> List[Any]:
+            layout_factory = lj.layoutItems(self)
+            valid_items = []
+
+            for item in decoded_data:
+                try:
+                    if _is_valid_shape(item):
+                        valid_items.append(layout_factory.create(item))
+                    else:
+                        self.logger.warning(f"Skipping invalid shape type: {item.get('type')}")
+                except Exception as e:
+                    self.logger.error(f"Error creating layout item: {str(e)}")
+                    continue
+
+            return valid_items
+
+        def _is_valid_shape(item: Dict[str, Any]) -> bool:
+            return isinstance(item, dict) and item.get("type") in self.layoutShapes
+
+        try:
+            loaded_items = create_valid_items()
+            if loaded_items:
+                self.undoStack.push(us.loadShapesUndo(self, loaded_items))
+            else:
+                self.logger.warning("No valid layout items were created")
+
+        except Exception as e:
+            self.logger.error(f"Failed to create layout items: {str(e)}")
+
+
 
 
     def deleteSelectedItems(self):

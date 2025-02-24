@@ -24,17 +24,20 @@
 
 from typing import List, Sequence
 from PySide6.QtCore import (QEvent, QPoint, QRectF, Qt)
-from PySide6.QtGui import (QGuiApplication, QColor, QPen, QPainterPath, )
-from PySide6.QtWidgets import (QGraphicsRectItem, QGraphicsScene, QMenu, QGraphicsItem,
+from PySide6.QtGui import (QGuiApplication)
+from PySide6.QtWidgets import (QQGraphicsScene, QMenu, QGraphicsItem,
                                QDialog,
                                QCompleter)
-
+from contextlib import contextmanager
+import time
 import revedaEditor.backend.dataDefinitions as ddef
 import revedaEditor.backend.undoStack as us
 import revedaEditor.gui.propertyDialogues as pdlg
 
 
 class editorScene(QGraphicsScene):
+    # Class-level constants for quick access
+    DEFAULT_GRID = (10, 10)
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -201,6 +204,39 @@ class editorScene(QGraphicsScene):
             except AttributeError:
                 self.messageLine.setText("Nothing selected")
 
+
+    def reloadScene(self):
+        # Disable updates temporarily for better performance
+        for view in self.views():
+            view.setUpdatesEnabled(False)
+
+        try:
+            # Block signals during reload to prevent unnecessary updates
+            self.blockSignals(True)
+
+            # Clear existing items
+            self.clear()
+
+            # Reload layout
+            self.loadDesign(self.editorWindow.file)
+
+            # Optional: Update scene rect to fit content
+            self.setSceneRect(self.itemsBoundingRect())
+
+        finally:
+            # Re-enable updates and signals
+            self.blockSignals(False)
+            for view in self.views():
+                view.setUpdatesEnabled(True)
+                view.viewport().update()
+
+    def loadDesign(self, file):
+        """
+        implement in subclasses
+        """
+        pass
+
+
     def fitItemsInView(self) -> None:
         self.setSceneRect(self.itemsBoundingRect().adjusted(-40, -40, 40, 40))
         self.views()[0].fitInView(self.sceneRect(), Qt.KeepAspectRatio)
@@ -289,3 +325,12 @@ class editorScene(QGraphicsScene):
         viewNameCompleter.setCaseSensitivity(Qt.CaseInsensitive)
         dlg.instanceViewName.setCompleter(viewNameCompleter)
         dlg.instanceViewName.setText(viewNameList[0])
+
+    @contextmanager
+    def measureDuration(self):
+        start_time = time.perf_counter()
+        try:
+            yield
+        finally:
+            end_time = time.perf_counter()
+            self.logger.info(f"Total processing time: {end_time - start_time:.3f} seconds")

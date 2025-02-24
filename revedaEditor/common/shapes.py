@@ -28,20 +28,20 @@ from functools import cached_property
 from platform import architecture
 from typing import (List, Tuple, NamedTuple, Union, Dict, Set)
 
-from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLine, QLineF, )
+from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLine, QLineF )
 from PySide6.QtGui import (QBrush, QFont, QFontMetrics, QPainterPath, QTextOption,
-                           QFontDatabase, QTransform, QPolygonF, QPolygon)
+                           QFontDatabase, QTransform, QPolygonF, QPolygon, )
 from PySide6.QtWidgets import (QGraphicsItem, QGraphicsPolygonItem, QGraphicsSimpleTextItem,
                                QGraphicsRectItem, QGraphicsSceneMouseEvent,
-                               QGraphicsSceneHoverEvent, QGraphicsScene)
-
+                               QGraphicsSceneHoverEvent, QGraphicsScene, QStyle)
+import revedaEditor.common.net as net
+from revedaEditor.common.labels import symbolLabel
 from revedaEditor.backend.pdkPaths import importPDKModule
 from bisect import bisect_right
 
 schlyr = importPDKModule('schLayers')
 symlyr = importPDKModule('symLayers')
-import revedaEditor.common.net as net
-from revedaEditor.common.labels import symbolLabel
+
 
 
 class symbolShape(QGraphicsItem):
@@ -195,7 +195,7 @@ class symbolRectangle(symbolShape):
         if self.draft:
             painter.setPen(symlyr.draftPen)
             self.setZValue(symlyr.draftLayer.z)
-        elif self.isSelected():
+        elif option.state & QStyle.State_Selected:
             painter.setPen(symlyr.selectedSymbolPen)
             self.setZValue(symlyr.symbolLayer.z)
             if self.stretch:
@@ -833,14 +833,20 @@ class symbolPolygon(symbolShape):
         return f"symbolPolygon({self._points})"
 
     def paint(self, painter, option, widget):
+        # Cache the selection state to avoid multiple calls
         is_selected = self.isSelected()
+
+        # Set up the pen only once
         painter.setPen(symlyr.selectedSymbolPen if is_selected else symlyr.symbolPen)
 
-        # Draw corner marker if in stretch mode and corner is selected
-        if is_selected and self._stretch and self._selectedCorner != self._DEFAULT_CORNER:
-            painter.drawEllipse(self._selectedCorner, self._CORNER_SIZE, self._CORNER_SIZE)
-
+        # Draw the main polygon first
         painter.drawPolygon(self._polygon)
+
+        # Draw corner marker only if necessary
+        if all((is_selected,
+                self._stretch,
+                self._selectedCorner != self._DEFAULT_CORNER)):
+            painter.drawEllipse(self._selectedCorner, self._CORNER_SIZE, self._CORNER_SIZE)
 
     def boundingRect(self) -> QRectF:
         return self._polygon.boundingRect()
@@ -1140,7 +1146,7 @@ class text(symbolShape):
 
     def paint(self, painter, option, widget):
         painter.setFont(self._textFont)
-        if self.isSelected():
+        if option.state & QStyle.State_Selected:
             painter.setPen(schlyr.selectedTextPen)
             painter.drawRect(self.boundingRect().adjusted(2, 2, -2, -2))
             self.setZValue(schlyr.selectedTextLayer.z)
@@ -1355,22 +1361,18 @@ class schematicSymbol(symbolShape):
         self._snapLines = {pin: lines for pin, lines in self._snapLines.items() if lines}
 
     def paint(self, painter, option, widget):
-        self.setZValue(symlyr.symbolLayer.z)
-        if self._draft:
-            painter.setPen(symlyr.draftPen)
-            self.setZValue(symlyr.draftLayer.z)
-        if self.isSelected():
+        if option.state & QStyle.State_Selected:
             painter.setPen(symlyr.selectedSymbolPen)
             painter.drawRect(self.boundingRect())
-            self.setZValue(symlyr.selectedSymbolLayer.z)
-        else:
-            self.setZValue(symlyr.symbolLayer.z)
+        elif self._draft:
+            painter.setPen(symlyr.draftPen)
+        
         if self.netlistIgnore:
             painter.setPen(schlyr.ignoreSymbolPen)
             painter.drawLine(self.boundingRect().bottomLeft(),
-                             self.boundingRect().topRight())
+                            self.boundingRect().topRight())
             painter.drawLine(self.boundingRect().topLeft(),
-                             self.boundingRect().bottomRight())
+                            self.boundingRect().bottomRight())
 
     def boundingRect(self):
         return self.childrenBoundingRect()

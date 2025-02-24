@@ -26,11 +26,12 @@
 # properties dialogues for various editor functions
 
 import pathlib
+import re
 from PySide6.QtGui import (
-    QFontDatabase,
+    QFontDatabase, QValidator,
 )
 from PySide6.QtCore import (
-    Qt,
+    Qt, QRegularExpression,
 )
 from PySide6.QtWidgets import (
     QWidget,
@@ -39,6 +40,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QFormLayout,
     QDialogButtonBox,
+    QButtonGroup,
     QLineEdit,
     QLabel,
     QComboBox,
@@ -543,9 +545,12 @@ class netProperties(QDialog):
 
     def initUI(self):
         self.setWindowTitle("Net Properties")
-        self.mainLayout = QVBoxLayout()
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
+        mainLayout = QVBoxLayout()
+        okButton = QDialogButtonBox.Ok
+        cancelButton = QDialogButtonBox.Cancel
+        QBtn = okButton | cancelButton
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.button(QDialogButtonBox.Ok).setDefault(True)
         netPointsBox = QGroupBox("Net Points")
         netPointsLayout = QFormLayout()
         netPointsBox.setLayout(netPointsLayout)
@@ -558,20 +563,33 @@ class netProperties(QDialog):
         self.netEndPointEditY = edf.shortLineEdit()
         netPointsLayout.addRow(edf.boldLabel("End Point X:"), self.netEndPointEditY)
 
+        netWidthGroupBox = QGroupBox('Net Width')
+        netWidthLayout = QHBoxLayout()
+        narrowNetButton = QRadioButton('Narrow')
+        wideNetButton = QRadioButton('Wide')
+        netWidthLayout.addWidget(narrowNetButton)
+        netWidthLayout.addWidget(wideNetButton)
+        self.widthButtonGroup = QButtonGroup(self)
+        self.widthButtonGroup.addButton(narrowNetButton)
+        self.widthButtonGroup.addButton(wideNetButton)
+        self.widthButtonGroup.setId(narrowNetButton, 0)
+        self.widthButtonGroup.setId(wideNetButton, 1)
+        netWidthGroupBox.setLayout(netWidthLayout)
+        mainLayout.addWidget(netWidthGroupBox)
         formBox = QGroupBox("Net Properties")
         formLayout = QFormLayout()
         self.netNameEdit = edf.longLineEdit()
-        # self.netNameEdit.setText(self.net.name)
         formLayout.addRow(edf.boldLabel("Net Name", self), self.netNameEdit)
         formBox.setLayout(formLayout)
-        self.mainLayout.addWidget(formBox)
-        self.mainLayout.addSpacing(20)
-        self.mainLayout.addWidget(netPointsBox)
-        self.mainLayout.addSpacing(40)
-        self.mainLayout.addWidget(self.buttonBox)
-        self.setLayout(self.mainLayout)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
+        mainLayout.addWidget(formBox)
+        mainLayout.addSpacing(20)
+        mainLayout.addWidget(netPointsBox)
+        mainLayout.addSpacing(40)
+        mainLayout.addWidget(buttonBox)
+        self.setLayout(mainLayout)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+        self.show()
 
 
 class createSchematicPinDialog(createPinDialog):

@@ -332,7 +332,8 @@ class symbolLabel(QGraphicsSimpleTextItem):
                 self._labelText = self._labelValue
             case "[@instName]":
                 # Set label name to "instName" and value and text to parent item's counter with prefix "I"
-                self._labelValue = f"I{self.parentItem().counter}"
+                self._labelValue = getattr(self.parentItem(), 'instanceName', f"I"
+                                                                 f"{self.parentItem().counter}")
                 self._labelText = self._labelValue
             case "[@libName]":
                 # Set label name to "libName" and value and text to parent item's library name

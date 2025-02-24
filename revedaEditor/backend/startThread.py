@@ -23,6 +23,22 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
+from PySide6.QtCore import (
+    QRunnable,
+    Slot,
+)
 
-# version
-__version__ = "0.7.9"
+
+class startThread(QRunnable):
+    __slots__ = ("fn",)
+
+    def __init__(self, fn):
+        super().__init__()
+        self.fn = fn
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            self.fn
+        except Exception as e:
+            print(e)

@@ -70,34 +70,64 @@ class revedaApp(QApplication):
         self.reveda_pdk_path = None
         self.setPaths(reveda_runpathObj)
 
-    def setPaths(self, reveda_runpathObj):
-        # Set the paths to the revedaeditor and revedasim
-        self.revedaeditor_path = os.environ.get("REVEDAEDIT_PATH", None)
-        if self.revedaeditor_path:
-            if Path(self.revedaeditor_path).is_absolute():
-                self.revedaeditor_pathObj = Path(self.revedaeditor_path)
+    def _resolve_path(self, env_path: str | None, base_path: Path, env_var_name: str) -> Path | None:
+        """Helper method to resolve and validate a path from environment variable."""
+        if not env_path:
+            return None
+            
+        try:
+            path_obj = Path(env_path)
+            if path_obj.is_absolute():
+                resolved_path = path_obj
             else:
-                self.revedaeditor_pathObj = reveda_runpathObj.joinpath(
-                    self.revedaeditor_path
-                )
-        self.revedasim_path = os.environ.get("REVEDASIM_PATH", None)
-        if self.revedasim_path:
-            if Path(self.revedasim_path).is_absolute():
-                self.revedasim_pathObj = Path(self.revedasim_path)
-            else:
-                self.revedasim_pathObj = reveda_runpathObj.joinpath(self.revedasim_path)
+                resolved_path = base_path.joinpath(env_path)
+                
+            if not resolved_path.exists():
+                print(f"Warning: Path specified in {env_var_name} does not exist: {resolved_path}")
+            return resolved_path
+        except Exception as e:
+            print(f"Error resolving path from {env_var_name}: {str(e)}")
+            return None
+
+    def setPaths(self, reveda_runpathObj: Path) -> None:
+        """
+        Set the paths to revedaeditor, revedasim, and PDK components.
+        
+        Args:
+            reveda_runpathObj: Base path object for resolving relative paths
+            
+        Raises:
+            ValueError: If reveda_runpathObj is None or not a Path object
+        """
+        if not isinstance(reveda_runpathObj, Path):
+            raise ValueError("reveda_runpathObj must be a Path object")
+            
+        if not reveda_runpathObj.exists():
+            raise ValueError(f"Base path does not exist: {reveda_runpathObj}")
+
+        # Resolve revedaeditor path
+        self.revedaeditor_path = os.environ.get("REVEDAEDIT_PATH")
+        self.revedaeditor_pathObj = self._resolve_path(
+            self.revedaeditor_path, reveda_runpathObj, "REVEDAEDIT_PATH"
+        )
+
+        # Resolve revedasim path
+        self.revedasim_path = os.environ.get("REVEDASIM_PATH")
+        self.revedasim_pathObj = self._resolve_path(
+            self.revedasim_path, reveda_runpathObj, "REVEDASIM_PATH"
+        )
+        if self.revedasim_pathObj:
             sys.path.append(str(self.revedasim_pathObj))
-        self.reveda_pdk_path = os.environ.get("REVEDA_PDK_PATH", None)
-        if self.reveda_pdk_path:
-            if Path(self.reveda_pdk_path).is_absolute():
-                self.revedaPdkPathObj = Path(self.reveda_pdk_path)
-            else:
-                self.revedaPdkPathObj = reveda_runpathObj.joinpath(
-                    self.reveda_pdk_path
-                )
+
+        # Resolve PDK path
+        self.reveda_pdk_path = os.environ.get("REVEDA_PDK_PATH")
+        self.revedaPdkPathObj = self._resolve_path(
+            self.reveda_pdk_path, reveda_runpathObj, "REVEDA_PDK_PATH"
+        )
+        if self.revedaPdkPathObj:
             sys.path.append(str(self.revedaPdkPathObj))
 
-OS_STYLE_MAP = {"Windows": "Windows", "Linux": "Breeze", "Darwin": "macOS"}
+OS_STYLE_MAP = {"Windows": "Fusion", "Linux": "Fusion", "Darwin": "macOS"}
 
 
 def initialize_app(argv) -> tuple[revedaApp, Optional[str]]:
@@ -122,4 +152,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

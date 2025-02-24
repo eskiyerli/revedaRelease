@@ -26,6 +26,7 @@
 # from hashlib import new
 import json
 
+from functools import lru_cache
 # from hashlib import new
 import pathlib
 from copy import deepcopy
@@ -37,7 +38,6 @@ from PySide6.QtCore import (
     QPoint,
     QPointF,
     QRectF,
-    QRect,
     Qt,
 )
 from PySide6.QtGui import (
@@ -61,7 +61,7 @@ import revedaEditor.fileio.loadJSON as lj
 import revedaEditor.fileio.symbolEncoder as symenc
 import revedaEditor.gui.propertyDialogues as pdlg
 from revedaEditor.backend.pdkPaths import importPDKModule
-from revedaEditor.gui.editorScene import editorScene
+from revedaEditor.scenes.editorScene import editorScene
 
 symlyr = importPDKModule('symLayers')
 
@@ -144,6 +144,7 @@ class symbolScene(editorScene):
                 mouse_event.scenePos().toPoint(),
                 self.snapTuple)
             if self.editModes.selectItem:
+                self.clearSelection()
                 if self._groupItems:
                     for item in self._groupItems:
                         item.setSelected(False)
@@ -628,55 +629,55 @@ class symbolScene(editorScene):
             newPolygon = shp.symbolPolygon(tempPoints)
             self.undoStack.push(us.addDeleteShapeUndo(self, newPolygon, item))
 
-    def loadSymbol(self, itemsList: List) -> None:
-        if len(itemsList) <= 2:
-            return
+    def loadDesign(self) -> None:
+        """Ultra-fast load implementation without caching"""
+        try:
+            # Load file contents
+            with open(self.editorWindow.file) as file:
+                itemsList = json.load(file)
 
-        # Unpack grid settings
-        snapGrid = itemsList[1].get("snapGrid", (10, 10))  # Provide complete default tuple
-        self.majorGrid, self.snapGrid = snapGrid
-        self.snapTuple = (self.snapGrid,) * 2  # More efficient tuple creation
-        self.snapDistance = 2 * self.snapGrid
+            # Disable updates
+            self.blockSignals(True)
 
-        # Initialize attribute list with estimated capacity
-        self.attributeList = []
-        symbolItemsFactory = lj.symbolItems(self)  # Create factory once
+            # Fast grid setup
+            grid_data = itemsList[1].get("snapGrid", self.DEFAULT_GRID)
+            self.majorGrid, self.snapGrid = grid_data
+            self.snapTuple = (self.snapGrid, self.snapGrid)
+            self.snapDistance = self.snapGrid << 1
 
-        # Process items using list comprehension for non-None items
-        for item in filter(None, itemsList[2:]):
-            item_type = item["type"]
+            # Create factory once
+            factory = lj.symbolItems(self)
 
-            if item_type in self.symbolShapes:
-                itemShape = symbolItemsFactory.create(item)
-                if isinstance(itemShape, lbl.symbolLabel):
-                    itemShape.setOpacity(1)
-                self.addItem(itemShape)
-            elif item_type == "attr":
-                self.attributeList.append(
-                    symbolItemsFactory.createSymbolAttribute(item)
-                )
+            # Reset attribute list
+            self.attributeList = []
 
-    # def loadSymbol(self, itemsList: List):
-    #     if len(itemsList) > 2:
-    #         snapGrid = itemsList[1].get("snapGrid", 10)
-    #         self.majorGrid = snapGrid[0]  # dot/line grid spacing
-    #         self.snapGrid = snapGrid[1]  # snapping grid size
-    #         self.snapTuple = (self.snapGrid, self.snapGrid)
-    #         self.snapDistance = 2 * self.snapGrid
-    #         self.parent.view.snapTuple = self.snapTuple
-    #         self.editorWindow.snapTuple = self.snapTuple
-    #         self.attributeList = []
-    #         for item in itemsList[2:]:
-    #             if item is not None:
-    #                 if item["type"] in self.symbolShapes:
-    #                     itemShape = lj.symbolItems(self).create(item)
-    #                     # items should be always visible in symbol view
-    #                     if isinstance(itemShape, lbl.symbolLabel):
-    #                         itemShape.setOpacity(1)
-    #                     self.addItem(itemShape)
-    #                 elif item["type"] == "attr":
-    #                     attr = lj.symbolItems(self).createSymbolAttribute(item)
-    #                     self.attributeList.append(attr)
+            # Process items directly
+            for item in itemsList[2:]:
+                if not item:
+                    continue
+
+                itemType = item.get("type")
+
+                if itemType in self.symbolShapes:
+                    shape = factory.create(item)
+                    if isinstance(shape, lbl.symbolLabel):
+                        shape.setOpacity(1)
+                    self.addItem(shape)
+                elif itemType == "attr":
+                    self.attributeList.append(
+                        factory.createSymbolAttribute(item)
+                    )
+
+        except Exception as e:
+            self.logger.error(f"Load failed: {e}")
+            # Optionally reset scene state
+            self.clear()
+            self.attributeList = []
+            raise
+
+        finally:
+            self.blockSignals(False)
+            self.update()
 
     def saveSymbolCell(self, fileName: pathlib.Path) -> bool:
         """
@@ -722,24 +723,6 @@ class symbolScene(editorScene):
         except Exception as e:
             self.logger.error(f"Symbol save error: {e}")
             return False
-
-    def reloadScene(self):
-        items = [item for item in self.items() if item.parentItem() is None]
-        if hasattr(self, "attributeList"):
-            items.extend(self.attributeList)
-        itemsList = json.loads(json.dumps(items, cls=symenc.symbolEncoder))
-        self.clear()
-        for item in itemsList:
-            if item is not None:
-                if item["type"] in self.symbolShapes:
-                    itemShape = lj.symbolItems(self).create(item)
-                    # items should be always visible in symbol view
-                    if isinstance(itemShape, lbl.symbolLabel):
-                        itemShape.setOpacity(1)
-                    self.addItem(itemShape)
-                elif item["type"] == "attr":
-                    attr = lj.symbolItems(self).createSymbolAttribute(item)
-                    self.attributeList.append(attr)
 
     def viewSymbolProperties(self):
         """

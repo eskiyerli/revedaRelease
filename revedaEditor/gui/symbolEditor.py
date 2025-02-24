@@ -38,7 +38,7 @@ from PySide6.QtWidgets import (
 
 import revedaEditor.backend.libraryModelView as lmview
 import revedaEditor.backend.libBackEnd as libb
-import revedaEditor.gui.symbolScene as symscn
+import revedaEditor.scenes.symbolScene as symscn
 import revedaEditor.gui.editorViews as edv
 import revedaEditor.gui.propertyDialogues as pdlg
 import revedaEditor.gui.editorWindow as edw
@@ -122,7 +122,7 @@ class symbolEditor(edw.editorWindow):
     def checkSaveCell(self):
         self.centralW.scene.saveSymbolCell(self.file)
         if self.parentEditor:
-            self.parentEditor.childEditorChanged.emit(self.parentObj)
+            self.parentEditor.centralW.scene.reloadScene()
 
     def saveCell(self):
         self.centralW.scene.saveSymbolCell(self.file)
@@ -175,12 +175,7 @@ class symbolEditor(edw.editorWindow):
         """
         symbol is loaded to the scene.
         """
-        with open(self.file) as tempFile:
-            try:
-                items = json.load(tempFile)
-            except json.decoder.JSONDecodeError:
-                self.logger.error("Cannot load symbol. JSON Decode Error")
-        self.centralW.scene.loadSymbol(items)
+        self.centralW.scene.loadDesign()
 
     def createLabelClick(self):
         createLabelDlg = pdlg.createSymbolLabelDialog(self)

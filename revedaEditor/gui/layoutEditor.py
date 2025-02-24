@@ -64,7 +64,7 @@ import revedaEditor.gui.editorWindow as edw
 import revedaEditor.gui.fileDialogues as fd
 import revedaEditor.gui.layoutDialogues as ldlg
 import revedaEditor.gui.lsw as lsw
-from revedaEditor.gui.layoutScene import layoutScene
+from revedaEditor.scenes.layoutScene import layoutScene
 from revedaEditor.gui.startThread import startThread
 
 
@@ -391,7 +391,7 @@ class layoutEditor(edw.editorWindow):
         self.centralW.scene.saveLayoutCell(self.file)
 
     def loadLayout(self):
-        self.centralW.scene.loadLayoutCell(self.file)
+        self.centralW.scene.loadDesign(self.file)
 
     def createInstClick(self, s):
         # create a designLibrariesView
