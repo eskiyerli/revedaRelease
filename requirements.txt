@@ -1,0 +1,6 @@
+PySide6>=6.8.2.1
+quantiphy>=2.20
+setuptools>=75.8.1
+python-dotenv>=1.0.1
+numpy>=2.2.3
+gdstk>=0.9.59

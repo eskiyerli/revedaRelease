@@ -96,6 +96,7 @@ class symbolModes(editModes):
 class schematicModes(editModes):
     drawPin: bool
     drawWire: bool
+    drawBus: bool
     drawText: bool
     addInstance: bool
 

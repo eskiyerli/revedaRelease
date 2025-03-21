@@ -22,7 +22,8 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
-
+import revedaEditor.common.net as net
+import revedaEditor.backend.undoStack as us
 from collections import Counter
 
 # import numpy as np
@@ -33,8 +34,7 @@ from PySide6.QtPrintSupport import (QPrinter,)
 from revedaEditor.backend.pdkPaths import importPDKModule
 
 schlyr = importPDKModule('schLayers')
-import revedaEditor.common.net as net
-import revedaEditor.backend.undoStack as us
+
 
 
 class editorView(QGraphicsView):
@@ -319,6 +319,7 @@ class schematicView(editorView):
         for netItem in netsInView:
             if netItem.scene():
                 self.scene.mergeSplitNets(netItem)
+
 
     def removeSnapLines(self, viewSnapLinesSet):
         undoCommandList = []

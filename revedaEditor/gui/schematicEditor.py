@@ -112,7 +112,7 @@ class schematicEditor(edw.editorWindow):
         # create menu
         self.menuCreate.addAction(self.createInstAction)
         self.menuCreate.addAction(self.createNetAction)
-        # self.menuCreate.addAction(self.createBusAction)
+        self.menuCreate.addAction(self.createBusAction)
         self.menuCreate.addAction(self.createPinAction)
         self.menuCreate.addAction(self.createTextAction)
         self.menuCreate.addAction(self.createSymbolAction)
@@ -143,6 +143,7 @@ class schematicEditor(edw.editorWindow):
         super()._createTriggers()
 
         self.createNetAction.triggered.connect(self.createNetClick)
+        self.createBusAction.triggered.connect(self.createBusClick)
         self.createInstAction.triggered.connect(self.createInstClick)
         self.createPinAction.triggered.connect(self.createPinClick)
         self.createTextAction.triggered.connect(self.createNoteClick)
@@ -200,6 +201,9 @@ class schematicEditor(edw.editorWindow):
 
     def createNetClick(self, s):
         self.centralW.scene.editModes.setMode("drawWire")
+
+    def createBusClick(self, s):
+        self.centralW.scene.editModes.setMode("drawBus")
 
     def createInstClick(self, s):
         # create a designLibrariesView
@@ -437,7 +441,7 @@ class schematicEditor(edw.editorWindow):
             if netlistObj:
                 self.runNetlisting(netlistObj)
         except Exception as e:
-            self.logger.error(f"Error in creating netlist: {e}")
+            self.logger.error(f"Error in creating netlist start: {e}")
 
     def createNetlistObject(self, view_name: str, file_path: pathlib.Path):
         if "schematic" in view_name:
@@ -779,17 +783,13 @@ class xyceNetlist:
         """
         Recursively traverse all sub-circuits and netlist them.
         """
-        try:
-            schematicScene = schematic.centralW.scene
-            schematicScene.nameSceneNets()  # name all nets in the schematic
 
-            sceneSymbolSet = schematicScene.findSceneSymbolSet()
-            schematicScene.generatePinNetMap(tuple(sceneSymbolSet))
-
-            for elementSymbol in sceneSymbolSet:
-                self.processElementSymbol(elementSymbol, schematic, cirFile)
-        except Exception as e:
-            self.schematic.logger.error(f"Netlisting error: {e}")
+        schematicScene = schematic.centralW.scene
+        schematicScene.nameSceneNets()  # name all nets in the schematic
+        sceneSymbolSet = schematicScene.findSceneSymbolSet()
+        schematicScene.generatePinNetMap(sceneSymbolSet)
+        for elementSymbol in sceneSymbolSet:
+            self.processElementSymbol(elementSymbol, schematic, cirFile)
 
     def processElementSymbol(self, elementSymbol, schematic, cirFile):
         if elementSymbol.symattrs.get("XyceNetlistPass") != "1" and (
@@ -836,6 +836,7 @@ class xyceNetlist:
 
                 if viewTuple not in self.netlistedViewsSet:
                     self.netlistedViewsSet.add(viewTuple)
+                    pinOrderString = elementSymbol.symattrs.get("pinOrder", ", ")
                     pinList = elementSymbol.symattrs.get("pinOrder", ", ").replace(",", " ")
                     cirFile.write(f".SUBCKT {schematicObj.cellName} {pinList}\n")
                     self.recursiveNetlisting(schematicObj, cirFile)
@@ -862,7 +863,6 @@ class xyceNetlist:
             # Process attributes
             for attrb, value in elementSymbol.symattrs.items():
                 xyceNetlistFormatLine = xyceNetlistFormatLine.replace(f"%{attrb}", value)
-
             # Add pin list
             pinList = " ".join(elementSymbol.pinNetMap.values())
             xyceNetlistFormatLine = (

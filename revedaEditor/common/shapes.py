@@ -25,10 +25,10 @@
 
 import math
 from functools import cached_property
-from platform import architecture
+from collections import OrderedDict
 from typing import (List, Tuple, NamedTuple, Union, Dict, Set)
 
-from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLine, QLineF )
+from PySide6.QtCore import (QPoint, QPointF, QRect, QRectF, Qt, QLine, QLineF)
 from PySide6.QtGui import (QBrush, QFont, QFontMetrics, QPainterPath, QTextOption,
                            QFontDatabase, QTransform, QPolygonF, QPolygon, )
 from PySide6.QtWidgets import (QGraphicsItem, QGraphicsPolygonItem, QGraphicsSimpleTextItem,
@@ -37,11 +37,10 @@ from PySide6.QtWidgets import (QGraphicsItem, QGraphicsPolygonItem, QGraphicsSim
 import revedaEditor.common.net as net
 from revedaEditor.common.labels import symbolLabel
 from revedaEditor.backend.pdkPaths import importPDKModule
-from bisect import bisect_right
+
 
 schlyr = importPDKModule('schLayers')
 symlyr = importPDKModule('symLayers')
-
 
 
 class symbolShape(QGraphicsItem):
@@ -457,7 +456,7 @@ class symbolCircle(symbolShape):
             self.setFlag(QGraphicsItem.ItemIsMovable, False)
             eventPos = event.pos().toPoint()
             distance = math.sqrt((eventPos.x() - self._centre.x()) ** 2 + (
-                        eventPos.y() - self._centre.y()) ** 2)
+                    eventPos.y() - self._centre.y()) ** 2)
             if distance == self._radius:
                 self._startStretch = True
                 self.setCursor(Qt.DragMoveCursor)
@@ -467,7 +466,7 @@ class symbolCircle(symbolShape):
         if self._startStretch:
             eventPos = event.pos().toPoint()
             distance = math.sqrt((eventPos.x() - self._centre.x()) ** 2 + (
-                        eventPos.y() - self._centre.y()) ** 2)
+                    eventPos.y() - self._centre.y()) ** 2)
             self.prepareGeometryChange()
             self._radius = distance
 
@@ -526,7 +525,6 @@ class symbolArc(symbolShape):
         self.prepareGeometryChange()
         self._arcType = type
 
-
     def paint(self, painter, option, widget) -> None:
         if self.isSelected():
             painter.setPen(symlyr.selectedSymbolPen)
@@ -551,12 +549,8 @@ class symbolArc(symbolShape):
 
     def arcDraw(self, painter):
         # Define the mapping of arc types to starting angles
-        ARC_ANGLES = {
-            symbolArc.arcTypes[0]: 0,
-            symbolArc.arcTypes[1]: 90,
-            symbolArc.arcTypes[2]: 180,
-            symbolArc.arcTypes[3]: 270
-        }
+        ARC_ANGLES = {symbolArc.arcTypes[0]: 0, symbolArc.arcTypes[1]: 90,
+            symbolArc.arcTypes[2]: 180, symbolArc.arcTypes[3]: 270}
 
         # Get the starting angle and draw the arc
         startAngle = ARC_ANGLES.get(self._arcType, 0) * 16
@@ -569,17 +563,19 @@ class symbolArc(symbolShape):
     def bRect(self):
         if self._arcType == symbolArc.arcTypes[0]:
             brect = QRectF(QRectF(self._rect.left(), self._rect.top(), self._rect.width(),
-                0.5 * self._rect.height(), )).adjusted(-2, -2, 2, 2)
+                                  0.5 * self._rect.height(), )).adjusted(-2, -2, 2, 2)
         elif self._arcType == symbolArc.arcTypes[1]:
-            brect = QRectF(QRectF(self._rect.left(), self._rect.top(), 0.5 * self._rect.width(),
-                self._rect.height(), )).adjusted(-2, -2, 2, 2)
+            brect = QRectF(
+                QRectF(self._rect.left(), self._rect.top(), 0.5 * self._rect.width(),
+                       self._rect.height(), )).adjusted(-2, -2, 2, 2)
         elif self._arcType == symbolArc.arcTypes[2]:
             brect = QRectF(self._rect.left(), self._rect.top() + self._rect.height() * 0.5,
-                self._rect.width(), 0.5 * self._rect.height(), ).adjusted(-2, -2, 2, 2)
+                           self._rect.width(), 0.5 * self._rect.height(), ).adjusted(-2, -2,
+                                                                                     2, 2)
         elif self._arcType == symbolArc.arcTypes[3]:
             brect = QRectF(self._rect.left() + 0.5 * self._rect.width(), self._rect.top(),
-                           0.5 * self._rect.width(), self._rect.height(), ).adjusted(-2, -2, 2,
-                                                                                     2)
+                           0.5 * self._rect.width(), self._rect.height(), ).adjusted(-2, -2,
+                                                                                     2, 2)
         return brect
 
     @property
@@ -703,6 +699,7 @@ class symbolArc(symbolShape):
                 self._start = self._rect.bottomRight()
                 self._end = self._rect.topLeft()
             self._rect = QRectF(self._start, self._end).normalized()
+
 
 class symbolLine(symbolShape):
     stretchSides = ("start", "end")
@@ -843,9 +840,7 @@ class symbolPolygon(symbolShape):
         painter.drawPolygon(self._polygon)
 
         # Draw corner marker only if necessary
-        if all((is_selected,
-                self._stretch,
-                self._selectedCorner != self._DEFAULT_CORNER)):
+        if all((is_selected, self._stretch, self._selectedCorner != self._DEFAULT_CORNER)):
             painter.drawEllipse(self._selectedCorner, self._CORNER_SIZE, self._CORNER_SIZE)
 
     def boundingRect(self) -> QRectF:
@@ -1246,6 +1241,7 @@ class text(symbolShape):
 
 
 class schematicSymbol(symbolShape):
+
     def __init__(self, shapes: list, attr: dict):
         super().__init__()
         self._shapes = shapes  # list of shapes in the symbol
@@ -1266,11 +1262,16 @@ class schematicSymbol(symbolShape):
         self._snapLines: dict[symbolPin, set[net.schematicNet]] = dict()
         self._shapeRectF = QRectF(0, 0, 0, 0)
         self._borderRect = QRect(0, 0, 0, 0)
+
+        self._setup_graphics()
         self.addShapes()
+        self._start = self.childrenBoundingRect().bottomLeft()
+
+    def _setup_graphics(self):
+        """Setup graphics item properties"""
         self.setFiltersChildEvents(True)
         self.setHandlesChildEvents(True)
         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
-        self._start = self.childrenBoundingRect().bottomLeft()
 
     def addShapes(self):
         for item in self._shapes:
@@ -1286,13 +1287,14 @@ class schematicSymbol(symbolShape):
         return f"schematicSymbol({self._instanceName})"
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value):
-        if self.scene():
+        scene = self.scene()
+        if scene:
             if change == QGraphicsItem.GraphicsItemChange.ItemPositionChange:
                 return self._handlePositionChange(value)
             elif change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
                 self._updateSnapLines()
             elif change == QGraphicsItem.GraphicsItemChange.ItemSelectedHasChanged:
-                self.scene().selectedSymbol = self if value else None
+                scene.selectedSymbol = self if value else None
         return super().itemChange(change, value)
 
     def _handlePositionChange(self, newPos: QPointF) -> QPointF:
@@ -1366,13 +1368,13 @@ class schematicSymbol(symbolShape):
             painter.drawRect(self.boundingRect())
         elif self._draft:
             painter.setPen(symlyr.draftPen)
-        
+
         if self.netlistIgnore:
             painter.setPen(schlyr.ignoreSymbolPen)
             painter.drawLine(self.boundingRect().bottomLeft(),
-                            self.boundingRect().topRight())
+                             self.boundingRect().topRight())
             painter.drawLine(self.boundingRect().topLeft(),
-                            self.boundingRect().bottomRight())
+                             self.boundingRect().bottomRight())
 
     def boundingRect(self):
         return self.childrenBoundingRect()
@@ -1490,12 +1492,21 @@ class schematicSymbol(symbolShape):
 
     @cached_property
     def pins(self):
-        if self.symattrs.get("pinOrder"):
-            pinOrderList = self.symattrs.get("pinOrder").split(",")
-            orderedPins = {key.strip(): self._pins[key.strip()] for key in pinOrderList}
-            return orderedPins
-        else:
+        """
+        Returns a dictionary of pins, ordered by the pinOrder attribute if it exists.
+        """
+
+        pinOrder = self.symattrs.get("pinOrder")
+        if not pinOrder:
             return self._pins
+        outputDict = OrderedDict()
+        for key in pinOrder.split(", "):
+            key = key.strip()
+            if key in pinOrder:
+                if key in self._pins:
+                    outputDict[key] = self._pins[key]
+        return outputDict
+
 
     @property
     def shapes(self):

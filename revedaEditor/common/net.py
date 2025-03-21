@@ -14,8 +14,8 @@
 #    derives, entirely or substantially, from the functionality of the Software. Any
 #    license notice or attribution required by the License must also include this
 #    Commons Clause License Condition notice.
-#
 #   Add-ons and extensions developed for this software may be distributed
+#
 #   under their own separate licenses.
 #
 #    Software: Revolution EDA
@@ -24,7 +24,7 @@
 
 
 # net class definition.
-from tracemalloc import start
+from functools import cached_property
 from PySide6.QtCore import (
     QPoint,
     Qt,
@@ -44,17 +44,15 @@ from PySide6.QtWidgets import (
     QGraphicsPathItem,
     QGraphicsSceneMouseEvent,
     QGraphicsSceneHoverEvent,
+    QStyle,
 )
-
-from revedaEditor.backend.pdkPaths import importPDKModule
-from typing import List, Tuple
-import re
-
-schlyr = importPDKModule("schLayers")
-
 import math
 from typing import Type, Set, Union
 from enum import IntEnum
+from revedaEditor.backend.pdkPaths import importPDKModule
+from typing import List, Tuple
+
+schlyr = importPDKModule("schLayers")
 
 
 class NetMode(IntEnum):
@@ -72,29 +70,40 @@ class netNameStrengthEnum(IntEnum):
 
 class schematicNet(QGraphicsItem):
 
-    def __init__(self, start: QPoint, end: QPoint, width:int = 0, mode: int = 0):
+    def __init__(self, start: QPoint, end: QPoint, width: int = 0, mode: int = 0):
         super().__init__()
-        self.setFlag(QGraphicsItem.ItemIsMovable, False)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
-        # self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges, True)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+
+        # Batch set multiple flags at once using setFlags
+        self.setFlags(
+            QGraphicsItem.ItemIsSelectable |
+            QGraphicsItem.ItemIsFocusable |
+            QGraphicsItem.ItemSendsGeometryChanges
+        )
+
         self.setAcceptHoverEvents(True)
+
+        # Basic properties
         self._mode = mode
+        self._width = width
+        self._flip = (1, 1)
+        self._offset = QPoint(0, 0)
+
+        # State flags
         self._stretch: bool = False
         self._nameConflict: bool = False
-        self._nameStrength: int = netNameStrengthEnum.NONAME
         self._highlighted: bool = False
+        self._nameStrength: int = netNameStrengthEnum.NONAME
+
+        # Collections
         self._flightLinesSet: Set["schematicNet"] = set()
         self._connectedNetsSet: Set["schematicNet"] = set()
         self._netSnapLines: dict = {}
-        self.draftLine: QLineF = QLineF(start, end)
-        self._flip = (1, 1)
-        self._offset = QPoint(0, 0)
+
+        # Line and name initialization
+        self.draftLine = QLineF(start, end)
         self._nameItem = netName("", self)
-        self._nameItem.setPos(self._draftLine.center())
+        self._nameItem.setPos(self.draftLine.center())
         self._nameItem.setParentItem(self)
-        self._width = width
 
     @property
     def draftLine(self) -> QLineF:
@@ -119,13 +128,52 @@ class schematicNet(QGraphicsItem):
         self._draftLine.setAngle(0)
         self.setTransformOriginPoint(self._transformOriginPoint)
 
-        self._shapeRect = (
-            QRectF(self._draftLine.p1(), self._draftLine.p2())
-            .normalized()
-            .adjusted(-3, -3, 3, 3)
-        )
+        # Clear the cached _extractRect
+        if '_extractRect' in self.__dict__:
+            del self.__dict__['_extractRect']
+        self._shapeRect = self._extractRect
         self._boundingRect = self._shapeRect.adjusted(-8, -8, 8, 8)
+
         self.setRotation(-self._angle)
+
+    @cached_property
+    def _extractRect(self) -> QRectF:
+        p1 = self._draftLine.p1()
+        p2 = self._draftLine.p2()
+        direction = p2 - p1
+
+        # Early return for zero-length line
+        if direction == QPoint(0, 0):
+            return QRectF(p1, p2).adjusted(-2, -2, 2, 2).normalized()
+
+        manhattan_length = direction.manhattanLength()
+        if manhattan_length == 0:
+            return QRectF(p1, p2).normalized()
+
+        # Cache frequently used values and combine calculations
+        half_width = 0.5 * self._getPen().width() * (self._width + 1)
+        inv_length = 1.0 / manhattan_length
+
+        # Calculate direction components in one step
+        direction_x = direction.x() * inv_length
+        direction_y = direction.y() * inv_length
+
+        # Calculate perpendicular offsets
+        perp_x = -direction_y * half_width
+        perp_y = direction_x * half_width
+
+        # Create points in a more direct way
+        point1 = QPoint(
+            round(p1.x() + perp_x),  # Using round() instead of int() for better precision
+            round(p1.y() + perp_y)
+        )
+        point2 = QPoint(
+            round(p2.x() - perp_x),
+            round(p2.y() - perp_y)
+        )
+
+        return QRectF(point1, point2).normalized()
+
 
     def shape(self) -> QPainterPath:
         path = QPainterPath()
@@ -141,21 +189,19 @@ class schematicNet(QGraphicsItem):
         painter.drawLine(self._draftLine)
 
     def _getPen(self) -> QPen:
-        if self.isSelected():
-            returnPen = QPen(schlyr.selectedWirePen)
-        elif self._stretch:
-            returnPen =  QPen(schlyr.stretchWirePen)
-        elif self._highlighted:
-            returnPen =  QPen(schlyr.hilightPen)
-        elif self._nameConflict:
-            returnPen = QPen(schlyr.errorWirePen)
-        else:
-            returnPen =  QPen(schlyr.wirePen)
-        returnPen.setWidth(returnPen.width()*(self._width+1))
-        return returnPen
+        pen_mapping = {
+            self.isSelected(): schlyr.selectedWirePen,
+            self._stretch: schlyr.stretchWirePen,
+            self._highlighted: schlyr.hilightPen,
+            self._nameConflict: schlyr.errorWirePen
+        }
+        base_pen = next((pen for condition, pen in pen_mapping.items() if condition), schlyr.wirePen)
+        return_pen = QPen(base_pen)
+        return_pen.setWidth(base_pen.width() * (self._width + 1))
+        return return_pen
 
     def __repr__(self):
-        return f"schematicNet({self.sceneEndPoints}, {self.width})"
+        return f"schematicNet({self.sceneEndPoints}, {self._width})"
 
     def itemChange(self, change, value):
         if self.scene():
@@ -170,22 +216,23 @@ class schematicNet(QGraphicsItem):
         return super().itemChange(change, value)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        super().mousePressEvent(event)
-        if self.scene():
-            if self.scene().editModes.moveItem:
+        scene = self.scene()
+        if scene:
+            if scene.editModes.moveItem:
                 self.setFlag(QGraphicsItem.ItemIsMovable, True)
             elif self._stretch:
                 eventPos = event.pos().toPoint()
                 if (
                     eventPos - self._draftLine.p1().toPoint()
-                ).manhattanLength() <= self.scene().snapDistance:
+                ).manhattanLength() <= scene.snapDistance:
                     self.setCursor(Qt.SizeHorCursor)
-                    self.scene().stretchNet.emit(self, "p1")
+                    scene.stretchNet.emit(self, "p1")
                 elif (
                     eventPos - self._draftLine.p2().toPoint()
                 ).manhattanLength() <= self.scene().snapDistance:
                     self.setCursor(Qt.SizeHorCursor)
-                    self.scene().stretchNet.emit(self, "p2")
+                    scene.stretchNet.emit(self, "p2")
+        super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         self.setSelected(False)
@@ -272,61 +319,74 @@ class schematicNet(QGraphicsItem):
             weakNet.name = strongNet.name
             weakNet.nameStrength = netNameStrengthEnum.INHERIT
 
-        if self.nameStrength.value == 3:  # SET
-            if otherNet.nameStrength.value in (0, 1, 2):
+        self_strength = self.nameStrength.value
+        other_strength = otherNet.nameStrength.value
+
+        if self_strength == 3:  # SET
+            if other_strength < 3:
                 resolve_name(otherNet, self)
                 return True
-            elif otherNet.nameStrength.value == 3:
-                if self.name != otherNet.name:
+            if self.name != otherNet.name:
+                self.nameConflict = otherNet.nameConflict = True
+                return False
+            return True
+
+        if self_strength == 2:  # INHERIT
+            match other_strength:
+                case 0 | 1:  # NONAME or WEAK
+                    resolve_name(otherNet, self)
+                    return True
+                case 2:  # INHERIT
+                    if self.name != otherNet.name:
+                        self.nameConflict = otherNet.nameConflict = True
+                        return False
+                    return True
+                case 3:
+                    resolve_name(self, otherNet)
+                    return True
+
+        if self_strength == 1:  # WEAK
+            match other_strength:
+                case 0:  # NONAME
+                    otherNet.nameStrength = netNameStrengthEnum.WEAK
+                    otherNet.name = self.name
+                    return True
+                case 1:  # WEAK
+                    if self.name != otherNet.name:
+                        self.nameConflict = otherNet.nameConflict = True
+                        return False
+                    return True
+                case 2 | 3:  # INHERIT or SET
+                    resolve_name(self, otherNet)
+                    return True
+            
+
+        if self_strength == 0:  # NONAME
+            if other_strength > 0:
+                resolve_name(self, otherNet)
+                return True
+            else:
+                if self.name != "" or otherNet.name != "":
                     self.nameConflict = otherNet.nameConflict = True
                     return False
                 return True
-        elif self.nameStrength.value == 2:  # INHERIT
-            if otherNet.nameStrength.value in (0, 1):
-                resolve_name(otherNet, self)
-                return True
-            elif otherNet.nameStrength.value in (2, 3):
-                if otherNet.nameStrength.value == 3 or self.name != otherNet.name:
-                    resolve_name(self, otherNet)
-                    return False if self.name != otherNet.name else True
-                return True
-        elif self.nameStrength.value == 1:  # WEAK
-            if otherNet.nameStrength.value == 0:
-                resolve_name(otherNet, self)
-                return True
-            elif otherNet.nameStrength.value in (1, 2, 3):
-                resolve_name(self, otherNet)
-                return False if self.name != otherNet.name else True
-        elif self.nameStrength.value == 0:  # NONAME
-            if otherNet.nameStrength.value in (2, 3):
-                resolve_name(self, otherNet)
-            return True
 
         return False
 
-    def mergeNetNames(self, otherNet: Type["schematicNet"]) -> bool:
-        if self.nameStrength.value < otherNet.nameStrength.value:
+    def mergeNetName(self, otherNet: "schematicNet") -> bool:
+        """
+        Merge net names based on name strength and handle conflicts.
+        """
+        if otherNet.nameStrength > self.nameStrength:
             self.name = otherNet.name
-            if otherNet.nameStrength.value == 3:
-                self.nameStrength = netNameStrengthEnum.SET
-            elif otherNet.nameStrength.value < 3:
-                self.nameStrength = otherNet.nameStrength
+            self.nameStrength = otherNet.nameStrength
             return True
-        elif self.nameStrength.value > otherNet.nameStrength.value:
-            otherNet.name = self.name
-            if self.nameStrength.value == 3:
-                otherNet.nameStrength = netNameStrengthEnum.SET
-            elif self.nameStrength.value < 3:
-                otherNet.nameStrength = self.nameStrength
+        elif otherNet.nameStrength == self.nameStrength:
+            if otherNet.name != self.name:
+                self.nameConflict = otherNet.nameConflict = True
+                return False
             return True
-        elif (
-            self.nameStrength.value == otherNet.nameStrength.value
-            and self.name != otherNet.name
-        ):
-            self.nameConflict = True
-            otherNet.nameConflict = True
-            return False
-        return True
+
 
     def inheritGuideLine(self, otherNet: Type["guideLine"]):
         self.name = otherNet.name
@@ -393,6 +453,9 @@ class schematicNet(QGraphicsItem):
     def width(self, value: int):
         self.prepareGeometryChange()
         self._width = value
+        # Clear the cached _extractRect
+        if '_extractRect' in self.__dict__:
+            del self.__dict__['_extractRect']
         self.update()
 
     def highlight(self):
@@ -414,14 +477,6 @@ class schematicNet(QGraphicsItem):
     @property
     def sceneShapeRect(self) -> QRectF:
         return self.mapRectToScene(self._shapeRect).normalized().toRect()
-
-    @property
-    def stretch(self) -> bool:
-        return self._stretch
-
-    @stretch.setter
-    def stretch(self, value: bool):
-        self._stretch = value
 
     @property
     def stretchSide(self) -> int:
@@ -623,3 +678,42 @@ class guideLine(QGraphicsLineItem):
         assert isinstance(otherNet, schematicNet)
         self.name = otherNet.name
         self.nameStrength = otherNet.nameStrength
+
+
+def clearNetStatus(netsSet: set[schematicNet]):
+    """
+    Clear all assigned net names
+    """
+    for netItem in netsSet:
+        netItem.nameConflict = False
+        if netItem.nameStrength.value < 3:
+            netItem.nameStrength = netNameStrengthEnum.NONAME
+
+
+def parseBusNotation(name: str) -> tuple[str, tuple[int, int]]:
+    """
+    Parse bus notation like 'name<0:5>' into base name and index range.
+    Also handles single net notation like 'name<0>' or 'name<1>'.
+
+    Args:
+    name (str): The net name with optional bus notation.
+
+    Returns:
+    tuple[str, tuple[int, int]]: A tuple containing the base name and a tuple of start and end indices.
+    """
+    # Check if the name does not contain bus notation
+    if '<' not in name or '>' not in name:
+        return name, (0, 0)
+
+    baseName = name.split('<')[0]  # Extract the base name before '<'
+    indexRange = name.split('<')[1].split('>')[0]  # Extract the content inside '<>'
+
+    # Check if it's a single index (e.g., 'name<0>')
+    if ':' not in indexRange:
+        singleIndex = int(indexRange)
+        return baseName, (singleIndex, singleIndex)
+
+    # Handle range notation (e.g., 'name<0:5>')
+    start, end = map(int, indexRange.split(':'))
+    return baseName, (start, end)
+

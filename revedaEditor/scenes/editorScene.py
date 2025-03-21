@@ -25,7 +25,7 @@
 from typing import List, Sequence
 from PySide6.QtCore import (QEvent, QPoint, QRectF, Qt)
 from PySide6.QtGui import (QGuiApplication)
-from PySide6.QtWidgets import (QQGraphicsScene, QMenu, QGraphicsItem,
+from PySide6.QtWidgets import (QGraphicsScene, QMenu, QGraphicsItem,
                                QDialog,
                                QCompleter)
 from contextlib import contextmanager
@@ -38,41 +38,62 @@ import revedaEditor.gui.propertyDialogues as pdlg
 class editorScene(QGraphicsScene):
     # Class-level constants for quick access
     DEFAULT_GRID = (10, 10)
-
     def __init__(self, parent):
-        super().__init__(parent)
+        super().__init__()
         self.parent = parent
-        self.editorWindow = self.parent.parent
-        self.majorGrid = self.editorWindow.majorGrid
-        self.snapTuple = self.editorWindow.snapTuple
+        editor_window = parent.parent  # Store reference locally
+        self.editorWindow = editor_window
+
+        # Group related window attributes in a single access
+        self.majorGrid = editor_window.majorGrid
+        self.snapTuple = editor_window.snapTuple
         self._snapDistance = int(self.majorGrid * 0.5)
+
+        # Initialize mouse-related attributes together
+        self.mousePressLoc = self.mouseMoveLoc = self.mouseReleaseLoc = None
         self.snapGrid = None
-        self.mousePressLoc = None
-        self.mouseMoveLoc = None
-        self.mouseReleaseLoc = None
-        # common edit modes
-        self.editModes = ddef.editModes(selectItem=True, deleteItem=False, moveItem=False,
-                                        copyItem=False, rotateItem=False,
-                                        changeOrigin=False,
-                                        panView=False, stretchItem=False, )
-        self.readOnly = False  # if the scene is not editable
+
+        # Use dictionary unpacking for edit modes
+        self.editModes = ddef.editModes(**{
+            'selectItem': True,
+            'deleteItem': False,
+            'moveItem': False,
+            'copyItem': False,
+            'rotateItem': False,
+            'changeOrigin': False,
+            'panView': False,
+            'stretchItem': False
+        })
+
+        # Initialize undo stack with limit
         self.undoStack = us.undoStack()
         self.undoStack.setUndoLimit(99)
-        self.origin = QPoint(0, 0)
-        self.cellName = self.editorWindow.file.parent.stem
+
+        # Group selection-related attributes
         self.partialSelection = False
         self._selectionRectItem = None
         self._selectedItems = []
         self._selectedItemGroup = None
         self._groupItems = []
-        self.libraryDict = self.editorWindow.libraryDict
+
+        # Initialize UI elements
+        self.origin = QPoint(0, 0)
+        self.cellName = editor_window.file.parent.stem
+        self.libraryDict = editor_window.libraryDict
         self.itemContextMenu = QMenu()
-        self.appMainW = self.editorWindow.appMainW
-        self.logger = self.appMainW.logger
-        self.messageLine = self.editorWindow.messageLine
-        self.statusLine = self.editorWindow.statusLine
+
+        # Get application-level references
+        app_main = editor_window.appMainW
+        self.appMainW = app_main
+        self.logger = app_main.logger
+        self.messageLine = editor_window.messageLine
+        self.statusLine = editor_window.statusLine
+
+        # Scene properties
+        self.readOnly = False
         self.installEventFilter(self)
         self.setMinimumRenderSize(2)
+
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
