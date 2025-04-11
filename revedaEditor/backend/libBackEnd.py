@@ -52,7 +52,7 @@ class libraryItem(QStandardItem):
         return f"{type(self).__name__}({self.libraryPath})"
 
     @property
-    def libraryPath(self):
+    def libraryPath(self) -> pathlib.Path:
         return self._libraryPath
 
     @libraryPath.setter

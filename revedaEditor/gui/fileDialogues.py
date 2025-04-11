@@ -691,7 +691,7 @@ class appProperties(QDialog):
     def __init__(self, parent):
         self.parent = parent
         super().__init__(parent)
-        self.setMinimumSize(650, 450)
+        self.setMinimumSize(750, 450)
         self.setWindowTitle("Revolution EDA Options")
         mainLayout = QVBoxLayout()
         mainLayout.setStretch(0, 2)
@@ -701,21 +701,29 @@ class appProperties(QDialog):
         filePathsLayout.setSpacing(20)
 
         rootPathDialogLayout = QHBoxLayout()
-        rootPathDialogLayout.addWidget(edf.boldLabel("Root Path:"), 2)
+        rootPathDialogLayout.addWidget(edf.boldLabel("Root (Run) Path:"), 2)
         self.rootPathEdit = edf.longLineEdit()
         rootPathDialogLayout.addWidget(self.rootPathEdit, 5)
         self.rootPathButton = QPushButton("...")
         self.rootPathButton.clicked.connect(self.onRootPathButtonClicked)
         filePathsLayout.addLayout(rootPathDialogLayout)
         rootPathDialogLayout.addWidget(self.rootPathButton, 1)
-        simPathDialogLayout = QHBoxLayout()
-        simPathDialogLayout.addWidget(edf.boldLabel("Simulation Path:"), 2)
-        self.simPathEdit = edf.longLineEdit()
-        simPathDialogLayout.addWidget(self.simPathEdit, 5)
-        self.simPathButton = QPushButton("...")
-        self.simPathButton.clicked.connect(self.onSimPathButtonClicked)
-        simPathDialogLayout.addWidget(self.simPathButton, 1)
-        filePathsLayout.addLayout(simPathDialogLayout)
+        simInPathDialogLayout = QHBoxLayout()
+        simInPathDialogLayout.addWidget(edf.boldLabel("Simulation Inputs (PDK) Path:"), 2)
+        self.simInpPathEdit = edf.longLineEdit()
+        simInPathDialogLayout.addWidget(self.simInpPathEdit, 5)
+        self.simInpPathButton = QPushButton("...")
+        self.simInpPathButton.clicked.connect(self.onSimInpPathButtonClicked)
+        simInPathDialogLayout.addWidget(self.simInpPathButton, 1)
+        filePathsLayout.addLayout(simInPathDialogLayout)
+        simOutPathDialogLayout = QHBoxLayout()
+        simOutPathDialogLayout.addWidget(edf.boldLabel("Simulation Outputs Path:"), 2)
+        self.simOutPathEdit = edf.longLineEdit()
+        simOutPathDialogLayout.addWidget(self.simOutPathEdit, 5)
+        self.simOutPathButton = QPushButton("...")
+        self.simOutPathButton.clicked.connect(self.onSimOutPathButtonClicked)
+        simOutPathDialogLayout.addWidget(self.simOutPathButton, 1)
+        filePathsLayout.addLayout(simOutPathDialogLayout)
         filePathsGroup.setLayout(filePathsLayout)
         mainLayout.addWidget(filePathsGroup)
         switchViewsGroup = QGroupBox("Switch and Stop Views")
@@ -741,21 +749,20 @@ class appProperties(QDialog):
         mainLayout.addWidget(self.buttonBox)
         self.setLayout(mainLayout)
 
-    def onFileButtonClicked(self):
-        self.editorPathEdit.setText(
-            QFileDialog.getOpenFileName(self, caption="Select text " "editor path.")[0]
-        )
-
     def onRootPathButtonClicked(self):
         self.rootPathEdit.setText(
             QFileDialog.getExistingDirectory(self, caption="Root run path:")
         )
 
-    def onSimPathButtonClicked(self):
-        self.simPathEdit.setText(
-            QFileDialog.getExistingDirectory(self, caption="Simulation path:")
+    def onSimOutPathButtonClicked(self):
+        self.simOutPathEdit.setText(
+            QFileDialog.getExistingDirectory(self, caption="Simulation Outputs path:")
         )
 
+    def onSimInpPathButtonClicked(self):
+        self.simInpPathEdit.setText(
+            QFileDialog.getExistingDirectory(self, caption="Simulation Inputs (PDK) path:")
+        )
 
 class libraryPathsModel(QStandardItemModel):
     def __init__(self, libraryDict):

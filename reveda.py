@@ -106,7 +106,7 @@ class revedaApp(QApplication):
             raise ValueError(f"Base path does not exist: {reveda_runpathObj}")
 
         # Resolve revedaeditor path
-        self.revedaeditor_path = os.environ.get("REVEDAEDIT_PATH")
+        self.revedaeditor_path = os.environ.get("REVEDAEDIT_PATH", str(Path.cwd()))
         self.revedaeditor_pathObj = self._resolve_path(
             self.revedaeditor_path, reveda_runpathObj, "REVEDAEDIT_PATH"
         )
@@ -126,6 +126,7 @@ class revedaApp(QApplication):
         )
         if self.revedaPdkPathObj:
             sys.path.append(str(self.revedaPdkPathObj))
+
 
 OS_STYLE_MAP = {"Windows": "Fusion", "Linux": "Fusion", "Darwin": "macOS"}
 

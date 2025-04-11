@@ -291,11 +291,12 @@ class symbolView(editorView):
 
 
 class schematicView(editorView):
+    _dotRadius = 10
     def __init__(self, scene, parent):
         self.parent = parent
         self.scene = scene
         super().__init__(self.scene, self.parent)
-        self._dotRadius = 2
+
         self.scene.wireEditFinished.connect(self.mergeSplitViewNets)
 
 

@@ -44,7 +44,6 @@ from PySide6.QtWidgets import (
     QGraphicsPathItem,
     QGraphicsSceneMouseEvent,
     QGraphicsSceneHoverEvent,
-    QStyle,
 )
 import math
 from typing import Type, Set, Union
@@ -101,9 +100,13 @@ class schematicNet(QGraphicsItem):
 
         # Line and name initialization
         self.draftLine = QLineF(start, end)
-        self._nameItem = netName("", self)
-        self._nameItem.setPos(self.draftLine.center())
-        self._nameItem.setParentItem(self)
+        self._nameItem = self.createEmptyNameItem()
+
+    def createEmptyNameItem(self):
+        nameItem = netName("", self)
+        nameItem.setPos(self.draftLine.center())
+        nameItem.setParentItem(self)
+        return nameItem
 
     @property
     def draftLine(self) -> QLineF:
@@ -112,6 +115,9 @@ class schematicNet(QGraphicsItem):
     @draftLine.setter
     def draftLine(self, line: QLineF):
         self.prepareGeometryChange()
+        # Invalidate cached hash when line changes
+        if hasattr(self, '_hash_value'):
+            del self._hash_value
         self._draftLine = line
         self._transformOriginPoint = line.p1()
         match self._mode:
@@ -174,7 +180,6 @@ class schematicNet(QGraphicsItem):
 
         return QRectF(point1, point2).normalized()
 
-
     def shape(self) -> QPainterPath:
         path = QPainterPath()
         path.addRect(self._shapeRect)
@@ -213,6 +218,7 @@ class schematicNet(QGraphicsItem):
                     else:
                         self.setZValue(self.zValue() - 10)
                         self.scene().selectedNet = None
+                        
         return super().itemChange(change, value)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
@@ -378,14 +384,27 @@ class schematicNet(QGraphicsItem):
         Merge net names based on name strength and handle conflicts.
         """
         if otherNet.nameStrength > self.nameStrength:
-            self.name = otherNet.name
-            self.nameStrength = otherNet.nameStrength
-            return True
+            if  otherNet.nameStrength == 3:
+                self.name = otherNet.name
+                self.nameStrength = netNameStrengthEnum.INHERIT
+                return True
+            else:
+                self.name = otherNet.name
+                self.nameStrength = otherNet.nameStrength
+                return True
         elif otherNet.nameStrength == self.nameStrength:
             if otherNet.name != self.name:
                 self.nameConflict = otherNet.nameConflict = True
                 return False
             return True
+
+    def clearName(self):
+        """
+        Clear the net name and set its strength to NONAME.
+        """
+        if self.nameStrength.value < 3:
+            self.name = ""
+            self.nameStrength = netNameStrengthEnum.NONAME
 
 
     def inheritGuideLine(self, otherNet: Type["guideLine"]):
@@ -394,13 +413,17 @@ class schematicNet(QGraphicsItem):
 
     @property
     def name(self) -> str:
-        return self._nameItem.name
+        if self._nameItem:
+            return self._nameItem.name
+        else:
+            return ""
 
     @name.setter
     def name(self, name: str):
         if name:
             self.prepareGeometryChange()
             self._nameItem.name = name
+            self._nameItem.nameStrength = netNameStrengthEnum.SET
             self._nameItem.setPos(self._draftLine.center())
 
     @property
@@ -453,6 +476,9 @@ class schematicNet(QGraphicsItem):
     def width(self, value: int):
         self.prepareGeometryChange()
         self._width = value
+        # Invalidate cached hash when width changes
+        if hasattr(self, '_hash_value'):
+            del self._hash_value
         # Clear the cached _extractRect
         if '_extractRect' in self.__dict__:
             del self.__dict__['_extractRect']
@@ -510,26 +536,55 @@ class schematicNet(QGraphicsItem):
     def mode(self) -> int:
         return self._mode
 
-    def __hash__(self):
-        return hash(self.draftLine.length())
+    @property
+    def nameItem(self) -> "netName":
+        return self._nameItem
 
-    def __eq__(self, other):
-        if isinstance(other, schematicNet):
-            self_points = {(point.x(), point.y()) for point in self.sceneEndPoints}
-            other_points = {(point.x(), point.y()) for point in other.sceneEndPoints}
-            return self_points == other_points
-        return False
+    @nameItem.setter
+    def nameItem(self, name: str):
+        self._nameItem = netName(name, self)
+        self._nameItem.setPos(self._draftLine.center())
+        self._nameItem.setParentItem(self)
 
+
+    def __hash__(self) -> int:
+        """Generate a hash value for the schematic net based on its properties."""
+        # Cache the hash value since the line length is unlikely to change frequently
+        if not hasattr(self, '_hash_value'):
+            # Combine multiple properties for a more unique hash
+            self._hash_value = hash((
+                self.draftLine.length(),
+                self.width,
+                frozenset((p.x(), p.y()) for p in self.sceneEndPoints)
+            ))
+        return self._hash_value
+
+    def __eq__(self, other) -> bool:
+        """Compare two schematic nets for equality."""
+        if not isinstance(other, schematicNet):
+            return False
+            
+        # Compare width first as it's a simple comparison
+        if self.width != other.width:
+            return False
+        
+        # Use set comprehension for endpoints comparison
+        # Cache the results to avoid multiple set creations
+        self_points = frozenset((point.x(), point.y()) for point in self.sceneEndPoints)
+        other_points = frozenset((point.x(), point.y()) for point in other.sceneEndPoints)
+        
+        return self_points == other_points
 
 class netName(QGraphicsSimpleTextItem):
-    def __init__(self, name: str, parent: schematicNet):
+    def __init__(self, name: str, parent: schematicNet | None = None):
         super().__init__(name, parent)
-        self.parent = parent
+        self._parent = parent
         self.setBrush(schlyr.wireBrush)
         self._nameConflict = False
         self._nameStrength = netNameStrengthEnum.NONAME
-        self.setRotation(self.parent.angle)
-        self._draftLineCenter = self.parent.draftLine.center()
+        if self._parent:
+            self.setRotation(self._parent.angle)
+            self._draftLineCenter = self._parent.draftLine.center()
 
     def setSelected(self, selected):
         super().setSelected(selected)
@@ -571,25 +626,29 @@ class netName(QGraphicsSimpleTextItem):
     def name(self, value: str):
         self.prepareGeometryChange()
         self.setText(value)
-        self.setRotation(self.parent.angle)
+        self.setRotation(self._parent.angle)
         if self._nameStrength == netNameStrengthEnum.SET:
             self.setVisible(True)
         else:
             self.setVisible(False)
 
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        super().mousePressEvent(event)
-        if self.scene():
-            self.setSelected(True)
-            if self.scene().editModes.moveItem:
-                self.parent.highlight()
-                self.setFlag(QGraphicsItem.ItemIsMovable, True)
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, parent: schematicNet):
+        self._parent = parent
+        self.setRotation(self._parent.angle)
+        self._draftLineCenter = self._parent.draftLine.center()
+
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
 
         self.setSelected(False)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.parent.unhighlight()
+        self.setFlag(QGraphicsItem.ItemIsMovable, False)
+        if self._parent:
+            self._parent.unhighlight()
         super().mouseReleaseEvent(event)  # type: ignore
 
 
@@ -678,16 +737,6 @@ class guideLine(QGraphicsLineItem):
         assert isinstance(otherNet, schematicNet)
         self.name = otherNet.name
         self.nameStrength = otherNet.nameStrength
-
-
-def clearNetStatus(netsSet: set[schematicNet]):
-    """
-    Clear all assigned net names
-    """
-    for netItem in netsSet:
-        netItem.nameConflict = False
-        if netItem.nameStrength.value < 3:
-            netItem.nameStrength = netNameStrengthEnum.NONAME
 
 
 def parseBusNotation(name: str) -> tuple[str, tuple[int, int]]:

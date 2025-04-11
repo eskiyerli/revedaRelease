@@ -99,6 +99,7 @@ class schematicModes(editModes):
     drawBus: bool
     drawText: bool
     addInstance: bool
+    nameNet: bool
 
 
 @dataclass

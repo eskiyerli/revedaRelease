@@ -27,7 +27,8 @@ import logging.config
 import pathlib
 import os
 import shutil
-from PySide6.QtCore import (QThreadPool, Slot, Signal, QTimer, QObject)
+from typing import List, Dict
+from PySide6.QtCore import (QThreadPool, Slot, Signal, QTimer, QObject, QSize)
 from PySide6.QtGui import (
     QAction,
     QFont,
@@ -94,38 +95,152 @@ class mainwContainer(QWidget):
 
 
 class MainWindow(QMainWindow):
+    # Class-level constants
+    WINDOW_SIZE = QSize(900, 300)
+    VIEW_TYPES = {
+        'switch': frozenset({"schematic", "veriloga", "spice", "symbol"}),
+        'stop': frozenset({"symbol"})
+    }
+    APP_LOGGER_NAME = "reveda"
+    PATHS = {
+        'defaultPDK': "defaultPDK",
+        'testbenches': "testbenches",
+        'library': "library.json",
+        'config': "reveda.conf"
+    }
+    STATUS_READY = "Ready"
+
+    # Signal definitions
     sceneSelectionChanged = Signal(QGraphicsScene)
     keyPressedView = Signal(int)
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the main application window."""
         super().__init__()
-        self.resize(900, 300)
-        self._createActions()
-        self._createMenuBar()
-        self._createTriggers()
 
-        self.switchViewList = ["schematic", "veriloga", "spice", "symbol"]
-        self.stopViewList = ["symbol"]
-        self.openViews = dict()
-        # create container to position all widgets
-        self.centralW = mainwContainer(self)
-        self.setCentralWidget(self.centralW)
-        self.mainW_statusbar = self.statusBar()
-        self.mainW_statusbar.showMessage("Ready")
-        self.app = QApplication.instance()
-        self.logger = logging.getLogger("reveda")
-        # library definition file path
-        self.runPath = pathlib.Path.cwd()  # all paths should refer to this
-        self.simulationPath = self.runPath.parent / "testbenches"  # good default
-        # look for library.json file where the script is invoked
-        self.libraryPathObj = self.runPath.joinpath("library.json")
-        self.libraryDict = self.readLibDefFile(self.libraryPathObj)
-        self.libraryBrowser = libw.libraryBrowser(self)
+        # Initialize core components
+        self._init_window()
+        self._init_data_structures()
+        self._init_paths()
+        self._init_app_components()
+
+    def _init_window(self) -> None:
+        """Initialize window properties and UI components."""
+        try:
+            # Set window size
+            self.resize(self.WINDOW_SIZE)
+
+            # Create UI elements
+            self._createActions()
+            self._createMenuBar()
+            self._createTriggers()
+
+            # Setup central widget
+            self.centralW = mainwContainer(self)
+            self.setCentralWidget(self.centralW)
+
+            # Setup status bar
+            self.mainW_statusbar = self.statusBar()
+            self.mainW_statusbar.showMessage(self.STATUS_READY)
+        except Exception as e:
+            self._handle_init_error("Window initialization failed", e)
+
+    def _init_data_structures(self) -> None:
+        """Initialize data structures and views."""
+        try:
+            self.switchViewList: List[str] = list(self.VIEW_TYPES['switch'])
+            self.stopViewList: List[str] = list(self.VIEW_TYPES['stop'])
+            self.openViews: Dict = {}
+        except Exception as e:
+            self._handle_init_error("Data structure initialization failed", e)
+
+    def _init_paths(self) -> None:
+        """Initialize application paths."""
+
+        try:
+            self._app = QApplication.instance()
+            if hasattr(self._app,"revedaeditor_pathObj"):
+                self.runPath = self._app.revedaeditor_pathObj.parent
+            else:
+                self.runPath = pathlib.Path.cwd()
+            if hasattr(self._app, "revedaPdkPathObj"):
+                self.simulationInpPath = self._app.revedaPdkPathObj
+            else:
+                self.simulationInpPath = self.runPath / self.PATHS["defaultPDK"]
+            self.simulationOutPath = self.runPath.parent / self.PATHS['testbenches']
+            self.libraryPathObj = self.runPath / self.PATHS['library']
+            self.confFilePath = self.runPath / self.PATHS['config']
+        except Exception as e:
+            self._handle_init_error("Path initialization failed", e)
+
+    def _init_app_components(self) -> None:
+        """Initialize application components and resources."""
+        try:
+            # Core application components
+            self.app = QApplication.instance()
+            self.logger = logging.getLogger(self.APP_LOGGER_NAME)
+
+            # Library components
+            self.libraryDict = self.readLibDefFile(self.libraryPathObj)
+            self.libraryBrowser = libw.libraryBrowser(self)
+
+            # Thread pool setup
+            self._setup_thread_pool()
+
+            # Final initialization
+            self.logger_def()
+            self.loadState()
+        except Exception as e:
+            self._handle_init_error("Application component initialization failed", e)
+
+    def _setup_thread_pool(self) -> None:
+        """Configure and initialize thread pool."""
         self.threadPool = QThreadPool.globalInstance()
-        self.confFilePath = self.runPath.joinpath("reveda.conf")
-        self.logger_def()
-        # now check the configuration file
-        self.loadState()
+        # Optionally configure thread pool settings here
+        # self.threadPool.setMaxThreadCount(max(4, QThread.idealThreadCount()))
+
+    def _handle_init_error(self, message: str, error: Exception) -> None:
+        """Handle initialization errors."""
+        if hasattr(self, 'logger'):
+            self.logger.error(f"{message}: {str(error)}")
+        raise RuntimeError(f"{message}: {str(error)}")
+
+#
+#
+# class MainWindow(QMainWindow):
+#     sceneSelectionChanged = Signal(QGraphicsScene)
+#     keyPressedView = Signal(int)
+#
+#
+#     def __init__(self):
+#         super().__init__()
+#         self.resize(900, 300)
+#         self._createActions()
+#         self._createMenuBar()
+#         self._createTriggers()
+#
+#         self.switchViewList = ["schematic", "veriloga", "spice", "symbol"]
+#         self.stopViewList = ["symbol"]
+#         self.openViews = dict()
+#         # create container to position all widgets
+#         self.centralW = mainwContainer(self)
+#         self.setCentralWidget(self.centralW)
+#         self.mainW_statusbar = self.statusBar()
+#         self.mainW_statusbar.showMessage("Ready")
+#         self.app = QApplication.instance()
+#         self.logger = logging.getLogger("reveda")
+#         # library definition file path
+#         self.runPath = pathlib.Path.cwd()  # all paths should refer to this
+#         self.simulationOutputPath = self.runPath.parent / "testbenches"  # good default
+#         # look for library.json file where the script is invoked
+#         self.libraryPathObj = self.runPath.joinpath("library.json")
+#         self.libraryDict = self.readLibDefFile(self.libraryPathObj)
+#         self.libraryBrowser = libw.libraryBrowser(self)
+#         self.threadPool = QThreadPool.globalInstance()
+#         self.confFilePath = self.runPath.joinpath("reveda.conf")
+#         self.logger_def()
+#         # now check the configuration file
+#         self.loadState()
 
     def _createMenuBar(self):
         self.mainW_menubar = self.menuBar()
@@ -229,30 +344,70 @@ class MainWindow(QMainWindow):
             QMessageBox.No,
         )
         if reply == QMessageBox.Yes:
+            # if hasattr(self, 'threadPool'):
+            #     self.threadPool.waitForDone()
             for item in self.app.topLevelWidgets():
                 item.close()
             # self.app.closeAllWindows()
         else:
             event.ignore()
 
+    # def optionsClick(self):
+    #     dlg = fd.appProperties(self)
+    #     dlg.runPathEdit.setText(str(self.runPath))
+    #     dlg.simOutPathEdit.setText(str(self.simulationOutputPath))
+    #     dlg.switchViewsEdit.setText(", ".join(self.switchViewList))
+    #     dlg.stopViewsEdit.setText(", ".join(self.stopViewList))
+    #
+    #     if dlg.exec() == QDialog.Accepted:
+    #         self.runPath = pathlib.Path(dlg.runPathEdit.text())
+    #         self.simulationOutputPath = pathlib.Path(dlg.simOutPathEdit.text())
+    #         self.switchViewList = [
+    #             switchView.strip() for switchView in dlg.switchViewsEdit.text().split(",")
+    #         ]
+    #         self.stopViewList = [
+    #             stopView.strip() for stopView in dlg.stopViewsEdit.text().split(",")
+    #         ]
+    #         if dlg.optionSaveBox.isChecked():
+    #             self.saveState()
     def optionsClick(self):
         dlg = fd.appProperties(self)
-        dlg.rootPathEdit.setText(str(self.runPath))
-        dlg.simPathEdit.setText(str(self.simulationPath))
-        dlg.switchViewsEdit.setText(", ".join(self.switchViewList))
-        dlg.stopViewsEdit.setText(", ".join(self.stopViewList))
+
+        # Set initial values more efficiently using a dictionary
+        initial_values = {
+            'rootPathEdit': str(self.runPath),
+            'simInpPathEdit': str(self.simulationInpPath),
+            'simOutPathEdit': str(self.simulationOutPath),
+            'switchViewsEdit': ", ".join(self.switchViewList),
+            'stopViewsEdit': ", ".join(self.stopViewList)
+        }
+
+        # Set text values in one loop
+        for field, value in initial_values.items():
+            getattr(dlg, field).setText(value)
 
         if dlg.exec() == QDialog.Accepted:
-            self.runPath = pathlib.Path(dlg.rootPathEdit.text())
-            self.simulationPath = pathlib.Path(dlg.simPathEdit.text())
-            self.switchViewList = [
-                switchView.strip() for switchView in dlg.switchViewsEdit.text().split(",")
-            ]
-            self.stopViewList = [
-                stopView.strip() for stopView in dlg.stopViewsEdit.text().split(",")
-            ]
-            if dlg.optionSaveBox.isChecked():
-                self.saveState()
+            # Get and process all text values at once
+            text_values = {
+                'rootPathEdit': dlg.rootPathEdit.text(),
+                'simInpPathEdit': dlg.simInpPathEdit.text(),
+                'simOutPathEdit': dlg.simOutPathEdit.text(),
+                'switchViewsEdit': dlg.switchViewsEdit.text(),
+                'stopViewsEdit': dlg.stopViewsEdit.text()
+            }
+
+            # Update paths
+            self.runPath = pathlib.Path(text_values['rootPathEdit'])
+            self.simulationInpPath = pathlib.Path(text_values['simInpPathEdit'])
+            self.simulationOutPath = pathlib.Path(text_values['simOutPathEdit'])
+
+            # Process lists in a more compact way
+            self.switchViewList = [x.strip() for x in text_values['switchViewsEdit'].split(',')]
+            self.stopViewList = [x.strip() for x in text_values['stopViewsEdit'].split(',')]
+
+            # Save state if needed
+            dlg.optionSaveBox.isChecked() and self.saveState()
+
 
     def importVerilogaClick(self):
         """
@@ -375,7 +530,7 @@ class MainWindow(QMainWindow):
         dlg = fd.gdsImportDialogue(self)
         dlg.unitEdit.setText("1 nm")
         dlg.libNameEdit.setText("importLib")
-        dlg.inputFileEdit.setText("/home/eskiyerli/onedrive_reveda/Projects/gds/newSymbol/newSymbol.gds") 
+        # dlg.inputFileEdit.setText("/home/eskiyerli/onedrive_reveda/Projects/gds/newSymbol/newSymbol.gds")
         if dlg.exec() == QDialog.Accepted:
             gdsImportLibName = dlg.libNameEdit.text().strip()
             gdsImportFileObj = pathlib.Path(dlg.inputFileEdit.text().strip())
@@ -439,37 +594,59 @@ class MainWindow(QMainWindow):
         abtDlg = hlp.aboutDialog(self)
         abtDlg.show()
 
+
     def loadState(self):
-        """
-        Load the state of the object from a configuration file.
+        if not self.confFilePath.exists():
+            return
 
-        This function reads the contents of the configuration file and updates the
-         state of the object based on the values found in the file.
-        It checks if the configuration file exists and then opens it for reading.
-        If the file exists, it loads the contents of the file as a
-        JSON object and assigns the values to the corresponding attributes of the
-        object. The attributes updated include `textEditorPath`,
-        `simulationPath`, `switchViewList`, and `stopViewList`. If the `switchViewList`
-        or `stopViewList` in the configuration file is not
-        empty, it updates the corresponding attributes with the values from the file.
-        """
+        self.logger.info(f"Configuration file: {self.confFilePath} exists")
 
-        if self.confFilePath.exists():
-            self.logger.info(f"Configuration file: {self.confFilePath} exists")
+        try:
             with self.confFilePath.open(mode="r") as f:
                 items = json.load(f)
-            if items:
-                self.runPath = pathlib.Path(items.get("runPath", os.getcwd()))
-                self.simulationPath = pathlib.Path(items.get("simulationPath", os.getcwd()))
-                if items.get("switchViewList")[0] != "":
-                    self.switchViewList = items.get("switchViewList", "")
-                if items.get("stopViewList")[0] != "":
-                    self.stopViewList = items.get("stopViewList", "")
+
+            if not items:
+                return
+
+            # Define default values and paths in a dictionary
+            path_settings = {
+                'runPath': ('runPath', self.runPath),
+                'simulationInpPath': ('simulationInpPath', self.simulationInpPath),
+                'simulationOutPath': ('simulationOutPath', self.simulationOutPath)
+            }
+
+            # Update paths
+            for attr, (key, default) in path_settings.items():
+                setattr(self, attr, pathlib.Path(items.get(key, default)))
+
+            # Handle lists with single operation
+            for attr in ['switchViewList', 'stopViewList']:
+                value = items.get(attr, [''])
+                if value and value[0] != '':
+                    setattr(self, attr, value)
+
+        except (json.JSONDecodeError, IOError) as e:
+            self.logger.error(f"Error loading configuration: {e}")
+
+    # def loadState(self):
+    #     if self.confFilePath.exists():
+    #         self.logger.info(f"Configuration file: {self.confFilePath} exists")
+    #         with self.confFilePath.open(mode="r") as f:
+    #             items = json.load(f)
+    #         if items:
+    #             self.runPath = pathlib.Path(items.get("runPath", os.getcwd()))
+    #             self.simulationInpPath = pathlib.Path(items.get("simulationInpPath", self.simulationInpPath))
+    #             self.simulationOutPath = pathlib.Path(items.get("simulationOutPath", self.simulationInpPath))
+    #             if items.get("switchViewList")[0] != "":
+    #                 self.switchViewList = items.get("switchViewList", "")
+    #             if items.get("stopViewList")[0] != "":
+    #                 self.stopViewList = items.get("stopViewList", "")
 
     def saveState(self):
         items = {
             "runPath": str(self.runPath),
-            "simulationPath": str(self.simulationPath),
+            "simulationInpPath": str(self.simulationInpPath),
+            "simulationOutPath": str(self.simulationOutPath),
             "switchViewList": self.switchViewList,
             "stopViewList": self.stopViewList,
         }

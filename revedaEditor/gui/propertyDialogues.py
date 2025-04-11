@@ -25,13 +25,13 @@
 
 # properties dialogues for various editor functions
 
+from ast import main
 import pathlib
-import re
 from PySide6.QtGui import (
-    QFontDatabase, QValidator,
+    QFontDatabase, 
 )
 from PySide6.QtCore import (
-    Qt, QRegularExpression,
+    Qt,
 )
 from PySide6.QtWidgets import (
     QWidget,
@@ -534,6 +534,24 @@ class instanceProperties(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
+class netNameDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.setWindowTitle("Add Net Name")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        buttonBox = QDialogButtonBox(QBtn)
+        mainLayout = QVBoxLayout()
+        formLayout = QFormLayout()
+        self.netNameEdit = edf.longLineEdit()
+        self.netNameEdit.setToolTip("Enter net name")
+        formLayout.addRow(edf.boldLabel("Net Name", self), self.netNameEdit)
+        mainLayout.addLayout(formLayout)
+        mainLayout.addSpacing(40)
+        mainLayout.addWidget(buttonBox)
+        self.setLayout(mainLayout)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
 
 class netProperties(QDialog):
     def __init__(self, parent):
@@ -590,6 +608,7 @@ class netProperties(QDialog):
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)
         self.show()
+
 
 
 class createSchematicPinDialog(createPinDialog):

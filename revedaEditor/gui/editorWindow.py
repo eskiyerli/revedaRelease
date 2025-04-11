@@ -71,8 +71,8 @@ class editorWindow(QMainWindow):
         self.statusLine = self.statusBar()
         self.messageLine = QLabel()  # message line
         self.statusLine.insertPermanentWidget(0,self.messageLine)
-        self.majorGrid = 10  # dot/line grid spacing
-        self.snapGrid = 5  # snapping grid size
+        self.majorGrid = 20  # dot/line grid spacing
+        self.snapGrid = 10  # snapping grid size
         self.snapTuple = (self.snapGrid, self.snapGrid)
         self.init_UI()
         self._createSignalConnections()
@@ -102,7 +102,7 @@ class editorWindow(QMainWindow):
         self.menuEdit = self.editorMenuBar.addMenu("&Edit")
         self.menuCreate = self.editorMenuBar.addMenu("C&reate")
         self.menuOptions = self.editorMenuBar.addMenu("&Options")
-        # self.menuCheck = self.editorMenuBar.addMenu("&Check")
+        self.menuCheck = self.editorMenuBar.addMenu("&Check")
         self.menuTools = self.editorMenuBar.addMenu("&Tools")
         # self.menuWindow = self.editorMenuBar.addMenu("&Window")
         self.menuUtilities = self.editorMenuBar.addMenu("&Utilities")

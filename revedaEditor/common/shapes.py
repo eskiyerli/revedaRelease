@@ -949,7 +949,7 @@ class symbolPin(symbolShape):
         self._pinRect = self._pinRectItem.rect().adjusted(-2, -2, 2, 2)
         self._pinNameItem = QGraphicsSimpleTextItem(self._pinName)
         self._font = QFont("Arial", 14)
-        # textBoundingRectHeight = self._pinNameItem.boundingRect().height()
+
         self._pinNameItem.setFont(self._font)
         self._pinNameItem.setPos(self._start.x() - self.PIN_WIDTH / 2,
                                  self._start.y() - self.PIN_HEIGHT / 2 + self.TEXT_MARGIN)
@@ -1156,6 +1156,7 @@ class text(symbolShape):
 
     @start.setter
     def start(self, value: QPoint):
+        self.prepareGeometryChange()
         self._start = value
 
     @property
@@ -1286,6 +1287,24 @@ class schematicSymbol(symbolShape):
     def __repr__(self):
         return f"schematicSymbol({self._instanceName})"
 
+    def shape(self):
+        path = QPainterPath()
+        validTypes = (symbolRectangle, symbolLine, symbolArc, symbolCircle, symbolPolygon)
+        shapes = [shapeItem for shapeItem in self.childItems() if isinstance(
+            shapeItem, validTypes)]
+        # If there are shapes, create a bounding rectangle
+        if not shapes:
+            return path
+
+        bounding_rect = QRectF()
+        for shape in shapes:
+            bounding_rect = bounding_rect.united(shape.sceneBoundingRect())
+
+        # Add the rectangle to the path
+        path.addRect(self.mapRectFromScene(bounding_rect))
+
+        return path
+
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value):
         scene = self.scene()
         if scene:
@@ -1365,7 +1384,7 @@ class schematicSymbol(symbolShape):
     def paint(self, painter, option, widget):
         if option.state & QStyle.State_Selected:
             painter.setPen(symlyr.selectedSymbolPen)
-            painter.drawRect(self.boundingRect())
+            painter.drawRect(self.shape().boundingRect().toRect())
         elif self._draft:
             painter.setPen(symlyr.draftPen)
 

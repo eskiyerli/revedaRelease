@@ -37,7 +37,7 @@ import revedaEditor.gui.propertyDialogues as pdlg
 
 class editorScene(QGraphicsScene):
     # Class-level constants for quick access
-    DEFAULT_GRID = (10, 10)
+    DEFAULT_GRID = (20, 10)
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
