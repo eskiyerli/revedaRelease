@@ -24,6 +24,8 @@
 #
 
 import sys
+
+from PySide6.QtCore import QObject
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTextEdit, QFileDialog, QToolBar,
                                QFontDialog, QInputDialog, QMessageBox, QLabel, )
 from PySide6.QtGui import (QTextCharFormat, QColor, QFont, QSyntaxHighlighter, QAction,
@@ -175,11 +177,10 @@ class XyceHighlighter(BaseHighlighter):
 
 
 class textEditor(QMainWindow):
-    closedSignal = Signal(ddef.viewTuple, str)
+    closedSignal = Signal(QObject)
 
     def __init__(self, parent, fileName: str = ""):
         super().__init__(parent=parent)
-        self._cellViewTuple = ddef.viewTuple("", "", "")
         self.parent = parent
         self.fileName: str = fileName
         self.textEdit = QTextEdit()
@@ -192,7 +193,6 @@ class textEditor(QMainWindow):
         self.statusLine = self.statusBar()
         self.statusLabel = QLabel()
         self.statusLine.addPermanentWidget(self.statusLabel)
-
         self.textEdit.cursorPositionChanged.connect(self.updateStatus)
 
         self.resize(600, 800)
@@ -350,22 +350,9 @@ class textEditor(QMainWindow):
         self.statusLabel.setText(f"Line: {line}, Column: {column}")
 
     def closeEvent(self, event):
-        if self.textEdit.toPlainText():
-            reply = QMessageBox.question(self, "Save File", "Do you want to save the file?",
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No, )
-            if reply == QMessageBox.Yes:
-                self.saveFile()
-        self.closedSignal.emit(self.cellViewTuple, self.fileName)
+
+        self.closedSignal.emit(self)
         super().closeEvent(event)
-
-    @property
-    def cellViewTuple(self) -> ddef.viewTuple:
-        return self._cellViewTuple
-
-    @cellViewTuple.setter
-    def cellViewTuple(self, viewTuple):
-        if isinstance(viewTuple, ddef.viewTuple):
-            self._cellViewTuple = viewTuple
 
 
 class jsonEditor(textEditor):

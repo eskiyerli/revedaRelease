@@ -25,10 +25,9 @@ import json
 import logging
 import logging.config
 import pathlib
-import os
 import shutil
 from typing import List, Dict
-from PySide6.QtCore import (QThreadPool, Slot, Signal, QTimer, QObject, QSize)
+from PySide6.QtCore import (QThreadPool, QThread, Slot, Signal, QTimer, QObject, QSize)
 from PySide6.QtGui import (
     QAction,
     QFont,
@@ -196,8 +195,11 @@ class MainWindow(QMainWindow):
     def _setup_thread_pool(self) -> None:
         """Configure and initialize thread pool."""
         self.threadPool = QThreadPool.globalInstance()
-        # Optionally configure thread pool settings here
-        # self.threadPool.setMaxThreadCount(max(4, QThread.idealThreadCount()))
+        cpuCount = QThread.idealThreadCount()
+        minThreads = 2
+        maxThreads = cpuCount * 2
+        self.threadPool.setMaxThreadCount(max(minThreads, min(maxThreads, cpuCount)))
+        self.threadPool.setExpiryTimeout(30000)
 
     def _handle_init_error(self, message: str, error: Exception) -> None:
         """Handle initialization errors."""
@@ -335,22 +337,6 @@ class MainWindow(QMainWindow):
         self.logger.addHandler(c_handler)
         self.logger.addHandler(f_handler)
 
-    def closeEvent(self, event):
-        reply = QMessageBox.question(
-            self,
-            "Confirm Exit",
-            "Are you sure you want to exit?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
-        )
-        if reply == QMessageBox.Yes:
-            # if hasattr(self, 'threadPool'):
-            #     self.threadPool.waitForDone()
-            for item in self.app.topLevelWidgets():
-                item.close()
-            # self.app.closeAllWindows()
-        else:
-            event.ignore()
 
     # def optionsClick(self):
     #     dlg = fd.appProperties(self)
@@ -653,8 +639,36 @@ class MainWindow(QMainWindow):
         with self.confFilePath.open(mode="w", encoding="utf") as f:
             json.dump(items, f, indent=4)
 
+    def closeEvent(self, event):
+        reply = QMessageBox.question(
+            self,
+            "Confirm Exit",
+            "Are you sure you want to exit?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            if not self.threadPool.waitForDone(5000):
+                self.threadPool.clear()
+            # for item in self.app.topLevelWidgets():
+            #     item.close()
+            self.app.closeAllWindows()
+        else:
+            event.ignore()
+
     def exitApp(self):
-        self.app.closeAllWindows()
+        reply = QMessageBox.question(
+            self,
+            "Confirm Exit",
+            "Are you sure you want to exit?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            if not self.threadPool.waitForDone(5000):
+                self.threadPool.clear()
+            self.app.closeAllWindows()
+
 
     @Slot()
     def selectionChangedScene(self):

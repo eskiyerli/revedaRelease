@@ -948,7 +948,8 @@ class symbolPin(symbolShape):
         self._pinRectItem.setParentItem(self)
         self._pinRect = self._pinRectItem.rect().adjusted(-2, -2, 2, 2)
         self._pinNameItem = QGraphicsSimpleTextItem(self._pinName)
-        self._font = QFont("Arial", 14)
+        self._pinNameItem.setZValue(symlyr.symbolPinLayer.z+10)
+        self._font = QFont("Arial", 10)
 
         self._pinNameItem.setFont(self._font)
         self._pinNameItem.setPos(self._start.x() - self.PIN_WIDTH / 2,
@@ -977,11 +978,11 @@ class symbolPin(symbolShape):
         self.setSelected(True)
 
     def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemSceneHasChanged:
-            # The scene change is complete
-            if self.scene().__class__.__name__ == 'schematicScene':
-                self._pinNameItem.setVisible(False)
-        elif change == QGraphicsItem.ItemSelectedHasChanged:
+        # if change == QGraphicsItem.ItemSceneHasChanged:
+        #     # The scene change is complete
+        #     if self.scene().__class__.__name__ == 'schematicScene':
+        #         self._pinNameItem.setVisible(False)
+        if change == QGraphicsItem.ItemSelectedHasChanged:
             if value:
                 self.scene().selectedSymbolPin = self
             else:

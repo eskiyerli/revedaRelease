@@ -23,22 +23,64 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 
-from PySide6.QtCore import (
-    QRunnable,
-    Slot,
-)
+from typing import Callable
+from PySide6.QtCore import QRunnable, Slot, Signal, QObject
 
+class workerSignals(QObject):
+    """Defines the signals available from a running worker thread."""
+    finished = Signal(object)
+    error = Signal(tuple)
 
 class startThread(QRunnable):
-    __slots__ = ("fn",)
+    """A thread class to execute a given function as a runnable task.
 
-    def __init__(self, fn):
+    Attributes:
+        fn (Callable): The function to be executed in the thread.
+        signals (WorkerSignals): Signal instance to emit results.
+    """
+    __slots__ = ("fn", "signals")
+
+    def __init__(self, fn: Callable) -> None:
+        """Initialize the thread with a function to execute.
+
+        Args:
+            fn (Callable): The function to be executed.
+        """
         super().__init__()
         self.fn = fn
+        self.signals = workerSignals()
 
     @Slot()
     def run(self) -> None:
+        """Execute the stored function in the thread.
+
+        Emits the result through signals when complete or if error occurs.
+        """
         try:
             self.fn
+            self.signals.finished.emit("Success")
         except Exception as e:
-            print(e)
+            print(f"Error executing thread function: {str(e)}")
+            self.signals.error.emit((str(e)))
+            raise
+
+# from PySide6.QtCore import (
+#     QRunnable,
+#     Slot,
+# )
+#
+#
+# class startThread(QRunnable):
+#     __slots__ = ("fn",)
+#
+#     def __init__(self, fn):
+#         super().__init__()
+#         self.fn = fn
+#
+#     @Slot()
+#     def run(self) -> None:
+#         try:
+#             self.fn
+#             print(self.fn)
+#         except Exception as e:
+#             print(e)

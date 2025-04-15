@@ -438,7 +438,7 @@ class libraryBrowser(QMainWindow):
         libName = libItem.libraryName
         openCellViewTuple = ddef.viewTuple(libName, cellName, viewName)
         if openCellViewTuple in self.appMainW.openViews.keys():
-            self.appMainW.openViews[openCellViewTuple].raise_()
+            self.appMainW.openViews[openCellViewTuple].show()
         else:
             match viewItem.viewType:
                 case "layout":
@@ -512,8 +512,9 @@ class libraryBrowser(QMainWindow):
                                 str(self._app.revedasim_pathObj), )
                             simmw = simmwModule.SimMainWindow(viewItem, self.libraryModel,
                                 self.designView)
-                            simmw.show()
                             self.appMainW.openViews[openCellViewTuple] = simmw
+                            simmw.show()
+                            
                         except (ImportError, NameError) as e:
                             self.logger.error("Reveda SAE is not installed.")
                             self.logger.error(e)

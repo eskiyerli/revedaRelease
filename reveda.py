@@ -145,6 +145,7 @@ def main():
         print(f"Applied {style} style")
     mainW = rvm.MainWindow()
     mainW.setWindowTitle("Revolution EDA")
+    app.mainW = mainW
     console = mainW.centralW.console
     redirect = pcon.Redirect(console.errorwrite)
     with redirect_stdout(console), redirect_stderr(redirect):

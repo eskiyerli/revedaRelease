@@ -30,7 +30,7 @@ import time
 import datetime
 from copy import deepcopy
 
-from PySide6.QtCore import (QPoint, Qt, )
+from PySide6.QtCore import (QPoint, Qt, QThreadPool, )
 from PySide6.QtGui import (QAction, QIcon, )
 from PySide6.QtWidgets import (QDialog, QGridLayout, QMenu, QToolBar, QWidget, )
 
@@ -68,6 +68,9 @@ class schematicEditor(edw.editorWindow):
         # create container to position all widgets
         self.centralW = schematicContainer(self)
         self.setCentralWidget(self.centralW)
+
+    def __repr__(self):
+        return f'schematicEditor({self.libName}-{self.cellName}-{self.viewName})'
 
     def _createActions(self):
         super()._createActions()
@@ -279,9 +282,16 @@ class schematicEditor(edw.editorWindow):
                 try:
                     simmwModule = importlib.import_module("revedasim.simMainWindow",
                                                           str(self._app.revedasim_pathObj))
-                    simmw = simmwModule.SimMainWindow(revbenchItem,
-                                                      self.libraryView.libraryModel,
-                                                      self.libraryView)
+                    cellViewTuple = ddef.viewTuple(self.libItem.libraryName,
+                                                   self.cellItem.cellName,
+                                                    revbenchItem.viewName)
+                    if self.appMainW.openViews.get(cellViewTuple):
+                        simmw = self.appMainW.openViews[cellViewTuple]
+                    else:
+                        simmw = simmwModule.SimMainWindow(revbenchItem,
+                                                          self.libraryView.libraryModel,
+                                                          self.libraryView)
+                        self.appMainW.openViews[cellViewTuple] = simmw
                     simmw.show()
                 except (ImportError, NameError):
                     self.logger.error("Reveda SAE is not installed.")
@@ -353,8 +363,8 @@ class schematicEditor(edw.editorWindow):
         netlistableViews = self._getNetlistableViews()
         dlg.viewNameCombo.addItems(netlistableViews)
 
-        if hasattr(self.appMainW, "simulationOutputPath"):
-            dlg.netlistDirEdit.setText(str(self.appMainW.simulationOutputPath))
+        if hasattr(self.appMainW, "simulationOutPath"):
+            dlg.netlistDirEdit.setText(str(self.appMainW.simulationOutPath))
 
         if dlg.exec() == QDialog.Accepted:
             self._startNetlisting(dlg)
@@ -389,7 +399,7 @@ class schematicEditor(edw.editorWindow):
             netlistObj = self.createNetlistObject(selectedViewName, netlistFilePath)
 
             if netlistObj:
-                self.runNetlisting(netlistObj)
+                self.runNetlisting(netlistObj, self.appMainW.threadPool)
         except Exception as e:
             self.logger.error(f"Error in creating netlist start: {e}")
 
@@ -405,13 +415,20 @@ class schematicEditor(edw.editorWindow):
             return netlist_obj
         return None
 
-    def runNetlisting(self, netlist_obj):
-        start_time = time.perf_counter()
-        xyceNetlRunner = startThread(fn=netlist_obj.writeNetlist())
-        self.appMainW.threadPool.start(xyceNetlRunner)
-        end_time = time.perf_counter()
-        self.logger.info(f"Netlisting time: {end_time - start_time}.3f seconds")
-        self.logger.info("Netlisting finished.")
+    def runNetlisting(self, netlist_obj, threadPool: QThreadPool = None):
+        with self.measureDuration():
+            xyceNetlRunner = startThread(fn=netlist_obj.writeNetlist())
+            xyceNetlRunner.signals.finished.connect(self.netListingFinished)
+            xyceNetlRunner.signals.error.connect(self.netlistingError)
+            xyceNetlRunner.setAutoDelete(False)
+            threadPool.start(xyceNetlRunner)
+
+
+    def netListingFinished(self, result):
+        self.logger.info(f"Netlisting finished: {result}")
+
+    def netlistingError(self, error):
+        self.logger.error(f"Error in netlisting: {error}")
 
     def goDownClick(self, s):
         self.centralW.scene.goDownHier()
@@ -671,7 +688,6 @@ class xyceNetlist:
         """
         Recursively traverse all sub-circuits and netlist them.
         """
-
         schematicScene = schematic.centralW.scene
         schematicScene.nameSceneNets()  # name all nets in the schematic
         sceneSymbolSet = schematicScene.findSceneSymbolSet()
@@ -702,6 +718,7 @@ class xyceNetlist:
         if self._use_config:
             return self.configDict.get(elementSymbol.cellName)[1]
         else:
+            # Iterate over the switch view list to determine the appropriate netlist view.
             for viewName in self._switchViewList:
                 if viewName in viewNames:
                     return viewName
