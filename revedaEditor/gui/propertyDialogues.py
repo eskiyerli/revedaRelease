@@ -9,8 +9,7 @@
 #
 #    For purposes of the foregoing, “Sell” means practicing any or all of the rights
 #    granted to you under the License to provide to third parties, for a fee or other
-#    consideration (including without limitation fees for hosting or consulting/
-#    support services related to the Software), a product or service whose value
+#    consideration (including without limitation fees for hosting) a product or service whose value
 #    derives, entirely or substantially, from the functionality of the Software. Any
 #    license notice or attribution required by the License must also include this
 #    Commons Clause License Condition notice.
@@ -41,6 +40,7 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QDialogButtonBox,
     QButtonGroup,
+    QTabWidget,
     QLineEdit,
     QLabel,
     QComboBox,
@@ -482,7 +482,8 @@ class instanceProperties(QDialog):
 
     def initUI(self):
         self.setWindowTitle("Instance Properties")
-        self.mainLayout = QVBoxLayout()
+        tabWidget = QTabWidget()
+        mainLayout = QVBoxLayout()
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         formLayout = QFormLayout()
@@ -509,6 +510,8 @@ class instanceProperties(QDialog):
 
         formLayout.addRow(edf.boldLabel("Angle", self), self.angleEdit)
         formLayout.setVerticalSpacing(10)
+        mainLayout.addLayout(formLayout)
+        propertiesGroup = QGroupBox()
         self.instanceLabelsLayout = QGridLayout()
         self.instanceLabelsLayout.setColumnMinimumWidth(0, 100)
         self.instanceLabelsLayout.setColumnMinimumWidth(1, 200)
@@ -516,21 +519,19 @@ class instanceProperties(QDialog):
         self.instanceLabelsLayout.setColumnStretch(0, 0)
         self.instanceLabelsLayout.setColumnStretch(1, 1)
         self.instanceLabelsLayout.setColumnStretch(2, 0)
-
+        propertiesGroup.setLayout(self.instanceLabelsLayout)
+        tabWidget.addTab(propertiesGroup, "Instance Properties")
+        attributesGroup = QGroupBox()
         self.instanceAttributesLayout = QGridLayout()
         self.instanceAttributesLayout.setColumnMinimumWidth(0, 100)
         self.instanceAttributesLayout.setColumnMinimumWidth(1, 200)
         self.instanceAttributesLayout.setColumnStretch(0, 0)
         self.instanceAttributesLayout.setColumnStretch(1, 1)
-
-        self.mainLayout.addLayout(formLayout)
-        self.mainLayout.addWidget(edf.boldLabel("Instance Labels", self))
-        self.mainLayout.addLayout(self.instanceLabelsLayout)
-        self.mainLayout.addSpacing(40)
-        self.mainLayout.addWidget(edf.boldLabel("Instance Attributes", self))
-        self.mainLayout.addLayout(self.instanceAttributesLayout)
-        self.mainLayout.addWidget(self.buttonBox)
-        self.setLayout(self.mainLayout)
+        attributesGroup.setLayout(self.instanceAttributesLayout)
+        tabWidget.addTab(attributesGroup, "Instance Attributes")
+        mainLayout.addWidget(tabWidget)
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 

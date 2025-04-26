@@ -9,8 +9,7 @@
 #
 #    For purposes of the foregoing, “Sell” means practicing any or all of the rights
 #    granted to you under the License to provide to third parties, for a fee or other
-#    consideration (including without limitation fees for hosting or consulting/
-#    support services related to the Software), a product or service whose value
+#    consideration (including without limitation fees for hosting) a product or service whose value
 #    derives, entirely or substantially, from the functionality of the Software. Any
 #    license notice or attribution required by the License must also include this
 #    Commons Clause License Condition notice.
@@ -229,9 +228,8 @@ class schematicEditor(edw.editorWindow):
             noteFontStyle = textDlg.fontStyleCB.currentText()
             noteAlign = textDlg.textAlignmCB.currentText()
             noteOrient = textDlg.textOrientCB.currentText()
-            self.centralW.scene.textTuple = (
-                noteText, noteFontFamily, noteFontStyle, noteFontSize, noteAlign,
-                noteOrient,)
+            self.centralW.scene.textTuple = (noteText, noteFontFamily, noteFontStyle,
+                                             noteFontSize, noteAlign, noteOrient,)
             self.centralW.scene.editModes.setMode("drawText")
 
     def createSymbolClick(self, s):
@@ -284,7 +282,7 @@ class schematicEditor(edw.editorWindow):
                                                           str(self._app.revedasim_pathObj))
                     cellViewTuple = ddef.viewTuple(self.libItem.libraryName,
                                                    self.cellItem.cellName,
-                                                    revbenchItem.viewName)
+                                                   revbenchItem.viewName)
                     if self.appMainW.openViews.get(cellViewTuple):
                         simmw = self.appMainW.openViews[cellViewTuple]
                     else:
@@ -422,7 +420,6 @@ class schematicEditor(edw.editorWindow):
             xyceNetlRunner.signals.error.connect(self.netlistingError)
             xyceNetlRunner.setAutoDelete(False)
             threadPool.start(xyceNetlRunner)
-
 
     def netListingFinished(self, result):
         self.logger.info(f"Netlisting finished: {result}")
@@ -681,7 +678,6 @@ class xyceNetlist:
 
     @configDict.setter
     def configDict(self, value: dict):
-        assert isinstance(value, dict)
         self._configDict = value
 
     def recursiveNetlisting(self, schematic: schematicEditor, cirFile):
@@ -697,7 +693,7 @@ class xyceNetlist:
 
     def processElementSymbol(self, elementSymbol, schematic, cirFile):
         if elementSymbol.symattrs.get("XyceNetlistPass") != "1" and (
-        not elementSymbol.netlistIgnore):
+                not elementSymbol.netlistIgnore):
             libItem = libm.getLibItem(schematic.libraryView.libraryModel,
                                       elementSymbol.libraryName)
             cellItem = libm.getCellItem(libItem, elementSymbol.cellName)
@@ -770,7 +766,7 @@ class xyceNetlist:
             # Add pin list
             pinList = " ".join(elementSymbol.pinNetMap.values())
             xyceNetlistFormatLine = (
-                        xyceNetlistFormatLine.replace("@pinList", pinList) + "\n")
+                    xyceNetlistFormatLine.replace("@pinList", pinList) + "\n")
 
             return xyceNetlistFormatLine
 
@@ -785,7 +781,7 @@ class xyceNetlist:
         Create a netlist line from a nlp device format line.
         """
         try:
-            spiceNetlistFormatLine = elementSymbol.symattrs["XyceSpiceNetlistLine"].strip()
+            spiceNetlistFormatLine = elementSymbol.symattrs["VacaskSpiceNetlistLine"].strip()
             for labelItem in elementSymbol.labels.values():
                 if labelItem.labelName in spiceNetlistFormatLine:
                     spiceNetlistFormatLine = spiceNetlistFormatLine.replace(
@@ -797,7 +793,7 @@ class xyceNetlist:
                                                                             value)
             pinList = elementSymbol.symattrs.get("pinOrder", ", ").replace(",", " ")
             spiceNetlistFormatLine = (
-                        spiceNetlistFormatLine.replace("@pinList", pinList) + "\n")
+                    spiceNetlistFormatLine.replace("@pinList", pinList) + "\n")
             self.includeLines.add(elementSymbol.symattrs.get("incLine",
                                                              "* no include line is found for {item.cellName}").strip())
             return spiceNetlistFormatLine
@@ -827,7 +823,7 @@ class xyceNetlist:
                         f"%{attrb}", value)
             pinList = " ".join(elementSymbol.pinNetMap.values())
             verilogaNetlistFormatLine = (
-                        verilogaNetlistFormatLine.replace("@pinList", pinList) + "\n")
+                    verilogaNetlistFormatLine.replace("@pinList", pinList) + "\n")
             self.vamodelLines.add(elementSymbol.symattrs.get("vaModelLine",
                                                              "* no model line is found for {item.cellName}").strip())
             self.vahdlLines.add(elementSymbol.symattrs.get("vaHDLLine",
@@ -898,3 +894,185 @@ class vacaskNetlist():
                 cirFile.write(f"{line}\n")
             for line in self.vahdlLines:
                 cirFile.write(f"{line}\n")
+
+    @property
+    def configDict(self):
+        return self._configDict
+
+    @configDict.setter
+    def configDict(self, value: dict):
+        self._configDict = value
+
+    def recursiveNetlisting(self, schematic: schematicEditor, cirFile):
+        """
+        Recursively traverse all sub-circuits and netlist them.
+        """
+        schematicScene = schematic.centralW.scene
+        schematicScene.nameSceneNets()  # name all nets in the schematic
+        sceneSymbolSet = schematicScene.findSceneSymbolSet()
+        schematicScene.generatePinNetMap(sceneSymbolSet)
+        for elementSymbol in sceneSymbolSet:
+            self.processElementSymbol(elementSymbol, schematic, cirFile)
+
+    def processElementSymbol(self, elementSymbol, schematic, cirFile):
+        if elementSymbol.symattrs.get("vacaskNetlistPass") != "1" and (
+                not elementSymbol.netlistIgnore):
+            libItem = libm.getLibItem(schematic.libraryView.libraryModel,
+                                      elementSymbol.libraryName)
+            cellItem = libm.getCellItem(libItem, elementSymbol.cellName)
+            netlistView = self.determineNetlistView(elementSymbol, cellItem)
+
+            # Create the netlist line for the item.
+            self.createItemLine(cirFile, elementSymbol, cellItem, netlistView)
+        elif elementSymbol.netlistIgnore:
+            cirFile.write(f"//{elementSymbol.instanceName} is marked to be ignored\n")
+        elif not elementSymbol.symattrs.get("vacaskNetlistPass", False):
+            cirFile.write(
+                f"*{elementSymbol.instanceName} has no VacaskNetlistLine attribute\n")
+
+    def determineNetlistView(self, elementSymbol, cellItem):
+        viewItems = [cellItem.child(row) for row in range(cellItem.rowCount())]
+        viewNames = [view.viewName for view in viewItems]
+
+        if self._use_config:
+            return self.configDict.get(elementSymbol.cellName)[1]
+        else:
+            # Iterate over the switch view list to determine the appropriate netlist view.
+            for viewName in self._switchViewList:
+                if viewName in viewNames:
+                    return viewName
+            return "symbol"
+
+    def createItemLine(self, cirFile, elementSymbol: shp.schematicSymbol,
+                       cellItem: libb.cellItem, netlistView: str, ):
+        if "schematic" in netlistView:
+            # First write subckt call in the netlist.
+            cirFile.write(self.createXyceSymbolLine(elementSymbol))
+            schematicItem = libm.getViewItem(cellItem, netlistView)
+            if netlistView not in self._stopViewList:
+                # now load the schematic
+                schematicObj = schematicEditor(schematicItem, self.libraryDict,
+                                               self.libraryView)
+                schematicObj.loadSchematic()
+
+                viewTuple = ddef.viewTuple(schematicObj.libName, schematicObj.cellName,
+                                           schematicObj.viewName)
+
+                if viewTuple not in self.netlistedViewsSet:
+                    self.netlistedViewsSet.add(viewTuple)
+                    pinList = elementSymbol.symattrs.get("pinOrder", ", ").replace(",", " ")
+                    cirFile.write(f"subckt {schematicObj.cellName} {pinList}\n")
+                    self.recursiveNetlisting(schematicObj, cirFile)
+                    cirFile.write("ends\n")
+        elif "symbol" in netlistView:
+            cirFile.write(self.createVacaskSymbolLine(elementSymbol))
+        elif "spice" in netlistView:
+            cirFile.write("Cannot import spice to Vacask netlists yet\n")
+        elif "veriloga" in netlistView:
+            cirFile.write(self.createVerilogaLine(elementSymbol))
+
+    def createVacaskSymbolLine(self, elementSymbol: shp.schematicSymbol) -> str:
+        """
+        Create a netlist line from a Vacask device format line.
+
+        Args:
+            elementSymbol (shp.schematicSymbol): The schematic symbol containing netlist information
+
+        Returns:
+            str: The formatted netlist line
+
+        Raises:
+            KeyError: If required VacaskSymbolNetlistLine attribute is missing
+        """
+        try:
+            # Get the base netlist format line
+            try:
+                netlist_line = elementSymbol.symattrs["VacaskSymbolNetlistLine"].strip()
+            except KeyError:
+                raise KeyError("Missing required VacaskSymbolNetlistLine attribute")
+
+            # Create a mapping for all replacements at once
+            replacements = {}
+
+            # Add label replacements
+            replacements.update({label.labelName: label.labelValue for label in
+                                 elementSymbol.labels.values()})
+
+            # Add attribute replacements
+            replacements.update(
+                {f"%{attr}": value for attr, value in elementSymbol.symattrs.items()})
+
+            # Add pin list replacement
+            pin_list = f'({" ".join(elementSymbol.pinNetMap.values())})'
+            replacements["@pinList"] = pin_list
+
+            # Perform all replacements in one pass
+            for old, new in replacements.items():
+                netlist_line = netlist_line.replace(old, new)
+
+            return netlist_line + "\n"
+
+        except Exception as e:
+            raise Exception(f"Error creating Vacask netlist line: {str(e)}")
+
+    # def createVacaskSymbolLine(self, elementSymbol: shp.schematicSymbol):
+    #     """
+    #     Create a netlist line from a nlp device format line.
+    #     """
+    #     try:
+    #         vacaskNetlistFormatLine = elementSymbol.symattrs[
+    #             "VacaskSymbolNetlistLine"].strip()
+    #
+    #         # Process labels
+    #         for labelItem in elementSymbol.labels.values():
+    #             vacaskNetlistFormatLine = vacaskNetlistFormatLine.replace(labelItem.labelName,
+    #                                                                   labelItem.labelValue)
+    #
+    #         # Process attributes
+    #         for attrb, value in elementSymbol.symattrs.items():
+    #             vacaskNetlistFormatLine = vacaskNetlistFormatLine.replace(f"%{attrb}", value)
+    #         # Add pin list with parantheses
+    #         pinList = f'({" ".join(elementSymbol.pinNetMap.values())})'
+    #         xyceNetlistFormatLine = (
+    #                     vacaskNetlistFormatLine.replace("@pinList", pinList) + "\n")
+    #
+    #         return vacaskNetlistFormatLine
+    #
+    #     except Exception as e:
+    #         self._scene.logger.error(
+    #             f"Error creating netlist line for {elementSymbol.instanceName}: {e}")
+    #         return (
+    #             f"*Netlist line is not defined for symbol of {elementSymbol.instanceName}\n")
+
+
+    def createVerilogaLine(self, elementSymbol):
+        """
+        Create a netlist line from a nlp device format line.
+        """
+        try:
+            verilogaNetlistFormatLine = elementSymbol.symattrs[
+                "XyceVerilogaNetlistLine"].strip()
+            for labelItem in elementSymbol.labels.values():
+                if labelItem.labelName in verilogaNetlistFormatLine:
+                    verilogaNetlistFormatLine = verilogaNetlistFormatLine.replace(
+                        labelItem.labelName, labelItem.labelValue)
+
+            for attrb, value in elementSymbol.symattrs.items():
+                if f"%{attrb}" in verilogaNetlistFormatLine:
+                    verilogaNetlistFormatLine = verilogaNetlistFormatLine.replace(
+                        f"%{attrb}", value)
+            pinList = " ".join(elementSymbol.pinNetMap.values())
+            verilogaNetlistFormatLine = (
+                    verilogaNetlistFormatLine.replace("@pinList", pinList) + "\n")
+            self.vamodelLines.add(elementSymbol.symattrs.get("vaModelLine",
+                                                             "* no model line is found for {item.cellName}").strip())
+            self.vahdlLines.add(elementSymbol.symattrs.get("vaHDLLine",
+                                                           "* no hdl line is found for {item.cellName}").strip())
+            return verilogaNetlistFormatLine
+        except Exception as e:
+            self._scene.logger.error(e)
+            self._scene.logger.error(
+                f"Netlist line is not defined for {elementSymbol.instanceName}")
+            # if there is no NLPDeviceFormat line, create a warning line
+            return (
+                f"*Netlist line is not defined for symbol of {elementSymbol.instanceName}\n")
