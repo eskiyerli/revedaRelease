@@ -280,6 +280,7 @@ class schematicEditor(edw.editorWindow):
                 try:
                     simmwModule = importlib.import_module("revedasim.simMainWindow",
                                                           str(self._app.revedasim_pathObj))
+                    
                     cellViewTuple = ddef.viewTuple(self.libItem.libraryName,
                                                    self.cellItem.cellName,
                                                    revbenchItem.viewName)
@@ -361,8 +362,8 @@ class schematicEditor(edw.editorWindow):
         netlistableViews = self._getNetlistableViews()
         dlg.viewNameCombo.addItems(netlistableViews)
 
-        if hasattr(self.appMainW, "simulationOutPath"):
-            dlg.netlistDirEdit.setText(str(self.appMainW.simulationOutPath))
+        if hasattr(self.appMainW, "outputPrefixPath"):
+            dlg.netlistDirEdit.setText(str(self.appMainW.outputPrefixPath))
 
         if dlg.exec() == QDialog.Accepted:
             self._startNetlisting(dlg)

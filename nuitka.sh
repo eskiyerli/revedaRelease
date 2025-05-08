@@ -11,8 +11,7 @@
 #
 #    For purposes of the foregoing, “Sell” means practicing any or all of the rights
 #    granted to you under the License to provide to third parties, for a fee or other
-#    consideration (including without limitation fees for hosting or consulting/
-#    support services related to the Software), a product or service whose value
+#    consideration (including without limitation fees for hosting) a product or service whose value
 #    derives, entirely or substantially, from the functionality of the Software. Any
 #    license notice or attribution required by the License must also include this
 #    Commons Clause License Condition notice.
@@ -27,4 +26,5 @@
 #
 
 #python -m nuitka --standalone reveda.py --enable-plugin=pyside6 --include-package=socket,queue  --include-data-dir=./docs=docs/ --include-data-files=.env=. --include-data-files=revinit.py=. --include-data-files=README.md=. --include-data-files=LICENSE.txt=. --include-package=pdk --include-data-dir=exampleLibraries=./exampleLibraries
-python -m nuitka reveda.py --standalone --enable-plugin=pyside6 --include-package=socket,queue,pdk,numpy --include-data-files=./pdk/sg13g2_tech.json=./pdk/sg13g2_tech.json
+python -m nuitka reveda.py --standalone --enable-plugin=pyside6 --include-package=socket,
+queue,ihp_pdk,numpy --include-data-files=./ihp_pdk/sg13g2_tech.json=./ihp_pdk/sg13g2_tech.json

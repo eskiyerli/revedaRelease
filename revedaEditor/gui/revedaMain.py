@@ -162,10 +162,10 @@ class MainWindow(QMainWindow):
             else:
                 self.runPath = pathlib.Path.cwd()
             if hasattr(self._app, "revedaPdkPathObj"):
-                self.simulationInpPath = self._app.revedaPdkPathObj
+                self.pdkPath = self._app.revedaPdkPathObj
             else:
-                self.simulationInpPath = self.runPath / self.PATHS["defaultPDK"]
-            self.simulationOutPath = self.runPath.parent / self.PATHS['testbenches']
+                self.pdkPath = self.runPath / self.PATHS["defaultPDK"]
+            self.outputPrefixPath = self.runPath.parent / self.PATHS['testbenches']
             self.libraryPathObj = self.runPath / self.PATHS['library']
             self.confFilePath = self.runPath / self.PATHS['config']
         except Exception as e:
@@ -361,8 +361,8 @@ class MainWindow(QMainWindow):
         # Set initial values more efficiently using a dictionary
         initial_values = {
             'rootPathEdit': str(self.runPath),
-            'simInpPathEdit': str(self.simulationInpPath),
-            'simOutPathEdit': str(self.simulationOutPath),
+            'simInpPathEdit': str(self.pdkPath),
+            'simOutPathEdit': str(self.outputPrefixPath),
             'switchViewsEdit': ", ".join(self.switchViewList),
             'stopViewsEdit': ", ".join(self.stopViewList)
         }
@@ -383,8 +383,8 @@ class MainWindow(QMainWindow):
 
             # Update paths
             self.runPath = pathlib.Path(text_values['rootPathEdit'])
-            self.simulationInpPath = pathlib.Path(text_values['simInpPathEdit'])
-            self.simulationOutPath = pathlib.Path(text_values['simOutPathEdit'])
+            self.pdkPath = pathlib.Path(text_values['simInpPathEdit'])
+            self.outputPrefixPath = pathlib.Path(text_values['simOutPathEdit'])
 
             # Process lists in a more compact way
             self.switchViewList = [x.strip() for x in text_values['switchViewsEdit'].split(',')]
@@ -553,7 +553,7 @@ class MainWindow(QMainWindow):
         warning.setDefaultButton(QMessageBox.Yes)
         ret = warning.exec()
         if ret == QMessageBox.Yes:
-            
+
             libDialog = QFileDialog(self, "Select Parent Directory", self.runPath)
             libDialog.setFileMode(QFileDialog.Directory)
             if libDialog.exec() == QDialog.Accepted:
@@ -596,8 +596,8 @@ class MainWindow(QMainWindow):
             # Define default values and paths in a dictionary
             path_settings = {
                 'runPath': ('runPath', self.runPath),
-                'simulationInpPath': ('simulationInpPath', self.simulationInpPath),
-                'simulationOutPath': ('simulationOutPath', self.simulationOutPath)
+                'pdkPath': ('pdkPath', self.pdkPath),
+                'outputPrefixPath': ('outputPrefixPath', self.outputPrefixPath)
             }
 
             # Update paths
@@ -620,8 +620,8 @@ class MainWindow(QMainWindow):
     #             items = json.load(f)
     #         if items:
     #             self.runPath = pathlib.Path(items.get("runPath", os.getcwd()))
-    #             self.simulationInpPath = pathlib.Path(items.get("simulationInpPath", self.simulationInpPath))
-    #             self.simulationOutPath = pathlib.Path(items.get("simulationOutPath", self.simulationInpPath))
+    #             self.pdkPath = pathlib.Path(items.get("pdkPath", self.pdkPath))
+    #             self.outputPrefixPath = pathlib.Path(items.get("outputPrefixPath", self.pdkPath))
     #             if items.get("switchViewList")[0] != "":
     #                 self.switchViewList = items.get("switchViewList", "")
     #             if items.get("stopViewList")[0] != "":
@@ -630,8 +630,8 @@ class MainWindow(QMainWindow):
     def saveState(self):
         items = {
             "runPath": str(self.runPath),
-            "simulationInpPath": str(self.simulationInpPath),
-            "simulationOutPath": str(self.simulationOutPath),
+            "pdkPath": str(self.pdkPath),
+            "outputPrefixPath": str(self.outputPrefixPath),
             "switchViewList": self.switchViewList,
             "stopViewList": self.stopViewList,
         }
@@ -649,9 +649,9 @@ class MainWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             if not self.threadPool.waitForDone(5000):
                 self.threadPool.clear()
-            # for item in self.app.topLevelWidgets():
-            #     item.close()
-            self.app.closeAllWindows()
+            for item in self.app.topLevelWidgets():
+                item.close()
+            # self.app.closeAllWindows()
         else:
             event.ignore()
 
@@ -666,7 +666,9 @@ class MainWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             if not self.threadPool.waitForDone(5000):
                 self.threadPool.clear()
-            self.app.closeAllWindows()
+            for item in self.app.topLevelWidgets():
+                item.close()
+            # self.app.closeAllWindows()
 
 
     @Slot()

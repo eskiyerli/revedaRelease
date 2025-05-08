@@ -27,8 +27,9 @@
 # The PySide6 plugin covers qt-plugins
 # nuitka-project: --standalone
 # nuitka-project: --windows-console-mode=attach
-# nuitka-project: --include-plugin-directory=revedaEditor
-# nuitka-project: --nofollow-import-to= defaultPDK, revedasim, revedaPlot, ihp_pdk, gf180_pdk
+# nuitka-project: --include-package=revedaEditor
+# nuitka-project: --include-package=revedasim
+# nuitka-project: --nofollow-import-to= defaultPDK, revedaPlot, ihp_pdk, gf180_pdk
 # nuitka-project: --enable-plugin=pyside6
 # nuitka-project: --product-version="0.7.9"
 # nuitka-project: --linux-icon=./logo-color.png
