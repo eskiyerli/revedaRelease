@@ -25,7 +25,6 @@
 import json
 from typing import List
 import pathlib
-import time
 import datetime
 from copy import deepcopy
 
@@ -46,7 +45,6 @@ import revedaEditor.gui.propertyDialogues as pdlg
 import revedaEditor.scenes.schematicScene as schscn
 from revedaEditor.gui.startThread import startThread
 
-import importlib
 
 
 class schematicEditor(edw.editorWindow):
@@ -124,7 +122,7 @@ class schematicEditor(edw.editorWindow):
         self.simulationMenu.addAction(self.netlistAction)
         self.editorMenuBar.insertMenu(self.menuHelp.menuAction(), self.simulationMenu)
         # self.menuHelp = self.editorMenuBar.addMenu("&Help")
-        if self._app.revedasim_path:
+        if self._app.plugins.get('plugins.revedasim'):
             self.simulationMenu.addAction(self.simulateAction)
 
     def _createTriggers(self):
@@ -241,8 +239,9 @@ class schematicEditor(edw.editorWindow):
 
     def startSimClick(self, s):
         try:
-            simdlg = importlib.import_module("revedasim.dialogueWindows",
-                                             str(self._app.revedasim_pathObj))
+            # simdlg = importlib.import_module("revedasim.dialogueWindows",
+            #                                  str(self._app.revedasim_pathObj))
+            simdlg = self._app.plugins.get('plugins.revedasim').dialogueWindows
             revbenchdlg = simdlg.createRevbenchDialogue(self, self.libraryView.libraryModel,
                                                         self.cellItem)
             revbenchdlg.libNamesCB.setCurrentText(self.libName)
@@ -277,10 +276,12 @@ class schematicEditor(edw.editorWindow):
                             json.dump(items, benchFile, indent=4)
                 except Exception as e:
                     self.logger.error(f"Error during simulation setup: {e}")
-                try:
-                    simmwModule = importlib.import_module("revedasim.simMainWindow",
-                                                          str(self._app.revedasim_pathObj))
-                    
+                
+                    # simmwModule = importlib.import_module("revedasim.simMainWindow",
+                    #                                       str(self._app.revedasim_pathObj))
+            
+                simmwModule = self._app.plugins.get('plugins.revedasim')
+                if simmwModule:
                     cellViewTuple = ddef.viewTuple(self.libItem.libraryName,
                                                    self.cellItem.cellName,
                                                    revbenchItem.viewName)
@@ -292,8 +293,9 @@ class schematicEditor(edw.editorWindow):
                                                           self.libraryView)
                         self.appMainW.openViews[cellViewTuple] = simmw
                     simmw.show()
-                except (ImportError, NameError):
-                    self.logger.error("Reveda SAE is not installed.")
+                else:
+                    self.logger.error('Revedasim plugin is not installed.')
+
 
         except ImportError or NameError:
             self.logger.error("Reveda SAE is not installed.")

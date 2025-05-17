@@ -52,7 +52,7 @@ from revedaEditor.gui.configEditor import configViewEdit
 class libraryBrowser(QMainWindow):
     def __init__(self, appMainW: QMainWindow) -> None:
         super().__init__()
-        self.resize(300, 600)
+        self.resize(600, 600)
         self.appMainW = appMainW
         self._app = QApplication.instance()
         self.libraryDict = self.appMainW.libraryDict
@@ -376,38 +376,37 @@ class libraryBrowser(QMainWindow):
         return configWindow
 
     def openRevbenchWindow(self, libItem, cellItem, viewItem):
-        if self._app.revedasim_path:
-            try:
-                simdlg = importlib.import_module("revedasim.dialogueWindows",
-                    str(self._app.revedasim_pathObj), )
-                revbenchdlg = simdlg.createRevbenchDialogue(self, self.libraryModel,
-                    cellItem, viewItem)
-                # hide view name dialog not to confuse the user.
-                revbenchdlg.benchBox.setVisible(False)
-                revbenchdlg.mainLayout.update()
-                if revbenchdlg.exec() == QDialog.Accepted:
-                    items = []
-                    libraryName = libItem.data(Qt.UserRole + 2).name
-                    cellName = cellItem.data(Qt.UserRole + 2).name
-                    items.append({"viewType": "revbench"})
-                    items.append({"libraryName": libraryName})
-                    items.append({"cellName": cellName})
-                    items.append({"designName": revbenchdlg.viewCB.currentText()})
-                    items.append({"settings": []})
-                    with viewItem.data(Qt.UserRole + 2).open(mode="w") as benchFile:
-                        json.dump(items, benchFile, indent=4)
-                    try:
-                        simmwModule = importlib.import_module("revedasim.simMainWindow",
-                            str(self._app.revedasim_pathObj), )
-                        simmw = simmwModule.SimMainWindow(viewItem, self.libraryModel,
-                            self.designView)
-                        simmw.show()
-                    except (ImportError, NameError) as e:
-                        self.logger.error("Reveda SAE is not installed.")
-                        self.logger.error(f"Import Error: {e}")
-            except (ImportError, NameError) as e:
-                self.logger.error("No license for Reveda SAE")
-                self.logger.error(f"Import Error: {e}")
+        if self._app.plugins.get('plugins.revedasim'):
+            simdlg = self._app.plugins['plugins.revedasim'].dialogueWindows
+            # simdlg = importlib.import_module("revedasim.dialogueWindows",
+            #     str(self._app.revedasim_pathObj), )
+            revbenchdlg = simdlg.createRevbenchDialogue(self, self.libraryModel,
+                cellItem, viewItem)
+            # hide view name dialog not to confuse the user.
+            revbenchdlg.benchBox.setVisible(False)
+            revbenchdlg.mainLayout.update()
+            if revbenchdlg.exec() == QDialog.Accepted:
+                items = []
+                libraryName = libItem.data(Qt.UserRole + 2).name
+                cellName = cellItem.data(Qt.UserRole + 2).name
+                items.append({"viewType": "revbench"})
+                items.append({"libraryName": libraryName})
+                items.append({"cellName": cellName})
+                items.append({"designName": revbenchdlg.viewCB.currentText()})
+                items.append({"settings": []})
+                with viewItem.data(Qt.UserRole + 2).open(mode="w") as benchFile:
+                    json.dump(items, benchFile, indent=4)
+
+                # simmwModule = importlib.import_module("revedasim.simMainWindow",
+                #     str(self._app.revedasim_pathObj), )
+                simmwModule = self._app.plugins['plugins.revedasim.simMainWindow']
+                simmw = simmwModule.SimMainWindow(viewItem, self.libraryModel,
+                    self.designView)
+                simmw.show()
+        else:
+            self.logger.error("Reveda SAE is not installed.")
+            self.logger.error(f"Import Error: {e}")
+
 
     def selectCellView(self, libModel) -> libb.viewItem:
         dlg = fd.selectCellViewDialog(self, libModel)
@@ -505,20 +504,24 @@ class libraryBrowser(QMainWindow):
                     self.appMainW.openViews[openCellViewTuple] = configWindow
                     configWindow.show()
                 case "revbench":
-                    if self._app.revedasim_pathObj:
-                        try:
-                            simmwModule = importlib.import_module("revedasim.simMainWindow",
-                                str(self._app.revedasim_pathObj), )
-                            simmw = simmwModule.SimMainWindow(viewItem, self.libraryModel,
-                                self.designView)
-                            self.appMainW.openViews[openCellViewTuple] = simmw
-                            simmw.show()
-                            
-                        except (ImportError, NameError) as e:
-                            self.logger.error("Reveda SAE is not installed.")
-                            self.logger.error(e)
+                    # if self._app.revedasim_pathObj:
+                    #     try:
+                    if self._app.plugins.get('plugins.revedasim'):
+                        # simmwModule = importlib.import_module("revedasim.simMainWindow",
+                        #     str(self._app.revedasim_pathObj), )
+                        simmwModule = self._app.plugins['plugins.revedasim'].simMainWindow
+                        simmw = simmwModule.SimMainWindow(viewItem, self.libraryModel,
+                            self.designView)
+                        self.appMainW.openViews[openCellViewTuple] = simmw
+                        simmw.show()
                     else:
-                        self.logger.error("No license for Reveda SAE")
+                        self.logger.error("Reveda SAE is not installed.")
+
+                    #     except (ImportError, NameError) as e:
+                    #         self.logger.error("Reveda SAE is not installed.")
+                    #         self.logger.error(e)
+                    # else:
+                    #     self.logger.error("No license for Reveda SAE")
                 case _:
                     pass
         return openCellViewTuple
@@ -558,6 +561,7 @@ class libraryBrowserContainer(QWidget):
 
     def initUI(self):
         self.layout = QVBoxLayout()
+        # self.designView = lmview.designLibrariesView(self)
         self.designView = lmview.designLibrariesView(self)
         self.layout.addWidget(self.designView)
         self.setLayout(self.layout)

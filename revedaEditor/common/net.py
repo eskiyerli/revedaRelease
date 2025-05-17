@@ -364,7 +364,6 @@ class schematicNet(QGraphicsItem):
                 case 2 | 3:  # INHERIT or SET
                     resolve_name(self, otherNet)
                     return True
-            
 
         if self_strength == 0:  # NONAME
             if other_strength > 0:
@@ -585,13 +584,12 @@ class netName(QGraphicsSimpleTextItem):
             self.setRotation(self._parent.angle)
             self._draftLineCenter = self._parent.draftLine.center()
 
-    def setSelected(self, selected):
-        super().setSelected(selected)
-        if selected:
-            self.setBrush(schlyr.selectedWireBrush)
+    def paint(self, painter, option, widget, /):
+        if self._nameStrength == netNameStrengthEnum.SET:
+            super().paint(painter, option, widget)
         else:
-            self.setBrush(schlyr.wireBrush)
-        self.update()
+            # Do not paint the name if the strength is not SET
+            pass
 
     @property
     def nameConflict(self) -> bool:
@@ -626,10 +624,11 @@ class netName(QGraphicsSimpleTextItem):
         self.prepareGeometryChange()
         self.setText(value)
         self.setRotation(self._parent.angle)
-        if self._nameStrength == netNameStrengthEnum.SET:
-            self.setVisible(True)
-        else:
-            self.setVisible(False)
+        self.parentItem().update()
+        # if self._nameStrength == netNameStrengthEnum.SET:
+        #     self.setVisible(True)
+        # else:
+        #     self.setVisible(False)
 
     @property
     def parent(self):

@@ -26,29 +26,31 @@
 #    nuitka-project: --macos-create-app-bundle
 # The PySide6 plugin covers qt-plugins
 # nuitka-project: --standalone
-# nuitka-project: --windows-console-mode=attach
-# nuitka-project: --include-package=revedaEditor
-# nuitka-project: --include-package=revedasim
-# nuitka-project: --nofollow-import-to= defaultPDK, revedaPlot, ihp_pdk, gf180_pdk
 # nuitka-project: --enable-plugin=pyside6
+# nuitka-project: --nofollow-import-to=defaultPDK, gf180_pdk,
+# nuitka-project: --include-data-dir=compiled_plugins=plugins
+# nuitka-project: --output-dir=dist
 # nuitka-project: --product-version="0.7.9"
 # nuitka-project: --linux-icon=./logo-color.png
 # nuitka-project: --windows-icon-from-ico=./logo-color.png
 # nuitka-project: --company-name="Revolution EDA"
 # nuitka-project: --file-description="Electronic Design Automation Software for Professional Custom IC Design Engineers"
 
+# import time
+import importlib
 import os
+import pkgutil
 import platform
 import sys
-from PySide6.QtWidgets import QApplication
-from typing import Optional
-# import time
-
-import revedaEditor.gui.revedaMain as rvm
-import revedaEditor.gui.pythonConsole as pcon
-from contextlib import redirect_stdout, redirect_stderr
-from dotenv import load_dotenv
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from typing import Optional
+import logging
+from dotenv import load_dotenv
+from PySide6.QtWidgets import QApplication
+
+import revedaEditor.gui.pythonConsole as pcon
+import revedaEditor.gui.revedaMain as rvm
 
 
 class revedaApp(QApplication):
@@ -59,22 +61,45 @@ class revedaApp(QApplication):
     Returns:
         None
     """
+    LOGGER = "reveda"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Load environment variables
+        
+        # Load environment variables and setup paths
         load_dotenv()
         reveda_runpathObj = Path(__file__).resolve().parent
-        self.revedaeditor_path = None
-        self.revedasim_path = None
-        self.reveda_pdk_path = None
+        
+        # Initialize logger
+        self.logger = logging.Logger(self.LOGGER)
+        f_handler = logging.FileHandler("reveda.log")
+        f_handler.setLevel(logging.INFO)
+        f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        f_handler.setFormatter(f_format)
+        self.logger.addHandler(f_handler)
+        # Setup paths and plugins
         self.setPaths(reveda_runpathObj)
+        self.plugins = {}
+        
+        # Plugin setup
+        plugin_dir = reveda_runpathObj / "plugins"
+        if plugin_dir not in sys.path:
+            sys.path.insert(0, str(plugin_dir))
+        self.discover_plugins(plugin_dir)
+        
+        # Log loaded plugins
+        self.logger.info(f"Loaded plugins: {self.plugins}")
+
+    def discover_plugins(self, plugin_dir):
+        for finder, name, ispkg in pkgutil.iter_modules([plugin_dir]):
+            module = importlib.import_module(name)
+            self.plugins[f'{plugin_dir.name}.{name}'] = module
 
     def _resolve_path(self, env_path: str | None, base_path: Path, env_var_name: str) -> Path | None:
         """Helper method to resolve and validate a path from environment variable."""
         if not env_path:
             return None
-            
+
         try:
             path_obj = Path(env_path)
             if path_obj.is_absolute():
@@ -90,34 +115,12 @@ class revedaApp(QApplication):
             return None
 
     def setPaths(self, reveda_runpathObj: Path) -> None:
-        """
-        Set the paths to revedaeditor, revedasim, and PDK components.
-        
-        Args:
-            reveda_runpathObj: Base path object for resolving relative paths
-            
-        Raises:
-            ValueError: If reveda_runpathObj is None or not a Path object
-        """
+
         if not isinstance(reveda_runpathObj, Path):
             raise ValueError("reveda_runpathObj must be a Path object")
             
         if not reveda_runpathObj.exists():
             raise ValueError(f"Base path does not exist: {reveda_runpathObj}")
-
-        # Resolve revedaeditor path
-        self.revedaeditor_path = os.environ.get("REVEDAEDIT_PATH", str(Path.cwd()))
-        self.revedaeditor_pathObj = self._resolve_path(
-            self.revedaeditor_path, reveda_runpathObj, "REVEDAEDIT_PATH"
-        )
-
-        # Resolve revedasim path
-        self.revedasim_path = os.environ.get("REVEDASIM_PATH")
-        self.revedasim_pathObj = self._resolve_path(
-            self.revedasim_path, reveda_runpathObj, "REVEDASIM_PATH"
-        )
-        if self.revedasim_pathObj:
-            sys.path.append(str(self.revedasim_pathObj))
 
         # Resolve PDK path
         self.reveda_pdk_path = os.environ.get("REVEDA_PDK_PATH")
@@ -128,14 +131,13 @@ class revedaApp(QApplication):
             sys.path.append(str(self.revedaPdkPathObj))
 
 
-OS_STYLE_MAP = {"Windows": "Fusion", "Linux": "Fusion", "Darwin": "macOS"}
-
-
 def initialize_app(argv) -> tuple[revedaApp, Optional[str]]:
     """Initialize application and determine style"""
+    OS_STYLE_MAP = {"Windows": "Fusion", "Linux": "Fusion", "Darwin": "macOS"}
     app = revedaApp(argv)
     style = OS_STYLE_MAP.get(platform.system())
     return app, style
+
 
 
 def main():

@@ -258,16 +258,20 @@ class schematicItems:
         end = QPoint(item["end"][0], item["end"][1])
         width = item.get('w',0)
         netItem = net.schematicNet(start, end, width)
+        netItem.name = item["nam"]
         match item["ns"]:
             case 3:
+
                 netItem.nameStrength = net.netNameStrengthEnum.SET
             case 2:
+
                 netItem.nameStrength = net.netNameStrengthEnum.INHERIT
             case 1:
+
                 netItem.nameStrength = net.netNameStrengthEnum.WEAK
             case _:
                 netItem.nameStrength = net.netNameStrengthEnum.NONAME
-        netItem.name = item["nam"]
+
         return netItem
 
     def _createSymbolShape(self, item):

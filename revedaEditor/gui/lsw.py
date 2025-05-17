@@ -38,7 +38,6 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (QTableView, QMenu, QGraphicsItem, )
 import numpy as np
 import os
-from dotenv import load_dotenv
 from revedaEditor.backend.pdkPaths import importPDKModule
 fabproc = importPDKModule('process')
 laylyr = importPDKModule('layoutLayers')

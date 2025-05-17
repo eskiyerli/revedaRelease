@@ -26,6 +26,7 @@
 import pathlib
 from contextlib import contextmanager
 import time
+from logging import getLogger
 from PySide6.QtCore import (Qt, QSize, Signal,)
 from PySide6.QtGui import (QAction, QIcon, QImage, QKeySequence, QPainter,)
 from PySide6.QtPrintSupport import QPrintDialog, QPrinter, QPrintPreviewDialog
@@ -45,6 +46,7 @@ class editorWindow(QMainWindow):
     """
     Base class for editor windows.
     """
+    MAIN_LOGGER = "reveda"
 
 
     def __init__(self, viewItem: libb.viewItem, libraryDict: dict,
@@ -53,7 +55,7 @@ class editorWindow(QMainWindow):
         self.centralW = None
         self.viewItem = viewItem
         self.file: pathlib.Path = self.viewItem.data(Qt.UserRole + 2)  # pathlib Path object
-        self.cellItem = self.viewItem.parent()
+        self.cellItem: libb.cellItem = self.viewItem.parent()
         self.cellName = self.cellItem.cellName
         self.libItem = self.cellItem.parent()
         self.libName: str = self.libItem.libraryName
@@ -65,7 +67,7 @@ class editorWindow(QMainWindow):
         self._app = QApplication.instance()  # main application pointer
         # self.appMainW = self.libraryView.parent.parent.appMainW
         self.appMainW = self._app.mainW
-        self.logger = self.appMainW.logger
+        self.logger = getLogger(self.MAIN_LOGGER)
         self.switchViewList = self.appMainW.switchViewList
         self.stopViewList = self.appMainW.stopViewList
         self.statusLine = self.statusBar()
@@ -694,7 +696,7 @@ class editorWindow(QMainWindow):
     def _createSignalConnections(self):
         self.centralW.scene.selectionChanged.connect(self.appMainW.selectionChangedScene)
         self.centralW.view.keyPressedSignal.connect(self.appMainW.viewKeyPressed)
-        
+
 
     @contextmanager
     def measureDuration(self):

@@ -21,10 +21,9 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 import json
-import logging
-import logging.config
 import pathlib
 import shutil
+import logging
 from typing import List, Dict
 from PySide6.QtCore import (QThreadPool, QThread, Slot, Signal, QTimer, QObject, QSize)
 from PySide6.QtGui import (
@@ -99,7 +98,6 @@ class MainWindow(QMainWindow):
         'switch': frozenset({"schematic", "veriloga", "spice", "symbol"}),
         'stop': frozenset({"symbol"})
     }
-    APP_LOGGER_NAME = "reveda"
     PATHS = {
         'defaultPDK': "defaultPDK",
         'testbenches': "testbenches",
@@ -121,6 +119,7 @@ class MainWindow(QMainWindow):
         self._init_data_structures()
         self._init_paths()
         self._init_app_components()
+        self.logger_def()
 
     def _init_window(self) -> None:
         """Initialize window properties and UI components."""
@@ -176,7 +175,7 @@ class MainWindow(QMainWindow):
         try:
             # Core application components
             self.app = QApplication.instance()
-            self.logger = logging.getLogger(self.APP_LOGGER_NAME)
+            self.logger = self.app.logger
 
             # Library components
             self.libraryDict = self.readLibDefFile(self.libraryPathObj)
@@ -186,7 +185,7 @@ class MainWindow(QMainWindow):
             self._setup_thread_pool()
 
             # Final initialization
-            self.logger_def()
+
             self.loadState()
         except Exception as e:
             self._handle_init_error("Application component initialization failed", e)
@@ -206,42 +205,14 @@ class MainWindow(QMainWindow):
             self.logger.error(f"{message}: {str(error)}")
         raise RuntimeError(f"{message}: {str(error)}")
 
-#
-#
-# class MainWindow(QMainWindow):
-#     sceneSelectionChanged = Signal(QGraphicsScene)
-#     keyPressedView = Signal(int)
-#
-#
-#     def __init__(self):
-#         super().__init__()
-#         self.resize(900, 300)
-#         self._createActions()
-#         self._createMenuBar()
-#         self._createTriggers()
-#
-#         self.switchViewList = ["schematic", "veriloga", "spice", "symbol"]
-#         self.stopViewList = ["symbol"]
-#         self.openViews = dict()
-#         # create container to position all widgets
-#         self.centralW = mainwContainer(self)
-#         self.setCentralWidget(self.centralW)
-#         self.mainW_statusbar = self.statusBar()
-#         self.mainW_statusbar.showMessage("Ready")
-#         self.app = QApplication.instance()
-#         self.logger = logging.getLogger("reveda")
-#         # library definition file path
-#         self.runPath = pathlib.Path.cwd()  # all paths should refer to this
-#         self.simulationOutputPath = self.runPath.parent / "testbenches"  # good default
-#         # look for library.json file where the script is invoked
-#         self.libraryPathObj = self.runPath.joinpath("library.json")
-#         self.libraryDict = self.readLibDefFile(self.libraryPathObj)
-#         self.libraryBrowser = libw.libraryBrowser(self)
-#         self.threadPool = QThreadPool.globalInstance()
-#         self.confFilePath = self.runPath.joinpath("reveda.conf")
-#         self.logger_def()
-#         # now check the configuration file
-#         self.loadState()
+    def logger_def(self):
+
+        c_handler = logging.StreamHandler(stream=self.centralW.console)
+        c_handler.setLevel(logging.INFO)
+        c_format = logging.Formatter("%(levelname)s - %(message)s")
+        c_handler.setFormatter(c_format)
+        self.logger.addHandler(c_handler)
+
 
     def _createMenuBar(self):
         self.mainW_menubar = self.menuBar()
@@ -322,39 +293,6 @@ class MainWindow(QMainWindow):
         self.libraryBrowser.show()
         self.libraryBrowser.raise_()
 
-    def logger_def(self):
-        logging.basicConfig(level=logging.INFO)
-
-        c_handler = logging.StreamHandler(stream=self.centralW.console)
-        c_handler.setLevel(logging.INFO)
-        c_format = logging.Formatter("%(levelname)s - %(message)s")
-        c_handler.setFormatter(c_format)
-        f_handler = logging.FileHandler("reveda.log")
-        f_handler.setLevel(logging.INFO)
-        f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-        f_handler.setFormatter(f_format)
-        self.logger.addHandler(c_handler)
-        self.logger.addHandler(f_handler)
-
-
-    # def optionsClick(self):
-    #     dlg = fd.appProperties(self)
-    #     dlg.runPathEdit.setText(str(self.runPath))
-    #     dlg.simOutPathEdit.setText(str(self.simulationOutputPath))
-    #     dlg.switchViewsEdit.setText(", ".join(self.switchViewList))
-    #     dlg.stopViewsEdit.setText(", ".join(self.stopViewList))
-    #
-    #     if dlg.exec() == QDialog.Accepted:
-    #         self.runPath = pathlib.Path(dlg.runPathEdit.text())
-    #         self.simulationOutputPath = pathlib.Path(dlg.simOutPathEdit.text())
-    #         self.switchViewList = [
-    #             switchView.strip() for switchView in dlg.switchViewsEdit.text().split(",")
-    #         ]
-    #         self.stopViewList = [
-    #             stopView.strip() for stopView in dlg.stopViewsEdit.text().split(",")
-    #         ]
-    #         if dlg.optionSaveBox.isChecked():
-    #             self.saveState()
     def optionsClick(self):
         dlg = fd.appProperties(self)
 

@@ -1606,35 +1606,6 @@ class schematicScene(editorScene):
                         netItem.nameStrength = snet.netNameStrengthEnum.SET
         return schemPinConNetsSet
 
-    #
-    # def findSchPinNets(self) -> set[snet.schematicNet]:
-    #     # nets connected to schematic pins.
-    #     schemPinConNetsSet = set()
-    #     sceneSchemPinsSet = self.findSceneSchemPinsSet()
-    #     for sceneSchemPin in sceneSchemPinsSet:
-    #         pinNetSet = {
-    #             netItem
-    #             for netItem in self.items(sceneSchemPin.sceneBoundingRect())
-    #             if isinstance(netItem, snet.schematicNet)
-    #         }
-    #         for netItem in pinNetSet:
-    #             if netItem.nameStrength.value == 3:
-    #                 if netItem.name == sceneSchemPin.pinName:
-    #                     schemPinConNetsSet.add(netItem)
-    #                 else:
-    #                     netItem.nameConflict = True
-    #                     self.logger.error(
-    #                         f"Net name conflict at {sceneSchemPin.pinName} of "
-    #                         f"{sceneSchemPin.parent().instanceName}."
-    #                     )
-    #             else:
-    #                 schemPinConNetsSet.add(netItem)
-    #                 netItem.name = sceneSchemPin.pinName
-    #                 netItem.nameStrength = snet.netNameStrengthEnum.INHERIT
-    #             netItem.update()
-    #         schemPinConNetsSet.update(pinNetSet)
-    #     return schemPinConNetsSet
-
     # Net grouping methods
     def groupNamedNets(
         self,

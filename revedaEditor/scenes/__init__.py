@@ -21,3 +21,7 @@
 #    License: Mozilla Public License 2.0
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
+from . import editorScene
+from . import layoutScene
+from . import schematicScene
+from . import symbolScene
