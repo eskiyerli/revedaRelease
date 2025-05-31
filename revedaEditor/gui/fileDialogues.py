@@ -47,6 +47,8 @@ from PySide6.QtWidgets import (
     QCheckBox,
 )
 import pathlib
+import datetime
+
 
 
 class createCellDialog(QDialog):
@@ -134,31 +136,6 @@ class selectCellViewDialog(createCellDialog):
         self.viewCB.clear()
         self.viewCB.addItems(viewList)
 
-
-class createCellViewDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-        self.init_UI()
-
-    def init_UI(self):
-        self.setWindowTitle("Create CellView")
-        layout = QFormLayout(self)
-        layout.setSpacing(10)
-        self.viewComboBox = QComboBox()
-
-        self.nameEdit = QLineEdit()
-        self.nameEdit.setPlaceholderText("CellView Name")
-        self.nameEdit.setFixedWidth(200)
-
-        layout.addRow(edf.boldLabel("Select View:"), self.viewComboBox)
-        layout.addRow(edf.boldLabel("View Name:"), self.nameEdit)
-
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        layout.addRow(self.buttonBox)
-
-
 class renameCellDialog(QDialog):
     def __init__(self, parent, cellItem):
         super().__init__(parent=parent)
@@ -184,11 +161,9 @@ class renameCellDialog(QDialog):
 
 
 class copyCellDialog(QDialog):
-    def __init__(self, parent, model, cellItem):
+    def __init__(self, parent):
         super().__init__(parent=parent)
         self.parent = parent
-        self.model = model
-        self.cellItem = cellItem
 
         # self.index = 0
         self.init_UI()
@@ -197,13 +172,10 @@ class copyCellDialog(QDialog):
         self.setWindowTitle("Copy Cell")
         layout = QFormLayout()
         layout.setSpacing(10)
-        self.libraryComboBox = QComboBox()
-        self.libraryComboBox.setModel(self.model)
-        self.libraryComboBox.setModelColumn(0)
-        self.libraryComboBox.setCurrentIndex(0)
-        self.selectedLibPath = self.libraryComboBox.itemData(0, Qt.UserRole + 2)
-        self.libraryComboBox.currentTextChanged.connect(self.selectLibrary)
-        layout.addRow(edf.boldLabel("Library:"), self.libraryComboBox)
+        self.libraryCB = QComboBox()
+        self.selectedLibPath = self.libraryCB.itemData(0, Qt.UserRole + 2)
+        self.libraryCB.currentTextChanged.connect(self.selectLibrary)
+        layout.addRow(edf.boldLabel("Library:"), self.libraryCB)
         self.copyName = QLineEdit()
         self.copyName.setPlaceholderText("Enter Cell Name")
         self.copyName.setFixedWidth(130)
@@ -216,8 +188,8 @@ class copyCellDialog(QDialog):
         self.setLayout(layout)
 
     def selectLibrary(self):
-        self.selectedLibPath = self.libraryComboBox.itemData(
-            self.libraryComboBox.currentIndex(), Qt.UserRole + 2
+        self.selectedLibPath = self.libraryCB.itemData(
+            self.libraryCB.currentIndex(), Qt.UserRole + 2
         )
 
 
@@ -994,3 +966,29 @@ class xschemSymIimportDialogue(QDialog):
             symFileNames = fileDialog.selectedFiles()
             if symFileNames:
                 self.symFileEdit.setText(', '.join(symFileNames))
+
+class fileInfoDialogue(QDialog):
+    def __init__(self, filePath: pathlib.Path, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("File Information")
+        self.setMinimumSize(500, 200)
+        layout = QFormLayout(self)
+        # Get file stats
+        stats = filePath.stat()
+        created = datetime.datetime.fromtimestamp(stats.st_ctime)
+        modified = datetime.datetime.fromtimestamp(stats.st_mtime)
+        size = stats.st_size
+
+        layout.addRow("File:", QLabel(filePath.name))
+        layout.addRow("Path:", QLabel(str(filePath.absolute())))
+        layout.addRow("Size:", QLabel(f"{size:,} bytes"))
+        layout.addRow("Created:", QLabel(created.strftime("%Y-%m-%d %H:%M:%S")))
+        layout.addRow("Modified:", QLabel(modified.strftime("%Y-%m-%d %H:%M:%S")))
+        layout.addRow("Accessed:", QLabel(datetime.datetime.fromtimestamp(stats.st_atime).strftime("%Y-%m-%d %H:%M:%S")))
+        layout.addRow("Permissions:", QLabel(oct(stats.st_mode)[-3:]))
+        # layout.addRow("Owner:", QLabel(str(stats.st_uid)))
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
+        self.buttonBox.accepted.connect(self.accept)
+        layout.addWidget(self.buttonBox)
+
+        self.setLayout(layout)

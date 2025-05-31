@@ -51,7 +51,7 @@ class symbolEditor(edw.editorWindow):
             self,
             viewItem: libb.viewItem,
             libraryDict: dict,
-            libraryView: lmview.designLibrariesView,
+            libraryView: lmview.BaseDesignLibrariesView ,
     ):
         super().__init__(viewItem, libraryDict, libraryView)
         self.setWindowTitle(f"Symbol Editor - {self.cellName} - {self.viewName}")

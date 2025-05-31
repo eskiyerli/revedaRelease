@@ -50,7 +50,7 @@ class editorWindow(QMainWindow):
 
 
     def __init__(self, viewItem: libb.viewItem, libraryDict: dict,
-                 libraryView: lmview.designLibrariesView, ):  # file is a pathlib.Path object
+                 libraryView: lmview.BaseDesignLibrariesView, ):
         super().__init__()
         self.centralW = None
         self.viewItem = viewItem

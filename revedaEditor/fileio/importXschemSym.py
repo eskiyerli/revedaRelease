@@ -22,6 +22,7 @@
 #    Licensor: Revolution Semiconductor (Registered in the Netherlands)
 #
 import pathlib
+import re
 from pathlib import Path
 
 from PySide6.QtCore import (QPoint, QRect, )
@@ -38,8 +39,6 @@ from revedaEditor.backend.pdkPaths import importPDKModule
 
 cb = importPDKModule('callbacks')
 
-import re
-
 
 class importXschemSym:
     """
@@ -47,7 +46,7 @@ class importXschemSym:
     """
 
     def __init__(self, parent: QMainWindow, filePathObj: Path,
-            libraryView: lmview.designLibrariesView, libraryName: str, ):
+            libraryView: lmview.BaseDesignLibrariesView, libraryName: str, ):
         self.parent = parent
         self.filePathObj = filePathObj
         self.libraryView = libraryView

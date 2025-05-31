@@ -29,7 +29,7 @@ from pathlib import Path
 from PySide6.QtCore import (Qt, )
 from PySide6.QtGui import (QStandardItem, )
 from PySide6.QtWidgets import QMessageBox, QWidget
-from typing import Union
+from typing import Union, Optional
 
 
 class libraryItem(QStandardItem):
@@ -40,6 +40,7 @@ class libraryItem(QStandardItem):
         self.setEditable(False)
         self.setData(libraryPath, Qt.UserRole + 2)
         self.setData("library", Qt.UserRole + 1)
+        self.setData(self.libraryName, Qt.UserRole + 3)
 
     def type(self):
         return Qt.StandardItem.UserType
@@ -61,7 +62,7 @@ class libraryItem(QStandardItem):
             self._libraryPath = value
 
     @property
-    def libraryName(self):
+    def libraryName(self) -> str:
         return self._libraryName
 
 
@@ -73,6 +74,7 @@ class cellItem(QStandardItem):
         self.setEditable(False)
         self.setData("cell", Qt.UserRole + 1)
         self.setData(cellPath, Qt.UserRole + 2)
+        self.setData(self.cellName, Qt.UserRole + 3)
 
     def type(self):
         return QStandardItem.UserType + 1
@@ -87,15 +89,26 @@ class cellItem(QStandardItem):
     def cellName(self):
         return self._cellName
 
+    def clone(self):
+        """
+        Clone the cell item and return a new cell item with the same path.
+        """
+        newCellItem = cellItem(self.cellPath)
+        newCellItem.setData('clone', Qt.UserRole + 4)
+        newCellItem.setData(self, Qt.UserRole + 10)
+        return newCellItem
+
 
 class viewItem(QStandardItem):
     def __init__(self, viewPath: pathlib.Path) -> None:
         self.viewPath = viewPath
+        self.viewName = viewPath.stem
         super().__init__(self.viewPath.stem)
         self.setEditable(False)
         self.setData("view", Qt.UserRole + 1)
         # set the data to the item to be the path to the view.
         self.setData(viewPath, Qt.UserRole + 2)
+        self.setData(self.viewName, Qt.UserRole + 3)
 
     def type(self):
         return QStandardItem.UserType + 1
@@ -139,9 +152,15 @@ class viewItem(QStandardItem):
         else:
             return None
 
-    @property
-    def viewName(self):
-        return str(self.viewPath.stem)
+    def clone(self):
+        """
+        Clone the view item and return a new view item with the same path.
+        """
+        newViewItem = viewItem(self.viewPath)
+        newViewItem.setEditable(False)
+        newViewItem.setData('clone', Qt.UserRole + 4)
+        newViewItem.setData(self, Qt.UserRole + 10)
+        return newViewItem
 
 
 def createLibrary(parent, model, libraryDir: str, libraryName: str) -> libraryItem:
@@ -162,6 +181,7 @@ def createLibrary(parent, model, libraryDir: str, libraryName: str) -> libraryIt
             newLibraryItem = createNewLibraryItem(model, libraryPath)
             parent.logger.info(f"Created {libraryPath}")
     return newLibraryItem
+
 
 def createNewLibraryItem(model, libraryPath):
     libraryPath.mkdir()
@@ -187,8 +207,9 @@ def createCell(parent, selectedLib: libraryItem, cellName: str) -> Union[cellIte
             parent.logger.info(f"Created {cellName} cell at {str(cellPath)}")
             return newCellItem
 
+
 def createNewCellItem(selectedLib, cellPath):
-    cellPath.mkdir(mode=0o755, parents=True,exist_ok=True)
+    cellPath.mkdir(mode=0o755, parents=True, exist_ok=True)
     newCellItem = cellItem(cellPath)
     selectedLib.appendRow(newCellItem)
     return newCellItem
@@ -209,12 +230,13 @@ def createCellView(parent: QWidget, viewName: str, cellItem: cellItem) -> viewIt
     if viewPath.exists():
         parent.logger.warning("Replacing the cell view.")
         oldView = [cellItem.child(row) for row in range(cellItem.rowCount()) if
-            cellItem.child(row).viewName == viewName][0]
+                   cellItem.child(row).viewName == viewName][0]
         oldView.delete()
     newViewItem = createCellviewItem(viewName, viewPath)
     parent.logger.warning(f"Created {viewName} at {str(viewPath)}")
     cellItem.appendRow(newViewItem)
     return newViewItem
+
 
 def createCellviewItem(viewName, viewPath):
     newViewItem = viewItem(viewPath)
@@ -243,44 +265,76 @@ def createCellviewItem(viewName, viewPath):
         json.dump(items, f, indent=4)
     return newViewItem
 
-# function for copying a cell
-def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -> bool:
-    """
-    parent: the parent widget
-    model: the model
-    cellItem: the cell item in the model
-    copyName: the name of the new cell
-    selectedLibPath: the path of the selected library
-    """
-    cellPath = origCellItem.data(Qt.UserRole + 2)  # get the cell path from item user data
-    if copyName == "":  # assign a default name for the cell
-        copyName = "newCell"
+
+def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -> tuple[bool, Optional[cellItem]]:
+    """Copy a cell to a new location with a new name."""
+    cellPath = origCellItem.data(Qt.UserRole + 2)
+    copyName = copyName or "newCell"
     copyPath = selectedLibPath.joinpath(copyName)
+
     if copyPath.exists():
         QMessageBox.warning(parent, "Error", "Cell already exits.")
-        return False
-    else:
-        assert cellPath.exists()
-        shutil.copytree(cellPath, copyPath)  # copied the cell
-        libraryItem = model.findItems(selectedLibPath.name, flags=Qt.MatchExactly)[
-            0]  # find the library item
-        # create new cell item
+        return False, None
+
+    try:
+        # Copy the cell directory
+        shutil.copytree(cellPath, copyPath)
+
+        # Create new cell and add to library
+        libraryItem = model.findItems(selectedLibPath.name, flags=Qt.MatchExactly)[0]
         newCellItem = cellItem(copyPath)
-        newCellItem.setEditable(False)
-        newCellItem.setData("cell", Qt.UserRole + 1)
-        newCellItem.setData(copyPath, Qt.UserRole + 2)
-        # go through view list and add to cell item
-        addedViewList = [viewItem(viewPath) for viewPath in copyPath.iterdir() if
-            viewPath.suffix == ".json"]
-        [addedView.setEditable(False) for addedView in addedViewList]
 
-        newCellItem.appendRows(addedViewList)
-        # add the new cell item to the library item
+        # Add JSON files as view items
+        viewItems = [viewItem(p) for p in copyPath.iterdir() if p.suffix == ".json"]
+        if viewItems:
+            newCellItem.appendRows(viewItems)
+
         libraryItem.appendRow(newCellItem)
-        return True
+        return True, newCellItem
+
+    except (FileNotFoundError, IndexError) as e:
+        QMessageBox.warning(parent, "Error", f"Failed to copy cell: {str(e)}")
+        return False, None
 
 
-def renameCell(parent, oldCell, newName) -> bool:
+# # function for copying a cell
+# def copyCell(parent, model, origCellItem: cellItem, copyName, selectedLibPath) -> bool:
+#     """
+#     parent: the parent widget
+#     model: the model
+#     cellItem: the cell item in the model
+#     copyName: the name of the new cell
+#     selectedLibPath: the path of the selected library
+#     """
+#     cellPath = origCellItem.data(Qt.UserRole + 2)  # get the cell path from item user data
+#     if copyName == "":  # assign a default name for the cell
+#         copyName = "newCell"
+#     copyPath = selectedLibPath.joinpath(copyName)
+#     if copyPath.exists():
+#         QMessageBox.warning(parent, "Error", "Cell already exits.")
+#         return False
+#     else:
+#         assert cellPath.exists()
+#         shutil.copytree(cellPath, copyPath)  # copied the cell
+#         libraryItem = model.findItems(selectedLibPath.name, flags=Qt.MatchExactly)[
+#             0]  # find the library item
+#         # create new cell item
+#         newCellItem = cellItem(copyPath)
+#         newCellItem.setEditable(False)
+#         newCellItem.setData("cell", Qt.UserRole + 1)
+#         newCellItem.setData(copyPath, Qt.UserRole + 2)
+#         # go through view list and add to cell item
+#         addedViewList = [viewItem(viewPath) for viewPath in copyPath.iterdir() if
+#             viewPath.suffix == ".json"]
+#         [addedView.setEditable(False) for addedView in addedViewList]
+
+#         newCellItem.appendRows(addedViewList)
+#         # add the new cell item to the library item
+#         libraryItem.appendRow(newCellItem)
+#         return True
+
+
+def renameCell(parent, oldCell: cellItem, newName: str) -> bool:
     """
     Function to rename a cell in the parent with a new name.
     Parameters:
@@ -298,4 +352,3 @@ def renameCell(parent, oldCell, newName) -> bool:
         cellPath.rename(cellPath.parent / newName)
         oldCell.setText(newName)
         return True
-
