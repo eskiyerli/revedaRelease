@@ -56,6 +56,7 @@ import revedaEditor.gui.stippleEditor as stip
 import revedaEditor.fileio.importGDS as igds
 import revedaEditor.backend.libraryMethods as libm
 from revedaEditor.gui.startThread import startThread
+from revedaEditor.resources import resources  # noqa: F401
 
 class EventLoopMonitor(QObject):
     def __init__(self, parent=None):
@@ -208,7 +209,7 @@ class MainWindow(QMainWindow):
     def logger_def(self):
 
         c_handler = logging.StreamHandler(stream=self.centralW.console)
-        c_handler.setLevel(logging.INFO)
+        c_handler.setLevel(logging.DEBUG)
         c_format = logging.Formatter("%(levelname)s - %(message)s")
         c_handler.setFormatter(c_format)
         self.logger.addHandler(c_handler)

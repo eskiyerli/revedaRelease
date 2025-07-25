@@ -32,6 +32,8 @@ def importPDKModule(moduleName):
     pdkPath = os.environ.get("REVEDA_PDK_PATH",'./defaultPDK')
     pdkPathObj = pathlib.Path(pdkPath)
     pdkPathParentObj = pdkPathObj.resolve().parent
-    sys.path.append(str(pdkPathParentObj))
+    pdkPathParentStr = str(pdkPathParentObj)
+    if pdkPathParentStr not in sys.path:
+        sys.path.append(pdkPathParentStr)
     fullModuleName = f"{pdkPathObj.name}.{moduleName}"
     return importlib.import_module(fullModuleName)

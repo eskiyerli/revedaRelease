@@ -130,6 +130,7 @@ class schematicScene(editorScene):
         self.textTuple = None
         self.netNameString = None
         self.newInstanceTuple = None
+        self._snapPointRect = self.defineSnapRect()
 
         # error shapes
         self.overlapRectSet = set()
@@ -383,18 +384,25 @@ class schematicScene(editorScene):
         Handle draw wire logic.
         """
         if self._newNet:  # finish net drawing
+            self._newNet.draftLine = QLineF(self._newNet.draftLine.p1(), self.snapToGrid(eventLoc, self.snapTuple))
             self.wireEditFinished.emit(self._newNet)
             self._newNet = None
-        startSnapPoint = self.findSnapPoint(eventLoc, set())
+
+        startSnapPoint = self.snapToGrid(self.findSnapPoint(eventLoc, set()),
+                                         self.snapTuple)
+
         self._snapPointRect.setPos(startSnapPoint)
         self._newNet = snet.schematicNet(startSnapPoint, startSnapPoint, 0)
         self.addUndoStack(self._newNet)
 
     def _handleDrawBus(self, eventLoc: QPoint):
         if self._newNet:
+            self._newNet.draftLine  = QLineF(self._newNet.draftLine.p1(),
+                                             self.snapToGrid(eventLoc, self.snapTuple))
             self.wireEditFinished.emit(self._newNet)
             self._newNet = None
-        startSnapPoint = self.findSnapPoint(eventLoc, set())
+        startSnapPoint = self.snapToGrid(self.findSnapPoint(eventLoc, set()),
+                                         self.snapTuple)
         self._newNet = snet.schematicNet(startSnapPoint, startSnapPoint, 1)
         self.addUndoStack(self._newNet)
 
@@ -408,7 +416,7 @@ class schematicScene(editorScene):
             self._newText = None
             self.textTuple = None
         if self.textTuple:
-            self._newText = self.addNote(mouseReleaseLoc, *self.textTuple)
+            self._newText = self.addNote(mouseReleaseLoc, self.textTuple)
 
     def _handleStretchItem(self):
         if self._stretchNet:
@@ -855,11 +863,11 @@ class schematicScene(editorScene):
         except Exception as e:
             self.logger.error(f"Pin add error: {e}")
 
-    def addNote(self, pos: QPoint) -> shp.text:
+    def addNote(self, pos: QPoint, textTuple:Tuple) -> shp.text:
         """
         Changed the method name not to clash with qgraphicsscene addText method.
         """
-        text = shp.text(pos, *self.textTuple)
+        text = shp.text(pos, *textTuple)
         self.addUndoStack(text)
         return text
 
@@ -953,8 +961,8 @@ class schematicScene(editorScene):
                     # shift position by four grid units to right and down
                     shape.setPos(
                         QPoint(
-                            item.pos().x() + 4 * self.snapTuple[0],
-                            item.pos().y() + 4 * self.snapTuple[1],
+                            int(item.pos().x() + 4 * self.snapTuple[0]),
+                            int(item.pos().y() + 4 * self.snapTuple[1]),
                         )
                     )
                     if isinstance(shape, shp.schematicSymbol):
@@ -979,11 +987,12 @@ class schematicScene(editorScene):
             file.parent.mkdir(parents=True, exist_ok=True)
 
             # Create temporary file in the same directory
-            temp_file = file.with_suffix(".tmp")
-            self.removeItem(self._snapPointRect)
+            tempFile = file.with_suffix(".tmp")
+            if self._snapPointRect.scene():
+                self.removeItem(self._snapPointRect)
             # Write to temporary file first
             with self.measureDuration():
-                with temp_file.open(mode="w", buffering=8192) as f:
+                with tempFile.open(mode="w", buffering=8192) as f:
                     # Start array
                     f.write("[\n")
 
@@ -1019,7 +1028,7 @@ class schematicScene(editorScene):
                     os.fsync(f.fileno())
 
                 # Atomic file replacement
-                temp_file.replace(file)
+                tempFile.replace(file)
 
                 self.logger.info(
                     f"Saved schematic to {self.editorWindow.cellName}:"
@@ -1032,8 +1041,8 @@ class schematicScene(editorScene):
         except Exception as e:
             self.logger.error(f"Unexpected error while saving schematic: {str(e)}")
             # Clean up temporary file if it exists
-            if temp_file.exists():
-                temp_file.unlink()
+            if tempFile.exists():
+                tempFile.unlink()
             return
 
     @staticmethod
@@ -1073,8 +1082,8 @@ class schematicScene(editorScene):
                     return
                 self._configure_grid_settings(gridSettings)
                 self.createSchematicItems(itemData)
-                self._snapPointRect = self.defineSnapRect()
-                self.addItem(self._snapPointRect)
+                # self._snapPointRect = self.defineSnapRect()
+                # self.addItem(self._snapPointRect)
         except (json.JSONDecodeError, FileNotFoundError) as e:
             self.logger.error(f"File error while loading schematic: {e}")
             return

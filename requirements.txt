@@ -1,6 +1,9 @@
-PySide6~=6.9.0
+PySide6<=6.9.0
 quantiphy~=2.20
 python-dotenv~=1.1.0
-numpy~=2.2.6
+numpy~=2.3.1
 gdstk~=0.9.60
-setuptools~=80.8.0
+setuptools~=80.9.0
+pyqtgraph~=0.14.0.dev0
+polars~=1.31.0
+pytest~=8.4.1

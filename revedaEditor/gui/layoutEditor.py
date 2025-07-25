@@ -323,11 +323,11 @@ class layoutEditor(edw.editorWindow):
         viaLayerNames = [item.name for item in fabproc.processVias]
         dlg.singleViaNamesCB.addItems(viaLayerNames)
         dlg.arrayViaNamesCB.addItems(viaLayerNames)
-        dlg.singleViaWidthEdit.setText(fabproc.processVias[0].minWidth)
-        dlg.singleViaHeightEdit.setText(fabproc.processVias[0].minHeight)
-        dlg.arrayViaWidthEdit.setText(fabproc.processVias[0].minWidth)
-        dlg.arrayViaHeightEdit.setText(fabproc.processVias[0].minHeight)
-        dlg.arrayViaSpacingEdit.setText(fabproc.processVias[0].minSpacing)
+        dlg.singleViaWidthEdit.setText(str(fabproc.processVias[0].minWidth))
+        dlg.singleViaHeightEdit.setText(str(fabproc.processVias[0].minHeight))
+        dlg.arrayViaWidthEdit.setText(str(fabproc.processVias[0].minWidth))
+        dlg.arrayViaHeightEdit.setText(str(fabproc.processVias[0].minHeight))
+        dlg.arrayViaSpacingEdit.setText(str(fabproc.processVias[0].minSpacing))
         if dlg.exec() == QDialog.Accepted:
             self.centralW.scene.editModes.setMode("addVia")
             self.centralW.scene.addVia = True
@@ -352,7 +352,7 @@ class layoutEditor(edw.editorWindow):
                 selViaDefTuple = [
                     viaDefTuple
                     for viaDefTuple in fabproc.processVias
-                    if viaDefTuple.netName == dlg.arrayViaNamesCB.currentText()
+                    if viaDefTuple.name == dlg.arrayViaNamesCB.currentText()
                 ][0]
 
                 singleViaTuple = ddef.singleViaTuple(
