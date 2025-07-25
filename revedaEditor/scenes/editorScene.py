@@ -188,10 +188,36 @@ class editorScene(QGraphicsScene):
 
         if event.type() in MOUSE_EVENTS:
             snappedPos = self.snapToGrid(event.scenePos(), self.snapTuple)
-            event.setScenePos(snappedPos.toPointF())
+            event.setScenePos(snappedPos)
             return False
 
         return super().eventFilter(source, event)
+    # def eventFilter(self, source, event):
+    #     """
+    #     Filter mouse events to snap them to background grid points.
+    #
+    #     Args:
+    #         source: The object that triggered the event
+    #         event: The event to be filtered
+    #
+    #     Returns:
+    #         bool: True if event should be filtered out, False if it should be processed
+    #     """
+    #     if self.readOnly:
+    #         return True
+    #
+    #     MOUSE_EVENTS = {
+    #         QEvent.GraphicsSceneMouseMove,
+    #         QEvent.GraphicsSceneMousePress,
+    #         QEvent.GraphicsSceneMouseRelease
+    #     }
+    #
+    #     if event.type() in MOUSE_EVENTS:
+    #         snappedPos = self.snapToGrid(event.scenePos(), self.snapTuple)
+    #         event.setScenePos(snappedPos.toPointF())
+    #         return False
+    #
+    #     return super().eventFilter(source, event)
 
     def copySelectedItems(self):
         '''

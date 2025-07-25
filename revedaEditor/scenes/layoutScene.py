@@ -262,6 +262,7 @@ class layoutScene(editorScene):
                                              self.arrayViaTuple.xs, self.arrayViaTuple.ys,
                                              self.arrayViaTuple.xnum,
                                              self.arrayViaTuple.ynum, )
+
         self.addUndoStack(self._arrayVia)
 
     def drawLayoutRuler(self):

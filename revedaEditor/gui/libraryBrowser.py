@@ -312,7 +312,6 @@ class libraryBrowser(QMainWindow):
                     for row in range(cellItem.rowCount())
                     if cellItem.child(row).viewType == "schematic"
                 ]
-
                 dlg = fd.createConfigViewDialogue(self.appMainW)
                 dlg.libraryNameEdit.setText(libItem.libraryName)
                 dlg.cellNameEdit.setText(cellItem.cellName)
@@ -458,14 +457,13 @@ class libraryBrowser(QMainWindow):
                 libraryName = libItem.data(Qt.UserRole + 2).name
                 cellName = cellItem.data(Qt.UserRole + 2).name
                 items.append({"viewType": "revbench"})
-                items.append({"libraryName": libraryName})
-                items.append({"cellName": cellName})
-                items.append({"designName": revbenchdlg.viewCB.currentText()})
+                items.append({"lib": libraryName})
+                items.append({"cell": cellName})
+                items.append({"view": revbenchdlg.viewCB.currentText()})
                 items.append({"settings": []})
                 with viewItem.data(Qt.UserRole + 2).open(mode="w") as benchFile:
                     json.dump(items, benchFile, indent=4)
-
-                simmwModule = self._app.plugins["plugins.revedasim.simMainWindow"]
+                simmwModule = self._app.plugins["plugins.revedasim"]
                 simmw = simmwModule.SimMainWindow(
                     viewItem, self.designView.libraryModel, self.designView
                 )
@@ -585,8 +583,8 @@ class libraryBrowser(QMainWindow):
                     # if self._app.revedasim_pathObj:
                     #     try:
                     if self._app.plugins.get("plugins.revedasim"):
-                        simmwModule = self._app.plugins["plugins.revedasim"].simMainWindow
-                        simmw = simmwModule.SimMainWindow(
+                        SimMainW = self._app.plugins["plugins.revedasim"].SimMainWindow
+                        simmw = SimMainW(
                             viewItem, self.designView.libraryModel, self.designView
                         )
                         self.appMainW.openViews[openCellViewTuple] = simmw
@@ -779,7 +777,7 @@ class libraryListView(QDialog):
         if changedLibraries:
             for libName in changedLibraries:
                 updateLibraryRunner = startThread(  
-                updateJSONFieldInLibrary(
+                lmview.updateJSONFieldInLibrary(
                     self.model,
                     libName,
                     "lib",
@@ -798,38 +796,3 @@ class libraryListView(QDialog):
                 )
                 self.appMainW.threadPool.start(updateLibraryRunner)
         return super().accept()
-
-
-def updateJSONFieldInLibrary(
-    model: lmview.designLibrariesModel, libraryName: str, key: str, oldValue: str, newValue: str
-):
-    """
-    Update a specific JSON field in all view files within a single library.
-
-    Args:
-        libraryName: Name of the library to process
-        key: The JSON key to search for
-        newValue: The new value to set for the key
-    """
-    libItem = libm.getLibItem(model, libraryName)
-    if libItem.hasChildren():
-        for row in range(libItem.rowCount()):
-            cellItem = libItem.child(row)
-            if cellItem.hasChildren():
-                for row in range(cellItem.rowCount()):
-                    viewItem = cellItem.child(row)
-                    try:
-                        with open(viewItem.viewPath, "r") as f:
-                            data = json.load(f)
-                            updated = False
-                            for item in data:
-                                if item.get(key) == oldValue:
-                                    updated = True
-                                    item[key] = newValue
-
-                        if updated:
-                            with open(viewItem.viewPath, "w") as f:
-                                json.dump(data, f, indent=4)
-                    except Exception as e:
-                        print(f"Error updating {viewItem.viewPath}: {str(e)}")
-

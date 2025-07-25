@@ -138,7 +138,7 @@ class layoutEncoder(json.JSONEncoder):
                         init_args = inspect.signature(item.__class__.__init__).parameters
                         args_used = [param for param in init_args if (param != "self")]
 
-                        argDict = {arg: getattr(item, arg) for arg in args_used}
+                        argDict = {arg: getattr(item, arg) for arg in args_used if hasattr(item, arg)}
                         itemDict = {
                             "type": "Pcell",
                             "lib": item.libraryName,

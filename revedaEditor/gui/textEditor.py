@@ -207,6 +207,11 @@ class textEditor(QMainWindow):
         self.openAction = QAction(documentOpenIcon, "&Open", self)
         self.openAction.setShortcut("Ctrl+O")
         self.openAction.triggered.connect(self.openFile)
+        
+        reloadIcon = QIcon(":/icons/arrow-circle.png")
+        self.reloadAction = QAction(reloadIcon, "&Reload", self)
+        self.reloadAction.setShortcut("F5")
+        self.reloadAction.triggered.connect(self.reloadFile)
 
         saveIcon = QIcon(":/icons/document.png")
         self.saveAction = QAction(saveIcon, "&Save", self)
@@ -257,6 +262,7 @@ class textEditor(QMainWindow):
         menubar.setNativeMenuBar(False)
         fileMenu = menubar.addMenu("&File")
         fileMenu.addAction(self.openAction)
+        fileMenu.addAction(self.reloadAction)
         fileMenu.addAction(self.saveAction)
         fileMenu.addAction(self.saveAsAction)
         fileMenu.addAction(self.quitAction)
@@ -276,6 +282,7 @@ class textEditor(QMainWindow):
         self.addToolBar(toolbar)
 
         toolbar.addAction(self.openAction)
+        toolbar.addAction(self.reloadAction)
         toolbar.addAction(self.saveAction)
         toolbar.addAction(self.saveAsAction)
         toolbar.addAction(self.quitAction)
@@ -312,6 +319,19 @@ class textEditor(QMainWindow):
             with open(self.fileName, "w") as file:
                 text = self.textEdit.toPlainText()
                 file.write(text)
+                
+    def reloadFile(self):
+        if self.fileName:
+            cursor_position = self.textEdit.textCursor().position()
+            with open(self.fileName, "r") as file:
+                text = file.read()
+                self.textEdit.setPlainText(text)
+            # Try to restore cursor position if possible
+            cursor = self.textEdit.textCursor()
+            cursor.setPosition(min(cursor_position, len(self.textEdit.toPlainText())))
+            self.textEdit.setTextCursor(cursor)
+        else:
+            QMessageBox.information(self, "Reload", "No file is currently open.")
 
     def changeFont(self):
         ok, font = QFontDialog.getFont(self.textEdit.font(), self)

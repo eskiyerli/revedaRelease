@@ -23,34 +23,20 @@
 #
 
 
-from dbm.ndbm import library
-from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import (
-    QAction,
-    QStandardItemModel,
-    QStandardItem,
-)
-from PySide6.QtWidgets import (
-    QAbstractItemView,
-    QDialog,
-    QMenu,
-    QMessageBox,
-    QTreeView,
-    QWidget,
-    QApplication,
-    QListView,
-    QHBoxLayout,
-    QVBoxLayout,
-    QLabel,
-)
-
-import revedaEditor.backend.libraryMethods as libm
-import revedaEditor.backend.libBackEnd as libb
-import revedaEditor.gui.fileDialogues as fd
-import pathlib
 import logging
-from typing import List
+import pathlib
 import shutil
+from typing import List
+
+from PySide6.QtCore import Qt, QPoint
+from PySide6.QtGui import (QAction, QStandardItemModel, QStandardItem, )
+from PySide6.QtWidgets import (QAbstractItemView, QDialog, QMenu, QMessageBox, QTreeView,
+                               QWidget, QApplication, QListView, QHBoxLayout, QVBoxLayout,
+                               QLabel, )
+
+import revedaEditor.backend.libBackEnd as libb
+import revedaEditor.backend.libraryMethods as libm
+import revedaEditor.gui.fileDialogues as fd
 
 
 class BaseDesignLibrariesView(QWidget):
@@ -75,11 +61,8 @@ class BaseDesignLibrariesView(QWidget):
 
     def removeLibrary(self, selectedLib: libb.libraryItem):
         try:
-            button = QMessageBox.question(
-                self,
-                "Library Deletion",
-                "Are you sure to delete this library? This action cannot be undone.",
-            )
+            button = QMessageBox.question(self, "Library Deletion",
+                                          "Are you sure to delete this library? This action cannot be undone.", )
             if button == QMessageBox.Yes:
                 self.libraryModel.removeLibraryFromModel(selectedLib)
                 self.libraryDict.pop(selectedLib.libraryName, None)
@@ -126,13 +109,11 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         self.cellsListView = QListView()
         self.cellsListView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.cellsListView.customContextMenuRequested.connect(
-            self.cellsListContextMenuEvent
-        )
+            self.cellsListContextMenuEvent)
         self.viewsListView = QListView()
         self.viewsListView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.viewsListView.customContextMenuRequested.connect(
-            self.viewsListContextMenuEvent
-        )
+            self.viewsListContextMenuEvent)
 
         libsLabel = QLabel("**Libraries**")
         libsLabel.setTextFormat(Qt.MarkdownText)
@@ -165,8 +146,7 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         self.libsListView.setModel(self.libraryModel)
         # Connect selection signals
         self.libsListView.selectionModel().selectionChanged.connect(
-            self.onLibsListSelection
-        )
+            self.onLibsListSelection)
 
     def onLibsListSelection(self, selected, deselected):
         # Clear second and third lists
@@ -195,16 +175,14 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         self.cellsListView.setModel(cellsModel)
         # Connect second list selection after setting its model
         self.cellsListView.selectionModel().selectionChanged.connect(
-            self.onCellsListSelection
-        )
+            self.onCellsListSelection)
 
     def recursive_clone(self, item):
         """Recursively clone an item and all its children."""
         clonedItem = item.clone()
         # Store reference to original item
-        clonedItem.setData(
-            item, Qt.UserRole + 10
-        )  # Use a custom role to store the original item
+        clonedItem.setData(item,
+                           Qt.UserRole + 10)  # Use a custom role to store the original item
 
         if item.hasChildren():
             for i in range(item.rowCount()):
@@ -222,15 +200,13 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         if not indexes:
             return
         cellItem = (
-            self.cellsListView.model().itemFromIndex(indexes[0]).data(Qt.UserRole + 10)
-        )
+            self.cellsListView.model().itemFromIndex(indexes[0]).data(Qt.UserRole + 10))
         # Create new model for third list
         viewsModel = self.createViewsListModel(cellItem=cellItem)
         self.viewsListView.setModel(viewsModel)
         # Connect third list selection after setting its model
         self.viewsListView.selectionModel().selectionChanged.connect(
-            self.onViewsListSelection
-        )
+            self.onViewsListSelection)
 
     def createViewsListModel(self, cellItem: libb.cellItem) -> QStandardItemModel:
         """
@@ -269,8 +245,7 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
 
         # Reconnect selection signals
         self.libsListView.selectionModel().selectionChanged.connect(
-            self.onLibsListSelection
-        )
+            self.onLibsListSelection)
 
         # Clear other views
         self.cellsListView.setModel(None)
@@ -285,37 +260,17 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         index = senderView.indexAt(pos)
         if index.isValid():
             selectedLibItem = self.libsListView.model().itemFromIndex(index)
-            menu.addAction(
-                QAction(
-                    "Rename Library",
-                    self,
-                    triggered=lambda: self.renameLib(selectedLibItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "Remove Library",
-                    self,
-                    triggered=lambda: self.removeLibrary(selectedLibItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "Create Cell",
-                    self,
-                    triggered=lambda: self.createCell(selectedLibItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "File Information...",
-                    self,
-                    triggered=lambda: self.showItemFileInfo(selectedLibItem),
-                )
-            )
-            menu.exec(
-                senderView.viewport().mapToGlobal(pos)
-            )  # Use global position for context menu
+            menu.addAction(QAction("Rename Library", self,
+                                   triggered=lambda: self.renameLib(selectedLibItem), ))
+            menu.addAction(QAction("Remove Library", self,
+                                   triggered=lambda: self.removeLibrary(selectedLibItem), ))
+            menu.addAction(QAction("Create Cell", self,
+                                   triggered=lambda: self.createCell(selectedLibItem), ))
+            menu.addAction(QAction("File Information...", self,
+                                   triggered=lambda: self.showItemFileInfo(
+                                       selectedLibItem), ))
+            menu.exec(senderView.viewport().mapToGlobal(
+                pos))  # Use global position for context menu
 
     def cellsListContextMenuEvent(self, pos):
         senderView = self.sender()
@@ -324,44 +279,22 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         if index.isValid():
             selectedCloneCellItem = self.cellsListView.model().itemFromIndex(index)
             selectedCellItem = selectedCloneCellItem.data(Qt.UserRole + 10)
-            menu.addAction(
-                QAction(
-                    "Create CellView...",
-                    self,
-                    triggered=lambda: self.createCellView(selectedCloneCellItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "Copy Cell...",
-                    self,
-                    triggered=lambda: self.copyCell(selectedCellItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "Rename Cell...",
-                    self,
-                    triggered=lambda: self.renameCell(selectedCloneCellItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "Delete Cell...",
-                    self,
-                    triggered=lambda: self.deleteCell(selectedCloneCellItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "File Information...",
-                    self,
-                    triggered=lambda: self.showClonedItemFileInfo(selectedCloneCellItem),
-                )
-            )
-            menu.exec(
-                senderView.viewport().mapToGlobal(pos)
-            )  # Use global position for context menu
+            menu.addAction(QAction("Create CellView...", self,
+                                   triggered=lambda: self.createCellView(
+                                       selectedCloneCellItem), ))
+            menu.addAction(QAction("Copy Cell...", self,
+                                   triggered=lambda: self.copyCell(selectedCellItem), ))
+            menu.addAction(QAction("Rename Cell...", self,
+                                   triggered=lambda: self.renameCell(
+                                       selectedCloneCellItem), ))
+            menu.addAction(QAction("Delete Cell...", self,
+                                   triggered=lambda: self.deleteCell(
+                                       selectedCloneCellItem), ))
+            menu.addAction(QAction("File Information...", self,
+                                   triggered=lambda: self.showClonedItemFileInfo(
+                                       selectedCloneCellItem), ))
+            menu.exec(senderView.viewport().mapToGlobal(
+                pos))  # Use global position for context menu
 
     def viewsListContextMenuEvent(self, pos):
         senderView = self.sender()
@@ -370,42 +303,21 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         if index.isValid():
             selectedCloneViewItem = self.viewsListView.model().itemFromIndex(index)
             selectedViewItem = selectedCloneViewItem.data(Qt.UserRole + 10)
-            menu.addAction(
-                QAction(
-                    "Open View", self, triggered=lambda: self.openView(selectedViewItem)
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "Copy View...",
-                    self,
-                    triggered=lambda: self.copyView(selectedCloneViewItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "Rename View...",
-                    self,
-                    triggered=lambda: self.renameView(selectedCloneViewItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "Delete View...",
-                    self,
-                    triggered=lambda: self.deleteView(selectedCloneViewItem),
-                )
-            )
-            menu.addAction(
-                QAction(
-                    "File Information...",
-                    self,
-                    triggered=lambda: self.showClonedItemFileInfo(selectedCloneViewItem),
-                )
-            )
-            menu.exec(
-                senderView.viewport().mapToGlobal(pos)
-            )  # Use global position for context menu
+            menu.addAction(QAction("Open View", self,
+                                   triggered=lambda: self.openView(selectedViewItem)))
+            menu.addAction(QAction("Copy View...", self, triggered=lambda: self.copyView(
+                selectedCloneViewItem), ))
+            menu.addAction(QAction("Rename View...", self,
+                                   triggered=lambda: self.renameView(
+                                       selectedCloneViewItem), ))
+            menu.addAction(QAction("Delete View...", self,
+                                   triggered=lambda: self.deleteView(
+                                       selectedCloneViewItem), ))
+            menu.addAction(QAction("File Information...", self,
+                                   triggered=lambda: self.showClonedItemFileInfo(
+                                       selectedCloneViewItem), ))
+            menu.exec(senderView.viewport().mapToGlobal(
+                pos))  # Use global position for context menu
 
     def createCell(self, selectedLib: libb.libraryItem):
         try:
@@ -432,13 +344,9 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
             dlg.libraryCB.setCurrentText(parentLib.libraryName)
 
             if dlg.exec() == QDialog.Accepted:
-                success, newCellItem = libb.copyCell(
-                    self,
-                    self.libraryModel,
-                    selectedCellItem,
-                    dlg.copyName.text(),
-                    dlg.selectedLibPath,
-                )
+                success, newCellItem = libb.copyCell(self, self.libraryModel,
+                                                     selectedCellItem, dlg.copyName.text(),
+                                                     dlg.selectedLibPath, )
                 if success:
                     cloneItem = newCellItem.clone()
                     if selectedCellItem.hasChildren():
@@ -452,19 +360,19 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         except OSError as e:
             self.logger.warning(f"Error copying cell: {e}")
 
-    def renameCell(self, selectedCellItem: libb.cellItem):
+    def renameCell(self, cloneCellItem: libb.cellItem):
         try:
-            oldName = selectedCellItem.cellName
-            dlg = fd.renameCellDialog(self, selectedCellItem)
+            oldName = cloneCellItem.cellName
+            cellItem = cloneCellItem.data(Qt.UserRole + 10)
+            dlg = fd.renameCellDialog(self, cellItem)
+            libName = cellItem.parent().libraryName
             if dlg.exec() == QDialog.Accepted:
-                libb.renameCell(self, selectedCellItem, dlg.nameEdit.text().strip())
+                newName = dlg.nameEdit.text().strip()
+                libb.renameCell(self, cloneCellItem, newName)
                 # update the original cell item
-                libb.renameCell(
-                    self,
-                    selectedCellItem.data(Qt.UserRole + 10),
-                    dlg.nameEdit.text().strip(),
-                )
-                self.logger.info(f"Renamed {oldName} to {selectedCellItem.cellName}")
+                libb.renameCell(self, cellItem, dlg.nameEdit.text().strip(), )
+                updateJSONFieldInCell(self.libraryModel, libName, 'cell', oldName, newName)
+                self.logger.info(f"Renamed {oldName} to {newName}")
         except OSError as e:
             self.logger.warning(f"Error renaming cell: {e}")
 
@@ -506,15 +414,12 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
         # Find or create cell
         cellItem = libm.getCellItem(selectedLibItem, cellName)  # noqa: F811
         if not cellItem:
-            cellItem = libb.createCell(
-                self.libBrowsW, self.libraryModel, selectedLibItem, cellName
-            )
+            cellItem = libb.createCell(self.libBrowsW, self.libraryModel, selectedLibItem,
+                                       cellName)
 
         # Check if view already exists
-        if any(
-            child.viewName == newViewName
-            for child in (cellItem.child(row) for row in range(cellItem.rowCount()))
-        ):
+        if any(child.viewName == newViewName for child in
+               (cellItem.child(row) for row in range(cellItem.rowCount()))):
             self.logger.warning("View already exists. Delete cellview and try again.")
             return
 
@@ -542,9 +447,8 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
     def handleNewCellView(self, cellItem, dlg):
         viewName = dlg.viewName.text().strip()
         libItem = libm.getLibItem(self.libraryModel, dlg.libNamesCB.currentText())
-        viewItem = libm.findViewItem(
-            self.libraryModel, libItem.libraryName, cellItem.cellName, viewName
-        )
+        viewItem = libm.findViewItem(self.libraryModel, libItem.libraryName,
+                                     cellItem.cellName, viewName)
         if viewItem:
             messagebox = QMessageBox(self)
             messagebox.setText("Cell view already exists.")
@@ -625,6 +529,7 @@ class designLibrariesColumnView(BaseDesignLibrariesView):
             dlg = fd.fileInfoDialogue(viewPath, self.libBrowsW)
         dlg.exec()
 
+
 class designLibrariesTreeView(BaseDesignLibrariesView):
     def __init__(self, parent):
         super().__init__(parent=parent)
@@ -657,15 +562,12 @@ class designLibrariesTreeView(BaseDesignLibrariesView):
             dlg = fd.copyCellDialog(self)
             dlg.libraryCB.setCurrentText(parentLibrary.libraryName)
             if dlg.exec() == QDialog.Accepted:
-                success, _ = libb.copyCell(
-                    self,
-                    self.libraryModel,
-                    selectedCellItem,
-                    dlg.copyName.text(),
-                    dlg.selectedLibPath,
-                )
+                success, newCellItem = libb.copyCell(self, self.libraryModel,
+                                                     selectedCellItem, dlg.copyName.text(),
+                                                     dlg.selectedLibPath, )
                 if success:
                     self.logger.info("Cell copied successfully.")
+
         except OSError as e:
             self.logger.warning(f"Error in copying cell:{e}")
 
@@ -673,7 +575,14 @@ class designLibrariesTreeView(BaseDesignLibrariesView):
         try:
             dlg = fd.renameCellDialog(self, selectedCell)
             if dlg.exec() == QDialog.Accepted:
-                libb.renameCell(self, dlg.cellItem, dlg.nameEdit.text())
+                oldName = selectedCell.cellName
+                libName = selectedCell.parent().libraryName
+                success = libb.renameCell(self, dlg.cellItem, dlg.nameEdit.text())
+                if success:
+                    newName = selectedCell.cellName
+                    self.logger.info(f"Cell {oldName} renamed to {dlg.nameEdit.text()}.")
+                    updateJSONFieldInCell(self.libraryModel, libName, 'cell', oldName,
+                                          newName)
         except OSError as e:
             self.logger.warning(f"Error in renaming cell:{e}")
 
@@ -700,9 +609,8 @@ class designLibrariesTreeView(BaseDesignLibrariesView):
         libItem = selectedCell.parent()
         cellItem = selectedCell
         viewName = dlg.viewName.text().strip()
-        viewItem = libm.findViewItem(
-            self.libraryModel, libItem.libraryName, cellItem.cellName, viewName
-        )
+        viewItem = libm.findViewItem(self.libraryModel, libItem.libraryName,
+                                     cellItem.cellName, viewName)
         if viewItem:
             messagebox = QMessageBox(self)
             messagebox.setText("Cell view already exists.")
@@ -730,39 +638,28 @@ class designLibrariesTreeView(BaseDesignLibrariesView):
             if dlg.exec() == QDialog.Accepted:
                 if selectedView.data(Qt.UserRole + 1) == "view":
                     viewPath = self.selectedItem.data(Qt.UserRole + 2)
-                    selectedLibItem = libm.getLibItem(
-                        self.libraryModel, dlg.libNamesCB.currentText()
-                    )
+                    selectedLibItem = libm.getLibItem(self.libraryModel,
+                                                      dlg.libNamesCB.currentText())
                     cellName = dlg.cellCB.currentText()
-                    libCellNames = [
-                        selectedLibItem.child(row).cellName
-                        for row in range(selectedLibItem.rowCount())
-                    ]
+                    libCellNames = [selectedLibItem.child(row).cellName for row in
+                                    range(selectedLibItem.rowCount())]
                     if (
-                        cellName in libCellNames
-                    ):  # check if there is the cell in the library
-                        cellItem = libm.getCellItem(
-                            selectedLibItem, dlg.cellCB.currentText()
-                        )
+                            cellName in libCellNames):  # check if there is the cell in the library
+                        cellItem = libm.getCellItem(selectedLibItem,
+                                                    dlg.cellCB.currentText())
                     else:
-                        cellItem = libb.createCell(
-                            self.libBrowsW,
-                            self.libraryModel,
-                            selectedLibItem,
-                            dlg.cellCB.currentText(),
-                        )
-                    cellViewNames = [
-                        cellItem.child(row).viewName for row in range(cellItem.rowCount())
-                    ]
+                        cellItem = libb.createCell(self.libBrowsW, self.libraryModel,
+                                                   selectedLibItem,
+                                                   dlg.cellCB.currentText(), )
+                    cellViewNames = [cellItem.child(row).viewName for row in
+                                     range(cellItem.rowCount())]
                     newViewName = dlg.viewName.text()
                     if newViewName in cellViewNames:
                         self.logger.warning(
-                            "View already exists. Delete cellview and try again."
-                        )
+                            "View already exists. Delete cellview and try again.")
                     else:
                         newViewPath = cellItem.data(Qt.UserRole + 2).joinpath(
-                            f"{newViewName}.json"
-                        )
+                            f"{newViewName}.json")
                         shutil.copy(viewPath, newViewPath)
                         cellItem.appendRow(libb.viewItem(newViewPath))
         except OSError as e:
@@ -777,8 +674,7 @@ class designLibrariesTreeView(BaseDesignLibrariesView):
                 try:
                     viewPathObj = selectedView.data(Qt.UserRole + 2)
                     newPathObj = selectedView.data(Qt.UserRole + 2).rename(
-                        viewPathObj.parent.joinpath(f"{newName}.json")
-                    )
+                        viewPathObj.parent.joinpath(f"{newName}.json"))
                     selectedView.parent().appendRow(libb.viewItem(newPathObj))
                     selectedView.parent().removeRow(selectedView.row())
                 except FileExistsError:
@@ -794,8 +690,7 @@ class designLibrariesTreeView(BaseDesignLibrariesView):
             parent.removeRow(itemRow)
         except OSError as e:
             self.logger.warning(
-                f"Error in removing item: {selectedView.viewName}:{e.strerror}"
-            )
+                f"Error in removing item: {selectedView.viewName}:{e.strerror}")
 
     def reworkDesignLibrariesView(self, libraryDict: dict):
         """
@@ -820,92 +715,34 @@ class designLibrariesTreeView(BaseDesignLibrariesView):
         if index.isValid():
             selectedItem = self.libraryModel.itemFromIndex(index)
             if selectedItem.data(Qt.UserRole + 1) == "library":
-                menu.addAction(
-                    QAction(
-                        "Rename Library",
-                        self.treeView,
-                        triggered=lambda: self.renameLib(selectedItem),
-                    )
-                )
-                menu.addAction(
-                    QAction(
-                        "Remove Library",
-                        self.treeView,
-                        triggered=lambda: self.removeLibrary(selectedItem),
-                    )
-                )
-                menu.addAction(
-                    QAction(
-                        "Create Cell",
-                        self.treeView,
-                        triggered=lambda: self.createCell(selectedItem),
-                    )
-                )
+                menu.addAction(QAction("Rename Library", self.treeView,
+                                       triggered=lambda: self.renameLib(selectedItem), ))
+                menu.addAction(QAction("Remove Library", self.treeView,
+                                       triggered=lambda: self.removeLibrary(
+                                           selectedItem), ))
+                menu.addAction(QAction("Create Cell", self.treeView,
+                                       triggered=lambda: self.createCell(selectedItem), ))
             elif selectedItem.data(Qt.UserRole + 1) == "cell":
-                menu.addAction(
-                    QAction(
-                        "Create CellView...",
-                        self,
-                        triggered=lambda: self.createCellView(selectedItem),
-                    )
-                )
-                menu.addAction(
-                    QAction(
-                        "Copy Cell...",
-                        self.treeView,
-                        triggered=lambda: (self.copyCell(selectedItem.parent())),
-                    )
-                )
-                menu.addAction(
-                    QAction(
-                        "Rename Cell...",
-                        self.treeView,
-                        triggered=lambda: self.renameCell(selectedItem),
-                    )
-                )
-                menu.addAction(
-                    QAction(
-                        "Delete Cell...",
-                        self.treeView,
-                        triggered=lambda: self.deleteCell(selectedItem),
-                    )
-                )
+                menu.addAction(QAction("Create CellView...", self,
+                                       triggered=lambda: self.createCellView(
+                                           selectedItem), ))
+                menu.addAction(QAction("Copy Cell...", self.treeView, triggered=lambda: (
+                    self.copyCell(selectedItem.parent())), ))
+                menu.addAction(QAction("Rename Cell...", self.treeView,
+                                       triggered=lambda: self.renameCell(selectedItem), ))
+                menu.addAction(QAction("Delete Cell...", self.treeView,
+                                       triggered=lambda: self.deleteCell(selectedItem), ))
             elif selectedItem.data(Qt.UserRole + 1) == "view":
-                menu.addAction(
-                    QAction(
-                        "Open View",
-                        self.treeView,
-                        triggered=lambda: self.openView(selectedItem),
-                    )
-                )
-                menu.addAction(
-                    QAction(
-                        "Copy View...",
-                        self,
-                        triggered=lambda: self.copyView(selectedItem),
-                    )
-                )
-                menu.addAction(
-                    QAction(
-                        "Rename View...",
-                        self.treeView,
-                        triggered=lambda: self.renameView(selectedItem),
-                    )
-                )
-                menu.addAction(
-                    QAction(
-                        "Delete View...",
-                        self.treeView,
-                        triggered=lambda: self.deleteView(selectedItem),
-                    )
-                )
-            menu.addAction(
-                QAction(
-                    "File Information...",
-                    self.treeView,
-                    triggered=lambda: self.showFileInfo(selectedItem),
-                )
-            )
+                menu.addAction(QAction("Open View", self.treeView,
+                                       triggered=lambda: self.openView(selectedItem), ))
+                menu.addAction(QAction("Copy View...", self,
+                                       triggered=lambda: self.copyView(selectedItem), ))
+                menu.addAction(QAction("Rename View...", self.treeView,
+                                       triggered=lambda: self.renameView(selectedItem), ))
+                menu.addAction(QAction("Delete View...", self.treeView,
+                                       triggered=lambda: self.deleteView(selectedItem), ))
+            menu.addAction(QAction("File Information...", self.treeView,
+                                   triggered=lambda: self.showFileInfo(selectedItem), ))
             # Use global position for context menu
             menu.exec(event.globalPos())
 
@@ -932,11 +769,8 @@ class designLibrariesModel(QStandardItemModel):
             cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
             for cell in cellList:
                 cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
-                viewList = [
-                    view.name
-                    for view in designPath.joinpath(cell).iterdir()
-                    if view.suffix == ".json"
-                ]
+                viewList = [view.name for view in designPath.joinpath(cell).iterdir() if
+                            view.suffix == ".json"]
                 for view in viewList:
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
                 cellItem.sortChildren(0)
@@ -985,9 +819,8 @@ class designLibrariesModel(QStandardItemModel):
                     cellsList.append(itemText)
         return cellsList
 
-    def listCellViews(
-        self, libraryName: str, cellName: str, viewTypes: List[str]
-    ) -> List[str]:
+    def listCellViews(self, libraryName: str, cellName: str, viewTypes: List[str]) -> List[
+        str]:
         viewsList = []
         libraryItem = libm.getLibItem(self, libraryName)
         cellItem = libm.getCellItem(libraryItem, cellName)
@@ -996,7 +829,7 @@ class designLibrariesModel(QStandardItemModel):
                 if cellItem.child(row, 0).viewType in viewTypes:
                     viewsList.append(cellItem.child(row, 0).text())
         return viewsList
-    
+
 
 class symbolViewsModel(designLibrariesModel):
     """
@@ -1023,12 +856,9 @@ class symbolViewsModel(designLibrariesModel):
             cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
             for cell in cellList:
                 cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
-                viewList = [
-                    view.name
-                    for view in designPath.joinpath(cell).iterdir()
-                    if view.suffix == ".json"
-                    and any(x in view.name for x in self.symbolViews)
-                ]
+                viewList = [view.name for view in designPath.joinpath(cell).iterdir() if
+                            view.suffix == ".json" and any(
+                                x in view.name for x in self.symbolViews)]
                 for view in viewList:
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
 
@@ -1047,14 +877,12 @@ class layoutViewsModel(designLibrariesModel):
             cellList = [cell.name for cell in designPath.iterdir() if cell.is_dir()]
             for cell in cellList:
                 cellItem = self.addCellToModel(designPath.joinpath(cell), libraryItem)
-                viewList = [
-                    view.name
-                    for view in designPath.joinpath(cell).iterdir()
-                    if view.suffix == ".json"
-                    and any(x in view.name for x in self.layoutViews)
-                ]
+                viewList = [view.name for view in designPath.joinpath(cell).iterdir() if
+                            view.suffix == ".json" and any(
+                                x in view.name for x in self.layoutViews)]
                 for view in viewList:
                     self.addViewToModel(designPath.joinpath(cell, view), cellItem)
+
 
 class libraryCheckListView(QListView):
     def __init__(self, parent, model: designLibrariesModel):
@@ -1079,3 +907,70 @@ class libraryCheckListView(QListView):
             if item.checkState() == Qt.Checked:
                 checkedLibraries.append(item.text())
         return checkedLibraries
+
+
+def updateJSONFieldInLibrary(model: designLibrariesModel, libraryName: str, key: str,
+                             oldValue: str, newValue: str):
+    """
+    Update a specific JSON field in all view files within a single library.
+
+    Args:
+        libraryName: Name of the library to process
+        key: The JSON key to search for
+        newValue: The new value to set for the key
+    """
+    import json
+    libItem = libm.getLibItem(model, libraryName)
+    if libItem.hasChildren():
+        for row in range(libItem.rowCount()):
+            cellItem = libItem.child(row)
+            if cellItem.hasChildren():
+                for row in range(cellItem.rowCount()):
+                    viewItem = cellItem.child(row)
+                    try:
+                        with open(viewItem.viewPath, "r") as f:
+                            data = json.load(f)
+                            updated = False
+                            for item in data:
+                                if item.get(key) == oldValue:
+                                    updated = True
+                                    item[key] = newValue
+
+                        if updated:
+                            with open(viewItem.viewPath, "w") as f:
+                                json.dump(data, f, indent=4)
+                    except Exception as e:
+                        print(f"Error updating {viewItem.viewPath}: {str(e)}")
+
+
+def updateJSONFieldInCell(model: designLibrariesModel, libraryName: str, cellName: str,
+                          key: str, oldValue: str, newValue: str):
+    """
+    Update a specific JSON field in all view files within a single library.
+
+    Args:
+        libraryName: Name of the library to process
+        key: The JSON key to search for
+        newValue: The new value to set for the key
+    """
+    import json
+    libItem = libm.getLibItem(model, libraryName)
+    cellItem = libm.getCellItem(libItem, cellName)
+
+    if cellItem.hasChildren():
+        for row in range(cellItem.rowCount()):
+            viewItem = cellItem.child(row)
+            try:
+                with open(viewItem.viewPath, "r") as f:
+                    data = json.load(f)
+                    updated = False
+                    for item in data:
+                        if item.get(key) == oldValue:
+                            updated = True
+                            item[key] = newValue
+
+                if updated:
+                    with open(viewItem.viewPath, "w") as f:
+                        json.dump(data, f, indent=4)
+            except Exception as e:
+                print(f"Error updating {viewItem.viewPath}: {str(e)}")

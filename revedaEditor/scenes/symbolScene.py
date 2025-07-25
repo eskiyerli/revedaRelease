@@ -371,6 +371,15 @@ class symbolScene(editorScene):
         self.addUndoStack(label)
         return label
 
+    def addProperty(self, labelDefinition: str):
+        pass
+        # Extract core expression between [@ and ]
+        if labelDefinition.startswith("[@") and labelDefinition.endswith("]"):
+            core = labelDefinition[2:-1]
+            # Split into components
+            parts = core.split(":")
+            instProp = parts[0]
+
     def startPolygon(self, startLoc: QPoint ):
         newPolygon = shp.symbolPolygon([startLoc, startLoc])
         self.addUndoStack(newPolygon)
@@ -428,28 +437,6 @@ class symbolScene(editorScene):
             if updateMethod:
                 updateMethod(item)
 
-    # def itemProperties(self):
-    #     """
-    #     When item properties is queried.
-    #     """
-    #     selectedItems = [
-    #         item for item in self.selectedItems() if item.parentItem() is None
-    #     ]
-    #     for item in selectedItems:
-    #         if isinstance(item, shp.symbolRectangle):
-    #             self.updateSymbolRectangle(item)
-    #         elif isinstance(item, shp.symbolCircle):
-    #             self.updateSymbolCircle(item)
-    #         elif isinstance(item, shp.symbolArc):
-    #             self.updateSymbolArc(item)
-    #         elif isinstance(item, shp.symbolLine):
-    #             self.updateSymbolLine(item)
-    #         elif isinstance(item, shp.symbolPin):
-    #             self.updateSymbolPin(item)
-    #         elif isinstance(item, lbl.symbolLabel):
-    #             self.updateSymbolLabel(item)
-    #         elif isinstance(item, shp.symbolPolygon):
-    #             self.updateSymbolPolygon(item)
 
     def updateSymbolRectangle(self, item):
         queryDlg = pdlg.rectPropertyDialog(self.editorWindow)
@@ -592,6 +579,8 @@ class symbolScene(editorScene):
             newLabel.labelDefs()
             newLabel.setOpacity(1)
             self.undoStack.push(us.addDeleteShapeUndo(self, newLabel, item))
+        else:
+            self.addItem(item)
 
     def updateSymbolPin(self, item):
         queryDlg = pdlg.pinPropertyDialog(self.editorWindow)

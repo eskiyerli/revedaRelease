@@ -20,7 +20,6 @@
 
 from typing import NamedTuple, Union, List
 from dataclasses import dataclass
-
 from PySide6.QtCore import Qt, QPoint, QPointF
 from PySide6.QtGui import QColor
 
@@ -233,3 +232,4 @@ class rectCoords(NamedTuple):
     top: float
     w: float
     h: float
+

@@ -239,8 +239,6 @@ class schematicEditor(edw.editorWindow):
 
     def startSimClick(self, s):
         try:
-            # simdlg = importlib.import_module("revedasim.dialogueWindows",
-            #                                  str(self._app.revedasim_pathObj))
             simdlg = self._app.plugins.get('plugins.revedasim').dialogueWindows
             revbenchdlg = simdlg.createRevbenchDialogue(self, self.libraryView.libraryModel,
                                                         self.cellItem)
@@ -268,9 +266,9 @@ class schematicEditor(edw.editorWindow):
                         libraryName = self.libItem.data(Qt.UserRole + 2).name
                         cellName = self.cellItem.data(Qt.UserRole + 2).name
                         items.append({"viewType": "revbench"})
-                        items.append({"libraryName": libraryName})
-                        items.append({"cellName": cellName})
-                        items.append({"designName": revbenchdlg.viewCB.currentText()})
+                        items.append({"lib": libraryName})
+                        items.append({"cell": cellName})
+                        items.append({"view": revbenchdlg.viewCB.currentText()})
                         items.append({"settings": []})
                         with revbenchItem.data(Qt.UserRole + 2).open(mode="w") as benchFile:
                             json.dump(items, benchFile, indent=4)
@@ -418,7 +416,7 @@ class schematicEditor(edw.editorWindow):
 
     def runNetlisting(self, netlist_obj, threadPool: QThreadPool = None):
         with self.measureDuration():
-            xyceNetlRunner = startThread(fn=netlist_obj.writeNetlist())
+            xyceNetlRunner = startThread(fn=netlist_obj.writeNetlist)
             xyceNetlRunner.signals.finished.connect(self.netListingFinished)
             xyceNetlRunner.signals.error.connect(self.netlistingError)
             xyceNetlRunner.setAutoDelete(False)

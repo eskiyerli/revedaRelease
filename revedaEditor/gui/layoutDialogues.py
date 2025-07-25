@@ -498,13 +498,13 @@ class createLayoutViaDialog(QDialog):
 
     def singleViaNameChanged(self, text: str):
         via = [item for item in fabproc.processVias if item.name == text][0]
-        self.singleViaWidthEdit.setText(via.minWidth)
-        self.singleViaHeightEdit.setText(via.minHeight)
+        self.singleViaWidthEdit.setText(str(via.minWidth))
+        self.singleViaHeightEdit.setText(str(via.minHeight))
 
     def arrayViaNameChanged(self, text: str):
         via = [item for item in fabproc.processVias if item.name == text][0]
-        self.arrayViaWidthEdit.setText(via.minWidth)
-        self.arrayViaHeightEdit.setText(via.minHeight)
+        self.arrayViaWidthEdit.setText(str(via.minWidth))
+        self.arrayViaHeightEdit.setText(str(via.minWidth))
 
     def singleViaWidthChanged(self):
         text = self.singleViaWidthEdit.text()
@@ -541,17 +541,20 @@ class createLayoutViaDialog(QDialog):
         self.validateValue(text, self.arrayViaSpacingEdit, viaDefTuple.minSpacing,
                            viaDefTuple.maxSpacing, )
 
-    def validateValue(self, text, lineEdit: QLineEdit, min: str, max: str):
+    def validateValue(self, text, lineEdit: QLineEdit, min: float, max: float):
         validator = QDoubleValidator()
-        validator.setRange(float(min), float(max))
+        validator.setRange(min, max)
         pos = 0
-        if validator.validate(text, pos)[0] != QValidator.Acceptable:
-            if float(text) < float(min):
+        state = validator.validate(text, pos)
+        if text=="":
+            text = str(min)
+        if state[0] != QValidator.Acceptable:
+            if float(text) < min:
                 self._parent.logger.warning(f"Value too small, set back to {min}")
-                lineEdit.setText(min)
+                lineEdit.setText(str(min))
             else:
                 self._parent.logger.warning(f"Value too large, set back to {max}")
-                lineEdit.setText(max)
+                lineEdit.setText(str(max))
 
 
 class layoutViaProperties(createLayoutViaDialog):

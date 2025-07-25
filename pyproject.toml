@@ -14,23 +14,20 @@ authors = [
     { name = "Revolution EDA", email = "48187772+eskiyerli@users.noreply.github.com" },
 ]
 dependencies = [
-    "PySide6~=6.8.1",
-    "python-dotenv~=1.0.1",
+    "PySide6~=6.9.0",
+    "python-dotenv~=1.1.0",
     "quantiphy~=2.20",
-    "setuptools~=73.0.1",
+    "setuptools~=80.8.0",
     "gdstk~=0.9.53",
-    "cachetools~=5.5.0",
-    "methodtools~=0.4.7",
+    "numpy~=2.2.6",
 ]
 keywords = ["electronic", "design", "schematic", "layout"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
 ]
-version = ""
-
 
 [project.urls]
 Documentation = "https://github.com/eskiyerli/revolution-eda#readme"
@@ -55,6 +52,6 @@ path = "revedaEditor/gui/revinit.py"
 "./library.json" = "library.json"
 
 [tool.pyright]
-venvPath = "/home/eskiyerli/.local"
-venv_3p12 = "reveda_3p12"
-venv_3p11 = "reveda_3p11"
+# venvPath = "../../../.local"
+venvPath = "C:/Users/eskiye50/"
+venv = "reveda_3p13"

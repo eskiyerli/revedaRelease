@@ -13,7 +13,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-# (C) 2024 Revolution Semiconductor
+# (C) 2025 Revolution Semiconductor
 
 
 __author__ = "Revolution Semiconductor"
@@ -21,9 +21,9 @@ __copyright__ = "Copyright 2025 Revolution Semiconductor"
 __license__ = "Proprietary"
 __version__ = "0.7.9"
 __status__ = "Development"
+__date__ = "2025-07-23"
+__all__ = ["XyceSimulator", "AsciiDataObj", "rawDataObj"]
 
-from . import processRawFile
-from . import revedaPlotMain
-
-# from .processRawFile import rawDataObj, dataFrameTuple, columnTag
-# from .revedaPlotMain import revedaPlotMain
+from plugins.xyceInterface.xyceSimulator import XyceSimulator
+from plugins.xyceInterface.processAsciFile import AsciiDataObj
+from plugins.xyceInterface.processRawFile import rawDataObj
