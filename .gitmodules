@@ -6,7 +6,7 @@
 	url = https://github.com/eskiyerli/revedaSim.git
 [submodule "revedaPlot"]
 	path = plugins/revedaPlot
-	url = https://github.com/eskiyerli/revedaPlot
+	url = https://github.com/eskiyerli/revedaPlot.git
 [submodule "ihp_pdk"]
 	path = ihp_pdk
 	url = https://github.com/eskiyerli/ihp_pdk.git

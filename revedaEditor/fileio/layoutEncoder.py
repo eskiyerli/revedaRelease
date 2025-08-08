@@ -72,8 +72,8 @@ class layoutEncoder(json.JSONEncoder):
                 }
             case lshp.layoutViaArray:
                 viaDict = {
+                    "vdt": item.via.viaDefTuple.name,
                     "st": item.via.mapToScene(item.via.start).toTuple(),
-                    "vdt": item.via.viaDefTuple.netName,
                     "w": item.via.width,
                     "h": item.via.height,
                     "ang": item.angle,

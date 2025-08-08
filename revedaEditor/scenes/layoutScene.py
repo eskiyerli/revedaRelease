@@ -258,12 +258,12 @@ class layoutScene(editorScene):
             self._arrayVia = None
 
         singleVia = lshp.layoutVia(QPoint(0, 0), *self.arrayViaTuple.singleViaTuple, )
-        self._arrayVia = lshp.layoutViaArray(self.mouseMoveLoc, singleVia,
+        self._arrayVia = lshp.layoutViaArray(self.mouseReleaseLoc, singleVia,
                                              self.arrayViaTuple.xs, self.arrayViaTuple.ys,
                                              self.arrayViaTuple.xnum,
                                              self.arrayViaTuple.ynum, )
-
         self.addUndoStack(self._arrayVia)
+
 
     def drawLayoutRuler(self):
         if self._newRuler:
@@ -667,9 +667,6 @@ class layoutScene(editorScene):
         except Exception as e:
             self.logger.error(f"Failed to create layout items: {str(e)}")
 
-
-
-
     def deleteSelectedItems(self):
         for item in self.selectedItems():
             # if pin is to be deleted, the associated label should be also deleted.
@@ -754,16 +751,19 @@ class layoutScene(editorScene):
         if item.xnum == 1 and item.ynum == 1:
             dlg.singleViaRB.setChecked(True)
             dlg.singleViaClicked()
+            dlg.singleViaNamesCB.addItems(fabproc.processViaNames)
             dlg.singleViaNamesCB.setCurrentText(item.via.viaDefTuple.name)
             dlg.singleViaWidthEdit.setText(str(item.width / fabproc.dbu))
             dlg.singleViaHeightEdit.setText(str(item.via.height / fabproc.dbu))
         else:
             dlg.arrayViaRB.setChecked(True)
             dlg.arrayViaClicked()
+            dlg.arrayViaNamesCB.addItems(fabproc.processViaNames)
             dlg.arrayViaNamesCB.setCurrentText(item.via.viaDefTuple.name)
             dlg.arrayViaWidthEdit.setText(str(item.via.width / fabproc.dbu))
             dlg.arrayViaHeightEdit.setText(str(item.via.height / fabproc.dbu))
-            dlg.arrayViaSpacingEdit.setText(str(item.spacing / fabproc.dbu))
+            dlg.arrayXspacingEdit.setText(str(item.xs / fabproc.dbu))
+            dlg.arrayYspacingEdit.setText(str(item.xs/ fabproc.dbu))
             dlg.arrayXNumEdit.setText(str(item.xnum))
             dlg.arrayYNumEdit.setText(str(item.ynum))
         dlg.startXEdit.setText(str(self.toLayoutCoord(item.mapToScene(item.start)).x()))
@@ -783,15 +783,15 @@ class layoutScene(editorScene):
                     selViaDefTuple.minSpacing) * fabproc.dbu, 1, 1, )
             else:
                 selViaDefTuple = [viaDefTuple for viaDefTuple in fabproc.processVias if
-                                  viaDefTuple.netName == dlg.arrayViaNamesCB.currentText()][
+                                  viaDefTuple.name == dlg.arrayViaNamesCB.currentText()][
                     0]
 
                 singleViaTuple = ddef.singleViaTuple(selViaDefTuple, float(
                     dlg.arrayViaWidthEdit.text().strip()) * fabproc.dbu, float(
                     dlg.arrayViaHeightEdit.text().strip()) * fabproc.dbu, )
                 arrayViaTuple = ddef.arrayViaTuple(singleViaTuple, float(
-                    dlg.arrayViaSpacingEdit.text().strip()) * fabproc.dbu, float(
-                    dlg.arrayViaSpacingEdit.text().strip()) * fabproc.dbu, int(float(
+                    dlg.arrayXspacingEdit.text().strip()) * fabproc.dbu, float(
+                    dlg.arrayYspacingEdit.text().strip()) * fabproc.dbu, int(float(
                     dlg.arrayXNumEdit.text().strip())), int(float(
                     dlg.arrayYNumEdit.text().strip())), )
             singleVia = lshp.layoutVia(QPoint(0, 0), *arrayViaTuple.singleViaTuple, )

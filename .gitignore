@@ -24,3 +24,6 @@ venv/
 /nbproject/
 /.ropeproject/
 library.json
+*.prn
+*.raw
+tests/

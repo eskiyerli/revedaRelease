@@ -61,10 +61,10 @@ from PySide6.QtWidgets import (
 )
 
 import revedaEditor.backend.dataDefinitions as ddef
+
 from revedaEditor.backend.pdkPaths import importPDKModule
 laylyr = importPDKModule('layoutLayers')
 fabproc = importPDKModule('process')
-
 
 
 class textureCache:
@@ -77,17 +77,17 @@ class textureCache:
             with open(filePath, "r") as file:
                 cls._file_content_cache[filePath] = file.read()
         return cls._file_content_cache[filePath]
-    
+
     @classmethod
     def createImage(cls, filePath: Path, color: QColor, scale: int = 1)  -> QImage:
         content = cls.readFileContent(str(filePath))
 
         # Use numpy's loadtxt for faster parsing of text data
         data = np.loadtxt(content.splitlines(), dtype=np.uint8)
-        
+
         # Scale up the pattern by repeating each pixel
         data_scaled = np.repeat(np.repeat(data, scale, axis=0), scale, axis=1)
-        
+
         height, width = data_scaled.shape
 
         # Create QImage with Format_ARGB32 (not premultiplied)
@@ -233,10 +233,18 @@ class layoutShape(QGraphicsItem):
     def offset(self, value: Union[QPoint | QPointF]):
         self._offset = value
 
+    # def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+    #     super().mousePressEvent(event)
+    #     if self.scene() and self.scene().editModes.moveItem:
+    #         self.setFlag(QGraphicsItem.ItemIsMovable, True)
+
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
-        if self.scene() and self.scene().editModes.moveItem:
-            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        if self.scene():
+            self.scene().clearSelection()
+            self.setSelected(True)
+            if self.scene().editModes.moveItem:
+                self.setFlag(QGraphicsItem.ItemIsMovable, True)
 
     def sceneEvent(self, event):
         """
@@ -468,6 +476,7 @@ class layoutRect(layoutShape):
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         super().mousePressEvent(event)
+
         if self._layer.selectable:
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
             self.setFlag(QGraphicsItem.ItemIsSelectable, True)
@@ -575,9 +584,7 @@ class layoutInstance(layoutShape):
         if option.state & QStyle.State_Selected:
             painter.setPen(self._selectedPen)
             painter.drawRect(self.childrenBoundingRect())
-        # if self.isSelected():
-        #     painter.setPen(self._selectedPen)
-        #     painter.drawRect(self.boundingRect())
+
 
     def sceneEvent(self, event):
         """
@@ -1514,12 +1521,11 @@ class layoutVia(layoutShape):
     ):
         super().__init__()
         end = start + QPoint(width, height)
-        self._rect = QRectF(start, end).normalized()
+        self._rect = QRectF(start, end).normalized().toRect()
         self._start = self._rect.topLeft()
         self._end = self._rect.bottomRight()
         self._viaDefTuple = viaDefTuple
         self._layer = viaDefTuple.layer
-        self._name = viaDefTuple.name
         self._type = viaDefTuple.type
         self._width = width
         self._height = height
@@ -1598,188 +1604,300 @@ class layoutVia(layoutShape):
     def viaDefTuple(self):
         return self._viaDefTuple
 
-    @viaDefTuple.setter
-    def viaDefTuple(self, value: ddef.viaDefTuple):
-        self.prepareGeometryChange()
-        self._viaDefTuple = value
-        self.layer = self._viaDefTuple.layer
-        self._name = self._viaDefTuple.name
-        self._definePensBrushes(self._layer)
-        self.update()
+    @property
+    def type(self):
+        return self._type
 
 
 class layoutViaArray(layoutShape):
-    def __init__(
-        self,
-        start: QPoint,
-        via: layoutVia,
-        xs: float,
-        ys: float,
-        xnum: int,
-        ynum: int,
-    ):
+    def __init__(self, start: QPoint, prototype_via, xs: float,
+                 ys: float, xnum: int, ynum: int,
+                 ):
         super().__init__()
-        self._start = start
-        self._via = via  # prototype via
-        self._xnum = xnum
-        self._ynum = ynum
-        self._xs = xs
-        self._ys = ys
-        self._placeVias(via, xnum, ynum)
+        self._prototype_via = prototype_via
+        self._ynum = ynum # number of rows
+        self._xnum = xnum # number of columns
+        self._xs = xs # column spacing
+        self._ys = ys # row spacing
+        self._start = start # top-left corner location
+        self._via =  layoutVia(
+                    self._start,
+                    self._prototype_via.viaDefTuple,
+                    self._prototype_via.width,
+                    self._prototype_via.height
+                )
+        self._via_array = []
+        self._create_array()
         self.setFiltersChildEvents(True)
         self.setHandlesChildEvents(True)
         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
-        self._selectedPen = QPen(QColor("yellow"), 1, Qt.DashLine)
-        self._rect = self.childrenBoundingRect()
+        self._selectedPen = QPen(QColor("yellow"), 4, Qt.DashLine)
+        self._selectedPen.setCosmetic(True)
 
-    def _placeVias(self, via, xnum, ynum):
-        for childVia in self.childItems():
-            self.scene().removeItem(childVia)
-        for i, j in itertools.product(range(xnum), range(ynum)):
-            item = layoutVia(
-                QPoint(
-                    self._start.x() + i * (self._xs + via.width),
-                    self._start.y() + j * (self._ys + via.height),
-                ),
-                self._via.viaDefTuple,
-                via.width,
-                via.height,
-            )
-            item.setFlag(QGraphicsItem.ItemIsSelectable, False)
-            item.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
-            item.setParentItem(self)
+    def _create_array(self):
+        # Pre-calculate constants
+        x_step = self._xs + self._prototype_via.width
+        y_step = self._ys + self._prototype_via.height
+        start_x, start_y = self._start.x(), self._start.y()
+        via_def = self._prototype_via.viaDefTuple
+        via_width = self._prototype_via.width
+        via_height = self._prototype_via.height
 
-    def __repr__(self):
-        return f"layoutViaArray({self._via}, {self._xnum}, {self._ynum})"
+        # Create flat list using itertools.product
+        vias = [self._create_via(start_x + col * x_step, start_y + row * y_step,
+                                 via_def, via_width, via_height)
+                for row, col in
+                itertools.product(range(self._ynum), range(self._xnum))]
+
+        # Reshape into 2D array
+        self._via_array = [vias[i:i + self._xnum] for i in
+                           range(0, len(vias), self._xnum)]
+
+    def _create_via(self, x, y, via_def, width, height):
+        via = layoutVia(QPoint(x, y), via_def, width, height)
+        via.setFlag(QGraphicsItem.ItemIsSelectable, False)
+        via.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
+        via.setParentItem(self)
+        return via
+
+    # def _create_array(self):
+    #     self._via_array = []
+    #     for row in range(self._ynum):
+    #         via_row = []
+    #         for col in range(self._xnum):
+    #             x = self._start.x() + col * (self._xs +
+    #                                          self._prototype_via.width)
+    #             y = self._start.y() + row * (self._ys +
+    #                                          self._prototype_via.height)
+    #             via = layoutVia(
+    #                 QPoint(x, y),
+    #                 self._prototype_via.viaDefTuple,
+    #                 self._prototype_via.width,
+    #                 self._prototype_via.height
+    #             )
+    #             via.setFlag(QGraphicsItem.ItemIsSelectable, False)
+    #             via.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
+    #             via.setParentItem(self)
+    #             via_row.append(via)
+    #         self._via_array.append(via_row)
 
     def boundingRect(self) -> QRectF:
         return self.childrenBoundingRect()
 
-    def paint(self, painter, option, widget):
-        if self.isSelected():
-            painter.setPen(self._selectedPen)
-            painter.drawRect(self._rect)
-
     def shape(self) -> QPainterPath:
         path = QPainterPath()
-        path.addRect(self._rect)
+        path.addRect(self.childrenBoundingRect())
         return path
 
-    @property
-    def start(self):
-        return self._start
+    def paint(self, painter, option, widget):
+        painter.setRenderHint(QPainter.NonCosmeticBrushPatterns)
+        if option.state & QStyle.State_Selected:
+            painter.setPen(self._selectedPen)
+            painter.drawRect(self.childrenBoundingRect())
 
-    @start.setter
-    def start(self, start: QPoint):
-        self.prepareGeometryChange()
-        self._start = start
 
     @property
-    def xnum(self) -> int:
-        return self._xnum
-
-    @xnum.setter
-    def xnum(self, value: int):
-        self.prepareGeometryChange()
-        self._xnum = value
-        self._rect = self.childrenBoundingRect()
+    def via_array(self):
+        return self._via_array
 
     @property
-    def ynum(self) -> int:
+    def ynum(self):
         return self._ynum
 
-    @ynum.setter
-    def ynum(self, value: int):
-        self.prepareGeometryChange()
-        self._ynum = value
-        self._rect = self.childrenBoundingRect()
+    @property
+    def xnum(self):
+        return self._xnum
 
     @property
-    def via(self):
-        return self._via
-
-    @via.setter
-    def via(self, value: layoutVia):
-        self.prepareGeometryChange()
-        self._via = value
-
-    @property
-    def width(self):
-        return self._via.width
-
-    @width.setter
-    def width(self, value: float):
-        self.prepareGeometryChange()
-        self._via.width = value
-        for childVia in self.childItems():
-            childVia.width = value
-        self._rect = self.childrenBoundingRect()
-
-    @property
-    def height(self):
-        return self._via.height
-
-    @height.setter
-    def height(self, value: float):
-        self.prepareGeometryChange()
-        self._via.height = value
-        for childVia in self.childItems():
-            childVia.height = value
-        self._rect = self.childrenBoundingRect()
+    def start(self)-> QPoint:
+        return self._start
 
     @property
     def xs(self) -> float:
         return self._xs
 
-    @xs.setter
-    def xs(self, value: float):
-        self.prepareGeometryChange()
-        self._xs = value
-        self._placeVias(self._via, self._xnum, self._ynum)
-        self._rect = self.childrenBoundingRect()
-
     @property
-    def ys(self) -> float:
+    def ys(self):
         return self._ys
 
-    @ys.setter
-    def ys(self, value: float):
-        self.prepareGeometryChange()
-        self._ys = value
-        self._placeVias(self._via, self._xnum, self._ynum)
-        self._rect = self.childrenBoundingRect()
+    @property
+    def via(self):
+        return self._via
 
     @property
-    def xnum(self) -> int:
-        return self._xnum
-
-    @xnum.setter
-    def xnum(self, value: int):
-        self._xnum = value
-        self._placeVias(self._via, self._xnum, self._ynum)
-        self._rect = self.childrenBoundingRect()
+    def height(self):
+        return self._via.height
 
     @property
-    def ynum(self) -> int:
-        return self._ynum
+    def width(self):
+        return self._via.width
 
-    @ynum.setter
-    def ynum(self, value: int):
-        self._ynum = value
-        self._placeVias(self._via, self._xnum, self._ynum)
-        self._rect = self.childrenBoundingRect()
 
-    @property
-    def viaDefTuple(self):
-        return self._via.viaDefTuple
-
-    @viaDefTuple.setter
-    def viaDefTuple(self, value: ddef.viaDefTuple):
-        self._via.viaDefTuple = value
-        self.prepareGeometryChange()
-        for childVia in self.childItems():
-            childVia.viaDefTuple = value
-        self._rect = self.childrenBoundingRect()
+# class layoutViaArray(layoutShape):
+#     def __init__(
+#         self,
+#         start: QPoint,
+#         via: layoutVia,
+#         xs: float,
+#         ys: float,
+#         xnum: int,
+#         ynum: int,
+#     ):
+#         super().__init__()
+#         self._start = start
+#         self._via = via  # prototype via
+#         self._xnum = xnum
+#         self._ynum = ynum
+#         self._xs = xs
+#         self._ys = ys
+#         # Initialize flags and properties first
+#         self.setFiltersChildEvents(True)
+#         self.setHandlesChildEvents(True)
+#         self.setFlag(QGraphicsItem.ItemContainsChildrenInShape, True)
+#         self._selectedPen = QPen(QColor("yellow"), 1, Qt.DashLine)
+#         # Now place vias after parent is fully initialized
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     def _placeVias(self, via: layoutVia, xnum: int, ynum: int) -> None:
+#         for childVia in self.childItems():
+#             if self.scene():
+#                 self.scene().removeItem(childVia)
+#
+#         for i, j in itertools.product(range(xnum), range(ynum)):
+#             item = layoutVia(
+#                 QPoint(
+#                     int(self._start.x() + i * (self._xs + via.width)),
+#                     int(self._start.y() + j * (self._ys + via.height)),
+#                 ),
+#                 via.viaDefTuple,
+#                 int(via.width),
+#                 int(via.height),
+#             )
+#
+#             item.setFlag(QGraphicsItem.ItemIsSelectable, False)
+#             item.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
+#             item.setParentItem(self)
+#
+#     def __repr__(self):
+#         return (f"layoutViaArray("
+#                 f"{self._start},{self._via}, {self._xs}, {self._ys},"
+#                 f" {self._xnum},"
+#                 f" {self._ynum})")
+#
+#     def boundingRect(self) -> QRectF:
+#         return self.childrenBoundingRect()
+#
+#     def paint(self, painter, option, widget):
+#         if self.isSelected():
+#             painter.setPen(self._selectedPen)
+#             painter.drawRect(self._rect)
+#         else:
+#             super().paint(painter,option,widget)
+#
+#     def shape(self) -> QPainterPath:
+#         path = QPainterPath()
+#         path.addRect(self._rect)
+#         return path
+#
+#     @property
+#     def start(self):
+#         return self._start
+#
+#     @start.setter
+#     def start(self, start: QPoint):
+#         self.prepareGeometryChange()
+#         self._start = start
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     @property
+#     def xnum(self) -> int:
+#         return self._xnum
+#
+#     @xnum.setter
+#     def xnum(self, value: int):
+#         self.prepareGeometryChange()
+#         self._xnum = value
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     @property
+#     def ynum(self) -> int:
+#         return self._ynum
+#
+#     @ynum.setter
+#     def ynum(self, value: int):
+#         self.prepareGeometryChange()
+#         self._ynum = value
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     @property
+#     def via(self):
+#         return self._via
+#
+#     @via.setter
+#     def via(self, value: layoutVia):
+#         self.prepareGeometryChange()
+#         self._via = value
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     @property
+#     def width(self):
+#         return self._via.width
+#
+#     @width.setter
+#     def width(self, value: float):
+#         self.prepareGeometryChange()
+#         self._via.width = value
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     @property
+#     def height(self):
+#         return self._via.height
+#
+#     @height.setter
+#     def height(self, value: float):
+#         self.prepareGeometryChange()
+#         self._via.height = value
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     @property
+#     def xs(self) -> float:
+#         return self._xs
+#
+#     @xs.setter
+#     def xs(self, value: float):
+#         self.prepareGeometryChange()
+#         self._xs = value
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     @property
+#     def ys(self) -> float:
+#         return self._ys
+#
+#     @ys.setter
+#     def ys(self, value: float):
+#         self.prepareGeometryChange()
+#         self._ys = value
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
+#
+#     @property
+#     def viaDefTuple(self):
+#         return self._via.viaDefTuple
+#
+#     @viaDefTuple.setter
+#     def viaDefTuple(self, value: ddef.viaDefTuple):
+#         self._via.viaDefTuple = value
+#         self.prepareGeometryChange()
+#         self._placeVias(self._via, self._xnum, self._ynum)
+#         self._rect = self.childrenBoundingRect()
 
 
 class layoutPolygon(layoutShape):

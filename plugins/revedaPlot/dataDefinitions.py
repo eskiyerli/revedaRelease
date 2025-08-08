@@ -15,15 +15,23 @@
 # SOFTWARE.
 # (C) 2025 Revolution Semiconductor
 
+from typing import NamedTuple
 
-__author__ = "Revolution Semiconductor"
-__copyright__ = "Copyright 2025 Revolution Semiconductor"
-__license__ = "Proprietary"
-__version__ = "0.7.9"
-__status__ = "Development"
-__date__ = "2025-07-23"
-__all__ = ["XyceSimulator", "AsciiDataObj", "rawDataObj"]
+from polars import DataFrame
 
-from plugins.xyceInterface.xyceSimulator import XyceSimulator
-from plugins.xyceInterface.processAsciFile import AsciiDataObj
-from plugins.xyceInterface.processRawFile import rawDataObj
+
+class viewTuple(NamedTuple):
+    libraryName: str
+    cellName: str
+    viewName: str
+
+
+class columnTag(NamedTuple):
+    order: int
+    name: str
+    type: str
+
+
+class dataFrameTuple(NamedTuple):
+    header: str
+    dataFrame: DataFrame

@@ -1,51 +1,25 @@
-from builtins import print
-import sys
-from platform import system
 import pathlib
-from PySide6.QtWidgets import (
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QLabel,
-    QMenu,
-    QToolBar,
-    QApplication,
-    QFileDialog,
-    QTabWidget,
-)
+import sys
+from builtins import print
+from datetime import datetime
+from itertools import cycle
+from platform import system
+
+import numpy as np
+import polars as pl
+import pyqtgraph as pg
 from PySide6.QtCore import Qt, QPoint, QPointF
 from PySide6.QtGui import QAction, QKeySequence, QIcon, QColor
-import pyqtgraph as pg
+from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QLabel, QMenu, QToolBar,
+                               QApplication, QFileDialog, QTabWidget, )
 
-
-
-import polars as pl
-from datetime import datetime
 from . import resources as resources  # type: ignore
-from itertools import cycle
-import numpy as np
-from typing import NamedTuple
-
-
-class viewTuple(NamedTuple):
-    libraryName: str
-    cellName: str
-    viewName: str
+from .dataDefinitions import dataFrameTuple
 
 
 class revedaPlotItem(pg.PlotItem):
-    color_list = [
-        "#1f77b4",
-        "#ff7f0e",
-        "#2ca02c",
-        "#d62728",
-        "#9467bd",
-        "#8c564b",
-        "#e377c2",
-        "#7f7f7f",
-        "#bcbd22",
-        "#17becf",
-    ]
+    color_list = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b",
+        "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", ]
     colors = cycle(color_list)
 
     def __init__(self, parent, *args, **kwargs):
@@ -62,9 +36,7 @@ class revedaPlotItem(pg.PlotItem):
         self.labelBar.setTextFormat(Qt.MarkdownText)
         self.labelBar.setContentsMargins(5, 5, 5, 5)
         self.parent.parentWidget().labelBarLayout.addWidget(self.labelBar)
-        self.xarray = np.ndarray(
-            0,
-        )
+        self.xarray = np.ndarray(0, )
         self.markers = []
         self._setupActions()
 
@@ -128,9 +100,8 @@ class revedaPlotItem(pg.PlotItem):
             xpos, ypos = mousePoint.x(), mousePoint.y()
             # Update the status bar with the coordinates
             if self.vline is not None and self.addVlineAction.isChecked():
-                self.vline.setPos(xpos)
-            # if hasattr(self.parent, 'statusBar'):
-            #     self.parent.statusBar().showMessage(f"X: {xpos:.2f}, Y: {ypos:.2f}")
+                self.vline.setPos(
+                    xpos)  # if hasattr(self.parent, 'statusBar'):  #     self.parent.statusBar().showMessage(f"X: {xpos:.2f}, Y: {ypos:.2f}")
 
     def _handleMouseClick(self, event):
         pos = event.scenePos()  # Check if the click is within this plot item's bounds
@@ -142,16 +113,14 @@ class revedaPlotItem(pg.PlotItem):
                 # Call toggleVerticalLine with the x position of the click
                 if self.vline is None:
                     # Create new vertical line
-                    self.vline = pg.InfiniteLine(
-                        pos=xpos, angle=90, movable=True, pen=pg.mkPen("r", width=2)
-                    )
+                    self.vline = pg.InfiniteLine(pos=xpos, angle=90, movable=True,
+                        pen=pg.mkPen("r", width=2))
                     self.addItem(self.vline)
                     self.xarray = self.listDataItems()[0].xData
                     self.vline.setBounds((self.xarray[0], self.xarray[-1]))
                     self.parent.parentWidget().labelBarLayout.addWidget(self.labelBar)
                     self.vline.sigPositionChanged.connect(
-                        lambda: self._handleVlinePosChanged(self.xarray, self.vline)
-                    )
+                        lambda: self._handleVlinePosChanged(self.xarray, self.vline))
 
     def _handleVlinePosChanged(self, xarray: np.ndarray, line: pg.InfiniteLine):
         # This method is called when the vertical line is dragged
@@ -164,9 +133,7 @@ class revedaPlotItem(pg.PlotItem):
             yinterpolated = np.interp(xpos, xarray, yarray)
             # Update the label bar with the interpolated y value
             ystring += f"{pg.siFormat(yinterpolated)}, "
-        self.labelBar.setText(
-            f"**x-value**: {pg.siFormat(xpos)}, **y-values**: {ystring}"
-        )
+        self.labelBar.setText(f"**x-value**: {pg.siFormat(xpos)}, **y-values**: {ystring}")
 
     def toggleVerticalLine(self):
         if self.addVlineAction.isChecked():
@@ -242,17 +209,13 @@ class revedaLayoutWidget(pg.GraphicsLayoutWidget):
         self.setBackground("k")
         self.plots = []
         self.combined = True
-        self.dft = prf.dataFrameTuple(pl.DataFrame(), "", "")
+        self.dft = dataFrameTuple(pl.DataFrame(), "", "")
         self.xcolumn = 0
         self.ycolumns = [1]
         self._selectedPlot = None
 
     def addTitle(self, title: str):
-        self.titleItem = pg.LabelItem(
-            title,
-            size="16pt",
-            color="#ffff00",
-        )
+        self.titleItem = pg.LabelItem(title, size="16pt", color="#ffff00", )
         self.addItem(self.titleItem, row=0, col=0, colspan=2)
 
     def addPlotRow(self, row: int, plotItem=None):
@@ -272,32 +235,23 @@ class revedaLayoutWidget(pg.GraphicsLayoutWidget):
 
         return plotItem, legendVB
 
-    def plotData(self, dft: prf.dataFrameTuple, xcolumn: int, ycolumns: list[int]):
+    def plotData(self, dft: dataFrameTuple, xcolumn: int, ycolumns: list[int]):
         # sort the DataFrame by the xcolumn
-        dataFrame = dft.dataFrame.sort(
-            by=dft.dataFrame.columns[xcolumn], descending=False
-        )
-        self.dft = prf.dataFrameTuple(
-            header=dft.header,
-            dataFrame=dataFrame,
-            columnTag=dft.columnTag,
-        )
+        dataFrame = dft.dataFrame.sort(by=dft.dataFrame.columns[xcolumn], descending=False)
+        self.dft = dataFrameTuple(header=dft.header, dataFrame=dataFrame,
+            columnTag=dft.columnTag, )
         self.xcolumn = xcolumn
         self.ycolumns = ycolumns
         self.addTitle(f"{self.dft.header}:{datetime.now().strftime('%Y-%m-%d %H:%M')}")
-        legends = [
-            self.processLegendText(self.dft.dataFrame.columns[ycol])
-            for ycol in ycolumns
-        ]
+        legends = [self.processLegendText(self.dft.dataFrame.columns[ycol]) for ycol in
+            ycolumns]
         if self.combined:
             plotItem, legendVB = self.addPlotRow(1)
-            plotItem.multiDataPlot(
-                x=self.dft.dataFrame[:, xcolumn], y=self.dft.dataFrame[:, ycolumns]
-            )
+            plotItem.multiDataPlot(x=self.dft.dataFrame[:, xcolumn],
+                y=self.dft.dataFrame[:, ycolumns])
             plotCurves = plotItem.listDataItems()
             plotItem.getAxis("bottom").setLabel(
-                text=self.processLegendText(self.dft.dataFrame.columns[xcolumn])
-            )
+                text=self.processLegendText(self.dft.dataFrame.columns[xcolumn]))
             plotItem.combined = True
             legendItem = pg.LegendItem()
             legendVB.addItem(legendItem)
@@ -317,8 +271,7 @@ class revedaLayoutWidget(pg.GraphicsLayoutWidget):
                 # )
                 plotItem.combined = False
                 plotItem.getAxis("bottom").setLabel(
-                    text=self.processLegendText(self.dft.dataFrame.columns[xcolumn])
-                )
+                    text=self.processLegendText(self.dft.dataFrame.columns[xcolumn]))
                 legendItem = pg.LegendItem()
                 legendVB.addItem(legendItem)
                 legendItem.addItem(plotItem.listDataItems()[0], legends[i])
@@ -488,8 +441,7 @@ class revedaPlotMain(QMainWindow):
         # )
         self.exitAction.triggered.connect(self.closeWindow)
         self.clearAction.triggered.connect(
-            lambda: self.centralWidget.currentWidget().layoutWidget.clearPlots()
-        )
+            lambda: self.centralWidget.currentWidget().layoutWidget.clearPlots())
 
     def setCombined(self, combined: bool):
         """Set the plot type (combined or separate) for the current tab."""
@@ -514,9 +466,8 @@ class revedaPlotMain(QMainWindow):
             fileFilter = "JPEG Files (*.jpg *.jpeg)"
             ext = ".jpg"
             imgFormat = "JPEG"
-        filePath, _ = QFileDialog.getSaveFileName(
-            self, f"Export Plot as {format.upper()}", "", fileFilter
-        )
+        filePath, _ = QFileDialog.getSaveFileName(self, f"Export Plot as {format.upper()}",
+            "", fileFilter)
         if not filePath:
             return
         if not filePath.lower().endswith(ext):
@@ -525,11 +476,8 @@ class revedaPlotMain(QMainWindow):
 
     def closeWindow(self):
         """Close the main window."""
-        plotViewTuple = viewTuple(
-            self.appMainW.libraryItem.libraryName,
-            self.appMainW.cellItem.cellName,
-            "revedaPlot",
-        )
+        plotViewTuple = viewTuple(self.appMainW.libraryItem.libraryName,
+            self.appMainW.cellItem.cellName, "revedaPlot", )
         self.appMainW.openViews.pop(plotViewTuple, None)
         self.close()
 
@@ -545,16 +493,10 @@ class revedaPlotMain(QMainWindow):
         self.toolbar.addAction(self.export_png_action)
         self.toolbar.addAction(self.export_jpg_action)
 
-    def plotData(
-        self,
-        dft: prf.dataFrameTuple,
-        xcolumn: int,
-        ycolumns: list,
-        combined: bool = True,
-    ):
-        tabIndex = self.centralWidget.addTab(
-            revedaPlotTabWidget(self.centralWidget), "Plot"
-        )
+    def plotData(self, dft: dataFrameTuple, xcolumn: int, ycolumns: list,
+            combined: bool = True, ):
+        tabIndex = self.centralWidget.addTab(revedaPlotTabWidget(self.centralWidget),
+            "Plot")
         self.centralWidget.setCurrentIndex(tabIndex)
         tabWidget: revedaPlotTabWidget = self.centralWidget.widget(tabIndex)
         self.centralWidget.setTabText(tabIndex, f"Plot-{tabIndex}")
@@ -594,19 +536,17 @@ def main_raw():
     # Create QApplication instance
     app = QApplication(sys.argv)
     mainWindow = revedaPlotMain()
-
+    import processRawFile as prf
     if system() == "Linux":
         filepath = pathlib.Path(
             "/home/eskiyerli/onedrive_reveda/Projects/testbenches/commonSourceAmp/revbench"
-            "/commonSourceAmp_tran.raw"
-        )
+            "/commonSourceAmp_tran.raw")
     elif system() == "Windows":
         filepath = pathlib.Path(
-            "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\testbenches\\commonSourceAmp\\revbench\\commonSourceAmp_tran.raw"
-        )
+            "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\testbenches\\commonSourceAmp\\revbench\\commonSourceAmp_tran.raw")
 
-    dataObj = prf.rawDataObj(filepath)
-    for i, dft in enumerate(dataObj.get_dataframes()):
+    dataObj = prf.RawDataObj(filepath)
+    for i, dft in enumerate(dataObj.getDataFrames()):
         print(dft.dataFrame.columns)
         mainWindow.plotData(dft, xcolumn=1, ycolumns=[1, 2, 3], combined=False)
 
@@ -618,19 +558,17 @@ def main_ascii():
     # Create QApplication instance
     app = QApplication(sys.argv)
     mainWindow = revedaPlotMain()
-
+    import processAsciFile as paf
     if system() == "Linux":
         filepath = pathlib.Path(
-            "/home/eskiyerli/onedrive_reveda/Projects/testbenches/commonSourceAmp/revbench_win/commonSourceAmp_hb.sp.HB.FD.prn"
-        )
+            "/home/eskiyerli/onedrive_reveda/Projects/testbenches/commonSourceAmp/revbench_win/commonSourceAmp_hb.sp.HB.FD.prn")
     elif system() == "Windows":
         filepath = pathlib.Path(
-            "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\testbenches\\commonSourceAmp\\revbench\\commonSourceAmp_tran.txt"
-        )
+            "C:\\Users\\eskiye50\\OneDrive - Revolution Semiconductor\\Projects\\testbenches\\commonSourceAmp\\revbench\\commonSourceAmp_tran.txt")
 
     dataObj = paf.AsciiDataObj(filepath)
-    for i, dft in enumerate(dataObj.get_dataframes()):
-        mainWindow.plotData(dft, xcolumn=0, ycolumns=[1, 2, 3,4], combined=False)
+    for i, dft in enumerate(dataObj.getDataFrames()):
+        mainWindow.plotData(dft, xcolumn=0, ycolumns=[1, 2, 3, 4], combined=False)
 
     mainWindow.show()
     app.exec()

@@ -197,7 +197,7 @@ class rulerTuple(NamedTuple):
 # # this tuple defines the minimum dimensions of a via
 # # This can be extended to define the maximum dimensions
 
-
+# used in PDK
 class viaDefTuple(NamedTuple):
     name: str
     layer: layLayer
@@ -209,13 +209,13 @@ class viaDefTuple(NamedTuple):
     minSpacing: float
     maxSpacing: float
 
-
+# Used to define the via prototype
 class singleViaTuple(NamedTuple):
     viaDefTuple: viaDefTuple
     width: float
     height: float
 
-
+# both single vias and vias arrays are defined by this
 class arrayViaTuple(NamedTuple):
     singleViaTuple: singleViaTuple
     xs: float

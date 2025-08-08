@@ -22,7 +22,6 @@ __license__ = "Proprietary"
 __version__ = "0.7.9"
 __status__ = "Development"
 
-from . import processRawFile
 from . import revedaPlotMain
 
 # from .processRawFile import rawDataObj, dataFrameTuple, columnTag

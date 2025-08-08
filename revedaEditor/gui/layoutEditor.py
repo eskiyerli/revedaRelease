@@ -343,8 +343,8 @@ class layoutEditor(edw.editorWindow):
                 )
                 self.centralW.scene.arrayViaTuple = ddef.arrayViaTuple(
                     singleViaTuple,
-                    fabproc.dbu * float(selViaDefTuple.minSpacing),
-                    fabproc.dbu * float(selViaDefTuple.minSpacing),
+                    fabproc.dbu * selViaDefTuple.minSpacing,
+                    fabproc.dbu * selViaDefTuple.minSpacing,
                     1,
                     1,
                 )

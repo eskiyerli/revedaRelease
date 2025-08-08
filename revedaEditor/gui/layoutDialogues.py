@@ -427,7 +427,6 @@ class createLayoutViaDialog(QDialog):
         singleViaPropsLayout = QFormLayout()
         self.singleViaPropsGroup.setLayout(singleViaPropsLayout)
         self.singleViaNamesCB = QComboBox()
-
         self.singleViaNamesCB.currentTextChanged.connect(self.singleViaNameChanged)
         singleViaPropsLayout.addRow(edf.boldLabel("Via Name"), self.singleViaNamesCB)
         self.singleViaWidthEdit = edf.shortLineEdit()
@@ -454,16 +453,22 @@ class createLayoutViaDialog(QDialog):
 
         self.singleViaHeightEdit.editingFinished.connect(self.arrayViaHeightChanged)
         arrayViaPropsLayout.addRow(edf.boldLabel("Via Height"), self.arrayViaHeightEdit)
-        self.arrayViaSpacingEdit = edf.shortLineEdit()
-
-        self.arrayViaSpacingEdit.editingFinished.connect(self.arrayViaSpacingChanged)
-        arrayViaPropsLayout.addRow(edf.boldLabel("Spacing"), self.arrayViaSpacingEdit)
+        self.arrayXspacingEdit = edf.shortLineEdit()
+        self.arrayXspacingEdit.editingFinished.connect(lambda:
+                            self.arrayViaSpacingChanged(self.arrayXspacingEdit))
+        arrayViaPropsLayout.addRow(edf.boldLabel("Column Spacing"),
+                                   self.arrayXspacingEdit)
+        self.arrayYspacingEdit = edf.shortLineEdit()
+        self.arrayYspacingEdit.editingFinished.connect(lambda:
+                            self.arrayViaSpacingChanged(self.arrayYspacingEdit))
+        arrayViaPropsLayout.addRow(edf.boldLabel("Row Spacing"),
+                                   self.arrayYspacingEdit)
         self.arrayXNumEdit = edf.shortLineEdit()
         self.arrayXNumEdit.setText("1")
-        arrayViaPropsLayout.addRow(edf.boldLabel("Array X Size"), self.arrayXNumEdit)
+        arrayViaPropsLayout.addRow(edf.boldLabel("Number of Columns"), self.arrayXNumEdit)
         self.arrayYNumEdit = edf.shortLineEdit()
         self.arrayYNumEdit.setText("1")
-        arrayViaPropsLayout.addRow(edf.boldLabel("Array Y Size"), self.arrayYNumEdit)
+        arrayViaPropsLayout.addRow(edf.boldLabel("Number of Rows:"), self.arrayYNumEdit)
         mainLayout.addWidget(self.arrayViaPropsGroup)
         self.arrayViaPropsGroup.hide()
         self.singleViaPropsGroup.show()
@@ -534,27 +539,44 @@ class createLayoutViaDialog(QDialog):
         self.validateValue(text, self.arrayViaHeightEdit, viaDefTuple.minHeight,
                            viaDefTuple.maxHeight)
 
-    def arrayViaSpacingChanged(self):
-        text = self.arrayViaSpacingEdit.text()
+    def arrayViaSpacingChanged(self, spaceEditField):
+        text = spaceEditField.text()
         viaDefTuple = [item for item in fabproc.processVias if
                        item.name == self.arrayViaNamesCB.currentText()][0]
-        self.validateValue(text, self.arrayViaSpacingEdit, viaDefTuple.minSpacing,
+        self.validateValue(text, spaceEditField, viaDefTuple.minSpacing,
                            viaDefTuple.maxSpacing, )
 
-    def validateValue(self, text, lineEdit: QLineEdit, min: float, max: float):
-        validator = QDoubleValidator()
-        validator.setRange(min, max)
-        pos = 0
-        state = validator.validate(text, pos)
-        if text=="":
-            text = str(min)
-        if state[0] != QValidator.Acceptable:
-            if float(text) < min:
-                self._parent.logger.warning(f"Value too small, set back to {min}")
-                lineEdit.setText(str(min))
-            else:
-                self._parent.logger.warning(f"Value too large, set back to {max}")
-                lineEdit.setText(str(max))
+    def validateValue(self, text: str, lineEdit: QLineEdit, min_val: float, max_val: float):
+        if not text:
+            lineEdit.setText(str(min_val))
+            return
+
+        try:
+            value = float(text)
+            if value < min_val:
+                self._parent.logger.warning(f"Value too small, set back to {min_val}")
+                lineEdit.setText(str(min_val))
+            elif value > max_val:
+                self._parent.logger.warning(f"Value too large, set back to {max_val}")
+                lineEdit.setText(str(max_val))
+        except ValueError:
+            self._parent.logger.warning(f"Invalid number format, set back to {min_val}")
+            lineEdit.setText(str(min_val))
+
+    # def validateValue(self, text, lineEdit: QLineEdit, min: float, max: float):
+    #     validator = QDoubleValidator()
+    #     validator.setRange(min, max)
+    #     pos = 0
+    #     state = validator.validate(text, pos)
+    #     if text=="":
+    #         text = str(min)
+    #     if state[0] != QValidator.Acceptable:
+    #         if float(text) < min:
+    #             self._parent.logger.warning(f"Value too small, set back to {min}")
+    #             lineEdit.setText(str(min))
+    #         else:
+    #             self._parent.logger.warning(f"Value too large, set back to {max}")
+    #             lineEdit.setText(str(max))
 
 
 class layoutViaProperties(createLayoutViaDialog):
