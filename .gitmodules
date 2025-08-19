@@ -17,3 +17,6 @@
 	path = revedaEditor
 	url = https://github.com/eskiyerli/revedaEditor.git
 
+[submodule "plugins/revedaPlot"]
+	path = plugins/revedaPlot
+	url = https://github.com/eskiyerli/revedaPlot.git
