@@ -1,12 +1,9 @@
 [submodule "docs"]
-	path=docs
-	url=./docs/
+	path = docs
+	url = ./docs/
 [submodule "revedasim"]
 	path = plugins/revedasim
 	url = https://github.com/eskiyerli/revedaSim.git
-[submodule "revedaPlot"]
-	path = plugins/revedaPlot
-	url = https://github.com/eskiyerli/revedaPlot
 [submodule "ihp_pdk"]
 	path = ihp_pdk
 	url = https://github.com/eskiyerli/ihp_pdk.git
@@ -19,3 +16,7 @@
 [submodule "revedaEditor"]
 	path = revedaEditor
 	url = https://github.com/eskiyerli/revedaEditor.git
+
+[submodule "plugins/revedaPlot"]
+	path = plugins/revedaPlot
+	url = https://github.com/eskiyerli/revedaPlot.git
